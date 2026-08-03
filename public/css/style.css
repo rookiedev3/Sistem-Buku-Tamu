@@ -1,0 +1,102 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body.login-page{
+
+    background:linear-gradient(135deg,#2563EB,#1E40AF);
+
+}
+
+.login-card{
+
+    background:#fff;
+
+    border-radius:25px;
+
+    padding:45px;
+
+}
+
+.logo-circle{
+
+    width:90px;
+
+    height:90px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:#2563EB;
+
+    color:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:32px;
+
+    font-weight:bold;
+
+}
+
+.form-control{
+
+    height:50px;
+
+    border-radius:12px;
+
+}
+
+.form-control:focus{
+
+    border-color:#2563EB;
+
+    box-shadow:none;
+
+}
+
+.btn-primary-custom{
+
+    height:50px;
+
+    background:#2563EB;
+
+    color:white;
+
+    border-radius:12px;
+
+    font-weight:600;
+
+}
+
+.btn-primary-custom:hover{
+
+    background:#1E40AF;
+
+    color:white;
+
+}
+
+a{
+
+    text-decoration:none;
+
+}
+
+@media(max-width:768px){
+
+.login-card{
+
+padding:30px;
+
+}
+
+}
