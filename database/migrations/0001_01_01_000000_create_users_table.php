@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('role', ['owner', 'manager', 'admin', 'pic', 'security', 'tamu']);
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_login')->nullable();
+            $table->timestamps(); // tambahkan baris ini
         });
     }
 

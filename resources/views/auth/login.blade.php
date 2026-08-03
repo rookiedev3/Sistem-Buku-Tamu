@@ -65,8 +65,9 @@
 
                     </p>
 
-                    <form action="{{ route('dashboard') }}" method="GET">
+                    <form action="{{ route('login.proses') }}" method="post">
                          {{-- //jika sudah ada controllernya nanti ditambahkan @csrf --}}
+                         @csrf
 
                         <div class="mb-3">
 
@@ -76,7 +77,7 @@
 
                             </label>
 
-                            <input type="email" class="form-control" placeholder="Masukkan email">
+                            <input type="email" name="email" class="form-control" placeholder="Masukkan email">
 
                         </div>
 
@@ -88,7 +89,7 @@
 
                             </label>
 
-                            <input type="password" class="form-control" placeholder="Masukkan password">
+                            <input type="password" name="password" class="form-control" placeholder="Masukkan password">
 
                         </div>
 
@@ -140,7 +141,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 </body>
 
 </html>
