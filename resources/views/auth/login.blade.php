@@ -65,7 +65,8 @@
 
                     </p>
 
-                    <form>
+                    <form action="{{ route('dashboard') }}" method="GET">
+                         {{-- //jika sudah ada controllernya nanti ditambahkan @csrf --}}
 
                         <div class="mb-3">
 
@@ -113,7 +114,7 @@
 
                         </div>
 
-                        <button class="btn btn-primary-custom w-100">
+                        <button type="submit" class="btn btn-primary-custom w-100">
 
                             Login
 

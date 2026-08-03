@@ -61,7 +61,8 @@
                         Silakan isi data untuk membuat akun.
                     </p>
 
-                    <form action="{{ route('login') }}" method="GET"> //jika sudah ada controllernya nanti ditambahkan @csrf
+                    <form action="{{ route('login') }}" method="GET">
+                         {{-- //jika sudah ada controllernya nanti ditambahkan @csrf --}}
                     
                 
 
