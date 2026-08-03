@@ -10,7 +10,10 @@ Route::middleware('guest')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::get('/login', 'index')->name('login');
         Route::post('/login', 'login')->name('login.proses');
-        Route::get('/register', function () {return view('auth.register');})->name('register');
+        // Route::get('/register', function () {return view('auth.register');})->name('register');
+
+        Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [AuthController::class, 'register'])->name('register.proses');
     });
 });
 
