@@ -4,16 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class users extends Model
+class guest_categories extends Model
 {
-    protected $table = 'users';
+    protected $table = 'guest_categories';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'branch_id',
         'name',
-        'email',
-        'phone',
-        'password',
-        'role',
+        'color',
     ];
 }

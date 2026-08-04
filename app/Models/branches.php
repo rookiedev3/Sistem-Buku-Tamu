@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class users extends Model
+class branches extends Model
 {
-    protected $table = 'users';
+    protected $table = 'branches';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'branch_id',
+        'code',
         'name',
-        'email',
+        'address',
         'phone',
-        'password',
-        'role',
+        'is_active'
     ];
 }

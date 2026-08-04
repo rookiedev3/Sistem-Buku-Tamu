@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class guests extends Model
+{
+    protected $table = 'guests';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+        'guest_code',
+        'name',
+        'phone',
+        'email',
+        'company_name',
+        'position',
+        'address',
+        'guest_category_id',
+        'photo_path',
+        'notes',
+        'created_by',
+    ];
+}
