@@ -21,8 +21,7 @@
 
     @include('partials.sidebar')
 
-    <div class="grow">
-
+<div class="flex-grow-1 d-flex flex-column">
         @include('partials.navbar')
 
         <main class="p-4">

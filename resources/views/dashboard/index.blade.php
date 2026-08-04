@@ -2,16 +2,31 @@
 
 @section('content')
 
-<h2 class="fw-bold">
+@include('partials.tabs')
 
-Selamat Datang 👋
+@include('partials.banner')
 
-</h2>
+@include('partials.stats')
 
-<p>
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; margin-top: 24px;">
+        
+        <div>
+            @include('partials.kunjungan-hari-ini')
+        </div>
 
-Dashboard masih dalam proses.
+        <div>
+            @include('partials.aktivitas-terbaru')
+        </div>
 
-</p>
+    </div>
 
+   <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 24px;">
+    <div>
+        @include('partials.check-in-tamu')
+    </div>
+
+    <div>
+        @include('partials.ringkasan-operasional')
+    </div>
+</div>
 @endsection
