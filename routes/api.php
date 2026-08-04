@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BranchesApiController;
+use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 
@@ -32,4 +33,12 @@ Route::apiResource('visit-purposes', VisitPurposesApiController::class)->names([
     'show'    => 'api.visit-purposes.show',
     'update'  => 'api.visit-purposes.update',
     'destroy' => 'api.visit-purposes.destroy',
+]);
+
+Route::apiResource('lead-sources', LeadSourcesApiController::class)->names([
+    'index'   => 'api.lead-sources.index',
+    'store'   => 'api.lead-sources.store',
+    'show'    => 'api.lead-sources.show',
+    'update'  => 'api.lead-sources.update',
+    'destroy' => 'api.lead-sources.destroy',
 ]);

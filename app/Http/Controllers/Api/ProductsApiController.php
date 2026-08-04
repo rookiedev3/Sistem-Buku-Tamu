@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Branches;
 use App\Models\products;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
