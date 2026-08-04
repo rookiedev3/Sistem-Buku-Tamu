@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VisitController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -25,10 +26,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::group(['middleware' => [CheckUserLogin::class . ':owner']], function () {
+    Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
     });
 });
+
 
 
 // Route::get('/', function () {
@@ -38,8 +40,6 @@ Route::middleware('auth')->group(function () {
 // Route::get('/login', function () {
 //     return view('auth.login');
 // })->name('login');
-
-
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard.index');
