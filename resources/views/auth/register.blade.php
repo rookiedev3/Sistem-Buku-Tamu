@@ -61,40 +61,71 @@
                         Silakan isi data untuk membuat akun.
                     </p>
 
-                    <form action="{{ route('login') }}" method="GET">
-                         {{-- //jika sudah ada controllernya nanti ditambahkan @csrf --}}
-                    
-                
+                  
+
+                    <form method="POST" action="{{ route('register.proses') }}">
+    @csrf
 
     <div class="mb-3">
         <label class="form-label">Nama Lengkap</label>
-        <input type="text" class="form-control" placeholder="Masukkan nama lengkap">
+        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+            value="{{ old('name') }}" placeholder="Masukkan nama lengkap">
+        @error('name')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" class="form-control" placeholder="Masukkan email">
+        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+            value="{{ old('email') }}" placeholder="Masukkan email">
+        @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Nomor WhatsApp</label>
-        <input type="text" class="form-control" placeholder="08xxxxxxxxxx">
+        <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror"
+            value="{{ old('phone') }}" placeholder="08xxxxxxxxxx">
+        @error('phone')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cabang</label>
+        <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror">
+            <option value="">-- Pilih Cabang --</option>
+            @foreach ($branches as $branch)
+                <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                    {{ $branch->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('branch_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Password</label>
-        <input type="password" class="form-control" placeholder="Masukkan password">
+        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+            placeholder="Masukkan password">
+        @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-4">
         <label class="form-label">Konfirmasi Password</label>
-        <input type="password" class="form-control" placeholder="Ulangi password">
+        <input type="password" name="password_confirmation" class="form-control"
+            placeholder="Ulangi password">
     </div>
 
     <button type="submit" class="btn btn-primary-custom w-100">
         Daftar
     </button>
-
 </form>
 
                     <div class="text-center mt-4">
