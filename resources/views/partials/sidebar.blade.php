@@ -73,11 +73,11 @@
                             <span style="font-size: 15px;">⚙️</span> Master Data
                         </a>
                     </li>
-                   <li>
-                        <a href="{{ url('/pengguna') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('pengguna*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('pengguna*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('pengguna*') ? '800' : '700' }}; text-decoration: none;">
-                            <span style="font-size: 15px;">👤</span> Pengguna
-                        </a>
-                    </li>
+                 <li>
+                <a href="{{ url('/pengguna') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('pengguna*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('pengguna*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('pengguna*') ? '800' : '700' }}; text-decoration: none;">
+                    <span style="font-size: 15px;">👤</span> Pengguna
+                </a>
+            </li>
                 </ul>
             </div>
 

@@ -49,7 +49,25 @@ Route::get('/database-tamu', function () {
 Route::get('/database-tamu/{id}', function ($id) {
     return view('tamu.detail', ['id' => $id]);
 });
+//route lead dan follow up
+Route::get('/leads', function () {
+    return view('leads.index');
+});
 
+//route laporan
+Route::get('/laporan', function () {
+    return view('laporan.index');
+});
+
+//route master data
+Route::get('/master-data', function () {
+    return view('master.index');
+});
+
+//route pengguna
+Route::get('/pengguna', function () {
+    return view('pengguna.index');
+});
 
 
 });
