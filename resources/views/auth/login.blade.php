@@ -65,6 +65,19 @@
 
                     </p>
 
+                    
+                    @if (session('success'))
+                        <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
                     <form action="{{ route('login.proses') }}" method="post">
                          {{-- //jika sudah ada controllernya nanti ditambahkan @csrf --}}
                          @csrf

@@ -72,6 +72,7 @@ class AuthController extends Controller
         'password.confirmed' => 'Konfirmasi password tidak cocok.',
     ]);
 
+    try{
     User::create([
         'name'      => $request->name,
         'email'     => $request->email,
@@ -83,7 +84,11 @@ class AuthController extends Controller
     ]);
 
     return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silahkan login.');
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.']);
     }
+    } 
+
 
     public function showRegister()
     {
