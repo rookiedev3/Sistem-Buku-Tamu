@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchesController;
+use App\Http\Controllers\VisitsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
-use App\Http\Controllers\VisitsController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -47,12 +48,32 @@ Route::get('/database-tamu', function () {
 Route::get('/database-tamu/{id}', function ($id) {
     return view('tamu.detail', ['id' => $id]);
 });
+//route lead dan follow up
+Route::get('/leads', function () {
+    return view('leads.index');
+});
 
+//route laporan
+Route::get('/laporan', function () {
+    return view('laporan.index');
+});
+
+//route master data
+Route::get('/master-data', function () {
+    return view('master.index');
+});
+
+//route pengguna
+Route::get('/pengguna', function () {
+    return view('pengguna.index');
+});
 
 
 });
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/branches', BranchesController::class);
+    Route::resource('/products', ProductsController::class);
+
 
     Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
