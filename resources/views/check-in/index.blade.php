@@ -15,33 +15,35 @@
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Nama lengkap <span style="color:#e5484d;">*</span></label>
-                <input type="text" name="nama_lengkap" placeholder="Contoh: Ahmad Fauzan" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="name" placeholder="Contoh: Ahmad Fauzan" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Nomor WhatsApp <span style="color:#e5484d;">*</span></label>
-                <input type="text" name="whatsapp" placeholder="Contoh: 081234567890" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="phone" placeholder="Contoh: 081234567890" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Instansi / Perusahaan</label>
-                <input type="text" name="perusahaan" placeholder="Contoh: PT Maju Jaya" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="company_name" placeholder="Contoh: PT Maju Jaya" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Jabatan</label>
-                <input type="text" name="jabatan" placeholder="Contoh: Owner / Manager" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="position" placeholder="Contoh: Owner / Manager" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Jenis kunjungan</label>
-                <select name="jenis_kunjungan" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; cursor:pointer; box-sizing:border-box;">
-                    <option value="konsultasi">Konsultasi Bisnis</option>
-                    <option value="meeting">Meeting Terjadwal</option>
-                    <option value="vendor">Vendor / Partner</option>
-                    <option value="lainnya">Lainnya</option>
+                <select name="guest_category_id" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; cursor:pointer; box-sizing:border-box;">
+                    <option value="1">Prospek</option>
+                    <option value="2">Klien</option>
+                    <option value="3">Vendor</option>
+                    <option value="4">Pelamar</option>
+                    <option value="5">Mitra</option>
+                    <option value="6">Umum</option>
                 </select>
             </div>
             <div>
