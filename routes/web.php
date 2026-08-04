@@ -95,3 +95,20 @@ Route::get('/pengguna', function () {
 // Route::get('/dashboard', function () {
 //     return view('dashboard.index');
 // })->name('dashboard');
+
+/// --- RUTE TES TAMPILAN FRONTEND (MULTI-STEP) ---
+Route::get('/check-in/step-1', function () {
+    return view('check-in.step1');
+});
+
+Route::get('/check-in/step-2', function () {
+    return view('check-in.step2');
+});
+
+Route::get('/check-in/step-3', function () {
+    return view('check-in.step3');
+});
+
+Route::get('/check-in/step-4', function () {
+    return view('check-in.step4');
+});
