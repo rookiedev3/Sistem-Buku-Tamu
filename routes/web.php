@@ -56,7 +56,7 @@ Route::get('/database-tamu/{id}', function ($id) {
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/branches', BranchesController::class);
 
-    Route::group(['middleware' => [CheckUserLogin::class . ':owner']], function () {
+    Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
     });
 // });
@@ -69,8 +69,6 @@ Route::get('/database-tamu/{id}', function ($id) {
 // Route::get('/login', function () {
 //     return view('auth.login');
 // })->name('login');
-
-
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard.index');

@@ -3,30 +3,72 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class visits extends Model
 {
     protected $table = 'visits';
+
     protected $primaryKey = 'id';
+
     protected $fillable = [
-        'visit-code',
+        'visit_code',
         'guest_id',
         'branch_id',
         'purpose_id',
         'source_id',
         'assigned_to',
-        'scheduled_to', 
-        'check_in_at', 
-        'meeting_start_at', 
-        'check_out_at', 
-        'status', 
-        'queue_number', 
-        'meeting_result', 
-        'potential_level', 
-        'next_action', 
-        'follow_up_at', 
-        'is_converted_to_lead', 
-        'created_by', 
-        'updated_by'
-        ];
+        'scheduled_at',
+        'check_in_at',
+        'meeting_start_at',
+        'check_out_at',
+        'status',
+        'queue_number',
+        'meeting_result',
+        'potential_level',
+        'next_action',
+        'follow_up_at',
+        'is_converted_to_lead',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+        'check_in_at' => 'datetime',
+        'meeting_start_at' => 'datetime',
+        'check_out_at' => 'datetime',
+        'follow_up_at' => 'datetime',
+        'is_converted_to_lead' => 'boolean',
+    ];
+
+    public function guest(): BelongsTo
+    {
+        return $this->belongsTo(guests::class, 'guest_id');
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(branches::class, 'branch_id');
+    }
+
+    public function purpose(): BelongsTo
+    {
+        return $this->belongsTo(visit_purposes::class, 'purpose_id');
+    }
+
+    public function source(): BelongsTo
+    {
+        return $this->belongsTo(lead_sources::class, 'source_id');
+    }
+
+    public function assignedUser(): BelongsTo
+    {
+        return $this->belongsTo(users::class, 'assigned_to');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(users::class, 'created_by');
+    }
 }
