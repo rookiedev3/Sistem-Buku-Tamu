@@ -6,6 +6,7 @@ use App\Http\Controllers\VisitsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\VisitPurposesController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +74,7 @@ Route::get('/pengguna', function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/branches', BranchesController::class);
     Route::resource('/products', ProductsController::class);
+    Route::resource('/visit-purposes', VisitPurposesController::class);
 
 
     Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {

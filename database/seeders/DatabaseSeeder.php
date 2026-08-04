@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             UserTableSeeder::class,
             ProductsSeeder::class,
+            VisitPurposes::class,
         ]);
     }
 }
