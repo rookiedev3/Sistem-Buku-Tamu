@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +74,8 @@ Route::get('/pengguna', function () {
 });
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/branches', BranchesController::class);
+    Route::resource('/products', ProductsController::class);
+
 
     Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
