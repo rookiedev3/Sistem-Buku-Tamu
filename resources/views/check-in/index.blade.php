@@ -9,13 +9,13 @@
 
 <div class="card" style="background:#fff; border:1px solid #e8edf5; border-radius:24px; box-shadow:0 18px 50px rgba(31,53,97,.12); padding:30px; max-width: 900px;">
     
-    <form action="{{ route('tamu.store') }}" method="POST" style="display:flex; flex-direction:column; gap:20px;">
+    <form action="{{ route('visit.checkin') }}" method="POST" style="display:flex; flex-direction:column; gap:20px;">
         @csrf
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Nama lengkap <span style="color:#e5484d;">*</span></label>
-                <input type="text" name="nama" placeholder="Contoh: Ahmad Fauzan" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="nama_lengkap" placeholder="Contoh: Ahmad Fauzan" required style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Nomor WhatsApp <span style="color:#e5484d;">*</span></label>
@@ -26,7 +26,7 @@
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Instansi / Perusahaan</label>
-                <input type="text" name="instansi" placeholder="Contoh: PT Maju Jaya" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
+                <input type="text" name="perusahaan" placeholder="Contoh: PT Maju Jaya" style="width:100%; border:1px solid #e8edf5; border-radius:12px; padding:13px 14px; font-size:13px; background:#fbfcfe; color:#172033; outline:none; box-sizing:border-box;">
             </div>
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Jabatan</label>
@@ -96,7 +96,7 @@ function updateChipStyle(checkbox) {
     }
 }
 </script>
-
+    
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
                 <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Sumber mengetahui IT Solution</label>

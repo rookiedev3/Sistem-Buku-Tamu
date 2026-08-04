@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\VisitsController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -31,10 +32,7 @@ Route::middleware('auth')->group(function () {
 })->name('check-in.index');
 
 //Route untuk MEMPROSES/MENYIMPAN data form (fungsi store)
-Route::post('/check-in', function () {
-    // Logika penyimpanan data sementara di sini
-    return back()->with('success', 'Check-in berhasil!');
-})->name('tamu.store');
+Route::post('/check-in', [VisitsController::class, 'store'])->name('visit.checkin');
 
 // 2. Halaman Daftar Kunjungan (Arsip & Riwayat Kunjungan Tamu)
 Route::get('/kunjungan', function () {
