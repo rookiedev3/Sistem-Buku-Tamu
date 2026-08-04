@@ -37,17 +37,37 @@
         </div>
 
         <!-- Produk yang diminati (Chips) -->
-        <div>
-            <label style="display:block; font-size:12px; font-weight:700; color:#172033; margin-bottom:8px;">Produk yang diminati</label>
-            <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                <span style="padding:8px 14px; border-radius:10px; border:1px solid #cfe0ff; background:#eef4ff; color:#1463ff; font-size:12px; font-weight:800; cursor:pointer;">Website</span>
-                <span style="padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer;">Sistem POS</span>
-                <span style="padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer;">SEO</span>
-                <span style="padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer;">Digital Marketing</span>
-                <span style="padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer;">Custom System</span>
-            </div>
-        </div>
+       <div>
+    <label style="display:block; font-size:12px; font-weight:800; color:#172033; margin-bottom:8px;">Produk yang diminati</label>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        
+        <label class="chip-label" style="display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px; border:1px solid #cfe0ff; background:#eef4ff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            <input type="checkbox" name="produk[]" value="Website" checked style="display:none;" onchange="this.parentElement.style.background = this.checked ? '#eef4ff' : '#fff'; this.parentElement.style.borderColor = this.checked ? '#cfe0ff' : '#e8edf5'; this.parentElement.style.color = this.checked ? '#1463ff' : '#5c6678';">
+            Website
+        </label>
 
+        <label class="chip-label" style="display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            <input type="checkbox" name="produk[]" value="Sistem POS" style="display:none;" onchange="this.parentElement.style.background = this.checked ? '#eef4ff' : '#fff'; this.parentElement.style.borderColor = this.checked ? '#cfe0ff' : '#e8edf5'; this.parentElement.style.color = this.checked ? '#1463ff' : '#5c6678';">
+            Sistem POS
+        </label>
+
+        <label class="chip-label" style="display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            <input type="checkbox" name="produk[]" value="SEO" style="display:none;" onchange="this.parentElement.style.background = this.checked ? '#eef4ff' : '#fff'; this.parentElement.style.borderColor = this.checked ? '#cfe0ff' : '#e8edf5'; this.parentElement.style.color = this.checked ? '#1463ff' : '#5c6678';">
+            SEO
+        </label>
+
+        <label class="chip-label" style="display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            <input type="checkbox" name="produk[]" value="Digital Marketing" style="display:none;" onchange="this.parentElement.style.background = this.checked ? '#eef4ff' : '#fff'; this.parentElement.style.borderColor = this.checked ? '#cfe0ff' : '#e8edf5'; this.parentElement.style.color = this.checked ? '#1463ff' : '#5c6678';">
+            Digital Marketing
+        </label>
+
+        <label class="chip-label" style="display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px; border:1px solid #e8edf5; background:#fff; color:#5c6678; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            <input type="checkbox" name="produk[]" value="Custom System" style="display:none;" onchange="this.parentElement.style.background = this.checked ? '#eef4ff' : '#fff'; this.parentElement.style.borderColor = this.checked ? '#cfe0ff' : '#e8edf5'; this.parentElement.style.color = this.checked ? '#1463ff' : '#5c6678';">
+            Custom System
+        </label>
+
+    </div>
+</div>
         <!-- Baris 3: PIC yang ingin ditemui & Sumber informasi (Sejajar) -->
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div>

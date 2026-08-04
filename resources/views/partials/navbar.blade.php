@@ -12,9 +12,9 @@
             🔔
         </button>
 
-        <button class="btn-primary-custom" style="background: #1463ff; color: #fff; border: none; border-radius: 10px; padding: 9px 16px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(20,99,255,.2); display: flex; align-items: center; gap: 6px; transition: background 0.2s;">
-            <span>+ Tambah Tamu</span>
-        </button>
+        <a href="{{ url('/check-in') }}" style="background: #1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(20,99,255,.2);">
+        + Tambah Tamu
+    </a>
     </div>
 
 </nav>

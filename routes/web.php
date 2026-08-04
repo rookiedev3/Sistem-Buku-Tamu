@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CheckInController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
@@ -24,13 +25,41 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    //1. chek in route sementara front end 
+    Route::get('/check-in', function () {
+    return view('check-in.index'); // sesuaikan dengan nama file view Blade Anda
+})->name('check-in.index');
+
+//Route untuk MEMPROSES/MENYIMPAN data form (fungsi store)
+Route::post('/check-in', function () {
+    // Logika penyimpanan data sementara di sini
+    return back()->with('success', 'Check-in berhasil!');
+})->name('tamu.store');
+
+// 2. Halaman Daftar Kunjungan (Arsip & Riwayat Kunjungan Tamu)
+Route::get('/kunjungan', function () {
+    return view('kunjungan.index');
+});
+
+// 3. Halaman Database Tamu (Arsip & Riwayat Master Tamu)
+Route::get('/database-tamu', function () {
+    return view('tamu.index');
+});
+// Route untuk melihat detail riwayat kunjungan tamu berdasarkan ID
+Route::get('/database-tamu/{id}', function ($id) {
+    return view('tamu.detail', ['id' => $id]);
+});
+
+
+
+});
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('/branches', BranchesController::class);
 
     Route::group(['middleware' => [CheckUserLogin::class . ':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
     });
-});
+// });
 
 
 // Route::get('/', function () {

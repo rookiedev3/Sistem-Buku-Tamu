@@ -23,23 +23,24 @@
             <div>
                 <span style="font-size: 11px; font-weight: 800; color: #9aa3b2; display: block; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding-left: 4px;">Utama</span>
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
-                    <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: #eef4ff; color: #1463ff; font-size: 13px; font-weight: 800; text-decoration: none;">
+                     <li>
+                        <a href="{{ route('dashboard') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('/') || request()->is('dashboard') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('/') || request()->is('dashboard') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('/') || request()->is('dashboard') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">🏠</span> Dashboard
                         </a>
                     </li>
-                    <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+                   <li>
+                        <a href="{{ url('/check-in') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('check-in*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('check-in*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('check-in*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">➕</span> Check-in Tamu
                         </a>
                     </li>
-                    <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
-                            <span style="font-size: 15px;">📋</span> Daftar Kunjungan
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+
+                   <li>
+    <a href="{{ url('/kunjungan') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('kunjungan*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('kunjungan*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('kunjungan*') ? '800' : '700' }}; text-decoration: none;">
+        <span style="font-size: 15px;">📋</span> Daftar Kunjungan
+    </a>
+</li>
+                   <li>
+                        <a href="{{ url('/database-tamu') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('database-tamu*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('database-tamu*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('database-tamu*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">🗂️</span> Database Tamu
                         </a>
                     </li>
@@ -51,12 +52,12 @@
                 <span style="font-size: 11px; font-weight: 800; color: #9aa3b2; display: block; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding-left: 4px;">Penjualan</span>
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
                     <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+                        <a href="{{ url('/leads') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('leads*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('leads*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('leads*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">📈</span> Lead & Follow Up
                         </a>
                     </li>
                     <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+                        <a href="{{ url('/laporan') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('laporan*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('laporan*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('laporan*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">📊</span> Laporan
                         </a>
                     </li>
@@ -68,12 +69,12 @@
                 <span style="font-size: 11px; font-weight: 800; color: #9aa3b2; display: block; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding-left: 4px;">Pengaturan</span>
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
                     <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+                        <a href="{{ url('/master-data') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('master-data*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('master-data*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('master-data*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">⚙️</span> Master Data
                         </a>
                     </li>
-                    <li>
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: transparent; color: #5c6678; font-size: 13px; font-weight: 700; text-decoration: none;">
+                   <li>
+                        <a href="{{ url('/pengguna') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: {{ request()->is('pengguna*') ? '#eef4ff' : 'transparent' }}; color: {{ request()->is('pengguna*') ? '#1463ff' : '#5c6678' }}; font-size: 13px; font-weight: {{ request()->is('pengguna*') ? '800' : '700' }}; text-decoration: none;">
                             <span style="font-size: 15px;">👤</span> Pengguna
                         </a>
                     </li>

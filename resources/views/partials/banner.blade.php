@@ -5,7 +5,7 @@
             <p class="mb-0 text-white-50 fs-6">Berikut adalah ringkasan aktivitas buku tamu dan kunjungan kantor hari ini.</p>
         </div>
         <div>
-            <a href="#" class="btn btn-light text-primary fw-semibold px-3 py-2 rounded-3 shadow-sm">
+            <a href="{{ url('/check-in') }}" class="btn btn-light text-primary fw-semibold px-3 py-2 rounded-3 shadow-sm">
                 + Buka Form Check-in
             </a>
         </div>
