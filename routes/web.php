@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VisitController;
 use App\Http\Middleware\CheckUserLogin;
@@ -25,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::resource('/branches', BranchesController::class);
 
     Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
         // Route khusus untuk user dengan level 1 (admin)
