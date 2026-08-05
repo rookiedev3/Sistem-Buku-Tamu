@@ -12,12 +12,25 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'tamu') {
-            return $this->tamuDashboard($user);
-        }
-
         if ($user->role === 'owner') {
             return $this->ownerDashboard();
+        }
+
+        if ($user->role === 'manager') {
+            return $this->managerDashboard();
+        }
+        if ($user->role === 'admin') {
+            return $this->adminDashboard();
+        }
+        if ($user->role === 'pic') {
+            return $this->picDashboard();
+        }
+        if ($user->role === 'security') {
+            return $this->securityDashboard();
+        }
+
+        if ($user->role === 'tamu') {
+            return $this->tamuDashboard($user);
         }
 
         // fallback sementara untuk role lain (manager, admin, pic, security)
@@ -50,6 +63,26 @@ class DashboardController extends Controller
             'visitHariIni',
             'visitMenunggu'
         ));
+    }
+
+    protected function managerDashboard()
+    {
+        return view('dashboard.manager');
+    }
+
+    protected function adminDashboard()
+    {
+        return view('frontoffice.dashboard');
+    }
+
+    protected function picDashboard()
+    {
+        return view('pic.dashboard');
+    }
+
+    protected function securityDashboard()
+    {
+        return view('security.dashboard');
     }
 
     /**
