@@ -176,3 +176,10 @@ Route::prefix('manager')->group(function () {
     })->name('manager.laporan');
 
 });
+
+// Group Route untuk Role Security
+Route::prefix('security')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('security.dashboard');
+    })->name('security.dashboard');
+});
