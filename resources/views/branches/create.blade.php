@@ -1,73 +1,98 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-white p-6 rounded-lg shadow-sm max-w-2xl mx-auto">
 
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-700">Tambah Branch</h2>
-        <a href="{{ route('branches.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
-            &larr; Kembali
-        </a>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Tambah Branch Baru</h1>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Lengkapi formulir di bawah ini untuk menambahkan data cabang baru.</p>
     </div>
+    
+    <a href="{{ route('branches.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
+        &larr; Kembali
+    </a>
+</div>
 
-    @if ($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-md mb-4">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+{{-- Alert Error Validation --}}
+@if ($errors->any())
+    <div style="background: #fde8e8; border: 1px solid #f8b4b4; color: #c81e1e; padding: 14px 18px; border-radius: 14px; font-size: 13px; margin-bottom: 24px;">
+        <div style="font-weight: 800; margin-bottom: 6px;">Terdapat beberapa kesalahan:</div>
+        <ul style="margin: 0; padding-left: 20px;">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
+<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 28px; max-width: 680px;">
+    
     <form action="{{ route('branches.store') }}" method="POST">
         @csrf
 
-        <div class="mb-4">
-            <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Kode Branch</label>
+        {{-- Kode Branch --}}
+        <div style="margin-bottom: 20px;">
+            <label for="code" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
+                Kode Branch <span style="color: #e5484d;">*</span>
+            </label>
             <input type="text" name="code" id="code" value="{{ old('code') }}"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#63A0EF]"
-                placeholder="Contoh: BR-001">
+                placeholder="Contoh: BR-001"
+                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
-        <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Branch</label>
+        {{-- Nama Branch --}}
+        <div style="margin-bottom: 20px;">
+            <label for="name" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
+                Nama Branch <span style="color: #e5484d;">*</span>
+            </label>
             <input type="text" name="name" id="name" value="{{ old('name') }}"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#63A0EF]"
-                placeholder="Contoh: Branch Yogyakarta">
+                placeholder="Contoh: Branch Yogyakarta"
+                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
-        <div class="mb-4">
-            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+        {{-- Alamat --}}
+        <div style="margin-bottom: 20px;">
+            <label for="address" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
+                Alamat Lengkap
+            </label>
             <textarea name="address" id="address" rows="3"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#63A0EF]"
-                placeholder="Alamat lengkap branch">{{ old('address') }}</textarea>
+                placeholder="Masukkan alamat lengkap branch..."
+                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; resize: vertical; font-family: inherit;">{{ old('address') }}</textarea>
         </div>
 
-        <div class="mb-4">
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+        {{-- Nomor Telepon --}}
+        <div style="margin-bottom: 20px;">
+            <label for="phone" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
+                Nomor Telepon
+            </label>
             <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#63A0EF]"
-                placeholder="Contoh: 0274-123456">
+                placeholder="Contoh: 0274-123456"
+                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
-        <div class="mb-6 flex items-center gap-2">
+        {{-- Status Aktif --}}
+        <div style="margin-bottom: 28px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
             <input type="checkbox" name="is_active" id="is_active" value="1"
                 {{ old('is_active', true) ? 'checked' : '' }}
-                class="rounded border-gray-300 text-[#63A0EF] focus:ring-[#63A0EF]">
-            <label for="is_active" class="text-sm text-gray-700">Aktif</label>
+                style="width: 16px; height: 16px; accent-color: #1463ff; cursor: pointer;">
+            <label for="is_active" style="font-size: 13px; font-weight: 700; color: #172033; cursor: pointer;">
+                Aktifkan Branch Ini
+            </label>
         </div>
 
-        <div class="flex gap-2">
+        {{-- Tombol Aksi --}}
+        <div style="display: flex; gap: 10px; pt: 8px;">
             <button type="submit"
-                class="bg-[#63A0EF] hover:bg-[#4a90e2] text-white px-4 py-2 rounded-md text-sm transition shadow-sm">
-                Simpan
+                style="background: #1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(20,99,255,.2);">
+                Simpan Data
             </button>
             <a href="{{ route('branches.index') }}"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm transition">
+                style="background: #f1f4f9; color: #778195; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; border: none; display: inline-block;">
                 Batal
             </a>
         </div>
     </form>
+
 </div>
+
 @endsection

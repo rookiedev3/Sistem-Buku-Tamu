@@ -67,7 +67,7 @@ class DashboardController extends Controller
 
     protected function managerDashboard()
     {
-        return view('dashboard.manager');
+        return view('manager.dashboard');
     }
 
     protected function adminDashboard()
