@@ -7,7 +7,7 @@
     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Dashboard PIC / Sales 👋</h2>
-            <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar tamu berdasarkan kategori VIP & Reguler, catat hasil pertemuan, dan pantau konversi lead.</p>
+            <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar tamu berdasarkan kategori VIP & Reguler, konfirmasi kehadiran, catat hasil pertemuan, dan pantau konversi lead.</p>
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
@@ -37,6 +37,8 @@
                         <th style="padding: 14px;">Kategori</th>
                         <th style="padding: 14px;">Keperluan</th>
                         <th style="padding: 14px;">Waktu Check-in</th>
+                        <!-- Kolom Tambahan untuk Konfirmasi Kehadiran -->
+                        <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
@@ -53,6 +55,21 @@
                         </td>
                         <td style="padding: 14px; color: #475569;">Repeat Order & Kontrak Berkala</td>
                         <td style="padding: 14px; color: #778195; font-weight: 600;">10:15 WIB</td>
+                        
+                        <!-- Kolom Tombol Centang (✔) dan Silang (❌) untuk Konfirmasi Kehadiran -->
+                        <td style="padding: 14px; text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: 6px;">
+                                <!-- Tombol Centang (✔) - Konfirmasi Tamu Valid / Bertemu -->
+                                <button type="button" onclick="alert('Kehadiran tamu dikonfirmasi: Tamu benar bertemu dengan PIC.')" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                    ✓
+                                </button>
+                                <!-- Tombol Silang (❌) - Konfirmasi Tamu Salah / Tidak Jadi -->
+                                <button type="button" onclick="alert('Konfirmasi dibatalkan: Tamu salah tujuan atau tidak jadi masuk.')" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                    ✕
+                                </button>
+                            </div>
+                        </td>
+
                         <td style="padding: 14px; text-align: center;">
                             <!-- Tombol ini memicu Modal Bootstrap -->
                             <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan" style="background: #006B3F; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
