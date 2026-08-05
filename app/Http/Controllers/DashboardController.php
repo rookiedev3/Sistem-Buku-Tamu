@@ -65,6 +65,9 @@ class DashboardController extends Controller
         ));
     }
 
+    public function halamanUtama(){
+        return view('halaman_utama');
+    }
     protected function managerDashboard()
     {
         return view('manager.dashboard');

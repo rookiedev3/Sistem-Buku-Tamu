@@ -21,12 +21,13 @@ Route::middleware('guest')->group(function () {
 
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->name('register.proses');
+        Route::get('/', [DashboardController::class, 'halamanUtama'])->name('halamaanUtama');
     });
 });
 
 // Route untuk user yang sudah login (auth)
 Route::middleware('auth')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    // Route::get('/', [DashboardController::class, 'index'])->name('home');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
