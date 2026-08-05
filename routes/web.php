@@ -114,3 +114,20 @@ Route::get('/check-in/step-3', function () {
 Route::get('/check-in/step-4', function () {
     return view('check-in.step4');
 });
+
+// --- RUTE FRONT OFFICE ---
+Route::get('/frontoffice/dashboard', function () {
+    return view('frontoffice.dashboard');
+})->name('frontoffice.dashboard');
+
+Route::get('/frontoffice/history', function () {
+    return view('frontoffice.history');
+})->name('frontoffice.history');
+
+Route::get('/frontoffice/appointment', function () {
+    return view('frontoffice.appointment');
+})->name('frontoffice.appointment');
+
+Route::get('/frontoffice/pegawai', function () {
+    return view('frontoffice.pegawai');
+})->name('frontoffice.pegawai');
