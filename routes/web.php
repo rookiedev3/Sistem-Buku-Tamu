@@ -150,3 +150,28 @@ Route::prefix('pic')->group(function () {
     })->name('pic.leads');
 
 });
+
+// Group Route untuk Role Manager Operasional
+Route::prefix('manager')->group(function () {
+    
+    // 1. Dashboard Monitoring Manager
+    Route::get('/dashboard', function () {
+        return view('manager.dashboard');
+    })->name('manager.dashboard');
+
+    // 2. Semua Kunjungan
+    Route::get('/kunjungan', function () {
+        return view('manager.kunjungan');
+    })->name('manager.kunjungan');
+
+    // 3. Pipeline Lead Tim
+    Route::get('/leads', function () {
+        return view('manager.leads');
+    })->name('manager.leads');
+
+    // 4. Laporan & Export Data
+    Route::get('/laporan', function () {
+        return view('manager.laporan');
+    })->name('manager.laporan');
+
+});
