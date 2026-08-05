@@ -74,6 +74,8 @@ Route::get('/pengguna', function () {
 
 });
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    //route untuk master data (branches, products, lead sources, visit purposes, guest categories)
     Route::resource('/branches', BranchesController::class);
     Route::resource('/products', ProductsController::class);
     Route::resource('/lead-sources', LeadSourcesController::class);
@@ -129,3 +131,22 @@ Route::get('/frontoffice/appointment', function () {
 Route::get('/frontoffice/pegawai', function () {
     return view('frontoffice.pegawai');
 })->name('frontoffice.pegawai');
+
+Route::prefix('pic')->group(function () {
+    
+    // Halaman Dashboard PIC
+    Route::get('/dashboard', function () {
+        return view('pic.dashboard');
+    })->name('pic.dashboard');
+
+    // Halaman Riwayat Kunjungan PIC
+    Route::get('/riwayat', function () {
+        return view('pic.riwayat');
+    })->name('pic.riwayat');
+
+    // Lead & Follow Up PIC
+    Route::get('/leads', function () {
+        return view('pic.leads');
+    })->name('pic.leads');
+
+});
