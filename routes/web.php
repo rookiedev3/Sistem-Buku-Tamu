@@ -35,9 +35,6 @@ Route::middleware('auth')->group(function () {
     return view('check-in.index'); // sesuaikan dengan nama file view Blade Anda
 })->name('check-in.index');
 
-//Route untuk MEMPROSES/MENYIMPAN data form (fungsi store)
-Route::post('/check-in', [VisitsController::class, 'store'])->name('visit.checkin');
-
 // 2. Halaman Daftar Kunjungan (Arsip & Riwayat Kunjungan Tamu)
 Route::get('/kunjungan', function () {
     return view('kunjungan.index');
@@ -100,13 +97,12 @@ Route::get('/pengguna', function () {
 // })->name('dashboard');
 
 /// --- RUTE TES TAMPILAN FRONTEND (MULTI-STEP) ---
-Route::get('/check-in/step-1', function () {
-    return view('check-in.step1');
-});
+// Route Tahap 1
+Route::get('/check-in/step-1', [VisitsController::class, 'step1'])->name('check-in.step1');
+Route::post('/check-in/step-1', [VisitsController::class, 'storeStep1'])->name('check-in.store-step1');
 
-Route::get('/check-in/step-2', function () {
-    return view('check-in.step2');
-});
+// Route Tahap 2 (WAJIB ADA ->name('check-in.step2'))
+Route::get('/check-in/step-2', [VisitsController::class, 'step2'])->name('check-in.step2');
 
 Route::get('/check-in/step-3', function () {
     return view('check-in.step3');

@@ -59,7 +59,7 @@
                 <p style="font-size: 13px; color: #778195; margin: 0;">Kolom bertanda <span style="color: #e5484d; font-weight: bold;">*</span> wajib diisi.</p>
             </div>
 
-            <form action="/check-in/step-2" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 16px;">
+            <form action="/check-in/step-1" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 16px;">
                 @csrf
 
                 <div>
@@ -88,7 +88,7 @@
 
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Nomor WhatsApp (Aktif) <span style="color: #e5484d;">*</span></label>
-                    <input type="tel" name="phone" placeholder="Contoh: 081234567890" required 
+                    <input type="tel" name="phone" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" placeholder="Contoh: 081234567890" required 
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box;">
                 </div>
 
