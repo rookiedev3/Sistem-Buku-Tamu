@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BranchesApiController;
+use App\Http\Controllers\Api\GuestCategoriesApiController;
 use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
@@ -41,4 +42,12 @@ Route::apiResource('lead-sources', LeadSourcesApiController::class)->names([
     'show'    => 'api.lead-sources.show',
     'update'  => 'api.lead-sources.update',
     'destroy' => 'api.lead-sources.destroy',
+]);
+
+Route::apiResource('guest-categories', GuestCategoriesApiController::class)->names([
+    'index'   => 'api.guest-categories.index',
+    'store'   => 'api.guest-categories.store',
+    'show'    => 'api.guest-categories.show',
+    'update'  => 'api.guest-categories.update',
+    'destroy' => 'api.guest-categories.destroy',
 ]);
