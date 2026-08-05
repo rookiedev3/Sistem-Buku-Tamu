@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     return view('check-in.index'); // sesuaikan dengan nama file view Blade Anda
 })->name('check-in.index');
 
+//Route untuk MEMPROSES/MENYIMPAN data form (fungsi store)
+Route::post('/check-in', [VisitsController::class, 'store'])->name('visit.checkin');
+
 // 2. Halaman Daftar Kunjungan (Arsip & Riwayat Kunjungan Tamu)
 Route::get('/kunjungan', function () {
     return view('kunjungan.index');

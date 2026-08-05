@@ -49,8 +49,10 @@
                 <p style="font-size: 13px; color: #778195; margin: 0;">Kolom bertanda <span style="color: #e5484d; font-weight: bold;">*</span> wajib diisi.</p>
             </div>
 
-            <form action="#" method="POST" style="display: flex; flex-direction: column; gap: 14px;">
+            <form action="/check-in/step-2" method="POST" style="display: flex; flex-direction: column; gap: 14px;">
                 @csrf
+
+                <input type="hidden" name="guest_id" value="{{ $guest->id }}">
 
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Tujuan Bertemu (Staff / PIC) <span style="color: #e5484d;">*</span></label>
