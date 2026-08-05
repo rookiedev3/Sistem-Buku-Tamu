@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Visit;
 use App\Models\guests;
 use App\Models\visits;
 use App\Models\users;
@@ -10,19 +9,29 @@ use App\Models\branches;
 use App\Models\visit_purposes;
 use App\Models\products;
 use App\Models\lead_sources;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class VisitsController extends Controller
 {
+    // ==========================================
+    // STEP 1
+    // ==========================================
     public function step1()
     {
-        return view('check-in.step1');
+        // Ambil data sementara dari session jika pengguna menekan tombol kembali
+        $step1Data = session('step1_data', []);
+
+        return view('check-in.step1', compact('step1Data'));
     }
-    // Menyimpan data Tahap 1 & Lanjut ke Tahap 2
+
     public function storeStep1(Request $request)
     {
-        // 1. Validasi Input
+        $existingStep1 = session('step1_data', []);
+
+        // 1. Validasi Input Step 1
         $validatedData = $request->validate([
             'name'         => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
@@ -32,68 +41,191 @@ class VisitsController extends Controller
             'photo'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-       // Sanitasi Format WhatsApp (+62 / 62)
-    $phone = preg_replace('/[^0-9]/', '', $request->phone);
-    if (str_starts_with($phone, '0')) {
-        $phone = '+62' . substr($phone, 1);
-    }
-    
-    // Ganti data phone yang tervalidasi dengan data yang sudah disanitasi
-    $validatedData['phone'] = $phone;
+        // 2. Sanitasi Format WhatsApp
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        if (str_starts_with($phone, '0')) {
+            $phone = '+62' . substr($phone, 1);
+        }
+        $validatedData['phone'] = $phone;
 
-    // Handle Upload Foto jika ada
-    if ($request->hasFile('photo')) {
-        $path = $request->file('photo')->store('guest_photos', 'public');
-        $validatedData['photo'] = $path;
-    }
+        // Cek apakah nomor WA ini sudah pernah terdaftar di database (Tamu Lama)
+        $existingGuestInDb = guests::where('phone', $phone)->first();
 
-    // Cek keberadaan tamu berdasarkan nomor HP yang sudah berformat rapi
-    $guest = guests::where('phone', $phone)->first();
+        // 3. Handle Upload Foto
+        if ($request->hasFile('photo')) {
+            // Hapus file temporary lama di storage jika pengguna mengunggah ulang foto baru
+            if (!empty($existingStep1['photo']) && Storage::disk('public')->exists($existingStep1['photo'])) {
+                Storage::disk('public')->delete($existingStep1['photo']);
+            }
 
-    if ($guest) {
-        $guest->update($validatedData);
-    } else {
-        $validatedData['guest_code'] = $this->generateGuestCode();
-        $guest = guests::create($validatedData);
-    }
+            // Simpan foto baru ke folder temporary storage
+            $path = $request->file('photo')->store('temp_photos', 'public');
+            $validatedData['photo'] = $path;
+        } else {
+            // Jika tidak upload foto baru:
+            // Priority 1: Pakai foto dari session step 1
+            // Priority 2: Jika session kosong, pakai foto lama dari DB (Guest Eksisting)
+            $validatedData['photo'] = $existingStep1['photo']
+                ?? ($existingGuestInDb->photo ?? null);
+        }
 
-    session([
-        'guest_id'   => $guest->id,
-        'guest_code' => $guest->guest_code,
-    ]);
+        // 4. Simpan Sementara ke Session (Belum ke DB)
+        session(['step1_data' => $validatedData]);
 
-    return redirect()->route('check-in.step2');
-    }
-
-    private function generateGuestCode()
-    {
-        do {
-            // Format: GST-[TANGGAL]-[4 KARAKTER ACAK]
-            // Contoh hasil: GST-20260805-K9L2
-            $code = 'GST-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-        } while (guests::where('guest_code', $code)->exists()); // Memastikan tidak ada duplikasi
-
-        return $code;
+        return redirect()->route('check-in.step2');
     }
 
+    // ==========================================
+    // STEP 2
+    // ==========================================
     public function step2()
     {
-        // Ambil guest_id dari session
-        $guestId = session('guest_id');
-
-        if (!$guestId) {
+        if (!session()->has('step1_data')) {
             return redirect()->route('check-in.step1')->with('error', 'Silakan isi data identitas terlebih dahulu.');
         }
 
-        $guest = guests::findOrFail($guestId);
+        $step1Data = session('step1_data');
+        $step2Data = session('step2_data', []);
 
-        $pic = users::select('id', 'role')->get();
-        $branches = branches::select('code', 'name')->get();
+        $pic           = users::select('id', 'role')->get();
+        $branches      = branches::select('id', 'name', 'code')->get();
         $visitPurposes = visit_purposes::select('id', 'name')->get();
-        $products = products::select('code', 'name')->get();
-        $leadSources = lead_sources::select('id', 'name')->get();
+        $products      = products::select('code', 'name')->get();
+        $leadSources   = lead_sources::select('id', 'name')->get();
 
-        // Mengarah ke file: resources/views/check-in/step2.blade.php
-        return view('check-in.step2', compact('guest', 'pic', 'branches', 'visitPurposes', 'products', 'leadSources'));
+        return view('check-in.step2', compact('step1Data', 'step2Data', 'pic', 'branches', 'visitPurposes', 'products', 'leadSources'));
+    }
+
+    public function storeStep2(Request $request)
+    {
+        if (!session()->has('step1_data')) {
+            return redirect()->route('check-in.step1');
+        }
+
+        // 1. Validasi Input Step 2
+        $validated = $request->validate([
+            'assigned_to'      => 'required',
+            'branch_id'        => 'required',
+            'purpose_id'       => 'required',
+            'check_in_at'      => 'required',
+            'product_interest' => 'nullable',
+            'source_info'      => 'nullable',
+            'purpose'          => 'required|string|max:1000',
+        ]);
+
+        // 2. Simpan Sementara ke Session
+        session(['step2_data' => $validated]);
+
+        return redirect()->route('check-in.step3');
+    }
+
+    // ==========================================
+    // STEP 3 (Konfirmasi & Final Save DB)
+    // ==========================================
+    public function step3()
+    {
+        if (!session()->has('step1_data') || !session()->has('step2_data')) {
+            return redirect()->route('check-in.step1')->with('error', 'Sesi Anda telah berakhir, silakan isi kembali.');
+        }
+
+        $step1Data = session('step1_data');
+        $step2Data = session('step2_data');
+
+        $pic         = users::find($step2Data['assigned_to']);
+        $branch      = branches::find($step2Data['branch_id']);
+        $purposeType = visit_purposes::find($step2Data['purpose_id']);
+        $product     = !empty($step2Data['product_interest']) ? products::where('code', $step2Data['product_interest'])->first() : null;
+        $source      = !empty($step2Data['source_info']) ? lead_sources::find($step2Data['source_info']) : null;
+
+        return view('check-in.step3', compact(
+            'step1Data',
+            'step2Data',
+            'pic',
+            'branch',
+            'purposeType',
+            'product',
+            'source'
+        ));
+    }
+
+    public function storeFinal(Request $request)
+    {
+        if (!session()->has('step1_data') || !session()->has('step2_data')) {
+            return redirect()->route('check-in.step1');
+        }
+
+        $step1 = session('step1_data');
+        $step2 = session('step2_data');
+
+        $visit = DB::transaction(function () use ($step1, $step2) {
+
+            // 1. Cari / Buat Guest berdasarkan Nomor WhatsApp
+            $guest = guests::where('phone', $step1['phone'])->first();
+
+            if ($guest) {
+                if (empty($step1['photo'])) {
+                    unset($step1['photo']);
+                }
+                $guest->update($step1);
+            } else {
+                $todayDate = Carbon::now()->format('Ymd');
+                $prefix = 'GST-' . $todayDate . '-';
+                $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
+                $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
+
+                $step1['guest_code'] = $prefix . $sequence;
+                $guest = guests::create($step1);
+            }
+
+            // 2. Format Tanggal Check-In yang Aman
+            // Menggunakan Carbon::parse agar aman terlepas dari format string Flatpickr
+            $rawCheckInDate = $step2['check_in_at'] ?? now()->toDateString();
+            $checkInDateFormatted = Carbon::parse($rawCheckInDate)->format('Y-m-d');
+
+            // 3. Hitung Jumlah Antrean untuk Tanggal Kunjungan Tersebut
+            // Memastikan query membandingkan format YYYY-MM-DD dengan presisi
+            $todayVisitCount = visits::whereDate('check_in_at', $checkInDateFormatted)->count();
+
+            // Keamanan Tambahan:
+            // Jika antrean dihitung berdasarkan hari transaksi dibuat (Hari Ini), gunakan baris di bawah:
+            // $todayVisitCount = visits::whereDate('created_at', Carbon::today())->count();
+
+            $queueNumber = sprintf('%03d', $todayVisitCount + 1);
+
+            // 4. Generate Visit Code
+            $todayDate = Carbon::now()->format('Ymd');
+            $prefixVisit = 'VST-' . $todayDate . '-';
+            $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
+            $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
+            $visitCode = $prefixVisit . $sequenceVisit;
+
+            // 5. Simpan ke Tabel Visits
+            return visits::create([
+                'visit_code'       => $visitCode,
+                'guest_id'         => $guest->id,
+                'assigned_to'      => $step2['assigned_to'],
+                'branch_id'        => $step2['branch_id'],
+                'purpose_id'       => $step2['purpose_id'],
+                'check_in_at'      => $checkInDateFormatted,
+                'product_interest' => $step2['product_interest'] ?? null,
+                'source_info'      => $step2['source_info'] ?? null,
+                'purpose'          => $step2['purpose'],
+                'status'           => 'pending',
+                'queue_number'     => $queueNumber,
+            ]);
+        });
+
+        // Hapus session temporary
+        session()->forget(['step1_data', 'step2_data']);
+        session(['final_visit_id' => $visit->id]);
+
+        return redirect()->route('check-in.step4', ['id' => $visit->id]);
+    }
+
+    public function step4($id)
+    {
+        $visit = visits::findOrFail($id);
+
+        return view('check-in.step4', compact('visit'));
     }
 }

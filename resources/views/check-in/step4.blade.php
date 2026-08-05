@@ -15,10 +15,7 @@
         <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; padding: 24px; margin-bottom: 30px;">
             <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Nomor Token Antrian Anda</span>
             <div style="font-size: 42px; font-weight: 900; color: #1463ff; margin-top: 8px; letter-spacing: 2px;">
-                ANTRIAN-042
-            </div>
-            <div style="font-size: 13px; color: #475569; margin-top: 10px;">
-                Tujuan: <b>Budi Santoso (Sales Manager)</b>
+                {{ $visit->queue_number }}
             </div>
         </div>
 

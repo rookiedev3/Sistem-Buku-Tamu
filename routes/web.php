@@ -106,11 +106,9 @@ Route::post('/check-in/step-1', [VisitsController::class, 'storeStep1'])->name('
 
 // Route Tahap 2 (WAJIB ADA ->name('check-in.step2'))
 Route::get('/check-in/step-2', [VisitsController::class, 'step2'])->name('check-in.step2');
+Route::post('/check-in/step-2', [VisitsController::class, 'storeStep2'])->name('check-in.store-step2');
 
-Route::get('/check-in/step-3', function () {
-    return view('check-in.step3');
-});
+Route::get('/check-in/step-3', [VisitsController::class, 'step3'])->name('check-in.step3');
+Route::post('/check-in/step-3', [VisitsController::class, 'storeFinal'])->name('check-in.store-step3');
 
-Route::get('/check-in/step-4', function () {
-    return view('check-in.step4');
-});
+Route::get('/check-in/step-4/{id}', [VisitsController::class, 'step4'])->name('check-in.step4');
