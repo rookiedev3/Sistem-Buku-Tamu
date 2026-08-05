@@ -64,7 +64,7 @@
                 </div>
 
                 <div>
-                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Alamat Lengkap</label>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Alamat Instansi / Perusahaan</label>
                     <input type="text" name="address" placeholder="Contoh: Jl. Sudirman No. 123, Jakarta Selatan" 
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box;">
                 </div>
