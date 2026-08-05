@@ -25,7 +25,10 @@ class AuthController extends Controller
 
         $kredensial = $request->only('email', 'password');
 
-        if (Auth::attempt($kredensial)) {
+        // Cek apakah checkbox "remember" dicentang (mengembalikan true/false)
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($kredensial, $remember)) {
             $request->session()->regenerate();
             $user = Auth::user();
 

@@ -1,7 +1,28 @@
 @extends('layouts.pic')
 
 @section('content')
+
+@php
+    // 1. Amankan $visits: Jika tidak dikirim Controller, buat Collection kosong
+    $visits = $visits ?? collect();
+
+    // 2. Amankan $vipCount & $regularCount
+    $vipCount = $vipCount ?? $visits->filter(function($v) {
+        return optional($v->guest)->is_vip == true;
+    })->count();
+
+    $regularCount = $regularCount ?? ($visits->count() - $vipCount);
+@endphp
+
+
 <div style="display: flex; flex-direction: column; gap: 24px;">
+
+    <!-- Alert Sukses -->
+    @if(session('success'))
+        <div class="alert alert-success" style="border-radius: 12px; font-weight: 600;">
+            {{ session('success') }}
+        </div>
+    @endif
 
     <!-- Bagian Sambutan & Statistik Ringkas -->
     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
@@ -12,12 +33,12 @@
 
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Tamu VIP Menunggu</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #d97706; margin-top: 4px;">1 Orang</strong>
+            <strong style="font-size: 24px; font-weight: 900; color: #d97706; margin-top: 4px;">{{ $vipCount }} Orang</strong>
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Tamu Reguler</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">1 Orang</strong>
+            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">{{ $regularCount }} Orang</strong>
         </div>
     </div>
 
@@ -37,110 +58,149 @@
                         <th style="padding: 14px;">Kategori</th>
                         <th style="padding: 14px;">Keperluan</th>
                         <th style="padding: 14px;">Waktu Check-in</th>
-                        <!-- Kolom Tambahan untuk Konfirmasi Kehadiran -->
                         <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Baris Tamu VIP -->
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 14px; font-weight: 600;">1</td>
-                        <td style="padding: 14px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">Budi Santoso</strong>
-                            <span style="font-size: 11px; color: #778195;">PT Maju Mundur Sejahtera</span>
-                        </td>
-                        <td style="padding: 14px;">
-                            <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; border: 1px solid #fde68a;">⭐ VIP (Sering Order)</span>
-                        </td>
-                        <td style="padding: 14px; color: #475569;">Repeat Order & Kontrak Berkala</td>
-                        <td style="padding: 14px; color: #778195; font-weight: 600;">10:15 WIB</td>
-                        
-                        <!-- Kolom Tombol Centang (✔) dan Silang (❌) untuk Konfirmasi Kehadiran -->
-                        <td style="padding: 14px; text-align: center;">
-                            <div style="display: flex; justify-content: center; gap: 6px;">
-                                <!-- Tombol Centang (✔) - Konfirmasi Tamu Valid / Bertemu -->
-                                <button type="button" onclick="alert('Kehadiran tamu dikonfirmasi: Tamu benar bertemu dengan PIC.')" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                    ✓
-                                </button>
-                                <!-- Tombol Silang (❌) - Konfirmasi Tamu Salah / Tidak Jadi -->
-                                <button type="button" onclick="alert('Konfirmasi dibatalkan: Tamu salah tujuan atau tidak jadi masuk.')" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                    ✕
-                                </button>
-                            </div>
-                        </td>
+                    @forelse($visits as $index => $visit)
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 14px; font-weight: 600;">{{ $index + 1 }}</td>
+                            
+                            <td style="padding: 14px;">
+                                <strong style="display: block; color: #172033; font-weight: 800;">{{ $visit->guest->name ?? '-' }}</strong>
+                                <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }}</span>
+                            </td>
 
-                        <td style="padding: 14px; text-align: center;">
-                            <!-- Tombol ini memicu Modal Bootstrap -->
-                            <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan" style="background: #006B3F; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
-                                Mulai Pertemuan
-                            </button>
-                        </td>
-                    </tr>
+                            <td style="padding: 14px;">
+                                @if(isset($visit->guest) && $visit->guest->is_vip)
+                                    <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; border: 1px solid #fde68a;">⭐ VIP</span>
+                                @else
+                                    <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">Reguler</span>
+                                @endif
+                            </td>
+
+                            <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
+                            <td style="padding: 14px; color: #778195; font-weight: 600;">{{ $visit->check_in_at ? $visit->check_in_at->format('H:i') . ' WIB' : '-' }}</td>
+                            
+                            <!-- Kolom Tombol Centang (✔) dan Silang (❌) -->
+<td style="padding: 14px; text-align: center;">
+    @if(in_array($visit->status, ['pending', 'waiting']))
+        <div style="display: flex; justify-content: center; gap: 6px;">
+            <!-- Tombol Centang: Konfirmasi Bertemu -->
+            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="confirmed">
+                <button type="submit" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✓</button>
+            </form>
+
+            <!-- Tombol Silang: Batalkan/Salah Tujuan -->
+            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="cancelled">
+                <button type="submit" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </form>
+        </div>
+    @elseif($visit->status == 'confirmed')
+        <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dikonfirmasi ✓</span>
+    @elseif($visit->status == 'cancelled')
+        <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dibatalkan ✕</span>
+    @elseif($visit->status == 'completed')
+        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Selesai</span>
+    @endif
+</td>
+
+                            <!-- Kolom Aksi Mulai Pertemuan -->
+                            <td style="padding: 14px; text-align: center;">
+                                @if($visit->status == 'confirmed')
+                                    <!-- Hanya Bisa Diklik Saat Status 'confirmed' (Setelah Tekan Centang) -->
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan-{{ $visit->id }}" style="background: #006B3F; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
+                                        Mulai Pertemuan
+                                    </button>
+                                @elseif($visit->status == 'completed')
+                                    <span style="color: #006B3F; font-size: 12px; font-weight: 700;">✔ Sudah Dicatat</span>
+                                @else
+                                    <!-- Tombol Terkunci Saat Status Masih Waiting atau Cancelled (Setelah Tekan Silang) -->
+                                    <button type="button" disabled style="background: #cbd5e1; color: #64748b; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: not-allowed;">
+                                        Mulai Pertemuan
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+
+                        <!-- ========================================================= -->
+                        <!-- MODAL CATAT PERTEMUAN UNTUK TIAP BARIS (ID DINAMIS) -->
+                        <!-- ========================================================= -->
+                        <div class="modal fade" id="modalCatatPertemuan-{{ $visit->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                                    
+                                    <div class="modal-header" style="border-bottom: 1px solid #e8edf5; padding: 20px 24px;">
+                                        <h5 class="modal-title" style="font-size: 16px; font-weight: 800; color: #172033;">
+                                            📝 Catat Hasil Pertemuan & Lead
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-body" style="padding: 24px;">
+                                        <!-- Info Tamu Ringkas -->
+                                        <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
+                                            <span style="color: #778195; display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;">Tamu yang Ditemui:</span>
+                                            <strong style="color: #172033; font-size: 14px;">{{ $visit->guest->name ?? '-' }} ({{ $visit->guest->company_name ?? '-' }})</strong>
+                                        </div>
+
+                                        <!-- Form Input Catatan -->
+                                        <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST">
+                                            @csrf
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
+                                                <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
+                                            </div>
+
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Status Konversi Lead</label>
+                                                <select name="potential_level" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+                                                    <option value="warm">Warm Lead (Perlu Follow-Up via WhatsApp)</option>
+                                                    <option value="hot">Hot Lead (Prospek Tinggi / Minta Penawaran)</option>
+                                                    <option value="deal">Deal / Berhasil (Resmi Order)</option>
+                                                    <option value="cold">Cold / Selesai Kunjungan Biasa</option>
+                                                </select>
+                                            </div>
+
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+                                                <input type="date" name="follow_up_at" value="{{ $visit->follow_up_at ? $visit->follow_up_at->format('Y-m-d') : '' }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
+                                            </div>
+
+                                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                                <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                                                    Batal
+                                                </button>
+                                                <button type="submit" style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                                                    Simpan & Selesaikan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END MODAL -->
+
+                    @empty
+                        <tr>
+                            <td colspan="7" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
+                                Belum ada kunjungan tamu hari ini.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-</div>
-
-<!-- ========================================== -->
-<!-- POP-UP MODAL FORM CATATAN HASIL PERTEMUAN -->
-<!-- ========================================== -->
-<div class="modal fade" id="modalCatatPertemuan" tabindex="-1" aria-labelledby="modalCatatPertemuanLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-            
-            <div class="modal-header" style="border-bottom: 1px solid #e8edf5; padding: 20px 24px;">
-                <h5 class="modal-title" id="modalCatatPertemuanLabel" style="font-size: 16px; font-weight: 800; color: #172033;">
-                    📝 Catat Hasil Pertemuan & Lead
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body" style="padding: 24px;">
-                <!-- Info Tamu Ringkas -->
-                <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
-                    <span style="color: #778195; display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;">Tamu yang Ditemui:</span>
-                    <strong style="color: #172033; font-size: 14px;">Budi Santoso (PT Maju Mundur Sejahtera)</strong>
-                    <div style="margin-top: 4px;"><span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">⭐ VIP</span></div>
-                </div>
-
-                <!-- Form Input Catatan -->
-                <form action="#" method="POST">
-                    @csrf
-                    <div style="margin-bottom: 16px;">
-                        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
-                        <textarea rows="3" placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;"></textarea>
-                    </div>
-
-                    <div style="margin-bottom: 16px;">
-                        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Status Konversi Lead</label>
-                        <select style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-                            <option value="warm">Warm Lead (Perlu Follow-Up via WhatsApp)</option>
-                            <option value="hot">Hot Lead (Prospek Tinggi / Minta Penawaran)</option>
-                            <option value="deal">Deal / Berhasil (Resmi Order)</option>
-                            <option value="cold">Cold / Selesai Kunjungan Biasa</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
-                        <input type="date" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                            Batal
-                        </button>
-                        <button type="submit" style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                            Simpan & Selesaikan
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
 </div>
 @endsection

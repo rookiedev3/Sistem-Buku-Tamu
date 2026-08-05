@@ -117,7 +117,7 @@
         <div class="sidebar-menu">
             <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 12px; margin-bottom: 4px;">Menu Utama</span>
 
-            <a href="{{ url('/pic/dashboard') }}" class="menu-item" style="color: {{ request()->is('pic/dashboard*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/dashboard*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/dashboard*') ? '700' : '600' }};">
+            <a href="{{ route('pic.dashboard') }}" class="menu-item" style="color: {{ request()->is('pic/dashboard*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/dashboard*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/dashboard*') ? '700' : '600' }};">
                 📊 Dashboard Tamu
             </a>
 

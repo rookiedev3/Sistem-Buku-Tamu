@@ -31,6 +31,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+
+## zahwa
+Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
+Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
+Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
+
+
     //1. chek in route sementara front end 
     Route::get('/check-in', function () {
     return view('check-in.index'); // sesuaikan dengan nama file view Blade Anda
@@ -135,10 +142,10 @@ Route::get('/frontoffice/pegawai', function () {
 
 Route::prefix('pic')->group(function () {
     
-    // Halaman Dashboard PIC
-    Route::get('/dashboard', function () {
-        return view('pic.dashboard');
-    })->name('pic.dashboard');
+    // // Halaman Dashboard PIC
+    // Route::get('/dashboard', function () {
+    //     return view('pic.dashboard');
+    // })->name('pic.dashboard');
 
     // Halaman Riwayat Kunjungan PIC
     Route::get('/riwayat', function () {

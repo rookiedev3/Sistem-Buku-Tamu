@@ -25,7 +25,7 @@
     </div>
 @endif
 
-<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 28px; max-width: 680px;">
+<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 28px; max-width: 680px; width: 100%; box-sizing: border-box; margin-bottom: 32px;">
     
     <form action="{{ route('branches.store') }}" method="POST">
         @csrf
@@ -71,7 +71,7 @@
         </div>
 
         {{-- Status Aktif --}}
-        <div style="margin-bottom: 28px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
+        <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
             <input type="checkbox" name="is_active" id="is_active" value="1"
                 {{ old('is_active', true) ? 'checked' : '' }}
                 style="width: 16px; height: 16px; accent-color: #1463ff; cursor: pointer;">
@@ -81,7 +81,7 @@
         </div>
 
         {{-- Tombol Aksi --}}
-        <div style="display: flex; gap: 10px; pt: 8px;">
+        <div style="display: flex; gap: 10px; padding-top: 8px;">
             <button type="submit"
                 style="background: #1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(20,99,255,.2);">
                 Simpan Data

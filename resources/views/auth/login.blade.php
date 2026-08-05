@@ -109,13 +109,9 @@
                         <div class="d-flex justify-content-between mb-4">
 
                             <div class="form-check">
-
-                                <input class="form-check-input" type="checkbox">
-
-                                <label class="form-check-label">
-
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                                <label class="form-check-label" for="remember">
                                     Ingat Saya
-
                                 </label>
 
                             </div>

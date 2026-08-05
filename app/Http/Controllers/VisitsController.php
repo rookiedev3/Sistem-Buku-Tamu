@@ -228,4 +228,73 @@ class VisitsController extends Controller
 
         return view('check-in.step4', compact('visit'));
     }
+
+    // ==========================================
+    // DASHBOARD PIC & MANAJEMEN PERTEMUAN
+    // ==========================================
+    public function dashboardPic()
+    {
+        // 1. Ambil data kunjungan hari ini beserta relasinya
+        $visits = visits::with(['guest', 'purpose', 'branch'])
+            ->whereDate('check_in_at', Carbon::today())
+            // ->where('assigned_to', auth()->id()) // Aktifkan jika ingin filter khusus PIC yang login
+            ->orderBy('check_in_at', 'desc')
+            ->get();
+
+        // 2. Hitung statistik (Asumsi: di tabel guests ada kolom is_vip atau kriteria tertentu)
+        // Jika belum ada kolom is_vip, kamu bisa sesuaikan logikanya
+        $vipCount = $visits->filter(function ($v) {
+            return $v->guest && $v->guest->is_vip == true; 
+        })->count();
+
+        $regularCount = $visits->count() - $vipCount;
+
+        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
+    }
+
+    // Aksi untuk tombol Centang (✓) dan Silang (✕)
+    public function updateStatus(Request $request, $id)
+    {
+        $visit = visits::findOrFail($id);
+        
+        $request->validate([
+            'status' => 'required|in:confirmed,cancelled'
+        ]);
+
+        $visit->status = $request->status;
+
+        // Jika dikonfirmasi hadir, catat waktu mulai
+        if ($request->status === 'confirmed') {
+            $visit->meeting_start_at = now();
+        }
+
+        $visit->save();
+
+        $msg = $request->status === 'confirmed' 
+            ? 'Kehadiran tamu dikonfirmasi. Silakan mulai pertemuan.' 
+            : 'Kunjungan telah dibatalkan.';
+
+        return back()->with('success', $msg);
+    }
+
+    // Aksi untuk simpan data dari Modal Pertemuan
+    public function completeMeeting(Request $request, $id)
+    {
+        $request->validate([
+            'meeting_result'  => 'required|string',
+            'potential_level' => 'required|string',
+            'follow_up_at'    => 'nullable|date',
+        ]);
+
+        $visit = visits::findOrFail($id);
+        $visit->update([
+            'meeting_result'  => $request->meeting_result,
+            'potential_level' => $request->potential_level,
+            'follow_up_at'    => $request->follow_up_at,
+            'status'          => 'completed',
+            'check_out_at'    => now(),
+        ]);
+
+        return back()->with('success', 'Hasil pertemuan berhasil disimpan!');
+    }
 }
