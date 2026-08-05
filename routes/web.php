@@ -112,3 +112,20 @@ Route::get('/check-in/step-3', [VisitsController::class, 'step3'])->name('check-
 Route::post('/check-in/step-3', [VisitsController::class, 'storeFinal'])->name('check-in.store-step3');
 
 Route::get('/check-in/step-4/{id}', [VisitsController::class, 'step4'])->name('check-in.step4');
+
+// --- RUTE FRONT OFFICE ---
+Route::get('/frontoffice/dashboard', function () {
+    return view('frontoffice.dashboard');
+})->name('frontoffice.dashboard');
+
+Route::get('/frontoffice/history', function () {
+    return view('frontoffice.history');
+})->name('frontoffice.history');
+
+Route::get('/frontoffice/appointment', function () {
+    return view('frontoffice.appointment');
+})->name('frontoffice.appointment');
+
+Route::get('/frontoffice/pegawai', function () {
+    return view('frontoffice.pegawai');
+})->name('frontoffice.pegawai');
