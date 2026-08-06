@@ -227,33 +227,39 @@ class VisitsController extends Controller
         return view('check-in.step4', compact('visit'));
     }
 
-    // ==========================================
+        // ==========================================
     // DASHBOARD PIC & MANAJEMEN PERTEMUAN
     // ==========================================
-    public function dashboardPic()
-    {
-        // 1. Ambil data kunjungan hari ini beserta relasinya
-        $visits = visits::with(['guest', 'purpose', 'branch'])
-            ->whereDate('check_in_at', Carbon::today())
-            // ->where('assigned_to', auth()->id()) // Aktifkan jika ingin filter khusus PIC yang login
-            ->orderBy('check_in_at', 'desc')
-            ->get();
+public function dashboardPic()
+{
+    // Mengambil data milik PIC yang sedang login
+    $visits = visits::with(['guest', 'purpose', 'branch'])
+        ->where('assigned_to', auth()->id())
+        ->where(function ($query) {
+            // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi
+            $query->whereDate('check_in_at', Carbon::today())
+                  ->orWhereIn('status', ['pending', 'waiting', 'confirmed']);
+        })
+        ->orderBy('check_in_at', 'desc')
+        ->get();
 
-        // 2. Hitung statistik (Asumsi: di tabel guests ada kolom is_vip atau kriteria tertentu)
-        // Jika belum ada kolom is_vip, kamu bisa sesuaikan logikanya
-        $vipCount = $visits->filter(function ($v) {
-            return $v->guest && $v->guest->is_vip == true;
-        })->count();
+    $vipCount = $visits->filter(function ($v) {
+        return optional($v->guest)->is_vip == true;
+    })->count();
 
-        $regularCount = $visits->count() - $vipCount;
+    $regularCount = $visits->count() - $vipCount;
 
-        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
-    }
+    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
+}
 
     // Aksi untuk tombol Centang (✓) dan Silang (✕)
     public function updateStatus(Request $request, $id)
     {
-        $visit = visits::findOrFail($id);
+// Uji coba hapus sementara whereDate() untuk melihat seluruh data:
+$visits = visits::with(['guest', 'purpose', 'branch'])
+    ->where('assigned_to', auth()->id())
+    ->orderBy('check_in_at', 'desc')
+    ->get();
 
         $request->validate([
             'status' => 'required|in:confirmed,cancelled'
@@ -261,7 +267,6 @@ class VisitsController extends Controller
 
         $visit->status = $request->status;
 
-        // Jika dikonfirmasi hadir, catat waktu mulai
         if ($request->status === 'confirmed') {
             $visit->meeting_start_at = now();
         }
@@ -284,7 +289,11 @@ class VisitsController extends Controller
             'follow_up_at'    => 'nullable|date',
         ]);
 
-        $visit = visits::findOrFail($id);
+        // Pastikan hanya data kunjungan milik PIC yang sedang login yang bisa di-complete
+        $visit = visits::where('id', $id)
+            ->where('assigned_to', auth()->id())
+            ->firstOrFail();
+
         $visit->update([
             'meeting_result'  => $request->meeting_result,
             'potential_level' => $request->potential_level,

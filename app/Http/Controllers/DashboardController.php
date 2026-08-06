@@ -80,12 +80,12 @@ class DashboardController extends Controller
 
     protected function picDashboard()
     {
-        return view('pic.dashboard');
-    }
+return redirect()->route('pic.dashboard');
+} // ✅ Otomatis lempar ke rute yang ada datanya    }
 
     protected function securityDashboard()
     {
-        return view('security.dashboard');
+        return app(VisitsController::class)->dashboardPic();    
     }
 
     /**
@@ -109,4 +109,6 @@ class DashboardController extends Controller
 
         return view('tamu.dashboard', compact('guest', 'visits'));
     }
+
+    
 }
