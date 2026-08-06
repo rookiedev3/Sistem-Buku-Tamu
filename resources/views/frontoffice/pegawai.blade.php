@@ -83,6 +83,10 @@
                             style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             Ubah
                         </button>
+                        {{-- Tombol Hapus (Mockup UI Saja, Aman Tidak Bikin Error) --}}
+        <button type="button" onclick="alert('Tombol Hapus diklik (UI Mockup)')" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+            Hapus
+        </button>
                     </td>
                 </tr>
                 @empty
