@@ -6,6 +6,7 @@ use App\Models\guests;
 use App\Models\visits;
 use App\Models\users;
 use App\Models\branches;
+use App\Models\guest_categories;
 use App\Models\visit_purposes;
 use App\Models\products;
 use App\Models\lead_sources;
@@ -23,8 +24,9 @@ class VisitsController extends Controller
     {
         // Ambil data sementara dari session jika pengguna menekan tombol kembali
         $step1Data = session('step1_data', []);
+        $guestCategories = guest_categories::select('id', 'name')->get();
 
-        return view('check-in.step1', compact('step1Data'));
+        return view('check-in.step1', compact('step1Data', 'guestCategories'));
     }
 
     public function storeStep1(Request $request)
@@ -33,48 +35,51 @@ class VisitsController extends Controller
 
         // 1. Validasi Input Step 1
         $validatedData = $request->validate([
-            'name'         => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
-            'address'      => 'nullable|string|max:500',
-            'position'     => 'required|string|max:255',
-            'phone'        => 'required|string|max:20',
-            'photo'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'name'              => 'required|string|max:255',
+            'company_name'      => 'required|string|max:255',
+            'address'           => 'nullable|string|max:500',
+            'email'             => 'required|email|max:150',
+            'guest_category_id' => 'required|string|max:20',
+            'position'          => 'required|string|max:255',
+            'phone'             => 'required|string|max:20',
+            'photo'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Sanitasi Format WhatsApp
+        // 2. Sanitasi Format Nomor Telepon / WhatsApp (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '+62' . substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
+        }
+        // Pastikan selalu diawali dengan '+'
+        if (!str_starts_with($phone, '+')) {
+            $phone = '+' . $phone;
         }
         $validatedData['phone'] = $phone;
 
-        // Cek apakah nomor WA ini sudah pernah terdaftar di database (Tamu Lama)
+        // Cek apakah nomor WA ini sudah pernah terdaftar di database
         $existingGuestInDb = guests::where('phone', $phone)->first();
 
-        // 3. Handle Upload Foto
+        // 3. Handle Upload dan Penyimpanan Path Foto
         if ($request->hasFile('photo')) {
             // Hapus file temporary lama di storage jika pengguna mengunggah ulang foto baru
             if (!empty($existingStep1['photo']) && Storage::disk('public')->exists($existingStep1['photo'])) {
                 Storage::disk('public')->delete($existingStep1['photo']);
             }
 
-            // Simpan foto baru ke folder temporary storage
-            $path = $request->file('photo')->store('temp_photos', 'public');
+            // Simpan file ke disk public dan simpan string path-nya
+            $path = $request->file('photo')->store('photos', 'public');
             $validatedData['photo'] = $path;
         } else {
-            // Jika tidak upload foto baru:
-            // Priority 1: Pakai foto dari session step 1
-            // Priority 2: Jika session kosong, pakai foto lama dari DB (Guest Eksisting)
+            // Pertahankan path foto dari session sebelumnya atau dari DB
             $validatedData['photo'] = $existingStep1['photo']
                 ?? ($existingGuestInDb->photo ?? null);
         }
 
-        // 4. Simpan Sementara ke Session (Belum ke DB)
+        // 4. Simpan Seluruh Data ke Session
         session(['step1_data' => $validatedData]);
 
         return redirect()->route('check-in.step2');
     }
-
     // ==========================================
     // STEP 2
     // ==========================================

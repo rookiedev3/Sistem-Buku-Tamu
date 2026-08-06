@@ -98,6 +98,29 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box;">
                 </div>
 
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Email <span style="color: #e5484d;">*</span></label>
+                    <input type="email" name="email" value="{{ old('email', $step1Data['email'] ?? '') }}" placeholder="Contoh: nama@email.com" required
+                        style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Kategori Pengunjung</label>
+                    <select name="guest_category_id"
+                        style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
+                        <option value="" {{ old('guest_category_id', $step1Data['guest_category_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Kategori --</option>
+                        @if($guestCategories->isEmpty())
+                            <option value="" disabled>Data tidak ditemukan.</option>
+                        @else
+                            @foreach($guestCategories as $categories)
+                                <option value="{{ $categories->id }}" {{ old('guest_category_id', $step1Data['guest_category_id'] ?? '') == $categories->id ? 'selected' : '' }}>
+                                    {{ $categories->name }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
                 <!-- Foto Tamu (Opsional) -->
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Foto Tamu <span style="font-weight: 400; color: #778195;">(Opsional)</span></label>
