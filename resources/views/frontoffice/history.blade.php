@@ -15,10 +15,13 @@
         </p>
     </div>
 
-    <div style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
+    <form action="{{ route('frontoffice.history') }}" method="GET" id="dateFilterForm" style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
         <span style="font-size: 12px; font-weight: 600; color: #64748b;">Filter Tanggal:</span>
-        <input type="date" style="padding: 6px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; outline: none; color: #172033;" value="2026-08-05">
-    </div>
+        <input type="date" name="date" onchange="document.getElementById('dateFilterForm').submit()" style="padding: 6px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; outline: none; color: #172033;" value="{{ $filterDate }}">
+        @if(!empty($filterDate))
+        <a href="{{ route('frontoffice.history') }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 5px;">Clear</a>
+        @endif
+    </form>
 </div>
 
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
@@ -45,70 +48,57 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                
+                @forelse($visits as $visit)
                 <tr style="border-bottom: 1px solid #e8edf5;">
                     <td style="padding: 16px 20px;">
-                        <span style="font-weight: 800; color: #006B3F; display: block;">ANT-099</span>
-                        <span style="font-size: 11px; color: #778195;">04 Agustus 2026, 14:20</span>
+                        <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
+                        <span style="font-size: 11px; color: #778195;">{{ $visit->check_out_at ? $visit->check_out_at->translatedFormat('d M Y, H:i') : ($visit->scheduled_at ? $visit->scheduled_at->translatedFormat('d M Y, H:i') : '-') }}</span>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">Ahmad Hidayat</div>
-                        <div style="font-size: 11px; color: #778195;">PT Nusantara Tekno (Direktur)</div>
+                        <div style="font-weight: 700;">{{ $visit->guest->name ?? '-' }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</div>
                     </td>
-                    <td style="padding: 16px 20px;">Kerjasama Proyek</td>
+                    <td style="padding: 16px 20px;">{{ $visit->purpose->name ?? '-' }}</td>
                     <td style="padding: 16px 20px;">
                         <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;">
-                            Budi Santoso (Sales)
+                            {{ $visit->assignedUser->name ?? '-' }}
                         </span>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                        <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Selesai (Check-out)
                         </span>
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <button onclick="openDetailModal('ANT-099', 'Ahmad Hidayat', 'PT Nusantara Tekno', 'Direktur', '081234567890', 'Kerjasama Proyek', 'Budi Santoso (Sales)', '04 Agustus 2026, 09:15', '04 Agustus 2026, 14:20')" 
+                        <button onclick="openDetailModal(
+                            '{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}', 
+                            '{{ addslashes($visit->guest->name ?? '-') }}', 
+                            '{{ addslashes($visit->guest->company_name ?? '-') }}', 
+                            '{{ addslashes($visit->guest->position ?? '-') }}', 
+                            '{{ $visit->guest->phone ?? '-' }}', 
+                            '{{ addslashes($visit->purpose->name ?? '-') }}', 
+                            '{{ addslashes($visit->assignedUser->name ?? '-') }}', 
+                            '{{ $visit->check_in_at ? $visit->check_in_at->translatedFormat('d M Y, H:i') : '-' }}', 
+                            '{{ $visit->check_out_at ? $visit->check_out_at->translatedFormat('d M Y, H:i') : '-' }}',
+                            '{{ $visit->guest->photo_path ? asset('storage/' . $visit->guest->photo_path) : '' }}'
+                        )" 
                             style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             Detail
                         </button>
                     </td>
                 </tr>
-
-                <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px;">
-                        <span style="font-weight: 800; color: #006B3F; display: block;">ANT-098</span>
-                        <span style="font-size: 11px; color: #778195;">04 Agustus 2026, 11:10</span>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">Rina Marlina</div>
-                        <div style="font-size: 11px; color: #778195;">CV Media Kreasi (Staff Marketing)</div>
-                    </td>
-                    <td style="padding: 16px 20px;">Presentasi Produk</td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;">
-                            Siti Aminah (IT Support)
-                        </span>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Selesai (Check-out)
-                        </span>
-                    </td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <button onclick="openDetailModal('ANT-098', 'Rina Marlina', 'CV Media Kreasi', 'Staff Marketing', '089876543210', 'Presentasi Produk', 'Siti Aminah (IT Support)', '04 Agustus 2026, 08:30', '04 Agustus 2026, 11:10')" 
-                            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                            Detail
-                        </button>
-                    </td>
+                @empty
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Tidak ada data riwayat kunjungan selesai.</td>
                 </tr>
-
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
-        <span>Menampilkan arsip kunjungan sebelumnya</span>
-        <span>Halaman 1 dari 5</span>
+        <span>Menampilkan arsip kunjungan selesai</span>
+        <span>Total: {{ $visits->count() }} Kunjungan</span>
     </div>
 
 </div>
@@ -125,12 +115,14 @@
         <div style="padding: 24px; font-size: 13px; color: #172033; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
             
             <div style="display: flex; align-items: center; gap: 16px; background: #f8fafc; padding: 14px; border-radius: 14px; border: 1px solid #e8edf5;">
-                <div style="width: 60px; height: 60px; border-radius: 50%; background: #006B3F; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0;">
-                    AH
+                <div id="photoContainer" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: #006B3F; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+                        G
+                    </div>
                 </div>
                 <div>
                     <span style="font-size: 11px; color: #778195; font-weight: 600; text-transform: uppercase; display: block;">Dokumentasi Wajah</span>
-                    <span style="font-size: 13px; font-weight: 700; color: #172033;">Foto Tersedia (Mockup)</span>
+                    <span id="photoStatus" style="font-size: 13px; font-weight: 700; color: #172033;">Foto Tamu</span>
                 </div>
             </div>
 
@@ -181,8 +173,9 @@
     function filterHistoryTable() {
         const input = document.getElementById('searchHistory');
         const filter = input.value.toLowerCase();
-        const table = document.getElementById('historyTable');
-        const tr = table.getElementsByTagName('tr');
+        const table = document.getElementById('guestTable'); // or historyTable
+        const actualTable = table ? table : document.getElementById('historyTable');
+        const tr = actualTable.getElementsByTagName('tr');
 
         for (let i = 1; i < tr.length; i++) {
             let tdName = tr[i].getElementsByTagName('td')[1];
@@ -197,7 +190,7 @@
         }
     }
 
-    function openDetailModal(token, name, instansi, jabatan, phone, keperluan, pic, checkin, checkout) {
+    function openDetailModal(token, name, instansi, jabatan, phone, keperluan, pic, checkin, checkout, photoUrl) {
         document.getElementById('modalToken').innerText = token;
         document.getElementById('modalName').innerText = name;
         document.getElementById('modalInstansi').innerText = instansi + ' (' + jabatan + ')';
@@ -206,6 +199,18 @@
         document.getElementById('modalPic').innerText = pic;
         document.getElementById('modalCheckin').innerText = checkin;
         document.getElementById('modalCheckout').innerText = checkout;
+
+        const photoContainer = document.getElementById('photoContainer');
+        const photoStatus = document.getElementById('photoStatus');
+        
+        if (photoUrl) {
+            photoContainer.innerHTML = `<img src="${photoUrl}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" alt="Foto Tamu">`;
+            photoStatus.innerText = "Foto Terlampir";
+        } else {
+            const initial = name ? name.charAt(0).toUpperCase() : 'G';
+            photoContainer.innerHTML = `<div style="width: 60px; height: 60px; border-radius: 50%; background: #006B3F; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">${initial}</div>`;
+            photoStatus.innerText = "Foto Tidak Tersedia";
+        }
 
         document.getElementById('detailModal').style.display = 'flex';
     }

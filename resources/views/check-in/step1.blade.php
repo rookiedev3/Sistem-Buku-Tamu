@@ -130,7 +130,7 @@
                         <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Preview" style="width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e8edf5;">
                     </div>
                     @endif
-                    <input type="file" name="photo" accept="image/*"
+                    <input type="file" name="photo_path" accept="image/*"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box; cursor: pointer;">
                     <span style="font-size: 11px; color: #778195; display: block; margin-top: 4px;">Format: JPG, JPEG, PNG (Maks. 2MB)</span>
                 </div>

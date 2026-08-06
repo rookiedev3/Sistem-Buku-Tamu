@@ -144,8 +144,8 @@
                         </div>
                         
                         {{-- Input Text Flatpickr --}}
-                        <input type="text" id="check_in_at" name="check_in_at"
-                            value="{{ old('check_in_at', $step2Data['check_in_at'] ?? date('Y-m-d 08:00')) }}"
+                        <input type="text" id="scheduled_at" name="scheduled_at"
+                            value="{{ old('scheduled_at', $step2Data['scheduled_at'] ?? date('Y-m-d 08:00')) }}"
                             placeholder="Pilih tanggal & jam kunjungan..." required readonly
                             style="width: 100%; padding: 11px 16px 11px 44px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
                     </div>
@@ -154,14 +154,14 @@
                 {{-- Sumber Info --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Sumber Mengetahui IT Solution</label>
-                    <select name="source_info"
+                    <select name="source_id"
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
-                        <option value="" {{ old('source_info', $step2Data['source_info'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Sumber Informasi --</option>
+                        <option value="" {{ old('source_id', $step2Data['source_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Sumber Informasi --</option>
                         @if($leadSources->isEmpty())
                             <option value="" disabled>Data tidak ditemukan.</option>
                         @else
                             @foreach($leadSources as $lead)
-                                <option value="{{ $lead->id }}" {{ old('source_info', $step2Data['source_info'] ?? '') == $lead->id ? 'selected' : '' }}>
+                                <option value="{{ $lead->id }}" {{ old('source_id', $step2Data['source_id'] ?? '') == $lead->id ? 'selected' : '' }}>
                                     {{ $lead->name }}
                                 </option>
                             @endforeach
@@ -230,7 +230,7 @@
         color: #778195 !important;
         font-weight: 600 !important;
     }
-    #check_in_at:focus {
+    #scheduled_at:focus {
         border-color: #006B3F !important;
         background-color: #ffffff !important;
         box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
@@ -247,7 +247,7 @@
 
         ];
 
-        flatpickr("#check_in_at", {
+        flatpickr("#scheduled_at", {
             locale: "id",
             enableTime: true,
             time_24hr: true,

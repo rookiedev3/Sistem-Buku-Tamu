@@ -75,7 +75,7 @@ class DashboardController extends Controller
 
     protected function adminDashboard()
     {
-        return view('frontoffice.dashboard');
+        return redirect()->route('frontoffice.dashboard');
     }
 
     protected function picDashboard()

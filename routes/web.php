@@ -125,21 +125,20 @@ Route::post('/check-in/step-3', [VisitsController::class, 'storeFinal'])->name('
 Route::get('/check-in/step-4/{id}', [VisitsController::class, 'step4'])->name('check-in.step4');
 
 // --- RUTE FRONT OFFICE ---
-Route::get('/frontoffice/dashboard', function () {
-    return view('frontoffice.dashboard');
-})->name('frontoffice.dashboard');
+Route::get('/frontoffice/dashboard', [App\Http\Controllers\FrontOfficeController::class, 'dashboard'])->name('frontoffice.dashboard');
+Route::post('/frontoffice/visit/{id}/checkin', [App\Http\Controllers\FrontOfficeController::class, 'checkIn'])->name('frontoffice.checkin');
+Route::post('/frontoffice/visit/{id}/checkout', [App\Http\Controllers\FrontOfficeController::class, 'checkOut'])->name('frontoffice.checkout');
+Route::post('/frontoffice/visit/manual', [App\Http\Controllers\FrontOfficeController::class, 'storeManual'])->name('frontoffice.storeManual');
 
-Route::get('/frontoffice/history', function () {
-    return view('frontoffice.history');
-})->name('frontoffice.history');
+Route::get('/frontoffice/history', [App\Http\Controllers\FrontOfficeController::class, 'history'])->name('frontoffice.history');
 
-Route::get('/frontoffice/appointment', function () {
-    return view('frontoffice.appointment');
-})->name('frontoffice.appointment');
+Route::get('/frontoffice/appointment', [App\Http\Controllers\FrontOfficeController::class, 'appointment'])->name('frontoffice.appointment');
+Route::post('/frontoffice/appointment/store', [App\Http\Controllers\FrontOfficeController::class, 'storeAppointment'])->name('frontoffice.appointment.store');
+Route::post('/frontoffice/appointment/{id}/status', [App\Http\Controllers\FrontOfficeController::class, 'updateAppointmentStatus'])->name('frontoffice.appointment.status');
 
-Route::get('/frontoffice/pegawai', function () {
-    return view('frontoffice.pegawai');
-})->name('frontoffice.pegawai');
+Route::get('/frontoffice/pegawai', [App\Http\Controllers\FrontOfficeController::class, 'pegawai'])->name('frontoffice.pegawai');
+Route::post('/frontoffice/pegawai/store', [App\Http\Controllers\FrontOfficeController::class, 'storePegawai'])->name('frontoffice.storePegawai');
+Route::post('/frontoffice/pegawai/{id}/update', [App\Http\Controllers\FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 
 Route::prefix('pic')->group(function () {
     

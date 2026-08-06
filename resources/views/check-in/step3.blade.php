@@ -29,7 +29,7 @@
                         <span style="font-size: 14px; font-weight: 500;">Keperluan Kunjungan</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="width: 32px; height: 32px; background: #ffffff; color: #1463ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">3</div>
+                        <div style="width: 32px; height: 32px; background: #ffffff; color: #006B3F; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">3</div>
                         <span style="font-size: 14px; font-weight: 700;">Konfirmasi Data (Aktif)</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 14px; opacity: 0.7;">
@@ -53,24 +53,34 @@
             </div>
 
             <!-- Kartu Ringkasan Data -->
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 280px; overflow-y: auto;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 340px; overflow-y: auto;">
 
-                <!-- Seksion Foto Tamu (jika ada) -->
+                <!-- Foto Identitas / Tamu (Opsional) -->
                 @if(!empty($step1Data['photo']))
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                    <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Foto Tamu" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+                    <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Foto Tamu" style="width: 55px; height: 55px; object-fit: cover; border-radius: 50%; border: 2px solid #e2e8f0;">
                     <div>
-                        <span style="font-size: 13px; font-weight: bold;">Foto Identitas</span>
-                        <p style="font-size: 11px; color: #777; margin: 0;">Terlampir</p>
+                        <span style="font-size: 13px; font-weight: 700; color: #172033;">Foto Identitas</span>
+                        <p style="font-size: 11px; color: #10b981; margin: 0; font-weight: 600;">✓ Terlampir</p>
                     </div>
                 </div>
                 @endif
 
-                <div style="font-size: 11px; font-weight: 700; color: #1463ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">I. Informasi Identitas</div>
+                <div style="font-size: 11px; font-weight: 700; color: #006B3F; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">I. Informasi Identitas</div>
 
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Nama Lengkap:</span>
                     <span style="color: #172033; font-weight: 700;">{{ $step1Data['name'] ?? '-' }}</span>
+                </div>
+                <!-- Menambahkan Field Email -->
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: #64748b; font-weight: 600;">Email:</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $step1Data['email'] ?? '-' }}</span>
+                </div>
+                <!-- Menambahkan Field Kategori Tamu -->
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: #64748b; font-weight: 600;">Kategori Tamu:</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $guestCategory?->name ?? $step1Data['category'] ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Asal Instansi:</span>
@@ -86,40 +96,46 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Alamat:</span>
-                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 200px;">{{ $step1Data['address'] ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 220px;">{{ $step1Data['address'] ?? '-' }}</span>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;">
+                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 6px 0;">
 
-                <div style="font-size: 11px; font-weight: 700; color: #1463ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">II. Detail Kunjungan</div>
+                <div style="font-size: 11px; font-weight: 700; color: #006B3F; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">II. Detail Kunjungan</div>
 
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $pic->name ?? ($pic->role ?? 'PIC #' . $step2Data['assigned_to']) }}</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $pic?->name ?? $pic?->role ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Cabang:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $branch->name ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $branch?->name ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Jenis Kunjungan:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $purposeType->name ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $purposeType?->name ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Produk Diminati:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $product->name ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $product?->name ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Sumber Info:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $source->name ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700;">{{ $source?->name ?? '-' }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Waktu Check-In:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $step2Data['check_in_at'] ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700;">
+                        @if(!empty($step2Data['check_in_at']))
+                        {{ \Carbon\Carbon::parse($step2Data['check_in_at'])->translatedFormat('d M Y, H:i') }} WIB
+                        @else
+                        {{ now()->translatedFormat('d M Y, H:i') }} WIB
+                        @endif
+                    </span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Keperluan:</span>
-                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 200px;">{{ $step2Data['purpose'] ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 220px;">{{ $step2Data['purpose'] ?? '-' }}</span>
                 </div>
             </div>
 
@@ -127,22 +143,22 @@
             <form action="{{ route('check-in.step3') }}" method="POST" style="display: flex; flex-direction: column; gap: 12px;">
                 @csrf
 
-                <!-- Kotak Centang Persetujuan -->
+                <!-- Checkbox Persetujuan -->
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;">
-                    <input type="checkbox" name="privacy_consent" id="privacy_consent" required
-                        style="width: 18px; height: 18px; accent-color: #1463ff; cursor: pointer; margin-top: 2px;">
+                    <input type="checkbox" name="privacy_consent" id="privacy_consent" value="1" required
+                        style="width: 18px; height: 18px; accent-color: #006B3F; cursor: pointer; margin-top: 2px;">
                     <label for="privacy_consent" style="font-size: 12px; color: #475569; line-height: 1.5; cursor: pointer;">
                         Saya menyetujui penggunaan data ini untuk keperluan pencatatan kunjungan dan tindak lanjut layanan IT Solution.
                     </label>
                 </div>
 
-                <!-- Tombol Navigasi (Kembali & Konfirmasi) -->
+                <!-- Tombol Navigasi -->
                 <div style="display: flex; gap: 12px;">
                     <a href="{{ route('check-in.step2') }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
                         ⬅️ Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #1463ff; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #006B3F; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.25);">
                         Konfirmasi & Check-In 🚀
                     </button>
                 </div>

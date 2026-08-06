@@ -42,7 +42,7 @@ class VisitsController extends Controller
             'guest_category_id' => 'required|string|max:20',
             'position'          => 'required|string|max:255',
             'phone'             => 'required|string|max:20',
-            'photo'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo_path'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         // 2. Sanitasi Format Nomor Telepon / WhatsApp (+62...)
@@ -50,7 +50,6 @@ class VisitsController extends Controller
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
         }
-        // Pastikan selalu diawali dengan '+'
         if (!str_starts_with($phone, '+')) {
             $phone = '+' . $phone;
         }
@@ -60,19 +59,19 @@ class VisitsController extends Controller
         $existingGuestInDb = guests::where('phone', $phone)->first();
 
         // 3. Handle Upload dan Penyimpanan Path Foto
-        if ($request->hasFile('photo')) {
+        if ($request->hasFile('photo_path')) {
             // Hapus file temporary lama di storage jika pengguna mengunggah ulang foto baru
-            if (!empty($existingStep1['photo']) && Storage::disk('public')->exists($existingStep1['photo'])) {
-                Storage::disk('public')->delete($existingStep1['photo']);
+            if (!empty($existingStep1['photo_path']) && Storage::disk('public')->exists($existingStep1['photo_path'])) {
+                Storage::disk('public')->delete($existingStep1['photo_path']);
             }
 
             // Simpan file ke disk public dan simpan string path-nya
-            $path = $request->file('photo')->store('photos', 'public');
-            $validatedData['photo'] = $path;
+            $path = $request->file('photo_path')->store('photos', 'public');
+            $validatedData['photo_path'] = $path;
         } else {
             // Pertahankan path foto dari session sebelumnya atau dari DB
-            $validatedData['photo'] = $existingStep1['photo']
-                ?? ($existingGuestInDb->photo ?? null);
+            $validatedData['photo_path'] = $existingStep1['photo_path']
+                ?? ($existingGuestInDb->photo_path ?? null);
         }
 
         // 4. Simpan Seluruh Data ke Session
@@ -112,9 +111,9 @@ class VisitsController extends Controller
             'assigned_to'      => 'required',
             'branch_id'        => 'required',
             'purpose_id'       => 'required',
-            'check_in_at'      => 'required',
+            'scheduled_at'      => 'required',
             'product_interest' => 'nullable',
-            'source_info'      => 'nullable',
+            'source_id'      => 'nullable',
             'purpose'          => 'required|string|max:1000',
         ]);
 
@@ -136,15 +135,47 @@ class VisitsController extends Controller
         $step1Data = session('step1_data');
         $step2Data = session('step2_data');
 
-        $pic         = users::find($step2Data['assigned_to']);
-        $branch      = branches::find($step2Data['branch_id']);
-        $purposeType = visit_purposes::find($step2Data['purpose_id']);
-        $product     = !empty($step2Data['product_interest']) ? products::where('code', $step2Data['product_interest'])->first() : null;
-        $source      = !empty($step2Data['source_info']) ? lead_sources::find($step2Data['source_info']) : null;
+        $pic           = users::find($step2Data['assigned_to']);
+        $branch        = branches::find($step2Data['branch_id']);
+        $purposeType   = visit_purposes::find($step2Data['purpose_id']);
+        $product       = !empty($step2Data['product_interest']) ? products::where('code', $step2Data['product_interest'])->first() : null;
+        $source        = !empty($step2Data['source_id']) ? lead_sources::find($step2Data['source_id']) : null;
+        $guestCategory = !empty($step1Data['guest_category_id']) ? guest_categories::find($step1Data['guest_category_id']) : null;
 
         return view('check-in.step3', compact(
             'step1Data',
             'step2Data',
+            'pic',
+            'branch',
+            'purposeType',
+            'product',
+            'source',
+            'guestCategory'
+        ));
+    }
+
+    public function showStep3(Request $request)
+    {
+        // Ambil data step 1 & 2 dari session
+        $step1Data = session('checkin_step1', []);
+        $step2Data = session('checkin_step2', []);
+
+        if (empty($step1Data)) {
+            return redirect()->route('check-in.step1')->with('error', 'Silakan isi identitas terlebih dahulu.');
+        }
+
+        // Query Model berdasarkan ID dari session
+        $guestCategory = isset($step1Data['guest_category_id']) ? guest_categories::find($step1Data['guest_category_id']) : null;
+        $pic           = isset($step2Data['assigned_to']) ? users::find($step2Data['assigned_to']) : null;
+        $branch        = isset($step2Data['branch_id']) ? branches::find($step2Data['branch_id']) : null;
+        $purposeType   = isset($step2Data['purpose_type_id']) ? visit_purposes::find($step2Data['purpose_type_id']) : null;
+        $product       = isset($step2Data['product_id']) ? products::find($step2Data['product_id']) : null;
+        $source        = isset($step2Data['source_id']) ? lead_sources::find($step2Data['source_id']) : null;
+
+        return view('check-in.step3', compact(
+            'step1Data',
+            'step2Data',
+            'guestCategory',
             'pic',
             'branch',
             'purposeType',
@@ -168,8 +199,8 @@ class VisitsController extends Controller
             $guest = guests::where('phone', $step1['phone'])->first();
 
             if ($guest) {
-                if (empty($step1['photo'])) {
-                    unset($step1['photo']);
+                if (empty($step1['photo_path'])) {
+                    unset($step1['photo_path']);
                 }
                 $guest->update($step1);
             } else {
@@ -183,7 +214,7 @@ class VisitsController extends Controller
             }
 
             // 2. Format Tanggal & Jam Check-In
-            $rawCheckInDate = $step2['check_in_at'] ?? now();
+            $rawCheckInDate = $step2['scheduled_at'] ?? now();
 
             // Menyimpan Tanggal + Jam lengkap ke DB (YYYY-MM-DD HH:MM:SS)
             $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
@@ -192,7 +223,7 @@ class VisitsController extends Controller
             $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
 
             // 3. Hitung Jumlah Antrean berdasarkan Tanggal Kunjungan
-            $todayVisitCount = visits::whereDate('check_in_at', $checkInDateOnly)->count();
+            $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
             // 4. Generate Visit Code
@@ -209,11 +240,11 @@ class VisitsController extends Controller
                 'assigned_to'      => $step2['assigned_to'],
                 'branch_id'        => $step2['branch_id'],
                 'purpose_id'       => $step2['purpose_id'],
-                'check_in_at'      => $checkInDateTime, // 👈 Gunakan variabel yang mencakup jam & menit
+                'scheduled_at'      => $checkInDateTime, // 👈 Gunakan variabel yang mencakup jam & menit
                 'product_interest' => $step2['product_interest'] ?? null,
-                'source_info'      => $step2['source_info'] ?? null,
+                'source_id'      => $step2['source_id'] ?? null,
                 'purpose'          => $step2['purpose'],
-                'status'           => 'pending',
+                'status'           => 'Menunggu',
                 'queue_number'     => $queueNumber,
             ]);
         });
@@ -232,39 +263,39 @@ class VisitsController extends Controller
         return view('check-in.step4', compact('visit'));
     }
 
-        // ==========================================
+    // ==========================================
     // DASHBOARD PIC & MANAJEMEN PERTEMUAN
     // ==========================================
-public function dashboardPic()
-{
-    // Mengambil data milik PIC yang sedang login
-    $visits = visits::with(['guest', 'purpose', 'branch'])
-        ->where('assigned_to', auth()->id())
-        ->where(function ($query) {
-            // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi
-            $query->whereDate('check_in_at', Carbon::today())
-                  ->orWhereIn('status', ['pending', 'waiting', 'confirmed']);
-        })
-        ->orderBy('check_in_at', 'desc')
-        ->get();
+    public function dashboardPic()
+    {
+        // Mengambil data milik PIC yang sedang login
+        $visits = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            ->where(function ($query) {
+                // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi
+                $query->whereDate('scheduled_at', Carbon::today())
+                    ->orWhereIn('status', ['pending', 'waiting', 'confirmed']);
+            })
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
 
-    $vipCount = $visits->filter(function ($v) {
-        return optional($v->guest)->is_vip == true;
-    })->count();
+        $vipCount = $visits->filter(function ($v) {
+            return optional($v->guest)->is_vip == true;
+        })->count();
 
-    $regularCount = $visits->count() - $vipCount;
+        $regularCount = $visits->count() - $vipCount;
 
-    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
-}
+        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
+    }
 
     // Aksi untuk tombol Centang (✓) dan Silang (✕)
     public function updateStatus(Request $request, $id)
     {
-// Uji coba hapus sementara whereDate() untuk melihat seluruh data:
-$visits = visits::with(['guest', 'purpose', 'branch'])
-    ->where('assigned_to', auth()->id())
-    ->orderBy('check_in_at', 'desc')
-    ->get();
+        // Uji coba hapus sementara whereDate() untuk melihat seluruh data:
+        $visits = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
 
         $request->validate([
             'status' => 'required|in:confirmed,cancelled'

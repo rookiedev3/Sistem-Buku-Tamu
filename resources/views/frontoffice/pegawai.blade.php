@@ -2,6 +2,12 @@
 
 @section('content')
 
+@if(session('success'))
+<div style="background: #dcfce7; border: 1px solid #10b981; color: #15803d; padding: 12px 20px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+    {{ session('success') }}
+</div>
+@endif
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
         <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
@@ -43,58 +49,54 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                
+                @forelse($pegawaiList as $user)
                 <tr style="border-bottom: 1px solid #e8edf5;">
                     <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">Budi Santoso</div>
-                        <div style="font-size: 11px; color: #778195;">budi.santoso@company.com</div>
+                        <div style="font-weight: 700;">{{ $user->name }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $user->email }}</div>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <div>Sales Manager</div>
-                        <div style="font-size: 11px; color: #778195;">Divisi Pemasaran</div>
+                        <div style="text-transform: capitalize;">{{ $user->role }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $user->branch ? $user->branch->name : 'Semua Cabang' }}</div>
                     </td>
-                    <td style="padding: 16px 20px;">081234567890</td>
+                    <td style="padding: 16px 20px;">{{ $user->phone ?? '-' }}</td>
                     <td style="padding: 16px 20px;">
+                        @if($user->is_active)
                         <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             🟢 Di Tempat (Tersedia)
                         </span>
-                    </td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <button onclick="bukaModalUbah('Budi Santoso', 'budi.santoso@company.com', 'Sales Manager', 'Divisi Pemasaran', '081234567890')" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                            Ubah
-                        </button>
-                    </td>
-                </tr>
-
-                <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">Siti Aminah</div>
-                        <div style="font-size: 11px; color: #778195;">siti.aminah@company.com</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div>IT Support Specialist</div>
-                        <div style="font-size: 11px; color: #778195;">Divisi Teknologi</div>
-                    </td>
-                    <td style="padding: 16px 20px;">089876543210</td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            🟡 Sedang Meeting
+                        @else
+                        <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            🔴 Non-aktif / Di Luar
                         </span>
+                        @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <button onclick="bukaModalUbah('Siti Aminah', 'siti.aminah@company.com', 'IT Support Specialist', 'Divisi Teknologi', '089876543210')" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                        <button onclick="bukaModalUbah(
+                            '{{ $user->id }}', 
+                            '{{ addslashes($user->name) }}', 
+                            '{{ $user->email }}', 
+                            '{{ $user->role }}', 
+                            '{{ $user->branch_id }}', 
+                            '{{ $user->phone }}'
+                        )" 
+                            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             Ubah
                         </button>
                     </td>
                 </tr>
-
+                @empty
+                <tr>
+                    <td colspan="5" style="padding: 30px; text-align: center; color: #64748b;">Belum ada data pegawai di database.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan seluruh data pegawai aktif</span>
-        <span>Halaman 1 dari 1</span>
+        <span>Total: {{ $pegawaiList->count() }} Pegawai</span>
     </div>
 
 </div>
@@ -108,33 +110,47 @@
             <button onclick="tutupModalTambah()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
         </div>
 
-        <div style="padding: 24px; font-size: 13px; color: #172033; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nama Lengkap *</label>
-                <input type="text" id="inputNama" placeholder="Masukkan nama pegawai" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+        <form action="{{ route('frontoffice.storePegawai') }}" method="POST">
+            @csrf
+            <div style="padding: 24px; font-size: 13px; color: #172033; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nama Lengkap *</label>
+                    <input type="text" name="name" required placeholder="Masukkan nama pegawai" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Email Kantor *</label>
+                    <input type="email" name="email" required placeholder="nama@company.com" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Pilih Peran / Level *</label>
+                    <select name="role" required style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; background: #fff;">
+                        <option value="pic">PIC (Person in Charge)</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="security">Security</option>
+                        <option value="owner">Owner</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Cabang Kerja *</label>
+                    <select name="branch_id" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; background: #fff;">
+                        <option value="">Semua Cabang / Pusat</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nomor WhatsApp *</label>
+                    <input type="tel" name="phone" required placeholder="081234567890" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
             </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Email Kantor *</label>
-                <input type="email" id="inputEmail" placeholder="nama@company.com" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Jabatan *</label>
-                <input type="text" id="inputJabatan" placeholder="Contoh: Manager, Staff, dll" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Departemen / Divisi *</label>
-                <input type="text" id="inputDepartemen" placeholder="Contoh: Divisi IT, Pemasaran, dll" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nomor WhatsApp *</label>
-                <input type="tel" id="inputTelepon" placeholder="081234567890" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-        </div>
 
-        <div style="padding: 16px 24px; background: #fbfcfe; border-top: 1px solid #e8edf5; display: flex; gap: 10px; justify-content: flex-end;">
-            <button onclick="tutupModalTambah()" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Batal</button>
-            <button onclick="simpanPegawaiBaru()" style="background: #006B3F; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Simpan Pegawai</button>
-        </div>
+            <div style="padding: 16px 24px; background: #fbfcfe; border-top: 1px solid #e8edf5; display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="tutupModalTambah()" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Batal</button>
+                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Simpan Pegawai</button>
+            </div>
+        </form>
 
     </div>
 </div>
@@ -148,33 +164,47 @@
             <button onclick="tutupModalUbah()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
         </div>
 
-        <div style="padding: 24px; font-size: 13px; color: #172033; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nama Lengkap *</label>
-                <input type="text" id="ubahNama" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+        <form id="formUbahPegawai" method="POST">
+            @csrf
+            <div style="padding: 24px; font-size: 13px; color: #172033; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nama Lengkap *</label>
+                    <input type="text" name="name" id="ubahNama" required style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Email Kantor *</label>
+                    <input type="email" name="email" id="ubahEmail" required style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Peran / Level *</label>
+                    <select name="role" id="ubahRole" required style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; background: #fff;">
+                        <option value="pic">PIC (Person in Charge)</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="security">Security</option>
+                        <option value="owner">Owner</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Cabang Kerja *</label>
+                    <select name="branch_id" id="ubahBranch" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box; background: #fff;">
+                        <option value="">Semua Cabang / Pusat</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nomor WhatsApp *</label>
+                    <input type="tel" name="phone" id="ubahTelepon" required style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
+                </div>
             </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Email Kantor *</label>
-                <input type="email" id="ubahEmail" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Jabatan *</label>
-                <input type="text" id="ubahJabatan" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Departemen / Divisi *</label>
-                <input type="text" id="ubahDepartemen" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-            <div>
-                <label style="font-weight: 700; color: #172033; display: block; margin-bottom: 4px;">Nomor WhatsApp *</label>
-                <input type="tel" id="ubahTelepon" style="width: 100%; padding: 10px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; box-sizing: border-box;">
-            </div>
-        </div>
 
-        <div style="padding: 16px 24px; background: #fbfcfe; border-top: 1px solid #e8edf5; display: flex; gap: 10px; justify-content: flex-end;">
-            <button onclick="tutupModalUbah()" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Batal</button>
-            <button onclick="simpanPerubahanPegawai()" style="background: #006B3F; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Simpan Perubahan</button>
-        </div>
+            <div style="padding: 16px 24px; background: #fbfcfe; border-top: 1px solid #e8edf5; display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="tutupModalUbah()" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Batal</button>
+                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;">Simpan Perubahan</button>
+            </div>
+        </form>
 
     </div>
 </div>
@@ -210,35 +240,23 @@
         document.getElementById('modalTambahPegawai').style.display = 'none';
     }
 
-    function simpanPegawaiBaru() {
-        const nama = document.getElementById('inputNama').value;
-        if(!nama) {
-            alert('Mohon isi nama lengkap pegawai terlebih dahulu.');
-            return;
-        }
-        alert('Data pegawai baru atas nama "' + nama + '" berhasil disimpan!');
-        tutupModalTambah();
-    }
-
     // Modal Ubah
-    function bukaModalUbah(nama, email, jabatan, departemen, telepon) {
-        document.getElementById('ubahNama').value = nama;
+    function bukaModalUbah(id, name, email, role, branchId, phone) {
+        document.getElementById('ubahNama').value = name;
         document.getElementById('ubahEmail').value = email;
-        document.getElementById('ubahJabatan').value = jabatan;
-        document.getElementById('ubahDepartemen').value = departemen;
-        document.getElementById('ubahTelepon').value = telepon;
+        document.getElementById('ubahRole').value = role;
+        document.getElementById('ubahBranch').value = branchId ? branchId : '';
+        document.getElementById('ubahTelepon').value = phone;
+
+        // Set action form dynamically
+        const form = document.getElementById('formUbahPegawai');
+        form.action = `/frontoffice/pegawai/${id}/update`;
 
         document.getElementById('modalUbahPegawai').style.display = 'flex';
     }
 
     function tutupModalUbah() {
         document.getElementById('modalUbahPegawai').style.display = 'none';
-    }
-
-    function simpanPerubahanPegawai() {
-        const nama = document.getElementById('ubahNama').value;
-        alert('Perubahan data untuk pegawai "' + nama + '" berhasil disimpan!');
-        tutupModalUbah();
     }
 </script>
 
