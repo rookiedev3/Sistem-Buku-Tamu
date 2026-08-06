@@ -104,13 +104,12 @@
                                 @if($visit->check_in_at)
                                     {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
                                 @elseif($visit->scheduled_at)
-                                    {{ \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') }} WIB <span style="font-size: 10px; color: #d97706;">(Jadwal)</span>
+                                    {{ \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') }} WIB <span style="font-size: 10px; color: #d97706;"></span>
                                 @else
                                     -
                                 @endif
                             </td>
                             
-                            <!-- Kolom Tombol Centang (✔) dan Silang (❌) -->
 <!-- Kolom Konfirmasi Kehadiran -->
 <td style="padding: 14px; text-align: center;">
     @php $statusLower = strtolower($visit->status); @endphp
@@ -133,6 +132,8 @@
                 <button type="submit" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
             </form>
         </div>
+    @elseif(in_array($statusLower, ['terjadwal']))
+        <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Terjadwal</span>
     @elseif(in_array($statusLower, ['confirmed', 'dikonfirmasi']))
         <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dikonfirmasi ✓</span>
     @elseif(in_array($statusLower, ['cancelled', 'dibatalkan']))
@@ -152,7 +153,11 @@
 <td style="padding: 14px; text-align: center;">
     @php $statusLower = strtolower($visit->status); @endphp
     
-    @if(in_array($statusLower, ['confirmed', 'dikonfirmasi']))
+    @if(in_array($statusLower, ['terjadwal']))
+        <button type="button" disabled style="background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: not-allowed;">
+            Belum Check-In
+        </button>
+    @elseif(in_array($statusLower, ['confirmed', 'dikonfirmasi']))
         <form action="{{ route('pic.startMeeting', $visit->id) }}" method="POST" style="margin:0;">
             @csrf
             @method('PATCH')

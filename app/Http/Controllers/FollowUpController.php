@@ -9,6 +9,32 @@ use Carbon\Carbon;
 
 class FollowUpController extends Controller
 {
+
+// dashboard menampilkan kunjungan yang sedang berlangsung, menunggu, atau pending follow-up
+    public function dashboardPic()
+    {
+        $visits = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            // Abaikan status yang sudah selesai atau dibatalkan baik EN/ID
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']) 
+            ->where(function ($query) {
+                $query->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
+                      ->orWhereDate('check_in_at', Carbon::today())
+                      ->orWhereDate('scheduled_at', Carbon::today());
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $vipCount = $visits->filter(function ($v) {
+            return optional($v->guest)->is_vip == true;
+        })->count();
+
+        $regularCount = $visits->count() - $vipCount;
+
+        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
+    }
+
+    
     /**
      * Menampilkan halaman daftar follow-up aktif (Warm & Hot)
      */
@@ -39,28 +65,7 @@ class FollowUpController extends Controller
     /**
      * Dashboard PIC & Manajemen Pertemuan
      */
-public function dashboardPic()
-    {
-        $visits = visits::with(['guest', 'purpose', 'branch'])
-            ->where('assigned_to', auth()->id())
-            // Abaikan status yang sudah selesai atau dibatalkan baik EN/ID
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']) 
-            ->where(function ($query) {
-                $query->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
-                      ->orWhereDate('check_in_at', Carbon::today())
-                      ->orWhereDate('scheduled_at', Carbon::today());
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
 
-        $vipCount = $visits->filter(function ($v) {
-            return optional($v->guest)->is_vip == true;
-        })->count();
-
-        $regularCount = $visits->count() - $vipCount;
-
-        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
-    }
 
     /**
      * Riwayat Kunjungan PIC

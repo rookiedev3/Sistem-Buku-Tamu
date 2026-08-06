@@ -51,18 +51,25 @@
                         <th style="padding: 14px;">Tanggal & Waktu</th>
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
                         <th style="padding: 14px;">Keperluan</th>
-                        {{-- <th style="padding: 14px;">Status Prospek & Follow Up</th> --}}
                         <th style="padding: 14px; text-align: center;">Catatan Pertemuan</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status Akhir</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($visits as $index => $v)
+                    @php 
+                        // Normalisasi status ke huruf kecil untuk antisipasi bahasa Inggris/Indonesia
+                        $statusLower = strtolower(trim($v->status ?? '')); 
+                        $level = strtolower(trim($v->potential_level ?? ''));
+                        
+                        // Cek apakah status menunjukkan selesai/completed
+                        $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                    @endphp
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
                         <td style="padding: 14px; color: #778195; font-weight: 600;">
-                            {{ \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') }}<br>
-                            <span style="font-size: 11px;">{{ \Carbon\Carbon::parse($v->check_in_at)->format('H:i') }} WIB</span>
+                            {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}<br>
+                            <span style="font-size: 11px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
                         </td>
                         <td style="padding: 14px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
@@ -72,58 +79,58 @@
                             {{ $v->purpose->name ?? $v->purpose }}
                         </td>
                         
-{{-- <!-- Kolom Status Akhir -->
-<td style="padding: 14px; text-align: center;">
-    @php $level = strtolower($v->potential_level ?? ''); @endphp
-
-    @if($v->status !== 'completed')
-        <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
-            Dibatalkan
-        </span>
-    @elseif(in_array($level, ['deal', 'drop']))
-        <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
-            Selesai
-        </span>
-    @else
-        <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
-            Proses Follow-Up
-        </span>
-    @endif
-</td> --}}
-
-                        <!-- Kolom Terpisah: Tombol Modal Catatan -->
+                        <!-- Kolom Tombol Modal Catatan -->
                         <td style="padding: 14px; text-align: center;">
-                            @if($v->status === 'completed')
+                            @if($isCompleted)
                                 <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                                     📝 Lihat Catatan
                                 </button>
                             @else
-                                <span style="font-style: italic; color: #94a3b8; font-size: 12px;">Dibatalkan</span>
+                                <span style="font-style: italic; color: #94a3b8; font-size: 12px;">Dibatalkan / Belum Selesai</span>
                             @endif
                         </td>
-
 <!-- Kolom Status Akhir -->
 <td style="padding: 14px; text-align: center;">
-    @php $level = strtolower($v->potential_level ?? ''); @endphp
-
-    @if($v->status !== 'completed')
+    @if(in_array($statusLower, ['cancelled', 'dibatalkan']))
         <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
             Dibatalkan
         </span>
-    @elseif(in_array($level, ['deal', 'drop', 'cold']))
-        <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
-            Selesai
-        </span>
+    @elseif($isCompleted)
+        @if($level == 'cold')
+            <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Kunjungan Biasa
+            </span>
+        @elseif($level == 'warm')
+            <span style="background: #dbeafe; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Warm Lead
+            </span>
+        @elseif($level == 'hot')
+            <span style="background: #fef3c7; color: #d97706; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Hot Lead 🔥
+            </span>
+        @elseif($level == 'deal')
+            <span style="background: #dcfce7; color: #15803d; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Berhasil (Deal) 🎉
+            </span>
+        @elseif($level == 'drop')
+            <span style="background: #fee2e2; color: #b91c1c; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Drop
+            </span>
+        @else
+            <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+                Selesai
+            </span>
+        @endif
     @else
-        <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
-            Follow-Up
+        <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Dibatalkan
         </span>
     @endif
 </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">
+                        <td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">
                             Belum ada riwayat kunjungan yang ditangani.
                         </td>
                     </tr>
@@ -138,41 +145,65 @@
         </div>
     </div>
 
-</div>
-
-<!-- ============================================== -->
+</div><!-- ============================================== -->
 <!-- KUMPULAN MODAL CATATAN DI LUAR TABEL           -->
 <!-- ============================================== -->
 @foreach($visits as $v)
-    @if($v->status === 'completed')
+    @php    
+        $statusLowerModal = strtolower(trim($v->status ?? ''));
+        $isCompletedModal = in_array($statusLowerModal, ['completed', 'selesai', 'meeting selesai', 'sedang bertemu']);
+        
+        // Menentukan teks keterangan jadwal aktif yang dinamis berdasarkan potential_level
+        $levelModal = strtolower(trim($v->potential_level ?? ''));
+        if ($levelModal == 'deal') {
+            $scheduleText = 'Sudah Deal 🎉';
+        } elseif ($levelModal == 'drop') {
+            $scheduleText = 'Proses Dibatalkan / Drop';
+        } elseif ($levelModal == 'cold') {
+            $scheduleText = 'Kunjungan Biasa (Tanpa Follow-Up)';
+        } else {
+            $scheduleText = $v->follow_up_at ? \Carbon\Carbon::parse($v->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan';
+        }
+    @endphp
+
+    @if($isCompletedModal)
         <div class="modal fade" id="noteModal{{ $v->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                     <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
                         <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
-                            Hasil Pertemuan - {{ $v->guest->name ?? 'Tamu' }}
+                            Riwayat & Hasil Pertemuan - {{ $v->guest->name ?? 'Tamu' }}
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6;">
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
-                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Status Prospek Terakhir:</div>
-                            <div style="font-weight: 800; color: #172033; text-transform: capitalize; margin-bottom: 8px;">
-                                {{ $v->potential_level ?? 'Belum ada status' }}
+                    <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6; max-height: 70vh; overflow-y: auto;">
+                        
+                        <!-- Status & Jadwal Terkini -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 20px;">
+                            <div>
+                                <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Status Prospek Terakhir:</div>
+                                <div style="font-weight: 800; color: #172033; text-transform: capitalize;">
+                                    {{ $v->potential_level ?? 'Belum ada status' }}
+                                </div>
                             </div>
-
-                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal Follow-Up:</div>
-                            <div style="font-weight: 700; color: #006B3F;">
-                                {{ $v->follow_up_at ? \Carbon\Carbon::parse($v->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal / Sudah Deal' }}
+                            <div>
+                                <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal / Keterangan Status:</div>
+                                <div style="font-weight: 700; color: #006B3F;">
+                                    {{ $scheduleText }}
+                                </div>
                             </div>
                         </div>
 
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">
-                            Rangkuman / Catatan Diskusi:
-                        </label>
-                        <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; min-height: 100px;">
-                            {{ $v->meeting_result ?? 'Tidak ada catatan yang ditinggalkan.' }}
+                        <!-- Catatan Awal Pertemuan -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                                📌 Catatan Pertemuan Awal:
+                            </label>
+                            <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+                                {{ $v->meeting_result ?? 'Tidak ada catatan awal yang ditinggalkan.' }}
+                            </div>
                         </div>
+
                     </div>
                     <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
@@ -182,5 +213,4 @@
         </div>
     @endif
 @endforeach
-
 @endsection
