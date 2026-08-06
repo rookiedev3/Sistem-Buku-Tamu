@@ -38,98 +38,109 @@
     </div>
 
     <div style="overflow-x: auto;">
-        <table id="appTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
-                    <th style="padding: 14px 20px; font-weight: 700;">Kode / Jadwal Temu</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Tamu & Instansi</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Keperluan</th>
+                    <th style="padding: 14px 20px; font-weight: 700;">Token / Waktu</th>
+                    <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
+                    <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Tujuan PIC</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Status</th>
-                    <th style="padding: 14px 20px; font-weight: 700; text-align: center;">Aksi Konfirmasi</th>
+                    <th style="padding: 14px 20px; font-weight: 700; text-align: center;">Aksi (Check-in / Out)</th>
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-
-                @forelse($appointments as $apt)
-                <tr id="row-apt-{{ $apt->id }}" style="border-bottom: 1px solid #e8edf5;">
+                @forelse($visits as $visit)
+                <tr style="border-bottom: 1px solid #e8edf5;">
                     <td style="padding: 16px 20px;">
-                        <span style="font-weight: 800; color: #006B3F; display: block;">{{ $apt->visit_code }}</span>
-                        <span style="font-size: 11px; color: #778195;">{{ $apt->scheduled_at ? $apt->scheduled_at->format('d M Y, H:i') : '-' }} WIB</span>
+                        <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
+                        <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">{{ optional($apt->guest)->name ?? '-' }}</div>
-                        <div style="font-size: 11px; color: #778195;">
-                            {{ optional($apt->guest)->company_name ?? '-' }}
-                            @if(optional($apt->guest)->phone)
-                            <br><span style="color:#94a3b8; font-size:11px;">WA: {{ optional($apt->guest)->phone }}</span>
-                            @endif
-                        </div>
+                        <div style="font-weight: 700;">{{ $visit->guest->name ?? '-' }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</div>
                     </td>
-                    <td style="padding: 16px 20px;">{{ optional($apt->purpose)->name ?? '-' }}</td>
+                    <td style="padding: 16px 20px;">{{ $visit->purpose->name ?? '-' }}</td>
                     <td style="padding: 16px 20px;">
                         <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;">
-                            {{ optional($apt->assignedUser)->name ?? '-' }}
+                            {{ $visit->assignedUser->name ?? '-' }}
                         </span>
                     </td>
-                    <td style="padding: 16px 20px;" class="status-cell">
-                        @if(in_array($apt->status, ['waiting', 'Menunggu']))
-                        <span class="badge-status" style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Menunggu Konfirmasi
+                    
+                    {{-- TABEL STATUS --}}
+                    <td style="padding: 16px 20px;">
+                        @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
+                        <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Terjadwal
                         </span>
-                        @elseif(in_array($apt->status, ['confirmed', 'Disetujui']))
-                        <span class="badge-status" style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Disetujui
+                        @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
+                        <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Menunggu 
                         </span>
-                        @elseif(in_array($apt->status, ['cancelled', 'Ditolak']))
-                        <span class="badge-status" style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Ditolak
+                        @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed']))
+                        <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Sedang Bertemu
+                        </span>
+                        @elseif(in_array($visit->status, ['Selesai', 'completed']))
+                        <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Selesai
                         </span>
                         @else
-                        <span class="badge-status" style="background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            {{ $apt->status }}
+                        <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            {{ $visit->status }}
                         </span>
                         @endif
                     </td>
-                    <td style="padding: 16px 20px; text-align: center;" class="action-cell">
-                        @if(in_array($apt->status, ['waiting', 'Menunggu']))
-                        <div style="display: flex; gap: 6px; justify-content: center;">
-                            <button onclick="updateStatus({{ $apt->id }}, 'confirmed')" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                Setujui
-                            </button>
-                            <button onclick="updateStatus({{ $apt->id }}, 'cancelled')" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                Tolak
-                            </button>
+
+                    {{-- TABEL AKSI --}}
+                    <td style="padding: 16px 20px; text-align: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                            {{-- Status Terjadwal -> Tampilkan tombol Check-in --}}
+                            @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
+                            <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                    Check-in
+                                </button>
+                            </form>
+                            
+                            {{-- Status Menunggu -> Tamu sudah check-in, menunggu  --}}
+                            @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
+                            <span style="font-size: 11px; color: #d97706; font-weight: 600;"> Menunggu </span>
+
+                            {{-- Status Sedang Bertemu -> Tampilkan tombol Check-out --}}
+                            @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed']))
+                            <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                    Check-out
+                                </button>
+                            </form>
+
+                            {{-- Status Selesai --}}
+                            @else
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
+                            @endif
                         </div>
-                        @elseif(in_array($apt->status, ['confirmed', 'Disetujui']))
-                        <span style="font-size: 11px; color: #15803d; font-weight: 600;">Disetujui</span>
-                        @elseif(in_array($apt->status, ['cancelled', 'Ditolak']))
-                        <span style="font-size: 11px; color: #b91c1c; font-weight: 600;">Ditolak</span>
-                        @else
-                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">Terkonfirmasi</span>
-                        @endif
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="padding: 24px; text-align: center; color: #778195;">
-                        Tidak ada data janji temu.
-                    </td>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
                 </tr>
                 @endforelse
-
             </tbody>
         </table>
     </div>
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan jadwal janji temu aktif</span>
-        <span>Total: {{ $appointments->count() }} Janji Temu</span>
+        <span>Total: {{ isset($appointments) ? $appointments->count() : $visits->count() }} Janji Temu</span>
     </div>
 
 </div>
 
-
+{{-- Modal Janji Temu --}}
 <div id="appointmentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 500px; max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;">
 
@@ -193,11 +204,10 @@
 </div>
 
 <script>
-    // Fungsi Pencarian Tabel
     function filterAppTable() {
         const input = document.getElementById('searchApp');
         const filter = input.value.toLowerCase();
-        const table = document.getElementById('appTable');
+        const table = document.getElementById('guestTable');
         const tr = table.getElementsByTagName('tr');
 
         for (let i = 1; i < tr.length; i++) {
@@ -213,58 +223,12 @@
         }
     }
 
-    // Fungsi Modal Tambah Janji Temu
     function openAppointmentModal() {
         document.getElementById('appointmentModal').style.display = 'flex';
     }
 
-    // Reset dan Tutup Modal
     function closeAppointmentModal() {
         document.getElementById('appointmentModal').style.display = 'none';
-    }
-
-    // Fungsi Interaktif Setuju / Tolak
-    function updateStatus(id, action) {
-        const row = document.getElementById('row-apt-' + id);
-        const statusCell = row.querySelector('.status-cell');
-        const actionCell = row.querySelector('.action-cell');
-
-        fetch(`/frontoffice/appointment/${id}/status`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    status: action
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    if (action === 'confirmed') {
-                        statusCell.innerHTML = `
-                        <span class="badge-status" style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Disetujui
-                        </span>
-                    `;
-                        actionCell.innerHTML = `<span style="font-size: 11px; color: #15803d; font-weight: 600;">Disetujui</span>`;
-                    } else if (action === 'cancelled') {
-                        statusCell.innerHTML = `
-                        <span class="badge-status" style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Ditolak
-                        </span>
-                    `;
-                        actionCell.innerHTML = `<span style="font-size: 11px; color: #b91c1c; font-weight: 600;">Ditolak</span>`;
-                    }
-                } else {
-                    alert('Gagal memperbarui status.');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Terjadi kesalahan jaringan.');
-            });
     }
 </script>
 

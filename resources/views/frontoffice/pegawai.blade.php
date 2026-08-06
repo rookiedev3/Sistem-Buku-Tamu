@@ -27,10 +27,10 @@
 </div>
 
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
-    
+
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Direktori Pegawai Kantor</h3>
-        
+
         <div>
             <input type="text" id="cariPegawai" placeholder="Cari nama pegawai / departemen..." onkeyup="filterTabelPegawai()"
                 style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; width: 240px;">
@@ -79,14 +79,18 @@
                             '{{ $user->role }}', 
                             '{{ $user->branch_id }}', 
                             '{{ $user->phone }}'
-                        )" 
+                        )"
                             style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             Ubah
                         </button>
-                        {{-- Tombol Hapus (Mockup UI Saja, Aman Tidak Bikin Error) --}}
-        <button type="button" onclick="alert('Tombol Hapus diklik (UI Mockup)')" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-            Hapus
-        </button>
+                        {{-- Tombol Hapus dengan Konfirmasi --}}
+                        <form action="{{ route('frontoffice.deletePegawai', $user->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus {{ addslashes($user->name) }} dari daftar pegawai?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                Hapus
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 @empty
@@ -108,7 +112,7 @@
 
 <div id="modalTambahPegawai" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 500px; max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;">
-        
+
         <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Tambah Pegawai / PIC Baru 👤</h3>
             <button onclick="tutupModalTambah()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
@@ -162,7 +166,7 @@
 
 <div id="modalUbahPegawai" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: #ffffff; width: 500px; max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;">
-        
+
         <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Ubah Data Pegawai ✏️</h3>
             <button onclick="tutupModalUbah()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>

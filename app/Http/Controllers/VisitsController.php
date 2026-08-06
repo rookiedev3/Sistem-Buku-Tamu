@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class VisitsController extends Controller
 {
@@ -244,11 +245,13 @@ class VisitsController extends Controller
                 'product_interest' => $step2['product_interest'] ?? null,
                 'source_id'      => $step2['source_id'] ?? null,
                 'purpose'          => $step2['purpose'],
-                'status'           => 'Menunggu',
+                'status'           => 'Terjadwal',
                 'queue_number'     => $queueNumber,
             ]);
         });
 
+        $pic = users::find($step2['assigned_to']);
+        $branch = branches::find($step2['branch_id']);
         // Hapus session temporary
         session()->forget(['step1_data', 'step2_data']);
         session(['final_visit_id' => $visit->id]);

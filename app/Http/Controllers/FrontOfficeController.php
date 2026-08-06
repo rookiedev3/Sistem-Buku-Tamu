@@ -19,7 +19,7 @@ class FrontOfficeController extends Controller
     {
         // Ambil data kunjungan hari ini
         $today = Carbon::today();
-        
+
         $visits = visits::with(['guest', 'purpose', 'assignedUser'])
             ->whereDate('scheduled_at', $today)
             ->orderBy('scheduled_at', 'asc')
@@ -206,17 +206,24 @@ class FrontOfficeController extends Controller
 
     public function appointment()
     {
-        // Ambil semua data janji temu dari database
-        $appointments = visits::with(['guest', 'purpose', 'assignedUser', 'branch'])
-            ->orderBy('scheduled_at', 'desc')
+        // Ambil data kunjungan hari ini
+        $today = Carbon::today();
+
+        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
+            ->whereDate('scheduled_at', $today)
+            ->orderBy('scheduled_at', 'asc')
             ->get();
 
-        // Ambil data pendukung untuk modal
+        // Hitung statistik
+        $totalToday = $visits->count();
+        $waitingToday = $visits->whereIn('status', ['Menunggu', 'waiting'])->count();
+
+        // Ambil data pendukung untuk modal input manual
         $pics = User::where('role', 'pic')->select('id', 'name')->get();
         $branches = branches::select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
 
-        return view('frontoffice.appointment', compact('appointments', 'pics', 'branches', 'purposes'));
+        return view('frontoffice.appointment', compact('visits', 'totalToday', 'waitingToday', 'pics', 'branches', 'purposes'));
     }
 
     public function storeAppointment(Request $request)
@@ -316,5 +323,17 @@ class FrontOfficeController extends Controller
             'message' => 'Status janji temu berhasil diperbarui!',
             'new_status' => $dbStatus
         ]);
+    }
+
+    public function deletePegawai($id)
+    {
+        // 1. Cari data pegawai berdasarkan ID
+        $user = users::findOrFail($id);
+
+        // 2. Hapus data pegawai dari database
+        $user->delete();
+
+        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('success', 'Data pegawai berhasil dihapus.');
     }
 }

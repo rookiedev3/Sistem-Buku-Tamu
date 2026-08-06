@@ -139,6 +139,7 @@ Route::post('/frontoffice/appointment/{id}/status', [App\Http\Controllers\FrontO
 Route::get('/frontoffice/pegawai', [App\Http\Controllers\FrontOfficeController::class, 'pegawai'])->name('frontoffice.pegawai');
 Route::post('/frontoffice/pegawai/store', [App\Http\Controllers\FrontOfficeController::class, 'storePegawai'])->name('frontoffice.storePegawai');
 Route::post('/frontoffice/pegawai/{id}/update', [App\Http\Controllers\FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
+Route::delete('/frontoffice/pegawai/{id}/delete', [App\Http\Controllers\FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
 Route::prefix('pic')->group(function () {
     
