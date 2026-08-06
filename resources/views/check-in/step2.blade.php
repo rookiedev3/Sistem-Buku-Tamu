@@ -126,10 +126,10 @@
                     </select>
                 </div>
 
-                {{-- Tanggal Kunjungan (Datepicker Rapi) --}}
+                {{-- Tanggal & Jam Kunjungan (Datepicker & Timepicker) --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">
-                        Tanggal Kunjungan <span style="color: #e5484d;">*</span>
+                        Tanggal & Jam Kunjungan <span style="color: #e5484d;">*</span> <span style="font-weight: 400; color: #778195; font-size: 11px;">(08:00 - 17:00)</span>
                     </label>
                     
                     <div style="position: relative; display: flex; align-items: center; width: 100%;">
@@ -145,8 +145,8 @@
                         
                         {{-- Input Text Flatpickr --}}
                         <input type="text" id="check_in_at" name="check_in_at"
-                            value="{{ old('check_in_at', $step2Data['check_in_at'] ?? date('Y-m-d')) }}"
-                            placeholder="Pilih tanggal kunjungan..." required readonly
+                            value="{{ old('check_in_at', $step2Data['check_in_at'] ?? date('Y-m-d 08:00')) }}"
+                            placeholder="Pilih tanggal & jam kunjungan..." required readonly
                             style="width: 100%; padding: 11px 16px 11px 44px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
                     </div>
                 </div>
@@ -196,7 +196,7 @@
 <!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<!-- Custom Style UI Flatpickr -->
+<!-- Custom Style UI Flatpickr (Style Pertama / Standard) -->
 <style>
     .flatpickr-calendar {
         border-radius: 16px !important;
@@ -244,18 +244,19 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const liburNasional = [
-            "2026-01-01", // Tahun Baru
-            "2026-03-19", // Idul Fitri (Contoh)
-            "2026-03-20", // Idul Fitri (Contoh)
-            "2026-08-17", // Hari Kemerdekaan
-            "2026-12-25"  // Hari Natal
+
         ];
 
         flatpickr("#check_in_at", {
             locale: "id",
-            dateFormat: "Y-m-d",
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i",
             minDate: "today",
-            disableMobile: "true", // Memaksa tampilan modal UI Flatpickr tetap konsisten di HP
+            minTime: "08:00",           // Membatasi jam mulai: 08:00 WIB
+            maxTime: "17:00",           // Membatasi jam selesai: 17:00 WIB
+            minuteIncrement: 15,
+            disableMobile: "true",
             disable: [
                 // 1. Blokir Hari Minggu
                 function(date) {

@@ -177,19 +177,17 @@ class VisitsController extends Controller
                 $guest = guests::create($step1);
             }
 
-            // 2. Format Tanggal Check-In yang Aman
-            // Menggunakan Carbon::parse agar aman terlepas dari format string Flatpickr
-            $rawCheckInDate = $step2['check_in_at'] ?? now()->toDateString();
-            $checkInDateFormatted = Carbon::parse($rawCheckInDate)->format('Y-m-d');
+            // 2. Format Tanggal & Jam Check-In
+            $rawCheckInDate = $step2['check_in_at'] ?? now();
 
-            // 3. Hitung Jumlah Antrean untuk Tanggal Kunjungan Tersebut
-            // Memastikan query membandingkan format YYYY-MM-DD dengan presisi
-            $todayVisitCount = visits::whereDate('check_in_at', $checkInDateFormatted)->count();
+            // Menyimpan Tanggal + Jam lengkap ke DB (YYYY-MM-DD HH:MM:SS)
+            $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
 
-            // Keamanan Tambahan:
-            // Jika antrean dihitung berdasarkan hari transaksi dibuat (Hari Ini), gunakan baris di bawah:
-            // $todayVisitCount = visits::whereDate('created_at', Carbon::today())->count();
+            // Format khusus YYYY-MM-DD untuk query hitung antrean
+            $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
 
+            // 3. Hitung Jumlah Antrean berdasarkan Tanggal Kunjungan
+            $todayVisitCount = visits::whereDate('check_in_at', $checkInDateOnly)->count();
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
             // 4. Generate Visit Code
@@ -206,7 +204,7 @@ class VisitsController extends Controller
                 'assigned_to'      => $step2['assigned_to'],
                 'branch_id'        => $step2['branch_id'],
                 'purpose_id'       => $step2['purpose_id'],
-                'check_in_at'      => $checkInDateFormatted,
+                'check_in_at'      => $checkInDateTime, // 👈 Gunakan variabel yang mencakup jam & menit
                 'product_interest' => $step2['product_interest'] ?? null,
                 'source_info'      => $step2['source_info'] ?? null,
                 'purpose'          => $step2['purpose'],
@@ -244,7 +242,7 @@ class VisitsController extends Controller
         // 2. Hitung statistik (Asumsi: di tabel guests ada kolom is_vip atau kriteria tertentu)
         // Jika belum ada kolom is_vip, kamu bisa sesuaikan logikanya
         $vipCount = $visits->filter(function ($v) {
-            return $v->guest && $v->guest->is_vip == true; 
+            return $v->guest && $v->guest->is_vip == true;
         })->count();
 
         $regularCount = $visits->count() - $vipCount;
@@ -256,7 +254,7 @@ class VisitsController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $visit = visits::findOrFail($id);
-        
+
         $request->validate([
             'status' => 'required|in:confirmed,cancelled'
         ]);
@@ -270,8 +268,8 @@ class VisitsController extends Controller
 
         $visit->save();
 
-        $msg = $request->status === 'confirmed' 
-            ? 'Kehadiran tamu dikonfirmasi. Silakan mulai pertemuan.' 
+        $msg = $request->status === 'confirmed'
+            ? 'Kehadiran tamu dikonfirmasi. Silakan mulai pertemuan.'
             : 'Kunjungan telah dibatalkan.';
 
         return back()->with('success', $msg);
