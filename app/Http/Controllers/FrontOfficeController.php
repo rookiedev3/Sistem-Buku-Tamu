@@ -41,7 +41,7 @@ class FrontOfficeController extends Controller
     {
         $visit = visits::findOrFail($id);
         $visit->update([
-            'status' => 'Sedang Bertemu',
+            'status' => 'Menunggu',
             'check_in_at' => now(),
             'meeting_start_at' => now(),
         ]);
