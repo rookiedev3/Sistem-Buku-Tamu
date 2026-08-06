@@ -65,7 +65,7 @@
                         @else
                             @foreach($pic as $sales)
                                 <option value="{{ $sales->id }}" {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == $sales->id ? 'selected' : '' }}>
-                                    {{ $sales->role }}
+                                    {{ $sales->name }}
                                 </option>
                             @endforeach
                         @endif
