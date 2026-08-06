@@ -37,12 +37,12 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
-        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Daftar Lead Sources</h1>
-        <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data sumber lead perusahaan.</p>
+        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Daftar Visit Purposes</h1>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data tujuan kunjungan perusahaan.</p>
     </div>
     
-    <a href="{{ route('lead-sources.create') }}" style="background:#1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
-        + Tambah Lead Sources
+    <a href="{{ route('visit-purposes.create') }}" style="background: #006B3F; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
+        + Tambah Visit Purposes
     </a>
 </div>
 
@@ -56,9 +56,9 @@
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); overflow: hidden;">
     
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
-        <input type="text" placeholder="Cari sumber lead..." style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
+        <input type="text" placeholder="Cari tujuan kunjungan..." style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
         <div style="font-size: 13px; color: #778195; font-weight: 600;">
-            Total Lead Sources: <strong style="color: #172033; font-weight: 800;">{{ $lead_sources->count() }} Sumber</strong>
+            Total Visit Purposes: <strong style="color: #172033; font-weight: 800;">{{ $visit_purposes->count() }} Tujuan</strong>
         </div>
     </div>
 
@@ -67,21 +67,33 @@
             <thead>
                 <tr style="background: #f8fafc; color: #778195; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 800; width: 60px;">No</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Nama Sumber Lead</th>
+                    <th style="padding: 14px 20px; font-weight: 800;">Nama Visit Purposes</th>
+                    <th style="padding: 14px 20px; font-weight: 800; text-align: center;">Status</th>
                     <th style="padding: 14px 20px; font-weight: 800; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                @forelse ($lead_sources as $index => $lead_src)
+                @forelse ($visit_purposes as $index => $vst_purposes)
                 <tr style="border-bottom: 1px solid #f1f4f9;">
                     <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
-                    <td style="padding: 16px 20px; font-weight: 800;">{{ $lead_src->name }}</td>
+                    <td style="padding: 16px 20px; font-weight: 800;">{{ $vst_purposes->name }}</td>
+                    <td style="padding: 16px 20px; text-align: center;">
+                        @if ($vst_purposes->is_active)
+                            <span style="background: #e6f4ea; color: #137333; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block;">
+                                Aktif
+                            </span>
+                        @else
+                            <span style="background: #f1f4f9; color: #778195; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block;">
+                                Nonaktif
+                            </span>
+                        @endif
+                    </td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                            <a href="{{ route('lead-sources.edit', $lead_src->id) }}" style="color: #1463ff; text-decoration: none; font-weight: 800;">
+                            <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
                                 Edit
                             </a>
-                            <form action="{{ route('lead-sources.destroy', $lead_src->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Lead Source ini?')" style="margin: 0; display: inline;">
+                            <form action="{{ route('visit-purposes.destroy', $vst_purposes->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus Visit Purposes ini?')" style="margin: 0; display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" style="background: none; border: none; color: #e5484d; text-decoration: none; font-weight: 800; cursor: pointer; padding: 0; font-size: 13px; font-family: inherit;">
@@ -93,8 +105,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" style="padding: 32px 20px; text-align: center; color: #778195; font-size: 13px;">
-                        Belum ada data Lead Sources.
+                    <td colspan="4" style="padding: 32px 20px; text-align: center; color: #778195; font-size: 13px;">
+                        Belum ada data Visit Purposes.
                     </td>
                 </tr>
                 @endforelse
@@ -103,7 +115,7 @@
     </div>
 
     <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; font-size: 12px; color: #778195;">
-        <span>Menampilkan {{ $lead_sources->count() }} data lead sources</span>
+        <span>Menampilkan {{ $visit_purposes->count() }} data visit purposes</span>
     </div>
 
 </div>

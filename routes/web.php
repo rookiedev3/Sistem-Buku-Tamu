@@ -8,6 +8,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\GuestCategoriesController;
 use App\Http\Controllers\LeadSourcesController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitPurposesController;
 use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
@@ -31,9 +32,8 @@ Route::middleware('auth')->group(function () {
     // Route::get('/', [DashboardController::class, 'index'])->name('home');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('/pengguna', UserController::class)->names('user');
 
-
-## zahwa
 Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
 Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
 Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
@@ -75,10 +75,10 @@ Route::get('/master-data', function () {
     return view('master.index');
 });
 
-//route pengguna
-Route::get('/pengguna', function () {
-    return view('pengguna.index');
-});
+// //route pengguna
+// Route::get('/pengguna', function () {
+//     return view('pengguna.index');
+// });
 
 
 });

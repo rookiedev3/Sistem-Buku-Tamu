@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('master.nav-tabs')
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>

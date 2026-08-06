@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Manager - Buku Tamu Digital</title>
-    <!-- Google Fonts Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -24,7 +23,7 @@
             color: #172033;
         }
 
-        /* SIDEBAR KHUSUS MANAGER */
+        /* --- SIDEBAR STYLE (Menyesuaikan Front Office) --- */
         .sidebar {
             width: 260px;
             height: 100vh;
@@ -35,16 +34,29 @@
             left: 0;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             z-index: 100;
-            box-sizing: border-box;
         }
 
         .sidebar-brand {
             padding: 24px;
-            border-bottom: 1px solid #e8edf5;
             display: flex;
             align-items: center;
             gap: 12px;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+        .sidebar-brand-icon {
+            width: 36px;
+            height: 36px;
+            background: #006B3F;
+            color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
         }
 
         .sidebar-menu {
@@ -56,18 +68,40 @@
             overflow-y: auto;
         }
 
+        .menu-category {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 12px 4px;
+        }
+
         .menu-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 13px;
+            color: #64748b;
             text-decoration: none;
-            transition: 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.2s ease;
         }
 
-        /* KONTEN SEBELAH KANAN */
+        .menu-item:hover {
+            background: #f8fafc;
+            color: #006B3F;
+        }
+
+        .menu-item.active {
+            background: #e6f0eb;
+            color: #006B3F;
+            font-weight: 700;
+        }
+
+        /* --- MAIN CONTENT & NAVBAR --- */
         .main-wrapper {
             margin-left: 260px;
             flex-grow: 1;
@@ -100,72 +134,72 @@
 
 <body>
 
-    <!-- SIDEBAR KHUSUS MANAGER -->
     <aside class="sidebar">
-        <!-- Logo / Header Sidebar -->
-        <div class="sidebar-brand">
-            <div style="width: 38px; height: 38px; background: #1e3a8a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 16px;">
-                M
+        <div>
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">M</div>
+                <div>
+                    <div style="font-size: 15px; font-weight: 800; color: #172033;">Portal Manager</div>
+                    <div style="font-size: 11px; color: #778195;">Pengawasan & Laporan</div>
+                </div>
             </div>
-            <div>
-                <h2 style="font-size: 14px; font-weight: 800; color: #172033; margin: 0;">Portal Manager</h2>
-                <span style="font-size: 11px; color: #778195; font-weight: 600;">Pengawasan & Laporan</span>
+
+            <div class="sidebar-menu">
+                <div class="menu-category">Menu Utama</div>
+
+                <a href="{{ url('/manager/dashboard') }}" class="menu-item {{ request()->is('manager/dashboard*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard Monitoring</span>
+                </a>
+
+                <a href="{{ url('/manager/kunjungan') }}" class="menu-item {{ request()->is('manager/kunjungan*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Semua Kunjungan</span>
+                </a>
+
+                <a href="{{ url('/manager/leads') }}" class="menu-item {{ request()->is('manager/leads*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>Pipeline Lead Tim</span>
+                </a>
+
+                <div class="menu-category">Laporan</div>
+
+                <a href="{{ url('/manager/laporan') }}" class="menu-item {{ request()->is('manager/laporan*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Laporan & Export</span>
+                </a>
             </div>
         </div>
 
-        <!-- Menu Navigasi Manager -->
-        <div class="sidebar-menu">
-            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 12px; margin-bottom: 4px;">Menu Utama</span>
-
-            <a href="{{ url('/manager/dashboard') }}" class="menu-item" style="color: {{ request()->is('manager/dashboard*') ? '#1e3a8a' : '#5c6678' }}; background: {{ request()->is('manager/dashboard*') ? '#eff6ff' : 'transparent' }}; font-weight: {{ request()->is('manager/dashboard*') ? '700' : '600' }};">
-                📊 Dashboard Monitoring
-            </a>
-
-            <a href="{{ url('/manager/kunjungan') }}" class="menu-item" style="color: {{ request()->is('manager/kunjungan*') ? '#1e3a8a' : '#5c6678' }}; background: {{ request()->is('manager/kunjungan*') ? '#eff6ff' : 'transparent' }}; font-weight: {{ request()->is('manager/kunjungan*') ? '700' : '600' }};">
-                📋 Semua Kunjungan
-            </a>
-
-            <a href="{{ url('/manager/leads') }}" class="menu-item" style="color: {{ request()->is('manager/leads*') ? '#1e3a8a' : '#5c6678' }}; background: {{ request()->is('manager/leads*') ? '#eff6ff' : 'transparent' }}; font-weight: {{ request()->is('manager/leads*') ? '700' : '600' }};">
-                📈 Pipeline Lead Tim
-            </a>
-
-            <a href="{{ url('/manager/laporan') }}" class="menu-item" style="color: {{ request()->is('manager/laporan*') ? '#1e3a8a' : '#5c6678' }}; background: {{ request()->is('manager/laporan*') ? '#eff6ff' : 'transparent' }}; font-weight: {{ request()->is('manager/laporan*') ? '700' : '600' }};">
-                📥 Laporan & Export
-            </a>
-        </div>
-
-        <!-- Tombol Keluar di Bawah -->
-        <div style="padding: 16px; border-top: 1px solid #e8edf5;">
+        <div style="padding: 20px; border-top: 1px solid #e8edf5;">
             <form action="{{ route('logout') }}" method="get" style="margin: 0;">
                 @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">
-                    🚪 Keluar
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Keluar (Logout)</span>
                 </button>
             </form>
         </div>
     </aside>
 
-    <!-- KONTEN SEBELAH KANAN -->
     <div class="main-wrapper">
         
-        <!-- Navbar Atas -->
         <header class="navbar-top">
             <div style="font-size: 13px; color: #64748b; font-weight: 500;">
                 Selamat bertugas, <strong style="color: #172033;">Bapak/Ibu Manager Operasional</strong>
             </div>
 
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="font-size: 12px; background: #eff6ff; color: #1e3a8a; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
+                <div style="font-size: 12px; background: #e6f0eb; color: #006B3F; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
                     🛡️ Akses: Pengawasan Penuh
                 </div>
 
-                <div style="width: 36px; height: 36px; background: #1e3a8a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+                <div style="width: 36px; height: 36px; background: #006B3F; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
                     MGR
                 </div>
             </div>
         </header>
 
-        <!-- Tempat Konten Dinamis -->
         <main class="content-area">
             @yield('content')
         </main>

@@ -4,11 +4,11 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
-        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Tambah Visit Purpose Baru</h1>
-        <p style="font-size: 13px; color: #778195; margin: 0;">Lengkapi formulir di bawah ini untuk menambahkan tujuan kunjungan.</p>
+        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Tambah Lead Sources</h1>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Lengkapi formulir di bawah ini untuk menambahkan sumber lead baru.</p>
     </div>
     
-    <a href="{{ route('visit-purposes.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
+    <a href="{{ route('lead-sources.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
         &larr; Kembali
     </a>
 </div>
@@ -27,36 +27,26 @@
 
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 28px; max-width: 680px;">
     
-    <form action="{{ route('visit-purposes.store') }}" method="POST">
+    <form action="{{ route('lead-sources.store') }}" method="POST">
         @csrf
 
-        {{-- Nama Visit Purposes --}}
-        <div style="margin-bottom: 20px;">
+        {{-- Nama Lead Source --}}
+        <div style="margin-bottom: 28px;">
             <label for="name" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Nama Visit Purposes <span style="color: #e5484d;">*</span>
+                Nama Sumber Lead <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="name" id="name" value="{{ old('name') }}"
-                placeholder="Contoh: Meeting Bisnis / Konsultasi"
+                placeholder="Contoh: Instagram / Website / Referensi"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
-        </div>
-
-        {{-- Status Aktif --}}
-        <div style="margin-bottom: 28px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
-            <input type="checkbox" name="is_active" id="is_active" value="1"
-                {{ old('is_active', true) ? 'checked' : '' }}
-                style="width: 16px; height: 16px; accent-color: #006B3F; cursor: pointer;">
-            <label for="is_active" style="font-size: 13px; font-weight: 700; color: #172033; cursor: pointer;">
-                Aktif
-            </label>
         </div>
 
         {{-- Tombol Aksi --}}
         <div style="display: flex; gap: 10px;">
             <button type="submit"
-                style="background:#1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
+                style="background: #006B3F; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
                 Simpan Data
             </button>
-            <a href="{{ route('visit-purposes.index') }}"
+            <a href="{{ route('lead-sources.index') }}"
                 style="background: #f1f4f9; color: #778195; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; border: none; display: inline-block;">
                 Batal
             </a>

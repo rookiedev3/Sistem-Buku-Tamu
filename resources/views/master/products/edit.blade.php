@@ -4,11 +4,11 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
-        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Edit Branch</h1>
-        <p style="font-size: 13px; color: #778195; margin: 0;">Perbarui data informasi cabang perusahaan.</p>
+        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Edit Product</h1>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Perbarui data informasi produk perusahaan.</p>
     </div>
     
-    <a href="{{ route('branches.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
+    <a href="{{ route('products.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
         &larr; Kembali
     </a>
 </div>
@@ -27,67 +27,57 @@
 
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 28px; max-width: 680px;">
     
-    <form action="{{ route('branches.update', $branch->id) }}" method="POST">
+    <form action="{{ route('products.update', $product->id) }}" method="POST">
         @csrf
         @method('PUT')
 
-        {{-- Kode Branch --}}
+        {{-- Kode Product --}}
         <div style="margin-bottom: 20px;">
             <label for="code" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Kode Branch <span style="color: #e5484d;">*</span>
+                Kode Product <span style="color: #e5484d;">*</span>
             </label>
-            <input type="text" name="code" id="code" value="{{ old('code', $branch->code) }}"
-                placeholder="Contoh: BR-001"
+            <input type="text" name="code" id="code" value="{{ old('code', $product->code) }}"
+                placeholder="Contoh: PRD-001"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
-        {{-- Nama Branch --}}
+        {{-- Nama Product --}}
         <div style="margin-bottom: 20px;">
             <label for="name" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Nama Branch <span style="color: #e5484d;">*</span>
+                Nama Product <span style="color: #e5484d;">*</span>
             </label>
-            <input type="text" name="name" id="name" value="{{ old('name', $branch->name) }}"
-                placeholder="Contoh: Branch Yogyakarta"
+            <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}"
+                placeholder="Masukkan nama product"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
-        {{-- Alamat --}}
+        {{-- Kategori --}}
         <div style="margin-bottom: 20px;">
-            <label for="address" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Alamat Lengkap
+            <label for="category" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
+                Kategori <span style="color: #e5484d;">*</span>
             </label>
-            <textarea name="address" id="address" rows="3"
-                placeholder="Masukkan alamat lengkap branch..."
-                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; resize: vertical; font-family: inherit;">{{ old('address', $branch->address) }}</textarea>
-        </div>
-
-        {{-- Nomor Telepon --}}
-        <div style="margin-bottom: 20px;">
-            <label for="phone" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Nomor Telepon
-            </label>
-            <input type="text" name="phone" id="phone" value="{{ old('phone', $branch->phone) }}"
-                placeholder="Contoh: 0274-123456"
+            <input type="text" name="category" id="category" value="{{ old('category', $product->category) }}"
+                placeholder="Masukkan kategori product"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
         {{-- Status Aktif --}}
         <div style="margin-bottom: 28px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
             <input type="checkbox" name="is_active" id="is_active" value="1"
-                {{ old('is_active', $branch->is_active) ? 'checked' : '' }}
+                {{ old('is_active', $product->is_active) ? 'checked' : '' }}
                 style="width: 16px; height: 16px; accent-color: #006B3F; cursor: pointer;">
             <label for="is_active" style="font-size: 13px; font-weight: 700; color: #172033; cursor: pointer;">
-                Aktifkan Branch Ini
+                Aktif
             </label>
         </div>
 
         {{-- Tombol Aksi --}}
-        <div style="display: flex; gap: 10px; pt: 8px;">
+        <div style="display: flex; gap: 10px;">
             <button type="submit"
-                style="background:#1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
+                style="background: #006B3F; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
                 Update Data
             </button>
-            <a href="{{ route('branches.index') }}"
+            <a href="{{ route('products.index') }}"
                 style="background: #f1f4f9; color: #778195; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; border: none; display: inline-block;">
                 Batal
             </a>

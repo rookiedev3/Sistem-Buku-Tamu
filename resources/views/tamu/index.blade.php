@@ -45,6 +45,7 @@
             </thead>
             <tbody style="color: #172033;">
                 
+                <!-- Data Dummy 1 -->
                 <tr style="border-bottom: 1px solid #f1f4f9;">
                     <td style="padding: 16px 20px; font-weight: 700;">1</td>
                     <td style="padding: 16px 20px;">
@@ -56,15 +57,16 @@
                         <div style="font-size: 11px; color: #778195;">Manager</div>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
                     </td>
                     <td style="padding: 16px 20px; font-weight: 700;">3 Kali</td>
                     <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Selasa, 04 Agu 2026</td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <a href="{{ url('/database-tamu/1') }}" style="color: #1463ff; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
                     </td>
                 </tr>
 
+                <!-- Data Dummy 2 -->
                 <tr style="border-bottom: 1px solid #f1f4f9;">
                     <td style="padding: 16px 20px; font-weight: 700;">2</td>
                     <td style="padding: 16px 20px;">
@@ -76,12 +78,54 @@
                         <div style="font-size: 11px; color: #778195;">Owner</div>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Sistem POS</span>
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Sistem POS</span>
                     </td>
                     <td style="padding: 16px 20px; font-weight: 700;">1 Kali</td>
                     <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Senin, 03 Agu 2026</td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #1463ff; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                    </td>
+                </tr>
+
+                <!-- Data Dummy 3 -->
+                <tr style="border-bottom: 1px solid #f1f4f9;">
+                    <td style="padding: 16px 20px; font-weight: 700;">3</td>
+                    <td style="padding: 16px 20px;">
+                        <div style="font-weight: 800;">Rian Pratama</div>
+                        <div style="font-size: 11px; color: #778195;">085711223344</div>
+                    </td>
+                    <td style="padding: 16px 20px;">
+                        <div style="font-weight: 700;">PT Solusi Digital Nusantara</div>
+                        <div style="font-size: 11px; color: #778195;">IT Consultant</div>
+                    </td>
+                    <td style="padding: 16px 20px;">
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">SEO</span>
+                    </td>
+                    <td style="padding: 16px 20px; font-weight: 700;">2 Kali</td>
+                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Minggu, 02 Agu 2026</td>
+                    <td style="padding: 16px 20px; text-align: center;">
+                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                    </td>
+                </tr>
+
+                <!-- Data Dummy 4 -->
+                <tr style="border-bottom: 1px solid #f1f4f9;">
+                    <td style="padding: 16px 20px; font-weight: 700;">4</td>
+                    <td style="padding: 16px 20px;">
+                        <div style="font-weight: 800;">Dewi Lestari</div>
+                        <div style="font-size: 11px; color: #778195;">082199887766</div>
+                    </td>
+                    <td style="padding: 16px 20px;">
+                        <div style="font-weight: 700;">UD Sumber Rejeki</div>
+                        <div style="font-size: 11px; color: #778195;">Purchasing</div>
+                    </td>
+                    <td style="padding: 16px 20px;">
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
+                    </td>
+                    <td style="padding: 16px 20px; font-weight: 700;">4 Kali</td>
+                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Sabtu, 01 Agu 2026</td>
+                    <td style="padding: 16px 20px; text-align: center;">
+                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
                     </td>
                 </tr>
 
@@ -90,15 +134,58 @@
     </div>
 
     <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; font-size: 12px; color: #778195;">
-        <span>Menampilkan 1 - 10 dari 148 total data</span>
-        <div style="display: flex; gap: 6px;">
-            <button style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; cursor: pointer; color: #778195; font-weight: 700;" disabled>Sebelumnya</button>
-            <button style="padding: 6px 12px; border: 1px solid #1463ff; background: #1463ff; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 800;">1</button>
-            <button style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; cursor: pointer; color: #778195; font-weight: 700;">2</button>
-            <button style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; cursor: pointer; color: #778195; font-weight: 700;">Selanjutnya</button>
+        <span>Menampilkan data tamu</span>
+        <div style="display: flex; gap: 6px; align-items: center;" id="pagination-wrapper">
+            {{-- Tombol Sebelumnya --}}
+            <button type="button" onclick="ubahHalaman('prev')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Sebelumnya</button>
+            
+            {{-- Daftar Nomor Halaman --}}
+            <button type="button" onclick="pilihHalaman(1)" class="page-btn" data-page="1" style="padding: 6px 12px; border: 1px solid #006B3F; background: #006B3F; color: #fff; border-radius: 8px; font-weight: 800; cursor: pointer; pointer-events: auto !important;">1</button>
+            <button type="button" onclick="pilihHalaman(2)" class="page-btn" data-page="2" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">2</button>
+            <button type="button" onclick="pilihHalaman(3)" class="page-btn" data-page="3" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">3</button>
+            
+            {{-- Tombol Selanjutnya --}}
+            <button type="button" onclick="ubahHalaman('next')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Selanjutnya</button>
         </div>
     </div>
 
-</div>
+    {{-- Script Interaktif untuk Memindahkan Warna Hijau --}}
+    <script>
+        let halamanAktif = 1;
+        const totalHalaman = 3; // Ubah sesuai jumlah total halaman yang kamu inginkan
 
+        function pilihHalaman(nomor) {
+            halamanAktif = nomor;
+            perbaruiTampilanTombol();
+        }
+
+        function ubahHalaman(arah) {
+            if (arah === 'prev' && halamanAktif > 1) {
+                halamanAktif--;
+            } else if (arah === 'next' && halamanAktif < totalHalaman) {
+                halamanAktif++;
+            }
+            perbaruiTampilanTombol();
+        }
+
+        function perbaruiTampilanTombol() {
+            const tombolNomor = document.querySelectorAll('.page-btn');
+            tombolNomor.forEach(btn => {
+                const halaman = parseInt(btn.getAttribute('data-page'));
+                if (halaman === halamanAktif) {
+                    // Gaya saat tombol aktif (Warna Hijau)
+                    btn.style.background = '#006B3F';
+                    btn.style.borderColor = '#006B3F';
+                    btn.style.color = '#fff';
+                    btn.style.fontWeight = '800';
+                } else {
+                    // Gaya saat tombol tidak aktif (Warna Putih biasa)
+                    btn.style.background = '#fff';
+                    btn.style.borderColor = '#e8edf5';
+                    btn.style.color = '#778195';
+                    btn.style.fontWeight = '700';
+                }
+            });
+        }
+    </script>
 @endsection

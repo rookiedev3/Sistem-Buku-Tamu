@@ -11,7 +11,7 @@
             <p style="font-size: 13px; color: #778195; margin: 0;">Rekapitulasi data kunjungan tamu dan tren produk yang diminati.</p>
         </div>
         
-        <button onclick="window.print()" style="background: #ffffff; color: #172033; border: 1px solid #e8edf5; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(31,53,97,.05);">
+        <button onclick="window.print()" style="background: #ce3333; color: #fdfdfd; border: 1px solid #e8edf5; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(31,53,97,.05);">
             🖨️ Cetak / Print Laporan
         </button>
     </div>

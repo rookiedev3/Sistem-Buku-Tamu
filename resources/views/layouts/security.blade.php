@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Security - Buku Tamu Digital</title>
-    <!-- Google Fonts Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         * {
             box-sizing: border-box;
@@ -23,7 +23,7 @@
             color: #172033;
         }
 
-        /* SIDEBAR KHUSUS SECURITY */
+        /* --- SIDEBAR STYLE (Menyesuaikan Front Office & Manager) --- */
         .sidebar {
             width: 260px;
             height: 100vh;
@@ -34,15 +34,29 @@
             left: 0;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             z-index: 100;
         }
 
         .sidebar-brand {
             padding: 24px;
-            border-bottom: 1px solid #e8edf5;
             display: flex;
             align-items: center;
             gap: 12px;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+        .sidebar-brand-icon {
+            width: 36px;
+            height: 36px;
+            background: #006B3F;
+            color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
         }
 
         .sidebar-menu {
@@ -54,18 +68,40 @@
             overflow-y: auto;
         }
 
+        .menu-category {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 12px 4px;
+        }
+
         .menu-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 13px;
+            color: #64748b;
             text-decoration: none;
-            transition: 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.2s ease;
         }
 
-        /* KONTEN SEBELAH KANAN */
+        .menu-item:hover {
+            background: #f8fafc;
+            color: #006B3F;
+        }
+
+        .menu-item.active {
+            background: #e6f0eb;
+            color: #006B3F;
+            font-weight: 700;
+        }
+
+        /* --- MAIN CONTENT & NAVBAR --- */
         .main-wrapper {
             margin-left: 260px;
             flex-grow: 1;
@@ -98,46 +134,50 @@
 
 <body>
 
-    <!-- SIDEBAR KHUSUS SECURITY -->
     <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div style="width: 38px; height: 38px; background: #334155; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 16px;">
-                SEC
+        <div>
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">SEC</div>
+                <div>
+                    <div style="font-size: 15px; font-weight: 800; color: #172033;">Portal Security</div>
+                    <div style="font-size: 11px; color: #778195;">Check-in & Check-out Tamu</div>
+                </div>
             </div>
-            <div>
-                <h2 style="font-size: 14px; font-weight: 800; color: #172033; margin: 0;">Portal Security</h2>
-                <span style="font-size: 11px; color: #778195; font-weight: 600;">Check-in & Check-out Tamu</span>
+
+            <div class="sidebar-menu">
+                <div class="menu-category">Menu Utama</div>
+
+                <a href="{{ url('/security/dashboard') }}" class="menu-item {{ request()->is('security/dashboard*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Daftar Tamu Hari Ini</span>
+                </a>
             </div>
         </div>
 
-        <div class="sidebar-menu">
-            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 12px; margin-bottom: 4px;">Menu Utama</span>
-
-            <a href="{{ url('/security/dashboard') }}" class="menu-item" style="color: {{ request()->is('security/dashboard*') ? '#334155' : '#5c6678' }}; background: {{ request()->is('security/dashboard*') ? '#f1f5f9' : 'transparent' }}; font-weight: {{ request()->is('security/dashboard*') ? '700' : '600' }};">
-                📋 Daftar Tamu Hari Ini
-            </a>
-        </div>
-
-        <div style="padding: 16px; border-top: 1px solid #e8edf5;">
-            <form action="#" method="GET" style="margin: 0;">
+        <div style="padding: 20px; border-top: 1px solid #e8edf5;">
+            <form action="{{ route('logout') }}" method="get" style="margin: 0;">
+                @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">
-                    🚪 Keluar
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Keluar (Logout)</span>
                 </button>
             </form>
         </div>
     </aside>
 
-    <!-- KONTEN SEBELAH KANAN -->
     <div class="main-wrapper">
+        
         <header class="navbar-top">
             <div style="font-size: 13px; color: #64748b; font-weight: 500;">
                 Pos Penjagaan & Pengawasan Gerbang
             </div>
+
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="font-size: 12px; background: #f1f5f9; color: #334155; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
+                <div style="font-size: 12px; background: #e6f0eb; color: #006B3F; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
                     🛡️ Status: Aktif Bertugas
                 </div>
-                <div style="width: 36px; height: 36px; background: #334155; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
+
+                <div style="width: 36px; height: 36px; background: #006B3F; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
                     SC
                 </div>
             </div>
@@ -146,6 +186,7 @@
         <main class="content-area">
             @yield('content')
         </main>
+
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
