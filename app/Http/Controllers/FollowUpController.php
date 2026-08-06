@@ -40,35 +40,37 @@ class FollowUpController extends Controller
      * Dashboard PIC & Manajemen Pertemuan
      */
 public function dashboardPic()
-{
-    $visits = visits::with(['guest', 'purpose', 'branch'])
-        ->where('assigned_to', auth()->id())
-        ->whereNotIn('status', ['completed', 'cancelled']) // 👈 tambahkan baris ini
-        ->where(function ($query) {
-            $query->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed'])
-                  ->orWhereDate('check_in_at', Carbon::today())
-                  ->orWhereDate('scheduled_at', Carbon::today());
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+    {
+        $visits = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            // Abaikan status yang sudah selesai atau dibatalkan baik EN/ID
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']) 
+            ->where(function ($query) {
+                $query->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
+                      ->orWhereDate('check_in_at', Carbon::today())
+                      ->orWhereDate('scheduled_at', Carbon::today());
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    $vipCount = $visits->filter(function ($v) {
-        return optional($v->guest)->is_vip == true;
-    })->count();
+        $vipCount = $visits->filter(function ($v) {
+            return optional($v->guest)->is_vip == true;
+        })->count();
 
-    $regularCount = $visits->count() - $vipCount;
+        $regularCount = $visits->count() - $vipCount;
 
-    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
-}
+        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
+    }
 
     /**
      * Riwayat Kunjungan PIC
      */
-    public function riwayatPic(Request $request)
+public function riwayatPic(Request $request)
     {
         $query = visits::with(['guest', 'purpose', 'branch'])
             ->where('assigned_to', auth()->id())
-            ->whereIn('status', ['completed', 'cancelled']);
+            // Tangkap status selesai/batal dalam bahasa Inggris maupun Indonesia
+            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
         // Filter Pencarian (Nama Tamu / Perusahaan)
         if ($request->filled('keyword')) {
@@ -95,28 +97,29 @@ public function dashboardPic()
     /**
      * Update Status Kehadiran / Kunjungan
      */
-    public function updateStatus(Request $request, $id)
+public function updateStatus(Request $request, $id)
     {
-        // 1. Validasi Input
+        // Validasi disesuaikan agar menerima nilai Inggris/Indonesia dari view
         $request->validate([
-            'status' => 'required|in:confirmed,cancelled'
+            'status' => 'required|in:confirmed,cancelled,Dikonfirmasi,Dibatalkan'
         ]);
 
-        // 2. Ambil data visit dari database berdasarkan ID & PIC yang login
         $visit = visits::where('id', $id)
             ->where('assigned_to', auth()->id())
             ->firstOrFail();
 
-        // 3. Update status kunjungan
-        $visit->status = $request->status;
+        // Mapping status ke Bahasa Indonesia untuk disimpan ke database
+        $isConfirmed = in_array($request->status, ['confirmed', 'Dikonfirmasi']);
+        
+        $visit->status = $isConfirmed ? 'Dikonfirmasi' : 'Dibatalkan';
 
-        if ($request->status === 'confirmed') {
+        if ($isConfirmed) {
             $visit->meeting_start_at = now();
         }
 
         $visit->save();
 
-        $msg = $request->status === 'confirmed'
+        $msg = $isConfirmed
             ? 'Kehadiran tamu dikonfirmasi. Silakan mulai pertemuan.'
             : 'Kunjungan telah dibatalkan.';
 
@@ -126,21 +129,27 @@ public function dashboardPic()
     /**
      * Selesaikan Pertemuan & Catat Hasil Diskusi
      */
+/**
+     * Menyimpan Hasil Diskusi / Catatan Pertemuan (Status tetap 'meeting' sampai nanti di-checkout Admin)
+     */
     public function completeMeeting(Request $request, $id)
     {
         $request->validate([
             'potential_level' => 'required|string',
         ]);
 
-        $visit = visits::findOrFail($id);
+        $visit = visits::where('id', $id)
+            ->where('assigned_to', auth()->id())
+            ->firstOrFail();
         
         $visit->update([
-            'status'               => 'completed',
+            // Status TIDAK diubah jadi 'completed', biarkan tetap atau pastikan 'meeting'
+            'status'               => 'Meeting Selesai', // Diseragamkan ke Bahasa Indonesia
             'meeting_result'       => $request->notes ?? $request->meeting_result,
             'potential_level'      => $request->potential_level,
             'follow_up_at'         => $request->followup_date ?? $request->follow_up_at,
             'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot', 'deal']),
-            'check_out_at'         => now(),
+            // 'check_out_at' dihilangkan/tidak diisi di sini karena di-checkout oleh admin nanti
         ]);
 
         if (in_array($request->potential_level, ['warm', 'hot']) && ($request->followup_date || $request->follow_up_at)) {
@@ -218,6 +227,18 @@ public function dashboardPic()
             ->count();
 
         return view('pic.leads', compact('leads', 'totalLeads', 'totalDeal'));
+    }
+
+public function startMeeting($id)
+    {
+        $visit = visits::findOrFail($id);
+        
+        $visit->update([
+            'status' => 'Sedang Bertemu', // Diseragamkan ke Bahasa Indonesia
+            'meeting_start_at' => now(), 
+        ]);
+
+        return redirect()->back()->with('success', 'Pertemuan dimulai. Silakan lakukan diskusi dengan tamu.');
     }
 
 

@@ -54,6 +54,7 @@ Route::middleware('auth')->prefix('pic')->group(function () {
     Route::post('/leads/{visit_id}/followup', [FollowUpController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');        
     Route::patch('/visit/{id}/status', [FollowUpController::class, 'updateStatus'])->name('pic.updateStatus');
     Route::post('/visit/{id}/complete', [FollowUpController::class, 'completeMeeting'])->name('pic.completeMeeting');
+    Route::patch('/pic/visit/{id}/start-meeting', [FollowUpController::class, 'startMeeting'])->name('pic.startMeeting');
 });
 
 

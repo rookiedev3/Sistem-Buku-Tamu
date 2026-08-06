@@ -96,27 +96,32 @@
                         </span>
                         @endif
                     </td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            @if($visit->status === 'Menunggu' || $visit->status === 'waiting')
-                            <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
-                                @csrf
-                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                    Check-in
-                                </button>
-                            </form>
-                            @elseif($visit->status === 'Sedang Bertemu' || $visit->status === 'confirmed')
-                            <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
-                                @csrf
-                                <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                    Check-out
-                                </button>
-                            </form>
-                            @else
-                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
-                            @endif
-                        </div>
-                    </td>
+<td style="padding: 16px 20px; text-align: center;">
+    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+        @php $statusLower = strtolower($visit->status); @endphp
+
+        @if($statusLower === 'menunggu' || $statusLower === 'waiting')
+            <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
+                @csrf
+                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                    Check-in
+                </button>
+            </form>
+        @elseif($statusLower === 'meeting selesai')
+            <!-- HANYA MUNCUL DI SINI: Saat status benar-benar Meeting Selesai -->
+            <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
+                @csrf
+                <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                    Check-out
+                </button>
+            </form>
+        @elseif($statusLower === 'sedang bertemu' || $statusLower === 'confirmed')
+            <span style="font-size: 11px; color: #6741b5; font-weight: 600;">Diskusi Berlangsung</span>
+        @else
+            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
+        @endif
+    </div>
+</td>
                 </tr>
                 @empty
                 <tr>
