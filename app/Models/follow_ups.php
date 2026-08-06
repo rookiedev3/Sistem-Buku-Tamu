@@ -14,4 +14,10 @@ class follow_ups extends Model
         'result',
         'status',
     ];
+
+    public function visit()
+    {
+        return $this->belongsTo(visits::class, 'visit_id');
+    }
 }
+

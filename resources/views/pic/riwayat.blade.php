@@ -8,28 +8,33 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
                 <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 4px;">Riwayat Kunjungan Tamu 📋</h2>
-                <p style="font-size: 13px; color: #778195; margin: 0;">Arsip lengkap tamu yang pernah datang dan menemui Anda di masa lalu.</p>
+                <p style="font-size: 13px; color: #778195; margin: 0;">Arsip lengkap semua tamu yang pernah Anda tangani beserta hasil meeting dan status prospeknya.</p>
             </div>
         </div>
 
-        <!-- Filter Form Sederhana -->
-        <form action="" method="GET" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <!-- Filter Form -->
+        <form action="{{ route('pic.riwayat') }}" method="GET" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 200px;">
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Cari Nama / Instansi</label>
-                <input type="text" name="keyword" placeholder="Contoh: Budi atau PT..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
+                <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Contoh: Budi atau PT..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
             </div>
             <div style="width: 180px;">
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Dari Tanggal</label>
-                <input type="date" name="start_date" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
+                <input type="date" name="start_date" value="{{ request('start_date') }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
             </div>
             <div style="width: 180px;">
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Sampai Tanggal</label>
-                <input type="date" name="end_date" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
+                <input type="date" name="end_date" value="{{ request('end_date') }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
             </div>
-            <div>
+            <div style="display: flex; gap: 8px;">
                 <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
                     Filter
                 </button>
+                @if(request()->hasAny(['keyword', 'start_date', 'end_date']))
+                    <a href="{{ route('pic.riwayat') }}" style="background: #f1f5f9; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; height: 41px;">
+                        Reset
+                    </a>
+                @endif
             </div>
         </form>
     </div>
@@ -46,31 +51,136 @@
                         <th style="padding: 14px;">Tanggal & Waktu</th>
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
                         <th style="padding: 14px;">Keperluan</th>
-                        <th style="padding: 14px;">Catatan Hasil Pertemuan</th>
-                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status</th>
+                        {{-- <th style="padding: 14px;">Status Prospek & Follow Up</th> --}}
+                        <th style="padding: 14px; text-align: center;">Catatan Pertemuan</th>
+                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status Akhir</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @forelse($visits as $index => $v)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 14px; font-weight: 600;">1</td>
+                        <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
                         <td style="padding: 14px; color: #778195; font-weight: 600;">
-                            01 Agustus 2026<br>
-                            <span style="font-size: 11px;">14:30 WIB</span>
+                            {{ \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') }}<br>
+                            <span style="font-size: 11px;">{{ \Carbon\Carbon::parse($v->check_in_at)->format('H:i') }} WIB</span>
                         </td>
                         <td style="padding: 14px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">Siti Aminah</strong>
-                            <span style="font-size: 11px; color: #778195;">CV Berkah Jaya</span>
+                            <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
+                            <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                         </td>
-                        <td style="padding: 14px; color: #475569;">Konsultasi Sistem Administrasi Kantor</td>
-                        <td style="padding: 14px; color: #475569;">Klien tertarik berlangganan paket tahunan, menunggu ACC anggaran.</td>
+                        <td style="padding: 14px; color: #475569;">
+                            {{ $v->purpose->name ?? $v->purpose }}
+                        </td>
+                        
+{{-- <!-- Kolom Status Akhir -->
+<td style="padding: 14px; text-align: center;">
+    @php $level = strtolower($v->potential_level ?? ''); @endphp
+
+    @if($v->status !== 'completed')
+        <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Dibatalkan
+        </span>
+    @elseif(in_array($level, ['deal', 'drop']))
+        <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Selesai
+        </span>
+    @else
+        <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Proses Follow-Up
+        </span>
+    @endif
+</td> --}}
+
+                        <!-- Kolom Terpisah: Tombol Modal Catatan -->
                         <td style="padding: 14px; text-align: center;">
-                            <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Selesai (Deal)</span>
+                            @if($v->status === 'completed')
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                    📝 Lihat Catatan
+                                </button>
+                            @else
+                                <span style="font-style: italic; color: #94a3b8; font-size: 12px;">Dibatalkan</span>
+                            @endif
+                        </td>
+
+<!-- Kolom Status Akhir -->
+<td style="padding: 14px; text-align: center;">
+    @php $level = strtolower($v->potential_level ?? ''); @endphp
+
+    @if($v->status !== 'completed')
+        <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Dibatalkan
+        </span>
+    @elseif(in_array($level, ['deal', 'drop', 'cold']))
+        <span style="background: #e6f4ed; color: #006B3F; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Selesai
+        </span>
+    @else
+        <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
+            Follow-Up
+        </span>
+    @endif
+</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">
+                            Belum ada riwayat kunjungan yang ditangani.
                         </td>
                     </tr>
+                    @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination -->
+        <div style="margin-top: 20px;">
+            {{ $visits->links() }}
         </div>
     </div>
 
 </div>
+
+<!-- ============================================== -->
+<!-- KUMPULAN MODAL CATATAN DI LUAR TABEL           -->
+<!-- ============================================== -->
+@foreach($visits as $v)
+    @if($v->status === 'completed')
+        <div class="modal fade" id="noteModal{{ $v->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
+                        <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
+                            Hasil Pertemuan - {{ $v->guest->name ?? 'Tamu' }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Status Prospek Terakhir:</div>
+                            <div style="font-weight: 800; color: #172033; text-transform: capitalize; margin-bottom: 8px;">
+                                {{ $v->potential_level ?? 'Belum ada status' }}
+                            </div>
+
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal Follow-Up:</div>
+                            <div style="font-weight: 700; color: #006B3F;">
+                                {{ $v->follow_up_at ? \Carbon\Carbon::parse($v->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal / Sudah Deal' }}
+                            </div>
+                        </div>
+
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                            Rangkuman / Catatan Diskusi:
+                        </label>
+                        <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; min-height: 100px;">
+                            {{ $v->meeting_result ?? 'Tidak ada catatan yang ditinggalkan.' }}
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
+
 @endsection
