@@ -42,6 +42,12 @@ class visits extends Model
         'is_converted_to_lead' => 'boolean',
     ];
 
+    // Relasi ke User yang menjadi PIC
+    public function pic()
+    {
+        return $this->belongsTo(User::class, 'pic_id');
+    }
+
     public function guest(): BelongsTo
     {
         return $this->belongsTo(guests::class, 'guest_id');
