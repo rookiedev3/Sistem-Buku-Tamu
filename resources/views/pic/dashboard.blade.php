@@ -18,11 +18,28 @@
 <div style="display: flex; flex-direction: column; gap: 24px;">
 
     <!-- Alert Sukses -->
-    @if(session('success'))
+    {{-- @if(session('success'))
         <div class="alert alert-success" style="border-radius: 12px; font-weight: 600;">
             {{ session('success') }}
         </div>
-    @endif
+    @endif --}}
+
+
+    @if(session('success'))
+    <div class="alert alert-success" style="border-radius: 12px; font-weight: 600;">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="alert alert-danger" style="border-radius: 12px; font-weight: 600;">
+        <ul style="margin:0; padding-left: 18px;">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
     <!-- Bagian Sambutan & Statistik Ringkas -->
     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
@@ -57,7 +74,7 @@
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
                         <th style="padding: 14px;">Kategori</th>
                         <th style="padding: 14px;">Keperluan</th>
-                        <th style="padding: 14px;">Waktu Check-in</th>
+                        <th style="padding: 14px;">Waktu / Jadwal</th>
                         <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
                     </tr>
@@ -81,48 +98,57 @@
                             </td>
 
                             <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
-                            <td style="padding: 14px; color: #778195; font-weight: 600;">{{ $visit->check_in_at ? $visit->check_in_at->format('H:i') . ' WIB' : '-' }}</td>
+                            
+                            <!-- Menampilkan Check-in jika ada, jika null ambil dari Scheduled At -->
+                            <td style="padding: 14px; color: #778195; font-weight: 600;">
+                                @if($visit->check_in_at)
+                                    {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
+                                @elseif($visit->scheduled_at)
+                                    {{ \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') }} WIB <span style="font-size: 10px; color: #d97706;">(Jadwal)</span>
+                                @else
+                                    -
+                                @endif
+                            </td>
                             
                             <!-- Kolom Tombol Centang (✔) dan Silang (❌) -->
-<td style="padding: 14px; text-align: center;">
-    @if(in_array($visit->status, ['pending', 'waiting']))
-        <div style="display: flex; justify-content: center; gap: 6px;">
-            <!-- Tombol Centang: Konfirmasi Bertemu -->
-            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="confirmed">
-                <button type="submit" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✓</button>
-            </form>
+                            <td style="padding: 14px; text-align: center;">
+                                @php $statusLower = strtolower($visit->status); @endphp
+                                @if(in_array($statusLower, ['pending', 'waiting', 'menunggu']))
+                                    <div style="display: flex; justify-content: center; gap: 6px;">
+                                        <!-- Tombol Centang: Konfirmasi Bertemu -->
+                                        <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="confirmed">
+                                            <button type="submit" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✓</button>
+                                        </form>
 
-            <!-- Tombol Silang: Batalkan/Salah Tujuan -->
-            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="cancelled">
-                <button type="submit" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
-            </form>
-        </div>
-    @elseif($visit->status == 'confirmed')
-        <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dikonfirmasi ✓</span>
-    @elseif($visit->status == 'cancelled')
-        <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dibatalkan ✕</span>
-    @elseif($visit->status == 'completed')
-        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Selesai</span>
-    @endif
-</td>
+                                        <!-- Tombol Silang: Batalkan/Salah Tujuan -->
+                                        <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="cancelled">
+                                            <button type="submit" title="Tolak / Salah Tujuan" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                                        </form>
+                                    </div>
+                                @elseif($statusLower == 'confirmed')
+                                    <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dikonfirmasi ✓</span>
+                                @elseif($statusLower == 'cancelled')
+                                    <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dibatalkan ✕</span>
+                                @elseif($statusLower == 'completed')
+                                    <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Selesai</span>
+                                @endif
+                            </td>
 
                             <!-- Kolom Aksi Mulai Pertemuan -->
                             <td style="padding: 14px; text-align: center;">
-                                @if($visit->status == 'confirmed')
-                                    <!-- Hanya Bisa Diklik Saat Status 'confirmed' (Setelah Tekan Centang) -->
+                                @if($statusLower == 'confirmed')
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan-{{ $visit->id }}" style="background: #006B3F; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
                                         Mulai Pertemuan
                                     </button>
-                                @elseif($visit->status == 'completed')
+                                @elseif($statusLower == 'completed')
                                     <span style="color: #006B3F; font-size: 12px; font-weight: 700;">✔ Sudah Dicatat</span>
                                 @else
-                                    <!-- Tombol Terkunci Saat Status Masih Waiting atau Cancelled (Setelah Tekan Silang) -->
                                     <button type="button" disabled style="background: #cbd5e1; color: #64748b; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: not-allowed;">
                                         Mulai Pertemuan
                                     </button>
@@ -130,9 +156,7 @@
                             </td>
                         </tr>
 
-                        <!-- ========================================================= -->
-                        <!-- MODAL CATAT PERTEMUAN UNTUK TIAP BARIS (ID DINAMIS) -->
-                        <!-- ========================================================= -->
+                        <!-- MODAL CATAT PERTEMUAN -->
                         <div class="modal fade" id="modalCatatPertemuan-{{ $visit->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
@@ -145,13 +169,11 @@
                                     </div>
 
                                     <div class="modal-body" style="padding: 24px;">
-                                        <!-- Info Tamu Ringkas -->
                                         <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
                                             <span style="color: #778195; display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;">Tamu yang Ditemui:</span>
                                             <strong style="color: #172033; font-size: 14px;">{{ $visit->guest->name ?? '-' }} ({{ $visit->guest->company_name ?? '-' }})</strong>
                                         </div>
 
-                                        <!-- Form Input Catatan -->
                                         <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST">
                                             @csrf
                                             <div style="margin-bottom: 16px;">
@@ -171,7 +193,7 @@
 
                                             <div style="margin-bottom: 20px;">
                                                 <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
-                                                <input type="date" name="follow_up_at" value="{{ $visit->follow_up_at ? $visit->follow_up_at->format('Y-m-d') : '' }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
+                                                <input type="date" name="follow_up_at" value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
                                             </div>
 
                                             <div style="display: flex; justify-content: flex-end; gap: 10px;">

@@ -77,4 +77,17 @@ class visits extends Model
     {
         return $this->belongsTo(users::class, 'created_by');
     }
+
+public function followUps()
+{
+    return $this->hasMany(follow_ups::class, 'visit_id')->latest(); 
+}
+
+// app/Models/visits.php
+
+public function latestFollowUp()
+{
+    // Beritahu Laravel bahwa primary key-nya adalah 'follow_up_id'
+    return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
+}
 }

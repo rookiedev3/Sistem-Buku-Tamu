@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\VisitsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\GuestCategoriesController;
 use App\Http\Controllers\LeadSourcesController;
 use App\Http\Controllers\ProductsController;
@@ -38,6 +39,21 @@ Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('p
 Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
 Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
 
+
+Route::middleware('auth')->prefix('pic')->group(function () {
+    // 👈 Tambahkan baris ini agar /pic langsung mengarah ke /pic/dashboard
+    Route::get('/', function () {
+        return redirect()->route('pic.dashboard');
+    });
+    Route::get('/dashboard', [FollowUpController::class, 'dashboardPic'])->name('pic.dashboard');
+    Route::get('/riwayat', [FollowUpController::class, 'riwayatPic'])->name('pic.riwayat');
+    // Route Lead & Follow Up PIC
+    Route::get('/leads', [FollowUpController::class, 'leadsIndex'])->name('pic.leads');
+    Route::get('/followup', [FollowUpController::class, 'followupIndex'])->name('pic.followup');
+    Route::post('/leads/{visit_id}/followup', [FollowUpController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');        
+    Route::patch('/visit/{id}/status', [FollowUpController::class, 'updateStatus'])->name('pic.updateStatus');
+    Route::post('/visit/{id}/complete', [FollowUpController::class, 'completeMeeting'])->name('pic.completeMeeting');
+});
 
     //1. chek in route sementara front end 
     Route::get('/check-in', function () {
@@ -141,24 +157,24 @@ Route::post('/frontoffice/pegawai/store', [App\Http\Controllers\FrontOfficeContr
 Route::post('/frontoffice/pegawai/{id}/update', [App\Http\Controllers\FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 Route::delete('/frontoffice/pegawai/{id}/delete', [App\Http\Controllers\FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
-Route::prefix('pic')->group(function () {
+// Route::prefix('pic')->group(function () {
     
-    // // Halaman Dashboard PIC
-    // Route::get('/dashboard', function () {
-    //     return view('pic.dashboard');
-    // })->name('pic.dashboard');
+//     // // Halaman Dashboard PIC
+//     // Route::get('/dashboard', function () {
+//     //     return view('pic.dashboard');
+//     // })->name('pic.dashboard');
 
-    // Halaman Riwayat Kunjungan PIC
-    Route::get('/riwayat', function () {
-        return view('pic.riwayat');
-    })->name('pic.riwayat');
+//     // Halaman Riwayat Kunjungan PIC
+//     Route::get('/riwayat', function () {
+//         return view('pic.riwayat');
+//     })->name('pic.riwayat');
 
-    // Lead & Follow Up PIC
-    Route::get('/leads', function () {
-        return view('pic.leads');
-    })->name('pic.leads');
+//     // Lead & Follow Up PIC
+//     Route::get('/leads', function () {
+//         return view('pic.leads');
+//     })->name('pic.leads');
 
-});
+// });
 
 // Group Route untuk Role Manager Operasional
 Route::prefix('manager')->group(function () {
