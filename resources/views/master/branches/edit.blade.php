@@ -84,7 +84,7 @@
         {{-- Tombol Aksi --}}
         <div style="display: flex; gap: 10px; pt: 8px;">
             <button type="submit"
-                style="background:#1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
+                style="background: #006B3F; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
                 Update Data
             </button>
             <a href="{{ route('branches.index') }}"

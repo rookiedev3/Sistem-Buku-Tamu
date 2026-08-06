@@ -41,7 +41,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data sumber lead perusahaan.</p>
     </div>
     
-    <a href="{{ route('lead-sources.create') }}" style="background:#1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
+    <a href="{{ route('lead-sources.create') }}" style="background: #006B3F; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
         + Tambah Lead Sources
     </a>
 </div>
@@ -78,7 +78,7 @@
                     <td style="padding: 16px 20px; font-weight: 800;">{{ $lead_src->name }}</td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                            <a href="{{ route('lead-sources.edit', $lead_src->id) }}" style="color: #1463ff; text-decoration: none; font-weight: 800;">
+                            <a href="{{ route('lead-sources.edit', $lead_src->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
                                 Edit
                             </a>
                             <form action="{{ route('lead-sources.destroy', $lead_src->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Lead Source ini?')" style="margin: 0; display: inline;">
