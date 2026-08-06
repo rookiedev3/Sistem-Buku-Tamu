@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('purpose_id')->constrained('visit_purposes')->onDelete('cascade');
             $table->foreignId('source_id')->nullable()->constrained('lead_sources')->onDelete('set null');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
-            $table->dateTime('scheduled_at')->nullable();
-            $table->dateTime('check_in_at');
+            $table->dateTime('scheduled_at');
+            $table->dateTime('check_in_at')->nullable();
             $table->dateTime('meeting_start_at')->nullable();
             $table->dateTime('check_out_at')->nullable();
             $table->string('status', 30)->default('waiting');
