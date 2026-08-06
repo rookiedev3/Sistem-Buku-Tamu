@@ -2,6 +2,12 @@
 
 @section('content')
 
+@if(session('success'))
+<div style="background: #dcfce7; border: 1px solid #10b981; color: #15803d; padding: 12px 20px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+    {{ session('success') }}
+</div>
+@endif
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
         <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
@@ -18,23 +24,20 @@
     <div style="display: flex; gap: 12px;">
         <div style="background: #ffffff; padding: 12px 20px; border-radius: 14px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
             <span style="font-size: 11px; color: #778195; font-weight: 600; display: block;">Total Masuk Hari Ini</span>
-            <span style="font-size: 18px; font-weight: 800; color: #006B3F;">1 Orang</span>
+            <span style="font-size: 18px; font-weight: 800; color: #006B3F;">{{ $totalToday }} Orang</span>
         </div>
     </div>
 </div>
 
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
-    
+
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Log Aktivitas Tamu (Check-in & Check-out)</h3>
-        
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 12px; color: #778195; font-weight: 600; background: #f1f5f9; padding: 6px 12px; border-radius: 10px; border: 1px solid #e8edf5;">
-                📅 {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
-            </span>
-        </div>
+        <span style="font-size: 12px; color: #778195; font-weight: 600; background: #f1f5f9; padding: 6px 12px; border-radius: 10px; border: 1px solid #e8edf5;">
+            📅 {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+        </span>
     </div>
-    
+
     <div style="overflow-x: auto;">
         <table class="table align-middle" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; margin: 0;">
             <thead>
@@ -48,30 +51,58 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
+                @forelse($visits as $index => $v)
                 <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px; font-weight: 700;">1</td>
+                    <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px;">
-                        <strong style="display: block; color: #172033; font-weight: 800;">Budi Santoso</strong>
-                        <span style="font-size: 11px; color: #778195;">PT Maju Mundur Sejahtera</span>
+                        <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
+                        <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                     </td>
-                    <td style="padding: 16px 20px; color: #475569; font-weight: 600;">Siska (Sales)</td>
-                    <td style="padding: 16px 20px; color: #778195; font-weight: 600;">10:15 WIB</td>
+                    <td style="padding: 16px 20px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
+                    <td style="padding: 16px 20px; color: #778195; font-weight: 600;">
+                        {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '-' }}
+                    </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Di dalam area</span>
+                        @if($v->check_out_at)
+                            <span style="background: #f1f5f9; color: #64748b; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Sudah Keluar</span>
+                        @elseif($v->check_in_at)
+                            <span style="background: #e6f4ed; color: #006B3F; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Di dalam area</span>
+                        @else
+                            <span style="background: #fef3c7; color: #b45309; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Belum Masuk</span>
+                        @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <button onclick="alert('Proses Check-out berhasil. Tamu telah meninggalkan area.')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                            Check-out
-                        </button>
+                        @if(!$v->check_in_at)
+                            <form action="{{ route('security.checkin', $v->id) }}" method="POST" style="margin:0;">
+                                @csrf
+                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                                    Check-in
+                                </button>
+                            </form>
+                        @elseif(!$v->check_out_at)
+                            <form action="{{ route('security.checkout', $v->id) }}" method="POST" style="margin:0;">
+                                @csrf
+                                <button type="submit" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                                    Check-out
+                                </button>
+                            </form>
+                        @else
+                            <span style="font-size: 11px; color: #94a3b8;">Selesai</span>
+                        @endif
                     </td>
                 </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Belum ada tamu hari ini.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan log aktivitas hari ini</span>
-        <span>Halaman 1 dari 1</span>
+        <span>Total: {{ $totalToday }}</span>
     </div>
 
 </div>

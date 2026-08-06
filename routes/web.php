@@ -9,6 +9,7 @@ use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\GuestCategoriesController;
 use App\Http\Controllers\LeadSourcesController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitPurposesController;
 use App\Http\Middleware\CheckUserLogin;
@@ -54,6 +55,7 @@ Route::middleware('auth')->prefix('pic')->group(function () {
     Route::patch('/visit/{id}/status', [FollowUpController::class, 'updateStatus'])->name('pic.updateStatus');
     Route::post('/visit/{id}/complete', [FollowUpController::class, 'completeMeeting'])->name('pic.completeMeeting');
 });
+
 
     //1. chek in route sementara front end 
     Route::get('/check-in', function () {
@@ -112,6 +114,12 @@ Route::get('/master-data', function () {
         // Route khusus untuk user dengan level 1 (admin)
     });
 // });
+
+Route::middleware('auth')->prefix('security')->group(function () {
+    Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+    Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
+    Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
+});
 
 
 // Route::get('/', function () {
@@ -201,9 +209,9 @@ Route::prefix('manager')->group(function () {
 
 });
 
-// Group Route untuk Role Security
-Route::prefix('security')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('security.dashboard');
-    })->name('security.dashboard');
-});
+// // Group Route untuk Role Security
+// Route::prefix('security')->group(function () {
+//     Route::get('/dashboard', function () {
+//         return view('security.dashboard');
+//     })->name('security.dashboard');
+// });

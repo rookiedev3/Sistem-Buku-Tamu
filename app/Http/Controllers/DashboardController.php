@@ -85,7 +85,7 @@ return redirect()->route('pic.dashboard');
 
     protected function securityDashboard()
     {
-        return app(VisitsController::class)->dashboardPic();    
+    return redirect()->route('security.dashboard');
     }
 
     /**
