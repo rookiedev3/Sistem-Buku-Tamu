@@ -50,7 +50,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/riwayat', [PicController::class, 'riwayatPic'])->name('pic.riwayat');
         // Route Lead & Follow Up PIC
         Route::get('/leads', [PicController::class, 'leadsIndex'])->name('pic.leads');
-        Route::get('/followup', [PicController::class, 'followupIndex'])->name('pic.followup');
+        Route::get('/followup', [PicController::class, 'leadsIndex'])->name('pic.followup');
         Route::post('/leads/{visit_id}/followup', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');
         Route::patch('/visit/{id}/status', [PicController::class, 'updateStatus'])->name('pic.updateStatus');
         Route::post('/visit/{id}/complete', [PicController::class, 'completeMeeting'])->name('pic.completeMeeting');
