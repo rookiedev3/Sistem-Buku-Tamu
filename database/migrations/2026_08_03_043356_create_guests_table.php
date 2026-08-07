@@ -22,7 +22,6 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->bigInteger('guest_category_id')->nullable();
             $table->string('photo_path')->nullable();
-            $table->text('notes')->nullable();
             $table->bigInteger('created_by')->nullable();
             $table->timestamps();
         });

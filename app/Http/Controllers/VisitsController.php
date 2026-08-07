@@ -6,6 +6,7 @@ use App\Models\branches;
 use App\Models\guest_categories;
 use App\Models\guests;
 use App\Models\lead_sources;
+use App\Models\notifications;
 use App\Models\products;
 use App\Models\users;
 use App\Models\visit_purposes;
@@ -116,7 +117,7 @@ class VisitsController extends Controller
             'scheduled_at' => 'required',
             'product_interest' => 'nullable',
             'source_id' => 'nullable',
-            'purpose' => 'required|string|max:1000',
+            'notes' => 'required|string|max:1000',
         ]);
 
         // 2. Simpan Sementara ke Session
@@ -241,7 +242,7 @@ class VisitsController extends Controller
                 'scheduled_at' => $checkInDateTime,
                 'product_interest' => $step2['product_interest'] ?? null,
                 'source_id' => $step2['source_id'] ?? null,
-                'purpose' => $step2['purpose'],
+                'notes' => $step2['notes'],
                 'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
             ]);
@@ -254,6 +255,23 @@ class VisitsController extends Controller
                 'changed_by' => null,
                 'changed_at' => now(),
             ]);
+
+            $newVisit->status = 'Terjadwal';
+            $newVisit->check_in_at = now();
+            $newVisit->save();
+
+            // 1. Ambil semua user yang memiliki role 'admin'
+            $adminUsers = users::where('role', 'admin')->get();
+
+            // 2. Looping untuk kirim notifikasi ke masing-masing admin
+            foreach ($adminUsers as $admin) {
+                notifications::send(
+                    $admin->id,
+                    'guest_arrived',
+                    'Notifikasi Admin 🔔',
+                    'Tamu '.($guest->name ?? 'Tamu').' baru saja melakukan check-in.'
+                );
+            }
 
             return $newVisit;
         });
@@ -281,7 +299,7 @@ class VisitsController extends Controller
     public function dashboardPic()
     {
         // Mengambil data milik PIC yang sedang login
-        $visits = visits::with(['guest', 'purpose', 'branch'])
+        $visits = visits::with(['guest', 'notes', 'branch'])
             ->where('assigned_to', auth()->id())
             ->where(function ($query) {
                 // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi
