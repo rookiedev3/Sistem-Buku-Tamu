@@ -107,7 +107,7 @@ Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
 
-Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
+Route::group(['middleware' => [CheckUserLogin::class . ':owner']], function () {
     // Route khusus untuk user dengan level 1 (admin)
 });
 // });
@@ -161,6 +161,12 @@ Route::post('/frontoffice/pegawai/store', [FrontOfficeController::class, 'storeP
 Route::post('/frontoffice/pegawai/{id}/update', [FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 Route::delete('/frontoffice/pegawai/{id}/delete', [FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
+Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class, 'markAllNotificationsRead'])
+    ->name('frontoffice.notifications.readAll');
+
+Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::class, 'markNotificationRead'])
+    ->name('frontoffice.notifications.read');
+
 // Route::prefix('pic')->group(function () {
 
 //     // // Halaman Dashboard PIC
@@ -202,7 +208,6 @@ Route::prefix('manager')->group(function () {
     Route::get('/laporan', function () {
         return view('manager.laporan');
     })->name('manager.laporan');
-
 });
 
 // // Group Route untuk Role Security

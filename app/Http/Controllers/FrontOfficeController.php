@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\branches;
 use App\Models\guests;
+use App\Models\notifications;
 use App\Models\User;
 use App\Models\users;
 use App\Models\visit_purposes;
@@ -34,7 +35,12 @@ class FrontOfficeController extends Controller
         $branches = branches::select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
 
-        return view('frontoffice.dashboard', compact('visits', 'totalToday', 'waitingToday', 'pics', 'branches', 'purposes'));
+        // 3. Dengan Pagination (jika datanya banyak/halaman khusus notifikasi)
+        $notifications = notifications::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('frontoffice.dashboard', compact('visits', 'totalToday', 'waitingToday', 'pics', 'branches', 'purposes', 'notifications'));
     }
 
     public function checkIn($id)
@@ -42,7 +48,7 @@ class FrontOfficeController extends Controller
         $visit = visits::findOrFail($id);
 
         visit_status_logs::create([
-            'visit_id'   => $visit->id,
+            'visit_id' => $visit->id,
             'old_status' => $visit->status,
             'new_status' => 'Menunggu',
             'changed_by' => auth()->check() ? auth()->id() : null,
@@ -63,7 +69,7 @@ class FrontOfficeController extends Controller
         $visit = visits::findOrFail($id);
 
         visit_status_logs::create([
-            'visit_id'   => $visit->id,
+            'visit_id' => $visit->id,
             'old_status' => $visit->status,
             'new_status' => 'Selesai',
             'changed_by' => auth()->check() ? auth()->id() : null,
@@ -352,5 +358,25 @@ class FrontOfficeController extends Controller
 
         // 3. Kembali ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->with('success', 'Data pegawai berhasil dihapus.');
+    }
+
+    public function markAllNotificationsRead(Request $request)
+    {
+        notifications::where('user_id', auth()->id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return back()->with('success', 'Semua notifikasi ditandai sudah dibaca.');
+    }
+
+    public function markNotificationRead(Request $request, $id)
+    {
+        $notif = notifications::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $notif->update(['read_at' => now()]);
+
+        return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
 }

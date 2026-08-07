@@ -16,4 +16,9 @@ class users extends Model
         'password',
         'role',
     ];
+
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\notifications::class, 'user_id');
+    }
 }

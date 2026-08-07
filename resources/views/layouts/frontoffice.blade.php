@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Front Office Panel - Buku Tamu Digital</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -126,6 +126,108 @@
             padding: 32px;
             flex-grow: 1;
         }
+
+        /* --- NOTIFICATION DROPDOWN --- */
+        .notification-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-bell {
+            background: #f1f5f9;
+            border: 1px solid #e8edf5;
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-bell:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+        .btn-bell .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 20px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-box {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 1px);
+            width: 320px;
+            background: #ffffff;
+            border: 1px solid #e8edf5;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .notification-dropdown:hover .dropdown-box {
+            display: flex;
+        }
+
+        .notif-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background: #f8fafc;
+        }
+
+        .notif-item strong {
+            display: block;
+            font-size: 13px;
+            color: #172033;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .notif-item p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0 0 6px 0;
+            line-height: 1.4;
+        }
+
+        .notif-item small {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .notif-item-empty {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -187,7 +289,12 @@
                 </a>
 
                 <a href="/pengguna" class="menu-item {{ request()->routeIs('user.*') ? 'active' : '' }}">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="23" y1="11" x2="17" y2="11" />
+                    </svg>
                     <span>Manajemen Pengguna</span>
                 </a>
             </div>
@@ -216,6 +323,73 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 20px;">
+                @auth
+                @php
+                // Ambil 5 notifikasi belum dibaca khusus milik user yang sedang login
+                $myNotifications = auth()->user()->notifications()
+                ->whereNull('read_at')
+                ->latest()
+                ->take(5)
+                ->get();
+
+                $unreadCount = auth()->user()->notifications()
+                ->whereNull('read_at')
+                ->count();
+                @endphp
+
+                <div class="notification-dropdown">
+                    <!-- Tombol Lonceng dengan Badge Jumlah -->
+                    <button type="button" class="btn-bell">
+                        🔔
+                        @if($unreadCount > 0)
+                        <span class="badge">{{ $unreadCount }}</span>
+                        @endif
+                    </button>
+
+                    <!-- List Notifikasi -->
+                    <div class="dropdown-box">
+                        <!-- Dropdown Header -->
+                        <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+                            <span style="font-size: 12px; font-weight: 700; color: #172033;">Notifikasi Baru</span>
+                            @if($unreadCount > 0)
+                            <form action="{{ route('frontoffice.notifications.readAll') }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" style="background: none; border: none; color: #006B3F; font-size: 10px; font-weight: 700; cursor: pointer; padding: 0;">
+                                    Tandai semua dibaca
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+
+                        <!-- Dropdown Items -->
+                        <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column;">
+                            @forelse($myNotifications as $notif)
+                            <div class="notif-item" style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
+                                <div style="flex-grow: 1;">
+                                    <strong style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span>
+                                        {{ $notif->title }}
+                                    </strong>
+                                    <p>{{ $notif->body }}</p>
+                                    <small>{{ $notif->created_at->diffForHumans() }}</small>
+                                </div>
+                                <form action="{{ route('frontoffice.notifications.read', $notif->id) }}" method="POST" style="margin: 0; flex-shrink: 0;">
+                                    @csrf
+                                    <button type="submit" title="Tandai dibaca" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 700; cursor: pointer;">
+                                        ✓
+                                    </button>
+                                </form>
+                            </div>
+                            @empty
+                            <div class="notif-item-empty">
+                                Tidak ada notifikasi baru.
+                            </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+                @endauth
+
                 <div style="font-size: 12px; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
                     🟢 Operasional Aktif (Sleman)
                 </div>
