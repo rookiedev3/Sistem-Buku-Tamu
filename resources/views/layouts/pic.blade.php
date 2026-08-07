@@ -138,7 +138,7 @@
 
         <!-- Tombol Keluar di Bawah -->
         <div style="padding: 16px; border-top: 1px solid #e8edf5;">
-            <form action="{{ route('logout') }}" method="get" style="margin: 0;">
+            <form action="{{ route('logout') }}" method="post" style="margin: 0;">
                 @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">
                     🚪 Keluar
