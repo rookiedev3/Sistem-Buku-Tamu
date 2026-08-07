@@ -12,20 +12,21 @@ class SecurityController extends Controller
      * Dashboard Security — hanya menampilkan data kehadiran tamu hari ini.
      * TIDAK memuat kolom bisnis sensitif (meeting_result, potential_level, follow_up_at, dll).
      */
-    public function dashboard()
-    {
-        $today = Carbon::today();
+public function dashboard(Request $request)
+{
+    // Ambil tanggal dari input user, jika kosong gunakan hari ini
+    $selectedDate = $request->get('date', Carbon::today()->toDateString());
 
-        $visits = visits::with(['guest:id,name,company_name', 'assignedUser:id,name'])
-            ->select('id', 'visit_code', 'guest_id', 'assigned_to', 'scheduled_at', 'check_in_at', 'check_out_at', 'status')
-            ->whereDate('scheduled_at', $today)
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
+    $visits = visits::with(['guest:id,name,company_name', 'assignedUser:id,name'])
+        ->select('id', 'visit_code', 'guest_id', 'assigned_to', 'scheduled_at', 'check_in_at', 'check_out_at', 'status')
+        ->whereDate('scheduled_at', $selectedDate)
+        ->orderBy('scheduled_at', 'asc')
+        ->get();
 
-        $totalToday = $visits->count();
+    $totalToday = $visits->count();
 
-        return view('security.dashboard', compact('visits', 'totalToday'));
-    }
+    return view('security.dashboard', compact('visits', 'totalToday', 'selectedDate'));
+}
 
     /**
      * Security cuma boleh catat kehadiran (masuk), tidak bisa sentuh status prospek/lead.
