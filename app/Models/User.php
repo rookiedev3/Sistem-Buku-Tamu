@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\notifications;
 
 class User extends Authenticatable
 {
@@ -18,7 +19,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [ 
+    protected $fillable = [
         'branch_id',
         'name',
         'email',
@@ -55,5 +56,16 @@ class User extends Authenticatable
     public function branch()
     {
         return $this->belongsTo(branches::class, 'branch_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(notifications::class, 'user_id')->latest();
+    }
+
+    // Menghitung jumlah notifikasi yang belum dibaca
+    public function unreadNotificationsCount()
+    {
+        return $this->notifications()->unread()->count();
     }
 }

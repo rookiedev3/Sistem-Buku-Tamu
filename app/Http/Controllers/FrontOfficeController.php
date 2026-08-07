@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\guests;
-use App\Models\visits;
-use App\Models\users;
-use App\Models\User;
 use App\Models\branches;
+use App\Models\guests;
+use App\Models\User;
+use App\Models\users;
 use App\Models\visit_purposes;
+use App\Models\visit_status_logs;
+use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,6 @@ class FrontOfficeController extends Controller
         $today = Carbon::today();
 
         $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->whereDate('scheduled_at', $today)
             ->orderBy('scheduled_at', 'asc')
             ->get();
 
@@ -40,6 +40,15 @@ class FrontOfficeController extends Controller
     public function checkIn($id)
     {
         $visit = visits::findOrFail($id);
+
+        visit_status_logs::create([
+            'visit_id'   => $visit->id,
+            'old_status' => $visit->status,
+            'new_status' => 'Menunggu',
+            'changed_by' => auth()->check() ? auth()->id() : null,
+            'changed_at' => now(),
+        ]);
+
         $visit->update([
             'status' => 'Menunggu',
             'check_in_at' => now(),
@@ -52,6 +61,15 @@ class FrontOfficeController extends Controller
     public function checkOut($id)
     {
         $visit = visits::findOrFail($id);
+
+        visit_status_logs::create([
+            'visit_id'   => $visit->id,
+            'old_status' => $visit->status,
+            'new_status' => 'Selesai',
+            'changed_by' => auth()->check() ? auth()->id() : null,
+            'changed_at' => now(),
+        ]);
+
         $visit->update([
             'status' => 'Selesai',
             'check_out_at' => now(),
@@ -77,14 +95,14 @@ class FrontOfficeController extends Controller
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
         }
-        if (!str_starts_with($phone, '+')) {
+        if (! str_starts_with($phone, '+')) {
             $phone = '+' . $phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
             // Cari atau buat guest baru
             $guest = guests::where('phone', $phone)->first();
-            if (!$guest) {
+            if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
                 $prefix = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
@@ -136,7 +154,7 @@ class FrontOfficeController extends Controller
         $query = visits::with(['guest', 'purpose', 'assignedUser'])
             ->whereIn('status', ['Selesai', 'completed']);
 
-        if ($request->has('date') && !empty($request->date)) {
+        if ($request->has('date') && ! empty($request->date)) {
             $query->whereDate('scheduled_at', $request->date);
         }
 
@@ -210,7 +228,6 @@ class FrontOfficeController extends Controller
         $today = Carbon::today();
 
         $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->whereDate('scheduled_at', $today)
             ->orderBy('scheduled_at', 'asc')
             ->get();
 
@@ -243,14 +260,14 @@ class FrontOfficeController extends Controller
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
         }
-        if (!str_starts_with($phone, '+')) {
+        if (! str_starts_with($phone, '+')) {
             $phone = '+' . $phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
             // Cari atau buat guest baru
             $guest = guests::where('phone', $phone)->first();
-            if (!$guest) {
+            if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
                 $prefix = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
@@ -298,7 +315,7 @@ class FrontOfficeController extends Controller
     public function updateAppointmentStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:confirmed,cancelled,waiting,Menunggu,Disetujui,Ditolak'
+            'status' => 'required|in:confirmed,cancelled,waiting,Menunggu,Disetujui,Ditolak',
         ]);
 
         // Map status input ke database status standar
@@ -308,7 +325,7 @@ class FrontOfficeController extends Controller
             'cancelled' => 'cancelled',
             'Ditolak' => 'cancelled',
             'waiting' => 'waiting',
-            'Menunggu' => 'waiting'
+            'Menunggu' => 'waiting',
         ];
 
         $dbStatus = $statusMap[$request->status] ?? $request->status;
@@ -321,7 +338,7 @@ class FrontOfficeController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Status janji temu berhasil diperbarui!',
-            'new_status' => $dbStatus
+            'new_status' => $dbStatus,
         ]);
     }
 

@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('visit_status_logs', function (Blueprint $table) {
+            $table->id();
             $table->bigInteger('visit_id');
             $table->string('old_status', 30)->nullable();
             $table->string('new_status', 30);
-            $table->bigInteger('changed_by')->nullable();
+            $table->foreignId('changed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('changed_at')->useCurrent();
             $table->timestamps();
         });
