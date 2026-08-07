@@ -264,6 +264,10 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('owner_id', auth()->id())
             ->firstOrFail();
 
+            if ($lead->status === 'deal') {
+        return redirect()->back()->with('error', 'Lead ini sudah Deal dan tidak bisa diubah lagi.');
+    }
+
         $lead->status = $request->status;
         $lead->follow_up_at = in_array($request->status, ['deal', 'lost']) ? null : $request->due_at;
         // Kosongkan input = nilai lama dipertahankan, bukan direset ke 0
@@ -296,8 +300,8 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
         // Base query: selalu exclude status 'lost' dari halaman ini
         $query = leads::with(['guest', 'visit', 'followUps'])
             ->where('owner_id', $ownerId)
-            ->where('status', '!=', 'lost');
-
+    ->whereNotIn('status', ['deal', 'lost']);   // ganti dari '!= lost' aja
+    
         switch ($filter) {
             case 'active':
                 $query->whereNotIn('status', ['deal', 'lost']);

@@ -263,7 +263,7 @@ class VisitsController extends Controller
             // 1. Ambil semua user yang memiliki role 'admin'
             $adminUsers = users::where('role', 'admin')->get();
 
-            // 2. Looping untuk kirim notifikasi ke masing-masing admin
+            // 2. Looping untuk kirim notifikasi creke masing-masing admin
             foreach ($adminUsers as $admin) {
                 notifications::send(
                     $admin->id,

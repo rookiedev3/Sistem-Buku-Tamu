@@ -37,7 +37,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Nomor Telepon/HP</label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" placeholder="08123456789" style="border-radius: 10px; padding: 10px 14px; font-size: 13px; border: 1px solid #e8edf5;">
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" placeholder="Contoh:    08123456789" style="border-radius: 10px; padding: 10px 14px; font-size: 13px; border: 1px solid #e8edf5;">
                 </div>
 
                 <div class="mb-3">

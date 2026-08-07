@@ -38,7 +38,7 @@ class UserController extends Controller
         User::create([
             'name'      => $request->name,
             'email'     => $request->email,
-            'phone'     => $request->phone,
+            'phone'     => $this->normalizePhone($request->phone),
             'password'  => Hash::make($request->password),
             'role'      => $request->role,
             'branch_id' => $request->branch_id,
@@ -72,7 +72,7 @@ class UserController extends Controller
         $data = [
             'name'      => $request->name,
             'email'     => $request->email,
-            'phone'     => $request->phone,
+            'phone'     => $this->normalizePhone($request->phone),
             'role'      => $request->role,
             'branch_id' => $request->branch_id,
             'is_active' => $request->has('is_active') ? 1 : 0,
@@ -91,7 +91,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        
+
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
@@ -99,5 +99,28 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('user.index')->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Samakan format nomor telepon dengan yang dipakai di VisitsController::storeStep1()
+     * Contoh: "081234567890" atau "81234567890" -> "+6281234567890"
+     */
+    private function normalizePhone(?string $phone): ?string
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        $clean = preg_replace('/[^0-9]/', '', $phone);
+
+        if (str_starts_with($clean, '0')) {
+            $clean = '62'.substr($clean, 1);
+        }
+
+        if (! str_starts_with($clean, '+')) {
+            $clean = '+'.$clean;
+        }
+
+        return $clean;
     }
 }

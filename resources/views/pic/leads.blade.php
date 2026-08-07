@@ -23,18 +23,19 @@
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Pipeline Lead & Status Konversi</h3>
+                    <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
 
         <!-- Filter -->
         <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
             @php
                 $filterOptions = [
-                    'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
+                    'all'      => 'Semua' . ($countAll > 0 ? " ({$countActive})" : ''),
                     'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
                     'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
                     'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
                     'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
-                    'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
+                    // 'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
                 ];
                 $activeFilter = $filter ?? 'active';
             @endphp
@@ -120,12 +121,19 @@
                             @endphp
                             <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
                         </td>
-                        <td style="padding: 14px; text-align: center; white-space: nowrap;">
-                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Update Tahap</button>
-                            </div>
-                        </td>
+<td style="padding: 14px; text-align: center; white-space: nowrap;">
+    <div style="display: flex; gap: 6px; justify-content: center;">
+        <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
+
+        @if($lead->status === 'deal')
+            <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: not-allowed;">
+                ✔ Selesai
+            </button>
+        @else
+            <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Update Tahap</button>
+        @endif
+    </div>
+</td>
                     </tr>
                     @empty
                     <tr>
