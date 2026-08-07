@@ -118,7 +118,7 @@ class PicController extends Controller
             ->whereDate('follow_up_at', '>', $today)
             ->count();
 
-        return view('pic.followup', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
+        return view('pic.leads', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
     }
 
     /**
@@ -133,9 +133,10 @@ public function riwayatPic(Request $request)
         'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
     ]);
 
-    $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
-        ->where('assigned_to', auth()->id())
-        ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+// riwayatPic()
+$query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
+    ->where('assigned_to', auth()->id())
+    ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai']);
 
     if ($request->filled('keyword')) {
         $keyword = $request->keyword;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\follow_ups;
+use App\Models\leads;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
@@ -131,7 +132,7 @@ class FollowUpController extends Controller
             ->whereDate('follow_up_at', '>', $today)
             ->count();
 
-        return view('pic.followup', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
+        return view('pic.leads', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
     }
 
     /**
@@ -141,9 +142,16 @@ class FollowUpController extends Controller
     /**
      * Riwayat Kunjungan PIC
      */
-    public function riwayatPic(Request $request)
+  public function riwayatPic(Request $request)
     {
-        $query = visits::with(['guest', 'purpose', 'branch'])
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date'   => 'nullable|date|after_or_equal:start_date',
+        ], [
+            'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+        ]);
+
+        $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('assigned_to', auth()->id())
             ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
@@ -151,23 +159,15 @@ class FollowUpController extends Controller
             $keyword = $request->keyword;
             $query->whereHas('guest', function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('company_name', 'like', "%{$keyword}%");
+                  ->orWhere('company_name', 'like', "%{$keyword}%");
             });
         }
 
-        // Ambil & otomatis tukar kalau start > end
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-
-        if ($startDate && $endDate && $startDate > $endDate) {
-            [$startDate, $endDate] = [$endDate, $startDate];
+        if ($request->filled('start_date')) {
+            $query->whereDate('check_in_at', '>=', $request->start_date);
         }
-
-        if ($startDate) {
-            $query->whereDate('check_in_at', '>=', $startDate);
-        }
-        if ($endDate) {
-            $query->whereDate('check_in_at', '<=', $endDate);
+        if ($request->filled('end_date')) {
+            $query->whereDate('check_in_at', '<=', $request->end_date);
         }
 
         $visits = $query->orderBy('check_in_at', 'desc')
@@ -176,7 +176,6 @@ class FollowUpController extends Controller
 
         return view('pic.riwayat', compact('visits'));
     }
-
     /**
      * Update Status Kehadiran / Kunjungan
      */
@@ -309,26 +308,62 @@ class FollowUpController extends Controller
      */
     public function leadsIndex(Request $request)
     {
-        $leads = visits::with(['guest', 'followUps' => function ($query) {
-            $query->orderBy('created_at', 'desc');
-        }])
-            ->where('assigned_to', auth()->id())
-            ->where('potential_level', 'deal')
-            ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+        $today   = Carbon::today();
+        $filter  = $request->input('filter', 'active');
+        $ownerId = auth()->id();
 
-        $totalLeads = visits::where('assigned_to', auth()->id())
-            ->where(function ($query) {
-                $query->where('is_converted_to_lead', true)
-                    ->orWhereNotNull('follow_up_at');
-            })
-            ->count();
+        // Base query: selalu exclude status 'lost' dari halaman ini
+        $query = leads::with(['guest', 'visit', 'followUps'])
+            ->where('owner_id', $ownerId)
+            ->where('status', '!=', 'lost');
 
-        $totalDeal = visits::where('assigned_to', auth()->id())
-            ->where('potential_level', 'deal')
-            ->count();
+        switch ($filter) {
+            case 'active':
+                $query->whereNotIn('status', ['deal', 'lost']);
+                break;
+            case 'overdue':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                      ->whereDate('follow_up_at', '<', $today);
+                break;
+            case 'today':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                      ->whereDate('follow_up_at', $today);
+                break;
+            case 'upcoming':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                      ->whereDate('follow_up_at', '>', $today);
+                break;
+            case 'deal':
+                $query->where('status', 'deal');
+                break;
+            // 'all' => tanpa filter tambahan (tapi tetap exclude lost dari base query)
+        }
 
-        return view('pic.leads', compact('leads', 'totalLeads', 'totalDeal'));
+        if ($request->filled('start_date')) {
+            $query->whereDate('follow_up_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('follow_up_at', '<=', $request->end_date);
+        }
+
+        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+            ->paginate(10)
+            ->appends($request->query());
+
+        // Semua counter juga exclude 'lost' secara permanen
+        $baseCount = fn() => leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+
+        $countAll      = $baseCount()->count();
+        $countActive   = $baseCount()->whereNotIn('status', ['deal', 'lost'])->count();
+        $countOverdue  = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+        $countToday    = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+        $countUpcoming = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+        $countDeal     = $baseCount()->where('status', 'deal')->count();
+
+        return view('pic.leads', compact(
+            'leads', 'filter',
+            'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal'
+        ));
     }
 
     public function startMeeting($id)

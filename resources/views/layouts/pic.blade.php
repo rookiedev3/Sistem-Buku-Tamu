@@ -151,11 +151,11 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     <span>Dashboard Tamu</span>
                 </a>
-
+{{-- 
                 <a href="{{ route('pic.followup') }}" class="menu-item {{ request()->is('pic/followup*') ? 'active' : '' }}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                     <span>Follow Up</span>
-                </a>
+                </a> --}}
 
                 <a href="{{ route('pic.leads') }}" class="menu-item {{ request()->is('pic/leads*') ? 'active' : '' }}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -168,36 +168,7 @@
                 </a>
             </div>
         </div>
-
-<<<<<<< HEAD
-        <!-- Menu Navigasi -->
-        <div class="sidebar-menu">
-            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 12px; margin-bottom: 4px;">Menu Utama</span>
-
-            <a href="{{ route('pic.dashboard') }}" class="menu-item" style="color: {{ request()->is('pic/dashboard*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/dashboard*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/dashboard*') ? '700' : '600' }};">
-                📊 Dashboard Tamu
-            </a>
-
-        <!-- Menu Follow Up -->
-            {{-- <a href="{{ route('pic.followup')}}" class="menu-item" style="color: {{ request()->is('pic/followup*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/followup*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/followup*') ? '700' : '600' }};">
-                🔄 Follow Up
-            </a> --}}
-
-            <!-- Menu Leads Baru -->
-<a href="{{ route('pic.leads')}}" class="menu-item" style="color: {{ request()->is('pic/leads*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/leads*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/leads*') ? '700' : '600' }};">
-    📈 Lead & Follow-Up
-</a>
-
-            <a href="{{ route('pic.riwayat')}}" class="menu-item" style="color: {{ request()->is('pic/riwayat*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/riwayat*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/riwayat*') ? '700' : '600' }};">
-                📋 Riwayat Kunjungan
-            </a>
-        </div>
-
-        <!-- Tombol Keluar di Bawah -->
-        <div style="padding: 16px; border-top: 1px solid #e8edf5;">
-=======
         <div style="padding: 20px; border-top: 1px solid #e8edf5;">
->>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
             <form action="{{ route('logout') }}" method="post" style="margin: 0;">
                 @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">

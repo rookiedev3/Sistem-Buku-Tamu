@@ -166,8 +166,6 @@ Route::post('/frontoffice/pegawai/store', [FrontOfficeController::class, 'storeP
 Route::post('/frontoffice/pegawai/{id}/update', [FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 Route::delete('/frontoffice/pegawai/{id}/delete', [FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
-<<<<<<< HEAD
-
 // Group Route untuk Role Manager Operasional
 Route::prefix('manager')->middleware('auth')->group(function () {
 
@@ -190,13 +188,12 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     })->name('manager.laporan');
 
 });
-=======
+
 Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class, 'markAllNotificationsRead'])
     ->name('frontoffice.notifications.readAll');
 
 Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::class, 'markNotificationRead'])
     ->name('frontoffice.notifications.read');
->>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
 
 // Route::prefix('pic')->group(function () {
 
@@ -235,20 +232,17 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 //         return view('manager.leads');
 //     })->name('manager.leads');
 
-<<<<<<< HEAD
 //     // 4. Laporan & Export Data
 //     Route::get('/laporan', function () {
 //         return view('manager.laporan');
 //     })->name('manager.laporan');
 
 // });
-=======
     // 4. Laporan & Export Data
     Route::get('/laporan', function () {
         return view('manager.laporan');
     })->name('manager.laporan');
-});
->>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
+// });
 
 // // Group Route untuk Role Security
 // Route::prefix('security')->group(function () {
