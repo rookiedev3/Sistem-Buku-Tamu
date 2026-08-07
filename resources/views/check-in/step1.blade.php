@@ -110,13 +110,13 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" {{ old('guest_category_id', $step1Data['guest_category_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Kategori --</option>
                         @if($guestCategories->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($guestCategories as $categories)
-                                <option value="{{ $categories->id }}" {{ old('guest_category_id', $step1Data['guest_category_id'] ?? '') == $categories->id ? 'selected' : '' }}>
-                                    {{ $categories->name }}
-                                </option>
-                            @endforeach
+                        @foreach($guestCategories as $categories)
+                        <option value="{{ $categories->id }}" {{ old('guest_category_id', $step1Data['guest_category_id'] ?? '') == $categories->id ? 'selected' : '' }}>
+                            {{ $categories->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -130,9 +130,17 @@
                         <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Preview" style="width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e8edf5;">
                     </div>
                     @endif
-                    <input type="file" name="photo_path" accept="image/*"
+                    
+                    {{-- 🟢 Diberi onchange="validateFileSize(this)" agar JS tereksekusi --}}
+                    <input type="file" id="photoInput" name="photo_path" accept="image/*" onchange="validateFileSize(this)"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box; cursor: pointer;">
+                    
                     <span style="font-size: 11px; color: #778195; display: block; margin-top: 4px;">Format: JPG, JPEG, PNG (Maks. 2MB)</span>
+                    <small id="fileError" style="color: #dc2626; display: none; margin-top: 4px; font-size: 12px;"></small>
+                    
+                    @error('photo_path')
+                        <span style="font-size: 12px; color: #dc2626;">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <div style="margin-top: 10px;">
@@ -148,4 +156,22 @@
     </div>
 
 </div>
+<script>
+    function validateFileSize(input) {
+        const file = input.files[0];
+        const errorElement = document.getElementById('fileError');
+        const maxSizeBytes = 2 * 1024 * 1024; // 2 MB dalam Bytes
+
+        if (file) {
+            if (file.size > maxSizeBytes) {
+                errorElement.textContent = 'Ukuran file terlalu besar! Maksimal 2 MB.';
+                errorElement.style.display = 'block';
+                input.value = ''; // Reset file input
+            } else {
+                errorElement.style.display = 'none';
+            }
+        }
+    }
+</script>
+
 @endsection

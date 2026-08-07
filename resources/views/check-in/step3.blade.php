@@ -56,12 +56,22 @@
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 340px; overflow-y: auto;">
 
                 <!-- Foto Identitas / Tamu (Opsional) -->
-                @if(!empty($step1Data['photo']))
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                    <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Foto Tamu" style="width: 55px; height: 55px; object-fit: cover; border-radius: 50%; border: 2px solid #e2e8f0;">
+                @php
+                // Mengecek field 'photo_path' atau 'photo' dari data session step 1
+                $photoPath = $step1Data['photo_path'] ?? $step1Data['photo'] ?? null;
+                @endphp
+
+                @if(!empty($photoPath))
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <!-- Preview Gambar -->
+                    <img src="{{ asset('storage/' . $photoPath) }}"
+                        alt="Foto Tamu"
+                        style="width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 1px solid #cbd5e1;"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/55?text=Foto';" />
+
                     <div>
-                        <span style="font-size: 13px; font-weight: 700; color: #172033;">Foto Identitas</span>
-                        <p style="font-size: 11px; color: #10b981; margin: 0; font-weight: 600;">✓ Terlampir</p>
+                        <span style="font-size: 13px; font-weight: 700; color: #172033; display: block;">Foto Identitas</span>
+                        <span style="font-size: 11px; color: #10b981; font-weight: 600;">✓ Berhasil Terlampir</span>
                     </div>
                 </div>
                 @endif
@@ -135,7 +145,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Keperluan:</span>
-                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 220px;">{{ $step2Data['purpose'] ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 220px;">{{ $step2Data['notes'] ?? '-' }}</span>
                 </div>
             </div>
 

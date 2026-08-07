@@ -103,9 +103,9 @@
                             @if($statusLower === 'menunggu' || $statusLower === 'waiting')
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
-                                <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                                    Menunggu
-                                </span>
+                               <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Menunggu
+                        </span>
                             </form>
                             @elseif($statusLower === 'meeting selesai')
                             <!-- HANYA MUNCUL DI SINI: Saat status benar-benar Meeting Selesai -->

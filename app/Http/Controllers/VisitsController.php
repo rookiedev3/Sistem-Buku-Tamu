@@ -117,7 +117,7 @@ class VisitsController extends Controller
             'scheduled_at' => 'required',
             'product_interest' => 'nullable',
             'source_id' => 'nullable',
-            'purpose' => 'required|string|max:1000',
+            'notes' => 'required|string|max:1000',
         ]);
 
         // 2. Simpan Sementara ke Session
@@ -242,7 +242,7 @@ class VisitsController extends Controller
                 'scheduled_at' => $checkInDateTime,
                 'product_interest' => $step2['product_interest'] ?? null,
                 'source_id' => $step2['source_id'] ?? null,
-                'purpose' => $step2['purpose'],
+                'notes' => $step2['notes'],
                 'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
             ]);
@@ -299,7 +299,7 @@ class VisitsController extends Controller
     public function dashboardPic()
     {
         // Mengambil data milik PIC yang sedang login
-        $visits = visits::with(['guest', 'purpose', 'branch'])
+        $visits = visits::with(['guest', 'notes', 'branch'])
             ->where('assigned_to', auth()->id())
             ->where(function ($query) {
                 // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi

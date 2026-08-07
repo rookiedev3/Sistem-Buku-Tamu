@@ -11,128 +11,128 @@ use Illuminate\Http\Request;
 class FollowUpController extends Controller
 {
 
-// dashboard menampilkan kunjungan yang sedang berlangsung, menunggu, atau pending follow-up
-public function dashboardPic(Request $request)
-{
-    $filter = $request->input('filter', 'all');
-    $today = Carbon::today();
+    // dashboard menampilkan kunjungan yang sedang berlangsung, menunggu, atau pending follow-up
+    public function dashboardPic(Request $request)
+    {
+        $filter = $request->input('filter', 'all');
+        $today = Carbon::today();
 
-    $query = visits::with(['guest', 'purpose', 'branch'])
-        ->where('assigned_to', auth()->id())
-        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+        $query = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
-    if ($filter === 'today') {
-        $query->where(function ($q) use ($today) {
-            $q->whereDate('check_in_at', $today)
-              ->orWhereDate('scheduled_at', $today);
-        });
-    } elseif ($filter === 'upcoming') {
-        $query->whereNull('check_in_at')
-              ->whereDate('scheduled_at', '>', $today);
-    } else {
-        // Semua (default) — perilaku lama tetap dipertahankan
-        $query->where(function ($q) use ($today) {
-            $q->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
-              ->orWhereDate('check_in_at', $today)
-              ->orWhereDate('scheduled_at', $today);
-        });
-    }
+        if ($filter === 'today') {
+            $query->where(function ($q) use ($today) {
+                $q->whereDate('check_in_at', $today)
+                    ->orWhereDate('scheduled_at', $today);
+            });
+        } elseif ($filter === 'upcoming') {
+            $query->whereNull('check_in_at')
+                ->whereDate('scheduled_at', '>', $today);
+        } else {
+            // Semua (default) — perilaku lama tetap dipertahankan
+            $query->where(function ($q) use ($today) {
+                $q->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
+                    ->orWhereDate('check_in_at', $today)
+                    ->orWhereDate('scheduled_at', $today);
+            });
+        }
 
-    $visits = $query->orderBy('created_at', 'desc')->get();
+        $visits = $query->orderBy('created_at', 'desc')->get();
 
-    $vipCount = $visits->filter(function ($v) {
-        return optional($v->guest)->is_vip == true;
-    })->count();
-
-    $regularCount = $visits->count() - $vipCount;
-
-    // Hitung badge counter untuk filter cepat
-    $countToday = visits::where('assigned_to', auth()->id())
-        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
-        ->where(function ($q) use ($today) {
-            $q->whereDate('check_in_at', $today)
-              ->orWhereDate('scheduled_at', $today);
+        $vipCount = $visits->filter(function ($v) {
+            return optional($v->guest)->is_vip == true;
         })->count();
 
-    $countUpcoming = visits::where('assigned_to', auth()->id())
-        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
-        ->whereNull('check_in_at')
-        ->whereDate('scheduled_at', '>', $today)
-        ->count();
+        $regularCount = $visits->count() - $vipCount;
 
-    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
-}
+        // Hitung badge counter untuk filter cepat
+        $countToday = visits::where('assigned_to', auth()->id())
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+            ->where(function ($q) use ($today) {
+                $q->whereDate('check_in_at', $today)
+                    ->orWhereDate('scheduled_at', $today);
+            })->count();
 
-    
+        $countUpcoming = visits::where('assigned_to', auth()->id())
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+            ->whereNull('check_in_at')
+            ->whereDate('scheduled_at', '>', $today)
+            ->count();
+
+        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
+    }
+
+
     /**
      * Menampilkan halaman daftar follow-up aktif (Warm & Hot)
      */
-public function followupIndex(Request $request)
-{
-    $query = visits::with(['guest', 'followUps' => function ($query) {
+    public function followupIndex(Request $request)
+    {
+        $query = visits::with(['guest', 'followUps' => function ($query) {
             $query->orderBy('created_at', 'desc');
         }])
-        ->where('assigned_to', auth()->id())
-        ->whereIn('potential_level', ['warm', 'hot']);
+            ->where('assigned_to', auth()->id())
+            ->whereIn('potential_level', ['warm', 'hot']);
 
-    // Filter cepat: today / overdue / upcoming
-    $filter = $request->input('filter', 'all');
-    $today = Carbon::today();
+        // Filter cepat: today / overdue / upcoming
+        $filter = $request->input('filter', 'all');
+        $today = Carbon::today();
 
-    if ($filter === 'today') {
-        $query->whereDate('follow_up_at', $today);
-    } elseif ($filter === 'overdue') {
-        $query->whereDate('follow_up_at', '<', $today);
-    } elseif ($filter === 'upcoming') {
-        $query->whereDate('follow_up_at', '>', $today);
+        if ($filter === 'today') {
+            $query->whereDate('follow_up_at', $today);
+        } elseif ($filter === 'overdue') {
+            $query->whereDate('follow_up_at', '<', $today);
+        } elseif ($filter === 'upcoming') {
+            $query->whereDate('follow_up_at', '>', $today);
+        }
+
+        // Filter rentang tanggal manual (opsional, tetap bisa dipakai bareng filter cepat)
+        if ($request->filled('start_date')) {
+            $query->whereDate('follow_up_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('follow_up_at', '<=', $request->end_date);
+        }
+
+        // Urutkan: yang follow_up_at paling dekat/terlambat di atas, yang null di bawah
+        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+            ->paginate(10)
+            ->appends($request->query());
+
+        $totalLeads = visits::where('assigned_to', auth()->id())
+            ->where(function ($query) {
+                $query->where('is_converted_to_lead', true)
+                    ->orWhereNotNull('follow_up_at');
+            })
+            ->count();
+
+        $totalDeal = visits::where('assigned_to', auth()->id())
+            ->where('potential_level', 'deal')
+            ->count();
+
+        // Hitung ringkasan untuk badge counter di filter
+        $countOverdue = visits::where('assigned_to', auth()->id())
+            ->whereIn('potential_level', ['warm', 'hot'])
+            ->whereDate('follow_up_at', '<', $today)
+            ->count();
+
+        $countToday = visits::where('assigned_to', auth()->id())
+            ->whereIn('potential_level', ['warm', 'hot'])
+            ->whereDate('follow_up_at', $today)
+            ->count();
+
+        $countAll = visits::where('assigned_to', auth()->id())
+            ->whereIn('potential_level', ['warm', 'hot'])
+            ->count();
+
+        $countUpcoming = visits::where('assigned_to', auth()->id())
+            ->whereIn('potential_level', ['warm', 'hot'])
+            ->whereDate('follow_up_at', '>', $today)
+            ->count();
+
+        return view('pic.followup', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
     }
-
-    // Filter rentang tanggal manual (opsional, tetap bisa dipakai bareng filter cepat)
-    if ($request->filled('start_date')) {
-        $query->whereDate('follow_up_at', '>=', $request->start_date);
-    }
-    if ($request->filled('end_date')) {
-        $query->whereDate('follow_up_at', '<=', $request->end_date);
-    }
-
-    // Urutkan: yang follow_up_at paling dekat/terlambat di atas, yang null di bawah
-    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-        ->paginate(10)
-        ->appends($request->query());
-
-    $totalLeads = visits::where('assigned_to', auth()->id())
-        ->where(function ($query) {
-            $query->where('is_converted_to_lead', true)
-                  ->orWhereNotNull('follow_up_at');
-        })
-        ->count();
-
-    $totalDeal = visits::where('assigned_to', auth()->id())
-        ->where('potential_level', 'deal')
-        ->count();
-
-    // Hitung ringkasan untuk badge counter di filter
-    $countOverdue = visits::where('assigned_to', auth()->id())
-        ->whereIn('potential_level', ['warm', 'hot'])
-        ->whereDate('follow_up_at', '<', $today)
-        ->count();
-
-    $countToday = visits::where('assigned_to', auth()->id())
-        ->whereIn('potential_level', ['warm', 'hot'])
-        ->whereDate('follow_up_at', $today)
-        ->count();
-
-    $countAll = visits::where('assigned_to', auth()->id())
-    ->whereIn('potential_level', ['warm', 'hot'])
-    ->count();
-
-$countUpcoming = visits::where('assigned_to', auth()->id())
-    ->whereIn('potential_level', ['warm', 'hot'])
-    ->whereDate('follow_up_at', '>', $today)
-    ->count();
-
-return view('pic.followup', compact('leads', 'totalLeads', 'totalDeal', 'filter', 'countOverdue', 'countToday', 'countAll', 'countUpcoming'));
-}
 
     /**
      * Dashboard PIC & Manajemen Pertemuan
@@ -141,41 +141,41 @@ return view('pic.followup', compact('leads', 'totalLeads', 'totalDeal', 'filter'
     /**
      * Riwayat Kunjungan PIC
      */
-public function riwayatPic(Request $request)
-{
-    $query = visits::with(['guest', 'purpose', 'branch'])
-        ->where('assigned_to', auth()->id())
-        ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+    public function riwayatPic(Request $request)
+    {
+        $query = visits::with(['guest', 'purpose', 'branch'])
+            ->where('assigned_to', auth()->id())
+            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
-    if ($request->filled('keyword')) {
-        $keyword = $request->keyword;
-        $query->whereHas('guest', function ($q) use ($keyword) {
-            $q->where('name', 'like', "%{$keyword}%")
-              ->orWhere('company_name', 'like', "%{$keyword}%");
-        });
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->whereHas('guest', function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            });
+        }
+
+        // Ambil & otomatis tukar kalau start > end
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        if ($startDate && $endDate && $startDate > $endDate) {
+            [$startDate, $endDate] = [$endDate, $startDate];
+        }
+
+        if ($startDate) {
+            $query->whereDate('check_in_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('check_in_at', '<=', $endDate);
+        }
+
+        $visits = $query->orderBy('check_in_at', 'desc')
+            ->paginate(10)
+            ->appends($request->query());
+
+        return view('pic.riwayat', compact('visits'));
     }
-
-    // Ambil & otomatis tukar kalau start > end
-    $startDate = $request->start_date;
-    $endDate = $request->end_date;
-
-    if ($startDate && $endDate && $startDate > $endDate) {
-        [$startDate, $endDate] = [$endDate, $startDate];
-    }
-
-    if ($startDate) {
-        $query->whereDate('check_in_at', '>=', $startDate);
-    }
-    if ($endDate) {
-        $query->whereDate('check_in_at', '<=', $endDate);
-    }
-
-    $visits = $query->orderBy('check_in_at', 'desc')
-        ->paginate(10)
-        ->appends($request->query());
-
-    return view('pic.riwayat', compact('visits'));
-}
 
     /**
      * Update Status Kehadiran / Kunjungan
@@ -234,13 +234,15 @@ public function riwayatPic(Request $request)
             ->where('assigned_to', auth()->id())
             ->firstOrFail();
 
-        visit_status_logs::create([
-            'visit_id'   => $visit->id,
-            'old_status' => $visit->status,
-            'new_status' => 'Meeting Selesai',
-            'changed_by' => auth()->check() ? auth()->id() : null,
-            'changed_at' => now(),
-        ]);
+        if ($visit->status != 'Meeting Selesai') {
+            visit_status_logs::create([
+                'visit_id'   => $visit->id,
+                'old_status' => $visit->status,
+                'new_status' => 'Meeting Selesai',
+                'changed_by' => auth()->check() ? auth()->id() : null,
+                'changed_at' => now(),
+            ]);
+        }
 
         $visit->update([
             // Status TIDAK diubah jadi 'completed', biarkan tetap atau pastikan 'meeting'

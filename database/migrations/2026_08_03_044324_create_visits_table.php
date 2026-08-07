@@ -10,7 +10,8 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {Schema::create('visits', function (Blueprint $table) {
+    {
+        Schema::create('visits', function (Blueprint $table) {
             $table->id();
             $table->string('visit_code', 30)->unique();
             $table->foreignId('guest_id')->constrained('guests')->onDelete('cascade');
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->foreignId('source_id')->nullable()->constrained('lead_sources')->onDelete('set null');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->dateTime('scheduled_at');
+            $table->text('notes')->nullable();
             $table->dateTime('check_in_at')->nullable();
             $table->dateTime('meeting_start_at')->nullable();
             $table->dateTime('check_out_at')->nullable();
