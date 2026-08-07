@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->bigInteger('user_id');
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('type', 100);
             $table->string('title', 200);
             $table->text('body');
