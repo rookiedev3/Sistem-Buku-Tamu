@@ -19,6 +19,7 @@ class visits extends Model
         'source_id',
         'assigned_to',
         'scheduled_at',
+        'notes',
         'check_in_at',
         'meeting_start_at',
         'check_out_at',
