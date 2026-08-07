@@ -17,7 +17,6 @@ class guests extends Model
         'address',
         'guest_category_id',
         'photo_path',
-        'notes',
         'created_by',
     ];
 
