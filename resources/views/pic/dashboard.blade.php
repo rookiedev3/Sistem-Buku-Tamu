@@ -98,6 +98,7 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
                         <th style="padding: 14px;">Kategori</th>
                         <th style="padding: 14px;">Keperluan</th>
+                        <th style="padding: 14px; text-align: center;">Catatan</th>
                         <th style="padding: 14px;">Waktu / Jadwal</th>
                         <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
@@ -122,6 +123,17 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                     </td>
 
                             <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
+
+                            <!-- Kolom Catatan (dari data awal pengirim, bukan hasil meeting) -->
+                            <td style="padding: 14px; text-align: center;">
+                                @if(!empty($visit->notes))
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatanTamu-{{ $visit->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                    📝 Lihat Catatan
+                                </button>
+                                @else
+                                <span style="font-style: italic; color: #94a3b8; font-size: 12px;">-</span>
+                                @endif
+                            </td>
                             
 <td style="padding: 14px; color: #778195; font-weight: 600;">
     @if($visit->check_in_at)
@@ -209,6 +221,31 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                     </td>
                 </tr>
 
+                <!-- MODAL CATATAN TAMU (catatan data awal dari yang kirim/isi kunjungan) -->
+                @if(!empty($visit->notes))
+                <div class="modal fade" id="modalCatatanTamu-{{ $visit->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
+                                <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
+                                    📝 Catatan dari {{ $visit->guest->name ?? 'Tamu' }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6;">
+                                <div style="white-space: pre-line; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+                                    {{ $visit->notes }}
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <!-- END MODAL CATATAN TAMU -->
+
                 <!-- MODAL CATAT PERTEMUAN -->
                 <div class="modal fade" id="modalCatatPertemuan-{{ $visit->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -234,15 +271,12 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                                         <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
                                     </div>
 
-<div style="margin-bottom: 16px;">
-    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Status Konversi Lead</label>
-    <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-        <option value="warm">Warm Lead (Perlu Follow-Up via WhatsApp)</option>
-        <option value="hot">Hot Lead (Prospek Tinggi / Minta Penawaran)</option>
-        <option value="deal">Deal / Berhasil (Resmi Order)</option>
-        <option value="cold">Cold / Selesai Kunjungan Biasa</option>
-    </select>
-</div>
+<select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+    <option value="hot">Hot Lead</option>
+    <option value="warm">Warm Lead</option>
+    <option value="cold">Cold</option>
+    <option value="non_lead">Non-Lead</option>
+</select>
 
 <div style="margin-bottom: 20px;">
     <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
@@ -283,7 +317,7 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
 
                     @empty
                         <tr>
-                            <td colspan="7" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
+                            <td colspan="8" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
                                 Belum ada kunjungan tamu hari ini.
                             </td>
                         </tr>
@@ -338,9 +372,6 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
         box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
     }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

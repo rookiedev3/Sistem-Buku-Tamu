@@ -15,14 +15,15 @@
         </p>
     </div>
 
+    <!-- Statistik Dinamis dari Database -->
     <div style="display: flex; gap: 12px;">
         <div style="background: #ffffff; padding: 12px 20px; border-radius: 14px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
             <span style="font-size: 11px; color: #778195; font-weight: 600; display: block;">Total Tamu Hari Ini</span>
-            <span style="font-size: 18px; font-weight: 800; color: #1e3a8a;">18 Orang</span>
+            <span style="font-size: 18px; font-weight: 800; color: #1e3a8a;">{{ $totalToday ?? 0 }} Orang</span>
         </div>
         <div style="background: #ffffff; padding: 12px 20px; border-radius: 14px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
             <span style="font-size: 11px; color: #778195; font-weight: 600; display: block;">Lead Deal Bulan Ini</span>
-            <span style="font-size: 18px; font-weight: 800; color: #006B3F;">24 Klien</span>
+            <span style="font-size: 18px; font-weight: 800; color: #006B3F;">{{ $leadDealsCount ?? 0 }} Klien</span>
         </div>
     </div>
 </div>
@@ -52,28 +53,46 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
+                @forelse($visits as $index => $v)
                 <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px; font-weight: 700;">1</td>
+                    <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px;">
-                        <strong style="display: block; color: #172033; font-weight: 800;">Budi Santoso</strong>
-                        <span style="font-size: 11px; color: #778195;">PT Maju Mundur Sejahtera</span>
+                        <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
+                        <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">⭐ VIP</span>
+                        <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">
+                            ⭐ {{ $v->guest->category->name ?? 'Reguler' }}
+                        </span>
                     </td>
-                    <td style="padding: 16px 20px; color: #475569; font-weight: 600;">Siska (Sales / PIC)</td>
-                    <td style="padding: 16px 20px; color: #778195; font-weight: 600;">10:15 WIB</td>
+                    <td style="padding: 16px 20px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }} (PIC)</td>
+                    <td style="padding: 16px 20px; color: #778195; font-weight: 600;">
+                        {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '-' }}
+                    </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <span style="background: #dbeafe; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Sedang Bertemu</span>
+                        @if($v->check_out_at)
+                            <span style="background: #f1f5f9; color: #64748b; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Selesai</span>
+                        @elseif($v->check_in_at)
+                            <span style="background: #dbeafe; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Sedang Bertemu</span>
+                        @else
+                            <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Menunggu</span>
+                        @endif
                     </td>
                 </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">
+                        Belum ada data kunjungan tamu untuk hari ini.
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan data monitoring real-time</span>
-        <span>Halaman 1 dari 1</span>
+        <span>Total Data: {{ $visits->count() }}</span>
     </div>
 
 </div>

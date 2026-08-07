@@ -122,13 +122,13 @@
             </a>
 
         <!-- Menu Follow Up -->
-            <a href="{{ route('pic.followup')}}" class="menu-item" style="color: {{ request()->is('pic/followup*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/followup*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/followup*') ? '700' : '600' }};">
+            {{-- <a href="{{ route('pic.followup')}}" class="menu-item" style="color: {{ request()->is('pic/followup*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/followup*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/followup*') ? '700' : '600' }};">
                 🔄 Follow Up
-            </a>
+            </a> --}}
 
             <!-- Menu Leads Baru -->
 <a href="{{ route('pic.leads')}}" class="menu-item" style="color: {{ request()->is('pic/leads*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/leads*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/leads*') ? '700' : '600' }};">
-    📈 Lead 
+    📈 Lead & Follow-Up
 </a>
 
             <a href="{{ route('pic.riwayat')}}" class="menu-item" style="color: {{ request()->is('pic/riwayat*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/riwayat*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/riwayat*') ? '700' : '600' }};">

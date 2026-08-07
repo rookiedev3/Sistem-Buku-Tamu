@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class guests extends Model
 {
     protected $table = 'guests';
-    protected $primaryKey = 'id';
     protected $fillable = [
         'guest_code',
         'name',
@@ -21,4 +20,9 @@ class guests extends Model
         'notes',
         'created_by',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(guest_categories::class, 'guest_category_id');
+    }
 }

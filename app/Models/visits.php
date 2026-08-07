@@ -83,11 +83,14 @@ public function followUps()
     return $this->hasMany(follow_ups::class, 'visit_id')->latest(); 
 }
 
-// app/Models/visits.php
-
+public function lead()
+{
+    return $this->hasOne(leads::class, 'visit_id');
+}
 public function latestFollowUp()
 {
     // Beritahu Laravel bahwa primary key-nya adalah 'follow_up_id'
     return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
 }
+
 }
