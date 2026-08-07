@@ -2,24 +2,18 @@
 
 @section('content')
 <div style="display: flex; flex-direction: column; gap: 24px;">
-
-    <!-- Bagian Header Statistik Lead -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Data Leads & Klien Deal 🎉</h2>
-            <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar prospek klien dan pantau daftar perusahaan yang sudah berhasil closing.</p>
-        </div>
-
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Total Prospek Aktif</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #172033; margin-top: 4px;">{{ $totalLeads ?? 0 }} Klien</strong>
-        </div>
-
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">{{ $totalDeal ?? 0 }} Klien</strong>
-        </div>
+<!-- Bagian Header Statistik Lead -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Data Leads & Klien Deal 🎉</h2>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar prospek klien dan pantau daftar perusahaan yang sudah berhasil closing.</p>
     </div>
+
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
+        <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">{{ $totalDeal ?? 0 }} Klien</strong>
+    </div>
+</div>
 
     <!-- Tabel Daftar Leads / Deal -->
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -116,15 +110,11 @@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 20px;">
                         <div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Status Prospek Terakhir:</div>
-                            <div style="font-weight: 800; color: #172033; text-transform: capitalize;">
-                                {{ $lead->potential_level ?? 'Belum ada status' }}
-                            </div>
                         </div>
                         <div>
-                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal Follow-Up Aktif:</div>
-                            <div style="font-weight: 700; color: #006B3F;">
-                                {{ $followUpDate ? \Carbon\Carbon::parse($followUpDate)->translatedFormat('d F Y') : 'Tidak ada jadwal / Sudah Deal' }}
-                            </div>
+                            <div style="font-weight: 800; color: #172033; text-transform: capitalize;">
+                                {{ $lead->potential_level ?? 'Belum ada status' }}
+                            </div>                  
                         </div>
                     </div>
 

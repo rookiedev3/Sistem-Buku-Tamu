@@ -65,6 +65,30 @@
             <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Tamu Masuk & Kategori Pelanggan</h3>
             <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
+
+        <!-- Filter Cepat Dashboard -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+    @php
+        $filterOptions = [
+            'all'      => 'Semua',
+            'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
+            'upcoming' => 'Terjadwal Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
+        ];
+        $activeFilter = $filter ?? 'all';
+    @endphp
+
+    @foreach($filterOptions as $key => $label)
+        @php
+            $isActive = $activeFilter === $key;
+            $bg = $isActive ? '#006B3F' : '#f1f5f9';
+            $color = $isActive ? '#ffffff' : '#475569';
+        @endphp
+        <a href="{{ route('pic.dashboard', ['filter' => $key]) }}"
+           style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+            {{ $label }}
+        </a>
+    @endforeach
+</div>
         
         <div class="table-responsive">
             <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
@@ -99,16 +123,22 @@
 
                             <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
                             
-                            <!-- Menampilkan Check-in jika ada, jika null ambil dari Scheduled At -->
-                            <td style="padding: 14px; color: #778195; font-weight: 600;">
-                                @if($visit->check_in_at)
-                                    {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
-                                @elseif($visit->scheduled_at)
-                                    {{ \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') }} WIB <span style="font-size: 10px; color: #d97706;"></span>
-                                @else
-                                    -
-                                @endif
-                            </td>
+<td style="padding: 14px; color: #778195; font-weight: 600;">
+    @if($visit->check_in_at)
+        {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
+        <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Sudah check-in</div>
+    @elseif($visit->scheduled_at)
+        @php $schedDate = \Carbon\Carbon::parse($visit->scheduled_at); @endphp
+        {{ $schedDate->format('H:i') }} WIB
+        @if($schedDate->isToday())
+            <div style="font-size: 10px; color: #d97706; margin-top: 2px; font-weight: 700;">🔥 Hari Ini</div>
+        @else
+            <div style="font-size: 10px; color: #1d4ed8; margin-top: 2px; font-weight: 700;">📅 {{ tgl($schedDate) }}</div>
+        @endif
+    @else
+        -
+    @endif
+</td>
                             
 <!-- Kolom Konfirmasi Kehadiran -->
 <td style="padding: 14px; text-align: center;">
@@ -204,20 +234,36 @@
                                                 <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
                                             </div>
 
-                                            <div style="margin-bottom: 16px;">
-                                                <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Status Konversi Lead</label>
-                                                <select name="potential_level" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-                                                    <option value="warm">Warm Lead (Perlu Follow-Up via WhatsApp)</option>
-                                                    <option value="hot">Hot Lead (Prospek Tinggi / Minta Penawaran)</option>
-                                                    <option value="deal">Deal / Berhasil (Resmi Order)</option>
-                                                    <option value="cold">Cold / Selesai Kunjungan Biasa</option>
-                                                </select>
-                                            </div>
+<div style="margin-bottom: 16px;">
+    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Status Konversi Lead</label>
+    <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+        <option value="warm">Warm Lead (Perlu Follow-Up via WhatsApp)</option>
+        <option value="hot">Hot Lead (Prospek Tinggi / Minta Penawaran)</option>
+        <option value="deal">Deal / Berhasil (Resmi Order)</option>
+        <option value="cold">Cold / Selesai Kunjungan Biasa</option>
+    </select>
+</div>
 
-                                            <div style="margin-bottom: 20px;">
-                                                <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
-                                                <input type="date" name="follow_up_at" value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
-                                            </div>
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+
+    <div style="position: relative; display: flex; align-items: center; width: 100%;">
+        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        </div>
+
+        <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
+            value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
+            placeholder="Pilih tanggal follow-up..." readonly
+            style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+    </div>
+    <p id="follow_up_note-{{ $visit->id }}" style="display:none; font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">Follow-up tidak diperlukan untuk status Deal / Cold.</p>
+</div>
 
                                             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                                                 <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
@@ -246,6 +292,98 @@
             </table>
         </div>
     </div>
-
 </div>
+
+<!-- CDN CSS Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+<style>
+    .flatpickr-calendar {
+        border-radius: 16px !important;
+        box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important;
+        border: 1px solid #e8edf5 !important;
+        font-family: inherit !important;
+        padding: 8px !important;
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected.inRange,
+    .flatpickr-day.selected:focus,
+    .flatpickr-day.selected:hover {
+        background: #006B3F !important;
+        border-color: #006B3F !important;
+        font-weight: 600;
+        border-radius: 10px !important;
+    }
+    .flatpickr-day:hover {
+        border-radius: 10px !important;
+    }
+    .flatpickr-months .flatpickr-month {
+        color: #172033 !important;
+        fill: #172033 !important;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        font-weight: 700 !important;
+    }
+    span.flatpickr-weekday {
+        color: #778195 !important;
+        font-weight: 600 !important;
+    }
+    #follow_up_at:focus {
+        border-color: #006B3F !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach($visits as $visit)
+        (function() {
+            var inputEl  = document.getElementById('follow_up_at-{{ $visit->id }}');
+            var selectEl = document.getElementById('potential_level-{{ $visit->id }}');
+            var noteEl   = document.getElementById('follow_up_note-{{ $visit->id }}');
+
+            if (!inputEl || !selectEl) return;
+
+var fp = flatpickr(inputEl, {
+    locale: "id",
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    disableMobile: "true"
+});
+
+            function syncFollowUpState() {
+                var noFollowUp = ['deal', 'cold'].includes(selectEl.value);
+
+                if (noFollowUp) {
+                    fp.clear();          // kosongkan tanggal yang sudah dipilih
+                    fp.set('clickOpens', false);
+                    inputEl.disabled = true;
+                    inputEl.style.background = '#f1f5f9';
+                    inputEl.style.color = '#94a3b8';
+                    inputEl.style.cursor = 'not-allowed';
+                    if (noteEl) noteEl.style.display = 'block';
+                } else {
+                    fp.set('clickOpens', true);
+                    inputEl.disabled = false;
+                    inputEl.style.background = '#fbfcfe';
+                    inputEl.style.color = '#172033';
+                    inputEl.style.cursor = 'pointer';
+                    if (noteEl) noteEl.style.display = 'none';
+                }
+            }
+
+            selectEl.addEventListener('change', syncFollowUpState);
+            syncFollowUpState(); // jalankan sekali saat load, jaga-jaga default value bukan "warm"
+        })();
+        @endforeach
+    });
+</script>
 @endsection

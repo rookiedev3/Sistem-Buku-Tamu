@@ -3,22 +3,10 @@
 @section('content')
 <div style="display: flex; flex-direction: column; gap: 24px;">
 
-    <!-- Bagian Header Statistik Lead -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Lead & Follow-Up Penjualan 📈</h2>
-            <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar prospek klien hasil kunjungan, catat status konversi, dan jadwalkan tindak lanjut.</p>
-        </div>
-
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Total Prospek Aktif</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #172033; margin-top: 4px;">{{ $totalLeads ?? 0 }} Klien</strong>
-        </div>
-
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">{{ $totalDeal ?? 0 }} Klien</strong>
-        </div>
+    <!-- Header -->
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Lead & Follow-Up Penjualan 📈</h2>
+        <p style="font-size: 13px; color: #778195; margin: 0;">Kelola daftar prospek klien hasil kunjungan, catat status konversi, dan jadwalkan tindak lanjut.</p>
     </div>
 
     <!-- Tabel Manajemen Lead -->
@@ -26,6 +14,33 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Prospek & Status Konversi</h3>
         </div>
+        <!-- Filter Cepat Follow-Up -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+@php
+    $filterOptions = [
+        'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
+        'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
+        'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
+        'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
+    ];
+    $activeFilter = $filter ?? 'all';
+@endphp
+
+    @foreach($filterOptions as $key => $label)
+        @php
+            $isActive = $activeFilter === $key;
+            $bg = $isActive ? '#006B3F' : '#f1f5f9';
+            $color = $isActive ? '#ffffff' : '#475569';
+            if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
+                $bg = '#fef2f2'; $color = '#dc2626';
+            }
+        @endphp
+        <a href="{{ route('pic.followup', ['filter' => $key]) }}"
+           style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+            {{ $label }}
+        </a>
+    @endforeach
+</div>
         
         <div class="table-responsive">
             <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
@@ -58,9 +73,37 @@
                             @endphp
                             {{ Str::limit($note ?? 'Belum ada catatan follow-up.', 50) }}
                         </td>
-                        <td style="padding: 14px; color: #006B3F; font-weight: 700;">
-                            {{ $lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d M Y') : '-' }}
-                        </td>
+<td style="padding: 14px;">
+    @if($lead->follow_up_at)
+        @php
+            $fuDate = \Carbon\Carbon::parse($lead->follow_up_at)->startOfDay();
+            $today = \Carbon\Carbon::today();
+        @endphp
+        <div style="font-weight: 700; color: #172033; margin-bottom: 4px;">
+            {{ $fuDate->translatedFormat('d M Y') }}
+        </div>
+        @if($fuDate->lt($today))
+            <span style="background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">
+                ⚠ Terlambat {{ $fuDate->diffInDays($today) }} hari
+            </span>
+        @elseif($fuDate->eq($today))
+            <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">
+                🔥 Hari Ini
+            </span>
+@else
+    @php $diff = abs($fuDate->diffInDays($today)); @endphp
+    <span style="background: #e6f4ed; color: #006B3F; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;">
+        @if($diff == 1)
+            Besok
+        @else
+            {{ $diff }} hari mendatang
+        @endif
+    </span>
+@endif
+    @else
+        <span style="color: #94a3b8; font-size: 12px;">Belum dijadwalkan</span>
+    @endif
+</td>
                         <td style="padding: 14px;">
                             @if($lead->potential_level == 'warm')
                                 <span style="background: #dbeafe; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Warm Lead</span>
@@ -245,12 +288,27 @@
                             <textarea name="result" rows="3" placeholder="Tuliskan respon klien dari WA / telepon..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;" required></textarea>
                         </div>
 
-                        <!-- Jadwal Follow-Up Berikutnya -->
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
-                            <input type="date" name="due_at" id="dateInput{{ $lead->id }}" value="{{ $lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->format('Y-m-d') : '' }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
-                            <small id="dateNote{{ $lead->id }}" style="font-size: 11px; color: #94a3b8; display: block; margin-top: 4px;">*Tanggal otomatis dinonaktifkan jika status Deal atau Cold.</small>
-                        </div>
+<!-- Jadwal Follow-Up Berikutnya -->
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+
+    <div style="position: relative; display: flex; align-items: center; width: 100%;">
+        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        </div>
+
+        <input type="text" name="due_at" id="dateInput{{ $lead->id }}"
+            value="{{ $lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->format('Y-m-d') : '' }}"
+            placeholder="Pilih tanggal follow-up..." readonly
+            style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+    </div>
+    <small id="dateNote{{ $lead->id }}" style="font-size: 11px; color: #94a3b8; display: block; margin-top: 4px;">*Tanggal otomatis dinonaktifkan jika status Deal atau Cold.</small>
+</div>
 
                         <div style="display: flex; justify-content: flex-end; gap: 10px;">
                             <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">Batal</button>
@@ -263,25 +321,84 @@
     </div>
 @endforeach
 
-<!-- Script untuk mengatur akses tanggal berdasarkan status dropdown -->
+<!-- CDN CSS Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .flatpickr-calendar {
+        border-radius: 16px !important;
+        box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important;
+        border: 1px solid #e8edf5 !important;
+        font-family: inherit !important;
+        padding: 8px !important;
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected.inRange,
+    .flatpickr-day.selected:focus,
+    .flatpickr-day.selected:hover {
+        background: #006B3F !important;
+        border-color: #006B3F !important;
+        font-weight: 600;
+        border-radius: 10px !important;
+    }
+    .flatpickr-day:hover {
+        border-radius: 10px !important;
+    }
+    .flatpickr-months .flatpickr-month {
+        color: #172033 !important;
+        fill: #172033 !important;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        font-weight: 700 !important;
+    }
+    span.flatpickr-weekday {
+        color: #778195 !important;
+        font-weight: 600 !important;
+    }
+    input[id^="dateInput"]:focus {
+        border-color: #006B3F !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+    }
+</style>
+
+<!-- CDN JS Flatpickr & Bahasa Indonesia -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const selects = document.querySelectorAll(".status-dropdown");
 
         selects.forEach(select => {
             const leadId = select.getAttribute("data-id");
-            const dateInput = document.getElementById("dateInput" + leadId);
+            const dateInputEl = document.getElementById("dateInput" + leadId);
+            if (!dateInputEl) return;
+const fp = flatpickr(dateInputEl, {
+    locale: "id",
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    disableMobile: "true"
+});
 
             function handleDateAccess() {
-                if (!dateInput) return;
-                // Jika status Deal atau Cold, nonaktifkan input tanggal
-                if (select.value === "deal" || select.value === "cold" || select.value === "drop") {
-                    dateInput.value = ""; 
-                    dateInput.disabled = true; 
-                    dateInput.style.backgroundColor = "#f1f5f9";
+                const noFollowUp = ["deal", "cold", "drop"].includes(select.value);
+
+                if (noFollowUp) {
+                    fp.clear();
+                    fp.set('clickOpens', false);
+                    dateInputEl.disabled = true;
+                    dateInputEl.style.backgroundColor = "#f1f5f9";
+                    dateInputEl.style.color = "#94a3b8";
+                    dateInputEl.style.cursor = "not-allowed";
                 } else {
-                    dateInput.disabled = false; 
-                    dateInput.style.backgroundColor = "#fff";
+                    fp.set('clickOpens', true);
+                    dateInputEl.disabled = false;
+                    dateInputEl.style.backgroundColor = "#fbfcfe";
+                    dateInputEl.style.color = "#172033";
+                    dateInputEl.style.cursor = "pointer";
                 }
             }
 
