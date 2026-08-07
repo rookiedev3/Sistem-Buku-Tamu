@@ -8,6 +8,7 @@ class follow_ups extends Model
 {
     protected $table = 'follow_ups';
     protected $fillable = [
+        'lead_id',      // <-- WAJIB ditambah, ini yang bikin riwayat gak kesimpan
         'visit_id',
         'assigned_to',
         'due_at',

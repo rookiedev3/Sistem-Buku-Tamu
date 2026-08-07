@@ -3,10 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\FrontOfficeController;
 use App\Http\Controllers\GuestCategoriesController;
 use App\Http\Controllers\LeadSourcesController;
+use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\PicController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\UserController;
@@ -36,24 +37,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('/pengguna', UserController::class)->names('user');
 
-    Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
-    Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
-    Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
+    // Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
+    // Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
+    // Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
 
     Route::middleware('auth')->prefix('pic')->group(function () {
         // 👈 Tambahkan baris ini agar /pic langsung mengarah ke /pic/dashboard
         Route::get('/', function () {
             return redirect()->route('pic.dashboard');
         });
-        Route::get('/dashboard', [FollowUpController::class, 'dashboardPic'])->name('pic.dashboard');
-        Route::get('/riwayat', [FollowUpController::class, 'riwayatPic'])->name('pic.riwayat');
+        Route::get('/dashboard', [PicController::class, 'dashboardPic'])->name('pic.dashboard');
+        Route::get('/riwayat', [PicController::class, 'riwayatPic'])->name('pic.riwayat');
         // Route Lead & Follow Up PIC
-        Route::get('/leads', [FollowUpController::class, 'leadsIndex'])->name('pic.leads');
-        Route::get('/followup', [FollowUpController::class, 'followupIndex'])->name('pic.followup');
-        Route::post('/leads/{visit_id}/followup', [FollowUpController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');
-        Route::patch('/visit/{id}/status', [FollowUpController::class, 'updateStatus'])->name('pic.updateStatus');
-        Route::post('/visit/{id}/complete', [FollowUpController::class, 'completeMeeting'])->name('pic.completeMeeting');
-        Route::patch('/pic/visit/{id}/start-meeting', [FollowUpController::class, 'startMeeting'])->name('pic.startMeeting');
+        Route::get('/leads', [PicController::class, 'leadsIndex'])->name('pic.leads');
+        Route::get('/followup', [PicController::class, 'followupIndex'])->name('pic.followup');
+        Route::post('/leads/{visit_id}/followup', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');
+        Route::patch('/visit/{id}/status', [PicController::class, 'updateStatus'])->name('pic.updateStatus');
+        Route::post('/visit/{id}/complete', [PicController::class, 'completeMeeting'])->name('pic.completeMeeting');
+        Route::patch('/pic/visit/{id}/start-meeting', [PicController::class, 'startMeeting'])->name('pic.startMeeting');
+
+// baru
+Route::get('/pic/leads', [PicController::class, 'leadsIndex'])->name('pic.leads');
+Route::post('/pic/leads/{leadId}/follow-up', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');        
     });
 
     // 1. chek in route sementara front end
@@ -161,11 +166,37 @@ Route::post('/frontoffice/pegawai/store', [FrontOfficeController::class, 'storeP
 Route::post('/frontoffice/pegawai/{id}/update', [FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 Route::delete('/frontoffice/pegawai/{id}/delete', [FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
+<<<<<<< HEAD
+
+// Group Route untuk Role Manager Operasional
+Route::prefix('manager')->middleware('auth')->group(function () {
+
+    // 1. Dashboard Monitoring Manager (Diubah ke Controller)
+    Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
+
+    // 2. Semua Kunjungan
+    Route::get('/kunjungan', function () {
+        return view('manager.kunjungan');
+    })->name('manager.kunjungan');
+
+    // 3. Pipeline Lead Tim
+    Route::get('/leads', function () {
+        return view('manager.leads');
+    })->name('manager.leads');
+
+    // 4. Laporan & Export Data
+    Route::get('/laporan', function () {
+        return view('manager.laporan');
+    })->name('manager.laporan');
+
+});
+=======
 Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class, 'markAllNotificationsRead'])
     ->name('frontoffice.notifications.readAll');
 
 Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::class, 'markNotificationRead'])
     ->name('frontoffice.notifications.read');
+>>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
 
 // Route::prefix('pic')->group(function () {
 
@@ -187,28 +218,37 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 // });
 
 // Group Route untuk Role Manager Operasional
-Route::prefix('manager')->group(function () {
+// Route::prefix('manager')->group(function () {
 
-    // 1. Dashboard Monitoring Manager
-    Route::get('/dashboard', function () {
-        return view('manager.dashboard');
-    })->name('manager.dashboard');
+//     // 1. Dashboard Monitoring Manager
+//     Route::get('/dashboard', function () {
+//         return view('manager.dashboard');
+//     })->name('manager.dashboard');
 
-    // 2. Semua Kunjungan
-    Route::get('/kunjungan', function () {
-        return view('manager.kunjungan');
-    })->name('manager.kunjungan');
+//     // 2. Semua Kunjungan
+//     Route::get('/kunjungan', function () {
+//         return view('manager.kunjungan');
+//     })->name('manager.kunjungan');
 
-    // 3. Pipeline Lead Tim
-    Route::get('/leads', function () {
-        return view('manager.leads');
-    })->name('manager.leads');
+//     // 3. Pipeline Lead Tim
+//     Route::get('/leads', function () {
+//         return view('manager.leads');
+//     })->name('manager.leads');
 
+<<<<<<< HEAD
+//     // 4. Laporan & Export Data
+//     Route::get('/laporan', function () {
+//         return view('manager.laporan');
+//     })->name('manager.laporan');
+
+// });
+=======
     // 4. Laporan & Export Data
     Route::get('/laporan', function () {
         return view('manager.laporan');
     })->name('manager.laporan');
 });
+>>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
 
 // // Group Route untuk Role Security
 // Route::prefix('security')->group(function () {

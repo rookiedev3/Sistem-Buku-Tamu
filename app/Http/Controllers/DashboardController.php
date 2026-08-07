@@ -70,7 +70,7 @@ class DashboardController extends Controller
     }
     protected function managerDashboard()
     {
-        return view('manager.dashboard');
+        return redirect()->route('manager.dashboard');
     }
 
     protected function adminDashboard()

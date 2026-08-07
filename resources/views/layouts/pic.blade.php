@@ -169,7 +169,35 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+        <!-- Menu Navigasi -->
+        <div class="sidebar-menu">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 12px; margin-bottom: 4px;">Menu Utama</span>
+
+            <a href="{{ route('pic.dashboard') }}" class="menu-item" style="color: {{ request()->is('pic/dashboard*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/dashboard*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/dashboard*') ? '700' : '600' }};">
+                📊 Dashboard Tamu
+            </a>
+
+        <!-- Menu Follow Up -->
+            {{-- <a href="{{ route('pic.followup')}}" class="menu-item" style="color: {{ request()->is('pic/followup*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/followup*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/followup*') ? '700' : '600' }};">
+                🔄 Follow Up
+            </a> --}}
+
+            <!-- Menu Leads Baru -->
+<a href="{{ route('pic.leads')}}" class="menu-item" style="color: {{ request()->is('pic/leads*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/leads*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/leads*') ? '700' : '600' }};">
+    📈 Lead & Follow-Up
+</a>
+
+            <a href="{{ route('pic.riwayat')}}" class="menu-item" style="color: {{ request()->is('pic/riwayat*') ? '#006B3F' : '#5c6678' }}; background: {{ request()->is('pic/riwayat*') ? '#e6f0eb' : 'transparent' }}; font-weight: {{ request()->is('pic/riwayat*') ? '700' : '600' }};">
+                📋 Riwayat Kunjungan
+            </a>
+        </div>
+
+        <!-- Tombol Keluar di Bawah -->
+        <div style="padding: 16px; border-top: 1px solid #e8edf5;">
+=======
         <div style="padding: 20px; border-top: 1px solid #e8edf5;">
+>>>>>>> 8e427235ec68350fa8830dc330078dc384db6a7d
             <form action="{{ route('logout') }}" method="post" style="margin: 0;">
                 @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">
