@@ -155,7 +155,7 @@
         </div>
 
         <div style="padding: 20px; border-top: 1px solid #e8edf5;">
-            <form action="{{ route('logout') }}" method="get" style="margin: 0;">
+            <form action="{{ route('logout') }}" method="post" style="margin: 0;">
                 @csrf
                 <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #dc2626; background: #fef2f2; font-size: 13px; font-weight: 700; border: none; cursor: pointer;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -167,20 +167,29 @@
 
     <div class="main-wrapper">
         
-        <header class="navbar-top">
-            <div style="font-size: 13px; color: #64748b; font-weight: 500;">
-                Pos Penjagaan & Pengawasan Gerbang
+        <header class="navbar-top" style="height: 70px; background: #ffffff; border-bottom: 1px solid #e8edf5; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 90; box-sizing: border-box;">
+            
+            <div>
+                <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Portal Security</h1>
+                <p style="font-size: 11px; font-weight: 600; color: #778195; margin: 0;">
+                    {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                </p>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="font-size: 12px; background: #e6f0eb; color: #006B3F; padding: 6px 14px; border-radius: 20px; font-weight: 600;">
-                    🛡️ Status: Aktif Bertugas
+                    🛡️ Security
                 </div>
 
-                <div style="width: 36px; height: 36px; background: #006B3F; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">
-                    SC
+                <div style="width: 1px; height: 24px; background: #e8edf5; margin: 0 4px;"></div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; background: #006B3F; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px;">
+                        {{ strtoupper(substr(Auth::user()->name ?? 'SEC', 0, 2)) }}
+                    </div>
                 </div>
             </div>
+
         </header>
 
         <main class="content-area">
