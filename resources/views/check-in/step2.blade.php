@@ -1,12 +1,11 @@
 @extends('layouts.guest')
 
 @section('content')
-<div style="width: 100vw; min-height: 100vh; background: #f4f7fc; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px;">
+<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f7faf8; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(245, 235, 224, 0.7) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.04) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.3) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
 
-    <div style="width: 100%; max-width: 1150px; background: #ffffff; border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid #e8edf5; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+    <div style="width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid rgba(255, 255, 255, 0.95); overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
 
-        <!-- Left Sidebar Info -->
-        <div style="background: linear-gradient(135deg, #006B3F, #1b8a5c); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+        <div style="background: linear-gradient(135deg, #006B3F, #159A5C); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
                     Guest Check-In
@@ -43,7 +42,6 @@
             </div>
         </div>
 
-        <!-- Right Form Area -->
         <div style="padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
 
             <div style="margin-bottom: 20px;">
@@ -193,10 +191,8 @@
 
 </div>
 
-<!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<!-- Custom Style UI Flatpickr (Style Pertama / Standard) -->
 <style>
     .flatpickr-calendar {
         border-radius: 16px !important;
@@ -237,7 +233,6 @@
     }
 </style>
 
-<!-- CDN JS Flatpickr & Bahasa Indonesia -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
@@ -253,8 +248,8 @@
             time_24hr: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today",
-            minTime: "08:00",           // Membatasi jam mulai: 08:00 WIB
-            maxTime: "17:00",           // Membatasi jam selesai: 17:00 WIB
+            minTime: "08:00",          // Membatasi jam mulai: 08:00 WIB
+            maxTime: "17:00",          // Membatasi jam selesai: 17:00 WIB
             minuteIncrement: 15,
             disableMobile: "true",
             disable: [

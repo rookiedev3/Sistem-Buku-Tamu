@@ -14,6 +14,8 @@
             margin: 0;
             padding: 0;
         }
+
+        
     </style>
 </head>
 <body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;">

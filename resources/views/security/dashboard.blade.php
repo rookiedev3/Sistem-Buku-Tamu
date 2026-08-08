@@ -48,7 +48,7 @@
             <tbody style="color: #172033;">
                 @forelse($visits as $index => $v)
                 <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
+                    <td style="padding: 16px 20px; font-weight: 700;">{{ $visits->firstItem() + $index }}</td>
                     <td style="padding: 16px 20px;">
                         <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
                         <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
@@ -93,9 +93,8 @@
         </table>
     </div>
 
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
-        <span>Menampilkan log aktivitas tanggal {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}</span>
-        <span>Total: {{ $totalToday }}</span>
+    <div style="padding: 20px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe;">
+        @include('partials.pagination', ['paginator' => $visits])
     </div>
 
 </div>

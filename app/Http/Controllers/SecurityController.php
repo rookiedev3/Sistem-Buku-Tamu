@@ -14,6 +14,7 @@ class SecurityController extends Controller
      */
 public function dashboard(Request $request)
 {
+    $perPage = (int) $request->input('per_page', 10);
     // Ambil tanggal dari input user, jika kosong gunakan hari ini
     $selectedDate = $request->get('date', Carbon::today()->toDateString());
 
@@ -21,7 +22,8 @@ public function dashboard(Request $request)
         ->select('id', 'visit_code', 'guest_id', 'assigned_to', 'scheduled_at', 'check_in_at', 'check_out_at', 'status')
         ->whereDate('scheduled_at', $selectedDate)
         ->orderBy('scheduled_at', 'asc')
-        ->get();
+        ->paginate($perPage)          
+        ->appends($request->query());
 
     $totalToday = $visits->count();
 

@@ -82,7 +82,7 @@
                         $leadStatus = optional($v->lead)->status; // null kalau visit ini cold/non_lead (tidak dikonversi)
                     @endphp
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
+                        <td style="padding: 16px 20px; font-weight: 700;">{{ $visits->firstItem() + $index }}</td>
                         <td style="padding: 14px; color: #778195; font-weight: 600;">
                             {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}<br>
                             <span style="font-size: 11px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
@@ -114,7 +114,7 @@
                                 @php $b = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
                                 <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
                             @elseif($isCompleted)
-                                <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Kunjungan Biasa (Non-Lead)</span>
+                                <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">(Non-Lead)</span>
                             @else
                                 <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Dibatalkan</span>
                             @endif
@@ -133,7 +133,7 @@
 
         <!-- Pagination -->
         <div style="margin-top: 20px;">
-            {{ $visits->links() }}
+@include('partials.pagination', ['paginator' => $visits])
         </div>
     </div>
 

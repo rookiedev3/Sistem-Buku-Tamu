@@ -8,58 +8,66 @@ use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class PicController extends Controller
 {
     // dashboard menampilkan kunjungan yang sedang berlangsung, menunggu, atau pending follow-up
-    public function dashboardPic(Request $request)
-    {
-        $filter = $request->input('filter', 'all');
-        $today = Carbon::today();
+public function dashboardPic(Request $request)
+{
+    $filter = $request->input('filter', 'all');
+    $perPage = (int) $request->input('per_page', 10);
+    $today = Carbon::today();
 
-        $query = visits::with(['guest', 'purpose', 'branch'])
-            ->where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+    $query = visits::with(['guest', 'purpose', 'branch'])
+        ->where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
-        if ($filter === 'today') {
-            $query->where(function ($q) use ($today) {
-                $q->whereDate('check_in_at', $today)
-                  ->orWhereDate('scheduled_at', $today);
-            });
-        } elseif ($filter === 'upcoming') {
-            $query->whereNull('check_in_at')
-                  ->whereDate('scheduled_at', '>', $today);
-        } else {
-            $query->where(function ($q) use ($today) {
-                $q->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
-                  ->orWhereDate('check_in_at', $today)
-                  ->orWhereDate('scheduled_at', $today);
-            });
-        }
+    if ($filter === 'today') {
+        $query->where(function ($q) use ($today) {
+            $q->whereDate('check_in_at', $today)
+              ->orWhereDate('scheduled_at', $today);
+        });
+    } elseif ($filter === 'upcoming') {
+        $query->whereNull('check_in_at')
+              ->whereDate('scheduled_at', '>', $today);
+    } else {
+        $query->where(function ($q) use ($today) {
+            $q->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
+              ->orWhereDate('check_in_at', $today)
+              ->orWhereDate('scheduled_at', $today);
+        });
+    }
 
-        $visits = $query->orderBy('created_at', 'desc')->get();
+    $visits = $query->orderBy('created_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
 
-        $vipCount = $visits->filter(function ($v) {
-            return optional($v->guest)->is_vip == true;
+    // Kolom is_vip belum ada di database (masih tahap pengembangan bareng tim).
+    // Cek dulu sebelum query, supaya tidak error dan otomatis aktif begitu kolomnya sudah ada.
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        $vipCount = (clone $query)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count();
+        $regularCount = (clone $query)->count() - $vipCount;
+    } else {
+        $vipCount = 0;
+        $regularCount = (clone $query)->count();
+    }
+
+    $countToday = visits::where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+        ->where(function ($q) use ($today) {
+            $q->whereDate('check_in_at', $today)
+              ->orWhereDate('scheduled_at', $today);
         })->count();
 
-        $regularCount = $visits->count() - $vipCount;
+    $countUpcoming = visits::where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+        ->whereNull('check_in_at')
+        ->whereDate('scheduled_at', '>', $today)
+        ->count();
 
-        $countToday = visits::where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
-            ->where(function ($q) use ($today) {
-                $q->whereDate('check_in_at', $today)
-                  ->orWhereDate('scheduled_at', $today);
-            })->count();
-
-        $countUpcoming = visits::where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
-            ->whereNull('check_in_at')
-            ->whereDate('scheduled_at', '>', $today)
-            ->count();
-
-        return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
-    }
+    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
+}
 
     /**
      * Menampilkan halaman pipeline follow-up aktif (new/contacted/negotiation)
@@ -126,6 +134,7 @@ class PicController extends Controller
      */
 public function riwayatPic(Request $request)
 {
+    $perPage = (int) $request->input('per_page', 10);
     $request->validate([
         'start_date' => 'nullable|date',
         'end_date'   => 'nullable|date|after_or_equal:start_date',
@@ -154,7 +163,7 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
     }
 
     $visits = $query->orderBy('check_in_at', 'desc')
-        ->paginate(10)
+        ->paginate($perPage)
         ->appends($request->query());
 
     return view('pic.riwayat', compact('visits'));
@@ -293,6 +302,7 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
      */
     public function leadsIndex(Request $request)
     {
+        $perPage = (int) $request->input('per_page', 10);
         $today   = Carbon::today();
         $filter  = $request->input('filter', 'active');
         $ownerId = auth()->id();
@@ -332,7 +342,7 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
         }
 
         $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-            ->paginate(10)
+            ->paginate($perPage)
             ->appends($request->query());
 
         // Semua counter juga exclude 'lost' secara permanen

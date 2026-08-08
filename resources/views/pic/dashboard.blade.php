@@ -107,7 +107,7 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                 <tbody>
                     @forelse($visits as $index => $visit)
                         <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 14px; font-weight: 600;">{{ $index + 1 }}</td>
+                            <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
                             
                             <td style="padding: 14px;">
                                 <strong style="display: block; color: #172033; font-weight: 800;">{{ $visit->guest->name ?? '-' }}</strong>
@@ -324,6 +324,10 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                     @endforelse
                 </tbody>
             </table>
+        </div>
+                <!-- Pagination -->
+        <div style="margin-top: 20px;">
+        @include('partials.pagination', ['paginator' => $visits])
         </div>
     </div>
 </div>
