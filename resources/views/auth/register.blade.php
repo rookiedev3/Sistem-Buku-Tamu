@@ -18,7 +18,6 @@
             padding: 0;
         }
 
-        /* Wallpaper background dan posisi card disamakan persis dengan login */
         body {
             background-color: #f4f7fc;
             min-height: 100vh;
@@ -27,7 +26,7 @@
             justify-content: center;
         }
 
-        /* Container Card Memanjang (Ukuran, shadow, dan border-radius disamakan 100%) */
+        /* Container Card Memanjang (Disamakan 100% persis dengan login) */
         .login-wrapper {
             width: 100%;
             max-width: 950px;
@@ -39,7 +38,7 @@
             border: 1px solid #e8edf5;
         }
 
-        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) - Padding 50px persis login */
+        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) */
         .login-brand-side {
             flex: 1;
             background: linear-gradient(135deg, #006B3F 0%, #004d2e 100%);
@@ -50,7 +49,7 @@
             justify-content: space-between;
         }
 
-        /* Sisi Kanan: Form Register 2 Kolom - Padding disamakan 50px persis login */
+        /* Sisi Kanan: Form Register 2 Kolom */
         .login-form-side {
             flex: 1.1;
             padding: 50px;
@@ -73,7 +72,6 @@
             margin-bottom: 20px;
         }
 
-        /* Input form disesuaikan agar ukurannya pas dan proporsional */
         .form-control, .form-select {
             border-radius: 12px;
             padding: 10px 14px;
@@ -88,14 +86,54 @@
             background-color: #fff;
         }
 
+        /* Menghilangkan ikon mata bawaan dari browser (Edge & Chrome) */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            position: absolute;
+            right: 0;
+        }
+
+        /* Kotak Khusus Password agar Ikon Mata Kustom Menyatu Bersih */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container .form-control {
+            padding-right: 45px;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .password-toggle-btn:hover {
+            color: #006B3F;
+        }
+
         .btn-custom-login {
             background-color: #006B3F;
             color: #fff;
             border: none;
             border-radius: 12px;
-            padding: 12px;
+            padding: 11px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13.5px;
             transition: 0.2s ease;
         }
 
@@ -194,17 +232,27 @@
                 <div class="row g-2">
                     <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Password <span class="text-danger">*</span></label>
-                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                            placeholder="Min. 6 karakter" required>
+                        <div class="password-container">
+                            <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror"
+                                placeholder="Min. 6 karakter" required>
+                            <button type="button" class="password-toggle-btn" id="togglePassword">
+                                <i class="bi bi-eye-slash" id="eyeIcon"></i>
+                            </button>
+                        </div>
                         @error('password')
-                            <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Konfirmasi <span class="text-danger">*</span></label>
-                        <input type="password" name="password_confirmation" class="form-control"
-                            placeholder="Ulangi password" required>
+                        <div class="password-container">
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control"
+                                placeholder="Ulangi password" required>
+                            <button type="button" class="password-toggle-btn" id="togglePasswordConfirm">
+                                <i class="bi bi-eye-slash" id="eyeIconConfirm"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -221,6 +269,28 @@
         </div>
 
     </div>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            eyeIcon.className = type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+
+        const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
+        const passwordConfirm = document.getElementById('password_confirmation');
+        const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+
+        togglePasswordConfirm.addEventListener('click', function () {
+            const type = passwordConfirm.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordConfirm.setAttribute('type', type);
+            eyeIconConfirm.className = type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 

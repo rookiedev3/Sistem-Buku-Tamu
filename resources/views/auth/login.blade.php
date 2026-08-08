@@ -26,7 +26,6 @@
             justify-content: center;
         }
 
-        /* Container Card Memanjang */
         .login-wrapper {
             width: 100%;
             max-width: 950px;
@@ -38,7 +37,6 @@
             border: 1px solid #e8edf5;
         }
 
-        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) */
         .login-brand-side {
             flex: 1;
             background: linear-gradient(135deg, #006B3F 0%, #004d2e 100%);
@@ -49,7 +47,6 @@
             justify-content: space-between;
         }
 
-        /* Sisi Kanan: Form Login */
         .login-form-side {
             flex: 1.1;
             padding: 50px;
@@ -86,6 +83,46 @@
             background-color: #fff;
         }
 
+        /* Sembunyikan ikon mata bawaan browser (Edge/Chrome) */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            position: absolute;
+            right: 0;
+        }
+
+        /* Kotak Khusus Password untuk ikon mata custom kita */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container .form-control {
+            padding-right: 45px;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .password-toggle-btn:hover {
+            color: #006B3F;
+        }
+
         .btn-custom-login {
             background-color: #006B3F;
             color: #fff;
@@ -102,7 +139,6 @@
             color: #fff;
         }
 
-        /* Responsif untuk layar HP (otomatis menumpuk ke bawah jika di mobile) */
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;
@@ -162,7 +198,12 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 700; color: #172033;">Password</label>
-                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                    <div class="password-container">
+                        <input type="password" name="password" id="password" class="form-control" required placeholder="••••••••">
+                        <button type="button" class="password-toggle-btn" id="togglePassword">
+                            <i class="bi bi-eye-slash" id="eyeIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 13px;">
@@ -188,6 +229,18 @@
         </div>
 
     </div>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            eyeIcon.className = type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
