@@ -72,7 +72,7 @@
                 <tbody>
                     @forelse($leads as $index => $lead)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 14px; font-weight: 600;">{{ $leads->firstItem() + $index }}</td>
+                        <td style="padding: 16px 20px; font-weight: 700;">{{ $visits->firstItem() + $index }}</td>
                         <td style="padding: 14px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">{{ $lead->guest->name ?? '-' }}</strong>
                             <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
@@ -144,7 +144,9 @@
             </table>
         </div>
 
-        <div style="margin-top: 20px;">{{ $leads->links() }}</div>
+        <div style="margin-top: 20px;">
+@include('partials.pagination', ['paginator' => $leads])
+        </div>
     </div>
 </div>
 

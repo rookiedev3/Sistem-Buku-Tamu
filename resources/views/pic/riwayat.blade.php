@@ -82,7 +82,7 @@
                         $leadStatus = optional($v->lead)->status; // null kalau visit ini cold/non_lead (tidak dikonversi)
                     @endphp
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
+                        <td style="padding: 16px 20px; font-weight: 700;">{{ $visits->firstItem() + $index }}</td>
                         <td style="padding: 14px; color: #778195; font-weight: 600;">
                             {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}<br>
                             <span style="font-size: 11px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
@@ -133,7 +133,7 @@
 
         <!-- Pagination -->
         <div style="margin-top: 20px;">
-            {{ $visits->links() }}
+@include('partials.pagination', ['paginator' => $visits])
         </div>
     </div>
 
