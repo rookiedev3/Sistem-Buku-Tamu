@@ -166,16 +166,36 @@ Route::post('/frontoffice/pegawai/store', [FrontOfficeController::class, 'storeP
 Route::post('/frontoffice/pegawai/{id}/update', [FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
 Route::delete('/frontoffice/pegawai/{id}/delete', [FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
-// Group Route untuk Role Manager Operasional
+// // Group Route untuk Role Manager Operasional
+// Route::prefix('manager')->middleware('auth')->group(function () {
+
+//     // 1. Dashboard Monitoring Manager (Diubah ke Controller)
+//     Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
+
+//     // 2. Semua Kunjungan
+//     Route::get('/kunjungan', function () {
+//         return view('manager.kunjungan');
+//     })->name('manager.kunjungan');
+
+//     // 3. Pipeline Lead Tim
+//     Route::get('/leads', function () {
+//         return view('manager.leads');
+//     })->name('manager.leads');
+
+//     // 4. Laporan & Export Data
+//     Route::get('/laporan', function () {
+//         return view('manager.laporan');
+//     })->name('manager.laporan');
+
+// });
+
 Route::prefix('manager')->middleware('auth')->group(function () {
 
-    // 1. Dashboard Monitoring Manager (Diubah ke Controller)
+    // 1. Dashboard Monitoring Manager
     Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
 
     // 2. Semua Kunjungan
-    Route::get('/kunjungan', function () {
-        return view('manager.kunjungan');
-    })->name('manager.kunjungan');
+    Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
 
     // 3. Pipeline Lead Tim
     Route::get('/leads', function () {

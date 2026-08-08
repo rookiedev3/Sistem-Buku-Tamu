@@ -114,7 +114,7 @@
                                 @php $b = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
                                 <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
                             @elseif($isCompleted)
-                                <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Kunjungan Biasa (Non-Lead)</span>
+                                <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">(Non-Lead)</span>
                             @else
                                 <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Dibatalkan</span>
                             @endif
