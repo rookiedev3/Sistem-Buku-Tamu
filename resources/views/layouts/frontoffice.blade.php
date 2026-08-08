@@ -186,10 +186,14 @@
         }
 
         .notif-item {
-            padding: 14px 18px;
+            padding: 12px 18px;
             border-bottom: 1px solid #f1f5f9;
             transition: background 0.2s ease;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
         }
 
         .notif-item:last-child {
@@ -200,19 +204,32 @@
             background: #f8fafc;
         }
 
+        .notif-item-content {
+            flex-grow: 1;
+            min-width: 0;
+            /* penting: supaya teks panjang tidak mendorong lebar kotak */
+        }
+
         .notif-item strong {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 13px;
             color: #172033;
             font-weight: 700;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
+            line-height: 1.3;
         }
 
         .notif-item p {
             font-size: 12px;
             color: #64748b;
             margin: 0 0 6px 0;
-            line-height: 1.4;
+            line-height: 1.5;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-line;
+            /* biar \n di body jadi baris baru */
         }
 
         .notif-item small {
@@ -221,12 +238,19 @@
             font-weight: 600;
         }
 
-        .notif-item-empty {
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 600;
+        .notif-item-mark-btn {
+            background: #e6f4ed;
+            color: #006B3F;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 3px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 2px;
+            /* sejajarkan dengan baris judul, bukan mepet ke atas */
         }
     </style>
 </head>
@@ -257,6 +281,14 @@
                 </a>
 
                 <div class="menu-category">Fitur Staf</div>
+
+                <a href="{{ route('frontoffice.guest') }}" class="menu-item {{ request()->routeIs('frontoffice.guest') || request()->is('frontoffice/guests*') ? 'active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Daftar Tamu (Guests)</span>
+                </a>
 
                 <a href="/frontoffice/history" class="menu-item {{ request()->routeIs('frontoffice.history') ? 'active' : '' }}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -317,8 +349,8 @@
 
     <div class="main-wrapper">
 
-       <header class="navbar-top" style="height: 70px; background: #ffffff; border-bottom: 1px solid #e8edf5; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 90; box-sizing: border-box;">
-            
+        <header class="navbar-top" style="height: 70px; background: #ffffff; border-bottom: 1px solid #e8edf5; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 90; box-sizing: border-box;">
+
             <div>
                 <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Portal Front Office</h1>
                 <p style="font-size: 11px; font-weight: 600; color: #778195; margin: 0;">
@@ -368,18 +400,18 @@
                         <!-- Dropdown Items -->
                         <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column;">
                             @forelse($myNotifications as $notif)
-                            <div class="notif-item" style="display: flex; justify-content: space-between; align-items: start; gap: 10px;">
-                                <div style="flex-grow: 1;">
-                                    <strong style="display: flex; align-items: center; gap: 6px;">
-                                        <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span>
+                            <div class="notif-item">
+                                <div class="notif-item-content">
+                                    <strong>
+                                        <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; flex-shrink: 0;"></span>
                                         {{ $notif->title }}
                                     </strong>
                                     <p>{{ $notif->body }}</p>
                                     <small>{{ $notif->created_at->diffForHumans() }}</small>
                                 </div>
-                                <form action="{{ route('frontoffice.notifications.read', $notif->id) }}" method="POST" style="margin: 0; flex-shrink: 0;">
+                                <form action="{{ route('frontoffice.notifications.read', $notif->id) }}" method="POST" style="margin: 0;">
                                     @csrf
-                                    <button type="submit" title="Tandai dibaca" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; border-radius: 6px; padding: 2px 6px; font-size: 10px; font-weight: 700; cursor: pointer;">
+                                    <button type="submit" class="notif-item-mark-btn" title="Tandai dibaca">
                                         ✓
                                     </button>
                                 </form>

@@ -66,7 +66,7 @@
                             {{ $visit->assignedUser->name ?? '-' }}
                         </span>
                     </td>
-                    
+
                     {{-- TABEL STATUS --}}
                     <td style="padding: 16px 20px;">
                         @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
@@ -75,7 +75,7 @@
                         </span>
                         @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
                         <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Menunggu 
+                            Menunggu
                         </span>
                         @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed']))
                         <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
@@ -103,7 +103,7 @@
                                     Check-in
                                 </button>
                             </form>
-                            
+
                             {{-- Status Menunggu -> Tamu sudah check-in, menunggu  --}}
                             @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
                             <span style="font-size: 11px; color: #d97706; font-weight: 600;"> Menunggu </span>

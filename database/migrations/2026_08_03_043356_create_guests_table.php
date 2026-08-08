@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email', 150)->nullable();
             $table->string('company_name', 180)->nullable();
             $table->string('position', 100)->nullable();
+            $table->boolean('is_vip')->nullable();
             $table->text('address')->nullable();
             $table->bigInteger('guest_category_id')->nullable();
             $table->string('photo_path')->nullable();

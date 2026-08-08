@@ -50,10 +50,10 @@ class VisitsController extends Controller
         // 2. Sanitasi Format Nomor Telepon / WhatsApp (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+            $phone = '+' . $phone;
         }
         $validatedData['phone'] = $phone;
 
@@ -208,11 +208,11 @@ class VisitsController extends Controller
                 $guest->update($step1);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-'.$todayDate.'-';
+                $prefix = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
-                $step1['guest_code'] = $prefix.$sequence;
+                $step1['guest_code'] = $prefix . $sequence;
                 $guest = guests::create($step1);
             }
 
@@ -227,10 +227,10 @@ class VisitsController extends Controller
 
             // 4. Generate Visit Code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-'.$todayDate.'-';
+            $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit.$sequenceVisit;
+            $visitCode = $prefixVisit . $sequenceVisit;
 
             // 5. Simpan ke Tabel Visits
             $newVisit = visits::create([
@@ -260,17 +260,25 @@ class VisitsController extends Controller
             $newVisit->check_in_at = now();
             $newVisit->save();
 
+            // Ambil data pendukung untuk isi notifikasi
+            $purposeType = visit_purposes::find($step2['purpose_id']);
+            $branch = branches::find($step2['branch_id']);
+
             // 1. Ambil semua user yang memiliki role 'admin'
             $adminUsers = users::where('role', 'admin')->get();
 
-            // 2. Looping untuk kirim notifikasi creke masing-masing admin
+            // 2. Looping untuk kirim notifikasi ke masing-masing admin
             foreach ($adminUsers as $admin) {
-                notifications::send(
-                    $admin->id,
-                    'guest_arrived',
-                    'Notifikasi Admin 🔔',
-                    'Tamu '.($guest->name ?? 'Tamu').' baru saja melakukan check-in.'
-                );
+                    notifications::send(
+                        $admin->id,
+                        'guest_arrived',
+                        'Notifikasi Admin 🔔',
+                        'Tamu baru membuat jadwal pertemuan.' .
+                            "\n" . 'Nama: ' . ($guest->name ?? '-') .
+                            "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
+                            "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
+                            "\n" . 'Cabang: ' . ($branch->name ?? '-')
+                    );
             }
 
             return $newVisit;

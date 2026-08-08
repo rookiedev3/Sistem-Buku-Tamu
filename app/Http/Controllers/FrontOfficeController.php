@@ -61,6 +61,19 @@ class FrontOfficeController extends Controller
             'meeting_start_at' => now(),
         ]);
 
+        // 1. Ambil semua user yang memiliki role 'admin'
+        $picUsers = users::where('role', 'pic')->get();
+
+        // 2. Looping untuk kirim notifikasi creke masing-masing admin
+        foreach ($picUsers as $pic) {
+            notifications::send(
+                $pic->id,
+                'guest_arrived',
+                'Tamu Anda Sudah Datang 🔔',
+                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+            );
+        }
+
         return redirect()->back()->with('success', 'Tamu berhasil Check-in!');
     }
 
@@ -378,5 +391,66 @@ class FrontOfficeController extends Controller
         $notif->update(['read_at' => now()]);
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
+    }
+
+    public function guest(Request $request)
+    {
+        $query = Guests::query();
+
+        if ($request->has('vip') && $request->vip !== null) {
+            $query->where('is_vip', $request->vip);
+        }
+
+        $guests = $query->latest()->get();
+
+        return view('frontoffice.listGuests', compact('guests'));
+    }
+
+    // 2. Menyimpan Data Tamu Baru
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'is_vip' => 'required|boolean',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('guests', 'public');
+        }
+
+        guests::create([
+            'name' => $request->name,
+            'company_name' => $request->company_name,
+            'position' => $request->position,
+            'phone' => $request->phone,
+            'is_vip' => $request->is_vip,
+            'photo_path' => $photoPath,
+            'visits_count' => 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Data tamu berhasil ditambahkan!');
+    }
+
+    // 3. Fungsionalitas Toggle Status VIP via AJAX
+    public function toggleVip(Request $request, $id)
+    {
+        $request->validate([
+            'is_vip' => 'required|boolean'
+        ]);
+
+        $guest = guests::findOrFail($id);
+        $guest->is_vip = $request->is_vip;
+        $guest->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status VIP berhasil diperbarui',
+            'is_vip' => $guest->is_vip
+        ]);
     }
 }

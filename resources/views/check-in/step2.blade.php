@@ -12,7 +12,7 @@
                     Guest Check-In
                 </span>
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
-                    Keperluan Kunjungan 📋
+                    Keperluan Kunjungan 
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
                     Tentukan tujuan kunjungan, produk yang diminati, serta sampaikan detail keperluan Anda.
@@ -179,11 +179,11 @@
                 {{-- Navigation Buttons --}}
                 <div style="display: flex; gap: 12px; margin-top: 6px;">
                     <a href="{{ route('check-in.step1') }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
-                        ⬅️ Kembali
+                        ⬅ Kembali
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #1463ff; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
-                        Selanjutnya: Konfirmasi Data ➡️
+                        Selanjutnya: Konfirmasi Data 
                     </button>
                 </div>
             </form>

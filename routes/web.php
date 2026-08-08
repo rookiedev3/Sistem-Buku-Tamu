@@ -154,6 +154,10 @@ Route::get('/frontoffice/dashboard', [FrontOfficeController::class, 'dashboard']
 Route::post('/frontoffice/visit/{id}/checkin', [FrontOfficeController::class, 'checkIn'])->name('frontoffice.checkin');
 Route::post('/frontoffice/visit/{id}/checkout', [FrontOfficeController::class, 'checkOut'])->name('frontoffice.checkout');
 Route::post('/frontoffice/visit/manual', [FrontOfficeController::class, 'storeManual'])->name('frontoffice.storeManual');
+Route::get('/frontoffice/guests', [FrontOfficeController::class, 'guest'])->name('frontoffice.guest');
+Route::post('/frontoffice/guests', [FrontOfficeController::class, 'store'])->name('frontoffice.store');
+Route::patch('/frontoffice/guests/{guest}/toggle-vip', [FrontOfficeController::class, 'toggleVip'])->name('frontoffice.toggle-vip');
+
 
 Route::get('/frontoffice/history', [FrontOfficeController::class, 'history'])->name('frontoffice.history');
 

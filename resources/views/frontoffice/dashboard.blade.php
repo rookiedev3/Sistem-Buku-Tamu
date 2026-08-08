@@ -65,7 +65,7 @@
                 <tr style="border-bottom: 1px solid #e8edf5;">
                     <td style="padding: 16px 20px;">
                         <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
-                        <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? $visit->scheduled_at->format('H:i') . ' WIB' : '-' }}</span>
+                        <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
                     </td>
                     <td style="padding: 16px 20px;">
                         <div style="font-weight: 700;">{{ $visit->guest->name ?? '-' }}</div>
@@ -77,16 +77,22 @@
                             {{ $visit->assignedUser->name ?? '-' }}
                         </span>
                     </td>
+
+                    {{-- TABEL STATUS --}}
                     <td style="padding: 16px 20px;">
-                        @if($visit->status === 'Menunggu' || $visit->status === 'waiting')
+                        @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
+                        <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Terjadwal
+                        </span>
+                        @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
                         <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Menunggu
                         </span>
-                        @elseif($visit->status === 'Sedang Bertemu' || $visit->status === 'confirmed')
+                        @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed']))
                         <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Sedang Bertemu
                         </span>
-                        @elseif($visit->status === 'Selesai' || $visit->status === 'completed')
+                        @elseif(in_array($visit->status, ['Selesai', 'completed']))
                         <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Selesai
                         </span>
@@ -96,27 +102,33 @@
                         </span>
                         @endif
                     </td>
+
+                    {{-- TABEL AKSI --}}
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            @php $statusLower = strtolower($visit->status); @endphp
-
-                            @if($statusLower === 'menunggu' || $statusLower === 'waiting')
+                            {{-- Status Terjadwal -> Tampilkan tombol Check-in --}}
+                            @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
-                               <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Menunggu
-                        </span>
+                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                    Check-in
+                                </button>
                             </form>
-                            @elseif($statusLower === 'meeting selesai')
-                            <!-- HANYA MUNCUL DI SINI: Saat status benar-benar Meeting Selesai -->
+
+                            {{-- Status Menunggu --}}
+                            @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
+                            <span style="font-size: 11px; color: #d97706; font-weight: 600;">Menunggu</span>
+
+                            {{-- Status Sedang Bertemu / Meeting Selesai -> Tampilkan tombol Check-out --}}
+                            @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed', 'meeting selesai']))
                             <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                                     Check-out
                                 </button>
                             </form>
-                            @elseif($statusLower === 'sedang bertemu' || $statusLower === 'confirmed')
-                            <span style="font-size: 11px; color: #6741b5; font-weight: 600;">Diskusi Berlangsung</span>
+
+                            {{-- Status Selesai / Lainnya --}}
                             @else
                             <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
                             @endif
@@ -139,6 +151,7 @@
 
 </div>
 
+<!-- Modal Input Tamu Manual -->
 <div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 999;">
     <div style="background: #ffffff; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); box-sizing: border-box;">
         <h3 style="font-size: 18px; font-weight: 800; color: #172033; margin-top: 0; margin-bottom: 16px;">Form Input Tamu Manual (Front Office)</h3>
@@ -209,7 +222,6 @@
         document.getElementById('manualModal').style.display = 'none';
     }
 
-    // Fungsi Pencarian / Filter Tabel secara Real-time
     function filterTable() {
         const input = document.getElementById('searchGuest');
         const filter = input.value.toLowerCase();

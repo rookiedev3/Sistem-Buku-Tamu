@@ -12,7 +12,7 @@
                     Guest Check-In
                 </span>
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
-                    Selamat Datang! 👋
+                    Selamat Datang! 
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
                     Silakan isi data identitas Anda untuk memulai proses check-in kunjungan agar tim kami dapat menyambut dan melayani Anda dengan lebih cepat
@@ -131,7 +131,7 @@
                     </div>
                     @endif
                     
-                    {{-- 🟢 Diberi onchange="validateFileSize(this)" agar JS tereksekusi --}}
+                    {{--  Diberi onchange="validateFileSize(this)" agar JS tereksekusi --}}
                     <input type="file" id="photoInput" name="photo_path" accept="image/*" onchange="validateFileSize(this)"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box; cursor: pointer;">
                     
@@ -146,7 +146,7 @@
                 <div style="margin-top: 10px;">
                     <button type="submit"
                         style="width: 100%; background: #1463ff; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
-                        Selanjutnya: Keperluan Kunjungan ➡️
+                        Selanjutnya: Keperluan Kunjungan 
                     </button>
                 </div>
 
