@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\leads;
 use Illuminate\Http\Request;
 use App\Models\visits;
 use Carbon\Carbon;
@@ -64,5 +65,72 @@ public function kunjungan(Request $request)
         ->appends($request->query());
 
     return view('manager.kunjungan', compact('visits'));
+}
+public function leadsPipeline(Request $request)
+{
+    $today  = Carbon::today();
+    $filter = $request->input('filter', 'active');
+
+    $query = leads::with([
+        'guest',
+        'visit',
+        'owner',
+        'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
+    ]);
+
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        case 'lost':
+            $query->where('status', 'lost');
+            break;
+        // 'all' => tanpa filter tambahan, tampilkan semua status termasuk lost
+    }
+
+    if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                   ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('owner', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate(10)
+        ->appends($request->query());
+
+    // Counter lintas semua PIC — sekarang termasuk lost
+    $countAll      = leads::count();
+    $countActive   = leads::whereNotIn('status', ['deal', 'lost'])->count();
+    $countOverdue  = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+    $countToday    = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+    $countUpcoming = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+    $countDeal     = leads::where('status', 'deal')->count();
+    $countLost     = leads::where('status', 'lost')->count();
+
+    return view('manager.leads', compact(
+        'leads', 'filter',
+        'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal', 'countLost'
+    ));
 }
 }

@@ -197,10 +197,7 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     // 2. Semua Kunjungan
     Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
 
-    // 3. Pipeline Lead Tim
-    Route::get('/leads', function () {
-        return view('manager.leads');
-    })->name('manager.leads');
+    Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');       
 
     // 4. Laporan & Export Data
     Route::get('/laporan', function () {
