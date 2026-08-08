@@ -1,11 +1,11 @@
 @extends('layouts.guest')
 
 @section('content')
-<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f0f7f4; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
+<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f7faf8; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(245, 235, 224, 0.7) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.04) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.3) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
 
     <div style="width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid rgba(255, 255, 255, 0.95); overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
 
-                <div style="background: linear-gradient(135deg, #006B3F, #1b8a5c); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+        <div style="background: linear-gradient(135deg, #006B3F, #159A5C); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
                     Guest Check-In
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-                        <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 40px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 40px; display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                         <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -53,7 +53,7 @@
                     <span>Senin-Sabtu, 08.00-16.00 WIB</span>
                 </div>
             </div>
-        </div>                 <div style="padding: 50px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
+        </div> <div style="padding: 50px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
 
             <div style="margin-bottom: 20px;">
                 <h2 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 6px 0;">Tahap 1: Mengisi Identitas</h2>
@@ -116,7 +116,7 @@
                     </select>
                 </div>
 
-                                <div>
+                <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Foto Tamu <span style="font-weight: 400; color: #778195;">(Opsional)</span></label>
                     @if(!empty($step1Data['photo']))
                     <div style="margin-bottom: 12px;">
@@ -149,6 +149,7 @@
     </div>
 
 </div>
+
 <script>
     function validateFileSize(input) {
         const file = input.files[0];
@@ -166,5 +167,4 @@
         }
     }
 </script>
-
 @endsection
