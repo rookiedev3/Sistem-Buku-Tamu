@@ -8,7 +8,7 @@
             FRONT OFFICE SYSTEM
         </span>
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
-            Riwayat Kunjungan Tamu 📚
+            Riwayat Kunjungan Tamu 
         </h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">
             Arsip lengkap data tamu yang telah selesai melakukan kunjungan dan check-out dari sistem.

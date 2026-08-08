@@ -252,6 +252,19 @@
             margin-top: 2px;
             /* sejajarkan dengan baris judul, bukan mepet ke atas */
         }
+
+        .notif-item-empty {
+            padding: 24px 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -308,16 +321,6 @@
                         <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
                     <span>Janji Temu (Appointment)</span>
-                </a>
-
-                <a href="/frontoffice/pegawai" class="menu-item {{ request()->routeIs('frontoffice.pegawai') ? 'active' : '' }}">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    <span>Daftar Pegawai / PIC</span>
                 </a>
 
                 <a href="/pengguna" class="menu-item {{ request()->routeIs('user.*') ? 'active' : '' }}">

@@ -11,7 +11,7 @@
                     Guest Check-In
                 </span>
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
-                    Konfirmasi Data 🔍
+                    Konfirmasi Data 
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
                     Periksa kembali seluruh data Anda sebelum melakukan submit akhir dan mendapatkan token antrian.
@@ -154,11 +154,11 @@
 
                 <div style="display: flex; gap: 12px;">
                     <a href="{{ route('check-in.step2') }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
-                        ⬅️ Kembali
+                        ⬅ Kembali
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #006B3F; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.25);">
-                        Konfirmasi & Check-In 🚀
+                        Konfirmasi & Check-In 
                     </button>
                 </div>
 

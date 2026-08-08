@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\branches;
+use App\Models\guest_categories;
 use App\Models\guests;
+use App\Models\lead_sources;
 use App\Models\notifications;
+use App\Models\products;
 use App\Models\User;
 use App\Models\users;
 use App\Models\visit_purposes;
@@ -13,7 +16,6 @@ use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class FrontOfficeController extends Controller
 {
@@ -34,13 +36,27 @@ class FrontOfficeController extends Controller
         $pics = User::where('role', 'pic')->select('id', 'name')->get();
         $branches = branches::select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
+        $guestCategories = guest_categories::select('id', 'name')->get();
+        $products = products::select('code', 'name')->get();
+        $leadSources = lead_sources::select('id', 'name')->get();
 
         // 3. Dengan Pagination (jika datanya banyak/halaman khusus notifikasi)
         $notifications = notifications::where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
 
-        return view('frontoffice.dashboard', compact('visits', 'totalToday', 'waitingToday', 'pics', 'branches', 'purposes', 'notifications'));
+        return view('frontoffice.dashboard', compact(
+            'visits',
+            'totalToday',
+            'waitingToday',
+            'pics',
+            'branches',
+            'purposes',
+            'guestCategories',
+            'products',
+            'leadSources',
+            'notifications'
+        ));
     }
 
     public function checkIn($id)
@@ -70,7 +86,7 @@ class FrontOfficeController extends Controller
                 $pic->id,
                 'guest_arrived',
                 'Tamu Anda Sudah Datang 🔔',
-                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+                'Tamu '.($guest->name ?? 'Tamu').' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
             );
         }
 
@@ -100,69 +116,133 @@ class FrontOfficeController extends Controller
     public function storeManual(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
-            'company_name' => 'required|string|max:180',
-            'position' => 'required|string|max:100',
-            'phone' => 'required|string|max:25',
+            // Step 1
+            'name' => 'required|string|max:255',
+            'company_name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'email' => 'required|email|max:150',
+            'guest_category_id' => 'required|string|max:20',
+            'position' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'photo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            // Step 2
             'assigned_to' => 'required|exists:users,id',
             'branch_id' => 'required|exists:branches,id',
             'purpose_id' => 'required|exists:visit_purposes,id',
+            'scheduled_at' => 'required',
+            'product_interest' => 'nullable|string|max:255',
+            'source_id' => 'nullable|exists:lead_sources,id',
+            'notes' => 'required|string|max:1000',
         ]);
 
         // Sanitasi nomor telepon/WA
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
 
-        DB::transaction(function () use ($request, $phone) {
-            // Cari atau buat guest baru
+        // Handle profile photo upload
+        $photoPath = null;
+        if ($request->hasFile('photo_path')) {
+            $photoPath = $request->file('photo_path')->store('photos', 'public');
+        }
+
+        DB::transaction(function () use ($request, $phone, $photoPath) {
+            // 1. Cari / Buat Guest
             $guest = guests::where('phone', $phone)->first();
-            if (! $guest) {
+
+            $guestData = [
+                'name' => $request->name,
+                'company_name' => $request->company_name,
+                'address' => $request->address,
+                'email' => $request->email,
+                'guest_category_id' => $request->guest_category_id,
+                'position' => $request->position,
+                'phone' => $phone,
+            ];
+
+            if ($photoPath) {
+                $guestData['photo_path'] = $photoPath;
+            }
+
+            if ($guest) {
+                $guest->update($guestData);
+            } else {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-' . $todayDate . '-';
+                $prefix = 'GST-'.$todayDate.'-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
-                $guest = guests::create([
-                    'guest_code' => $prefix . $sequence,
-                    'name' => $request->name,
-                    'phone' => $phone,
-                    'company_name' => $request->company_name,
-                    'position' => $request->position,
-                ]);
-            } else {
-                $guest->update([
-                    'name' => $request->name,
-                    'company_name' => $request->company_name,
-                    'position' => $request->position,
-                ]);
+                $guestData['guest_code'] = $prefix.$sequence;
+                if (! isset($guestData['photo_path'])) {
+                    $guestData['photo_path'] = null;
+                }
+                $guest = guests::create($guestData);
             }
 
-            // Generate visit code
+            // 2. Format Tanggal & Jam Check-In
+            $rawCheckInDate = $request->scheduled_at ?? now();
+            $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
+            $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
+
+            // 3. Hitung antrean berdasarkan tanggal kunjungan
+            $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
+            $queueNumber = sprintf('%03d', $todayVisitCount + 1);
+
+            // 4. Generate Visit Code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-' . $todayDate . '-';
+            $prefixVisit = 'VST-'.$todayDate.'-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit . $sequenceVisit;
+            $visitCode = $prefixVisit.$sequenceVisit;
 
-            // Hitung nomor antrean
-            $todayVisitCount = visits::whereDate('scheduled_at', Carbon::today())->count();
-            $queueNumber = $todayVisitCount + 1;
-
-            visits::create([
+            // 5. Simpan ke tabel visits (status: Terjadwal)
+            $newVisit = visits::create([
                 'visit_code' => $visitCode,
                 'guest_id' => $guest->id,
+                'assigned_to' => $request->assigned_to,
                 'branch_id' => $request->branch_id,
                 'purpose_id' => $request->purpose_id,
-                'assigned_to' => $request->assigned_to,
-                'scheduled_at' => now(),
-                'status' => 'Menunggu',
+                'scheduled_at' => $checkInDateTime,
+                'product_interest' => $request->product_interest ?? null,
+                'source_id' => $request->source_id ?? null,
+                'notes' => $request->notes,
+                'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
             ]);
+
+            // 6. Simpan Log Status Awal
+            visit_status_logs::create([
+                'visit_id' => $newVisit->id,
+                'old_status' => null,
+                'new_status' => 'Terjadwal',
+                'changed_by' => auth()->check() ? auth()->id() : null,
+                'changed_at' => now(),
+            ]);
+
+            // Ambil data pendukung untuk isi notifikasi
+            $purposeType = visit_purposes::find($request->purpose_id);
+            $branch = branches::find($request->branch_id);
+
+            // 7. Ambil semua user yang memiliki role 'admin'
+            $adminUsers = users::where('role', 'admin')->get();
+
+            // 8. Kirim notifikasi ke masing-masing admin
+            foreach ($adminUsers as $admin) {
+                notifications::send(
+                    $admin->id,
+                    'guest_arrived',
+                    'Notifikasi Admin 🔔',
+                    'Tamu baru (manual) membuat jadwal pertemuan.'.
+                        "\n".'Nama: '.($guest->name ?? '-').
+                        "\n".'Instansi: '.($guest->company_name ?? '-').
+                        "\n".'Tujuan: '.($purposeType->name ?? '-').
+                        "\n".'Cabang: '.($branch->name ?? '-')
+                );
+            }
         });
 
         return redirect()->back()->with('success', 'Tamu manual berhasil didaftarkan ke antrian!');
@@ -181,64 +261,6 @@ class FrontOfficeController extends Controller
         $filterDate = $request->query('date', '');
 
         return view('frontoffice.history', compact('visits', 'filterDate'));
-    }
-
-    // ==========================================
-    // PEGAWAI (PIC)
-    // ==========================================
-    public function pegawai()
-    {
-        // Ambil data pegawai (yang bukan tamu)
-        $pegawaiList = User::where('role', 'pic')->get();
-        $branches = branches::select('id', 'name')->get();
-
-        return view('frontoffice.pegawai', compact('pegawaiList', 'branches'));
-    }
-
-    public function storePegawai(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|string|max:25',
-            'role' => 'required|in:owner,manager,admin,pic,security',
-            'branch_id' => 'nullable|exists:branches,id',
-        ]);
-
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'role' => $request->role,
-            'branch_id' => $request->branch_id,
-            'password' => Hash::make('pegawai123'), // password default
-            'is_active' => true,
-        ]);
-
-        return redirect()->back()->with('success', 'Pegawai baru berhasil ditambahkan!');
-    }
-
-    public function updatePegawai(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'phone' => 'required|string|max:25',
-            'role' => 'required|in:owner,manager,admin,pic,security',
-            'branch_id' => 'nullable|exists:branches,id',
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'role' => $request->role,
-            'branch_id' => $request->branch_id,
-        ]);
-
-        return redirect()->back()->with('success', 'Data pegawai berhasil diubah!');
     }
 
     public function appointment()
@@ -277,10 +299,10 @@ class FrontOfficeController extends Controller
         // Sanitasi nomor telepon/WA
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
@@ -288,12 +310,12 @@ class FrontOfficeController extends Controller
             $guest = guests::where('phone', $phone)->first();
             if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-' . $todayDate . '-';
+                $prefix = 'GST-'.$todayDate.'-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code' => $prefix . $sequence,
+                    'guest_code' => $prefix.$sequence,
                     'name' => $request->name,
                     'phone' => $phone,
                     'company_name' => $request->company_name,
@@ -307,10 +329,10 @@ class FrontOfficeController extends Controller
 
             // Generate visit code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-' . $todayDate . '-';
+            $prefixVisit = 'VST-'.$todayDate.'-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit . $sequenceVisit;
+            $visitCode = $prefixVisit.$sequenceVisit;
 
             // Hitung nomor antrean
             $todayVisitCount = visits::whereDate('scheduled_at', Carbon::today())->count();
@@ -361,18 +383,6 @@ class FrontOfficeController extends Controller
         ]);
     }
 
-    public function deletePegawai($id)
-    {
-        // 1. Cari data pegawai berdasarkan ID
-        $user = users::findOrFail($id);
-
-        // 2. Hapus data pegawai dari database
-        $user->delete();
-
-        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Data pegawai berhasil dihapus.');
-    }
-
     public function markAllNotificationsRead(Request $request)
     {
         notifications::where('user_id', auth()->id())
@@ -395,7 +405,7 @@ class FrontOfficeController extends Controller
 
     public function guest(Request $request)
     {
-        $query = Guests::query();
+        $query = guests::query();
 
         if ($request->has('vip') && $request->vip !== null) {
             $query->where('is_vip', $request->vip);
@@ -440,7 +450,7 @@ class FrontOfficeController extends Controller
     public function toggleVip(Request $request, $id)
     {
         $request->validate([
-            'is_vip' => 'required|boolean'
+            'is_vip' => 'required|boolean',
         ]);
 
         $guest = guests::findOrFail($id);
@@ -450,7 +460,24 @@ class FrontOfficeController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Status VIP berhasil diperbarui',
-            'is_vip' => $guest->is_vip
+            'is_vip' => $guest->is_vip,
         ]);
+    }
+
+    public function cancel($id)
+    {
+        $visit = visits::findOrFail($id);
+
+        visit_status_logs::create([
+            'visit_id' => $visit->id,
+            'old_status' => $visit->status,
+            'new_status' => 'Dibatalkan',
+            'changed_by' => auth()->check() ? auth()->id() : null,
+            'changed_at' => now(),
+        ]);
+
+        $visit->update(['status' => 'Dibatalkan']);
+
+        return redirect()->back()->with('success', 'Jadwal kunjungan berhasil dibatalkan.');
     }
 }

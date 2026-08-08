@@ -171,7 +171,7 @@
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Detail Keperluan Kunjungan <span style="color: #e5484d;">*</span></label>
                     <textarea name="notes" rows="2" placeholder="Tuliskan ringkasan keperluan Anda berkunjung..." required
-                        style="width: 100%; padding: 10px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; resize: vertical; box-sizing: border-box;">{{ old('purpose', $step2Data['purpose'] ?? '') }}</textarea>
+                        style="width: 100%; padding: 10px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; resize: vertical; box-sizing: border-box;">{{ old('notes', $step2Data['notes'] ?? '') }}</textarea>
                 </div>
 
                 {{-- Navigation Buttons --}}

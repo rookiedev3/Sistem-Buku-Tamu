@@ -56,9 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/visit/{id}/complete', [PicController::class, 'completeMeeting'])->name('pic.completeMeeting');
         Route::patch('/pic/visit/{id}/start-meeting', [PicController::class, 'startMeeting'])->name('pic.startMeeting');
 
-// baru
-Route::get('/pic/leads', [PicController::class, 'leadsIndex'])->name('pic.leads');
-Route::post('/pic/leads/{leadId}/follow-up', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');        
+        // baru
+        Route::get('/pic/leads', [PicController::class, 'leadsIndex'])->name('pic.leads');
+        Route::post('/pic/leads/{leadId}/follow-up', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');
     });
 
     // 1. chek in route sementara front end
@@ -112,7 +112,7 @@ Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
 
-Route::group(['middleware' => [CheckUserLogin::class . ':owner']], function () {
+Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
     // Route khusus untuk user dengan level 1 (admin)
 });
 // });
@@ -158,17 +158,13 @@ Route::get('/frontoffice/guests', [FrontOfficeController::class, 'guest'])->name
 Route::post('/frontoffice/guests', [FrontOfficeController::class, 'store'])->name('frontoffice.store');
 Route::patch('/frontoffice/guests/{guest}/toggle-vip', [FrontOfficeController::class, 'toggleVip'])->name('frontoffice.toggle-vip');
 
+Route::post('/frontoffice/cancel/{id}', [FrontOfficeController::class, 'cancel'])->name('frontoffice.cancel');
 
 Route::get('/frontoffice/history', [FrontOfficeController::class, 'history'])->name('frontoffice.history');
 
 Route::get('/frontoffice/appointment', [FrontOfficeController::class, 'appointment'])->name('frontoffice.appointment');
 Route::post('/frontoffice/appointment/store', [FrontOfficeController::class, 'storeAppointment'])->name('frontoffice.appointment.store');
 Route::post('/frontoffice/appointment/{id}/status', [FrontOfficeController::class, 'updateAppointmentStatus'])->name('frontoffice.appointment.status');
-
-Route::get('/frontoffice/pegawai', [FrontOfficeController::class, 'pegawai'])->name('frontoffice.pegawai');
-Route::post('/frontoffice/pegawai/store', [FrontOfficeController::class, 'storePegawai'])->name('frontoffice.storePegawai');
-Route::post('/frontoffice/pegawai/{id}/update', [FrontOfficeController::class, 'updatePegawai'])->name('frontoffice.updatePegawai');
-Route::delete('/frontoffice/pegawai/{id}/delete', [FrontOfficeController::class, 'deletePegawai'])->name('frontoffice.deletePegawai');
 
 // // Group Route untuk Role Manager Operasional
 // Route::prefix('manager')->middleware('auth')->group(function () {
@@ -201,7 +197,7 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     // 2. Semua Kunjungan
     Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
 
-    Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');       
+    Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');
 
     // 4. Laporan & Export Data
     Route::get('/laporan', function () {
@@ -259,10 +255,10 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 //     })->name('manager.laporan');
 
 // });
-    // 4. Laporan & Export Data
-    Route::get('/laporan', function () {
-        return view('manager.laporan');
-    })->name('manager.laporan');
+// 4. Laporan & Export Data
+Route::get('/laporan', function () {
+    return view('manager.laporan');
+})->name('manager.laporan');
 // });
 
 // // Group Route untuk Role Security
