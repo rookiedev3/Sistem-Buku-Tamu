@@ -19,26 +19,36 @@
         }
 
         body {
-            background-color: #f4f7fc;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #f0f7f4;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%),
+                linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Container Card Memanjang (Disamakan 100% persis dengan login) */
+        /* Lebar card pembungkus sama persis dengan Login (950px) */
         .login-wrapper {
             width: 100%;
-            max-width: 950px;
-            background: #ffffff;
+            max-width: 950px; 
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(31, 53, 97, 0.1);
             overflow: hidden;
             display: flex;
-            border: 1px solid #e8edf5;
+            border: 1px solid rgba(255, 255, 255, 0.95);
         }
 
-        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) */
+        /* Sisi Kiri: Branding */
         .login-brand-side {
             flex: 1;
             background: linear-gradient(135deg, #006B3F 0%, #004d2e 100%);
@@ -49,10 +59,10 @@
             justify-content: space-between;
         }
 
-        /* Sisi Kanan: Form Register 2 Kolom */
+        /* Sisi Kanan: Form Register (Padding dibuat lega agar card naik tingginya) */
         .login-form-side {
             flex: 1.1;
-            padding: 50px;
+            padding: 45px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -74,7 +84,7 @@
 
         .form-control, .form-select {
             border-radius: 12px;
-            padding: 10px 14px;
+            padding: 11px 14px;
             font-size: 13px;
             border: 1px solid #e8edf5;
             background-color: #fafbfc;
@@ -98,7 +108,6 @@
             right: 0;
         }
 
-        /* Kotak Khusus Password agar Ikon Mata Kustom Menyatu Bersih */
         .password-container {
             position: relative;
             display: flex;
@@ -131,9 +140,9 @@
             color: #fff;
             border: none;
             border-radius: 12px;
-            padding: 11px;
+            padding: 12px;
             font-weight: 700;
-            font-size: 13.5px;
+            font-size: 14px;
             transition: 0.2s ease;
         }
 
@@ -142,7 +151,6 @@
             color: #fff;
         }
 
-        /* Responsif untuk layar HP */
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;
@@ -183,8 +191,8 @@
             <form method="POST" action="{{ route('register.proses') }}">
                 @csrf
 
-                <div class="row g-2">
-                    <div class="col-md-6 mb-2">
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Nama Lengkap <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                             value="{{ old('name') }}" placeholder="Nama lengkap" required>
@@ -193,7 +201,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-2">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Email <span class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                             value="{{ old('email') }}" placeholder="nama@perusahaan.com" required>
@@ -203,8 +211,8 @@
                     </div>
                 </div>
 
-                <div class="row g-2">
-                    <div class="col-md-6 mb-2">
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">No. WhatsApp <span class="text-danger">*</span></label>
                         <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror"
                             value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" required>
@@ -213,7 +221,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-2">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Cabang <span class="text-danger">*</span></label>
                         <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Cabang --</option>
@@ -229,7 +237,7 @@
                     </div>
                 </div>
 
-                <div class="row g-2">
+                <div class="row g-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Password <span class="text-danger">*</span></label>
                         <div class="password-container">
@@ -256,7 +264,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-custom-login w-100 shadow-sm">
+                <button type="submit" class="btn btn-custom-login w-100 shadow-sm mt-1">
                     Daftar Akun
                 </button>
             </form>

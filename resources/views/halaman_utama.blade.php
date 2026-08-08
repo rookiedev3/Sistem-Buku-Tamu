@@ -18,22 +18,22 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        body {
+       body {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            /* Background disesuaikan: Bersih, elegan, dengan gradasi hijau lembut */
-            background-color: #f4f8f6;
+            /* Background disesuaikan: Gradasi hijau korporat yang hidup dan elegan */
+            background-color: #f0f7f4;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 107, 63, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
-                linear-gradient(to right, rgba(226, 232, 240, 0.3) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(226, 232, 240, 0.3) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%),
+                linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px;
             position: relative;
             overflow-x: hidden;
         }
-
         /* --- NAVBAR HIJAU KORPORAT --- */
         /* .top-navbar {
             width: 100%;

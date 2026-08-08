@@ -18,25 +18,38 @@
             padding: 0;
         }
 
+        /* Wallpaper background disamakan persis dengan halaman welcome (gradasi hijau korporat yang hidup) */
         body {
-            background-color: #f4f7fc;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #f0f7f4;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%),
+                linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px;
+            position: relative;
+            overflow-x: hidden;
         }
 
+        /* Container Card Memanjang */
         .login-wrapper {
             width: 100%;
             max-width: 950px;
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(31, 53, 97, 0.1);
             overflow: hidden;
             display: flex;
-            border: 1px solid #e8edf5;
+            border: 1px solid rgba(255, 255, 255, 0.95);
         }
 
+        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) */
         .login-brand-side {
             flex: 1;
             background: linear-gradient(135deg, #006B3F 0%, #004d2e 100%);
@@ -47,6 +60,7 @@
             justify-content: space-between;
         }
 
+        /* Sisi Kanan: Form Login */
         .login-form-side {
             flex: 1.1;
             padding: 50px;
@@ -139,6 +153,7 @@
             color: #fff;
         }
 
+        /* Responsif untuk layar HP */
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;

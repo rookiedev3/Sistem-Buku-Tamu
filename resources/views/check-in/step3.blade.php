@@ -1,12 +1,11 @@
 @extends('layouts.guest')
 
 @section('content')
-<div style="width: 100vw; min-height: 100vh; background: #f4f7fc; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px;">
+<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f0f7f4; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
 
-    <div style="width: 100%; max-width: 1150px; background: #ffffff; border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid #e8edf5; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+    <div style="width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid rgba(255, 255, 255, 0.95); overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
 
-        <!-- Sisi Kiri: Stepper (Tahap 3 Aktif) -->
-        <div style="background: linear-gradient(135deg, #006B3F, #1b8a5c); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                <div style="background: linear-gradient(135deg, #006B3F, #1b8a5c); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
                     Guest Check-In
@@ -18,8 +17,7 @@
                     Periksa kembali seluruh data Anda sebelum melakukan submit akhir dan mendapatkan token antrian.
                 </p>
 
-                <!-- Indikator Tahapan -->
-                <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div style="display: flex; align-items: center; gap: 14px; opacity: 0.7;">
                         <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.3); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">✓</div>
                         <span style="font-size: 14px; font-weight: 500;">Mengisi Identitas</span>
@@ -44,27 +42,23 @@
             </div>
         </div>
 
-        <!-- Sisi Kanan: Ringkasan Data & Persetujuan -->
-        <div style="padding: 30px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
+                <div style="padding: 30px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
 
             <div style="margin-bottom: 12px;">
                 <h2 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Tahap 3: Konfirmasi Data</h2>
                 <p style="font-size: 13px; color: #778195; margin: 0;">Pastikan seluruh data di bawah ini sudah benar.</p>
             </div>
 
-            <!-- Kartu Ringkasan Data -->
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 340px; overflow-y: auto;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 340px; overflow-y: auto;">
 
-                <!-- Foto Identitas / Tamu (Opsional) -->
-                @php
+                                @php
                 // Mengecek field 'photo_path' atau 'photo' dari data session step 1
                 $photoPath = $step1Data['photo_path'] ?? $step1Data['photo'] ?? null;
                 @endphp
 
                 @if(!empty($photoPath))
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
-                    <!-- Preview Gambar -->
-                    <img src="{{ asset('storage/' . $photoPath) }}"
+                                        <img src="{{ asset('storage/' . $photoPath) }}"
                         alt="Foto Tamu"
                         style="width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 1px solid #cbd5e1;"
                         onerror="this.onerror=null; this.src='https://via.placeholder.com/55?text=Foto';" />
@@ -82,13 +76,11 @@
                     <span style="color: #64748b; font-weight: 600;">Nama Lengkap:</span>
                     <span style="color: #172033; font-weight: 700;">{{ $step1Data['name'] ?? '-' }}</span>
                 </div>
-                <!-- Menambahkan Field Email -->
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Email:</span>
                     <span style="color: #172033; font-weight: 700;">{{ $step1Data['email'] ?? '-' }}</span>
                 </div>
-                <!-- Menambahkan Field Kategori Tamu -->
-                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Kategori Tamu:</span>
                     <span style="color: #172033; font-weight: 700;">{{ $guestCategory?->name ?? $step1Data['category'] ?? '-' }}</span>
                 </div>
@@ -149,12 +141,10 @@
                 </div>
             </div>
 
-            <!-- Form Submit Akhir -->
-            <form action="{{ route('check-in.step3') }}" method="POST" style="display: flex; flex-direction: column; gap: 12px;">
+                        <form action="{{ route('check-in.step3') }}" method="POST" style="display: flex; flex-direction: column; gap: 12px;">
                 @csrf
 
-                <!-- Checkbox Persetujuan -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;">
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;">
                     <input type="checkbox" name="privacy_consent" id="privacy_consent" value="1" required
                         style="width: 18px; height: 18px; accent-color: #006B3F; cursor: pointer; margin-top: 2px;">
                     <label for="privacy_consent" style="font-size: 12px; color: #475569; line-height: 1.5; cursor: pointer;">
@@ -162,8 +152,7 @@
                     </label>
                 </div>
 
-                <!-- Tombol Navigasi -->
-                <div style="display: flex; gap: 12px;">
+                                <div style="display: flex; gap: 12px;">
                     <a href="{{ route('check-in.step2') }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
                         ⬅️ Kembali
                     </a>
