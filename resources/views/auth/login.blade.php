@@ -228,7 +228,7 @@
                             Ingat Saya
                         </label>
                     </div>
-                    <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 700;">Lupa Password?</a>
+                    <a href="{{ route('password.request') }}" style="color: #006B3F; text-decoration: none; font-weight: 700;">Lupa Password?</a>
                 </div>
 
                 <button type="submit" class="btn btn-custom-login w-100 shadow-sm">
