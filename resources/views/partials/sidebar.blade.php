@@ -1,31 +1,24 @@
 <aside class="sidebar" style="width: 260px; background: #ffffff; border-right: 1px solid #e8edf5; display: flex; flex-direction: column; justify-content: space-between; position: fixed; height: 100vh; z-index: 100;">
     
-    <!-- Bagian Atas: Brand & Menu yang bisa di-scroll -->
     <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
         
         <div class="sidebar-brand" style="padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e8edf5; flex-shrink: 0;">
-    
-    <div class="sidebar-brand-icon" style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #e8edf5; box-shadow: 0 2px 5px rgba(0,0,0,0.04);">
-        <img src="{{ asset('images/logo-perusahaan.png') }}" alt="Logo IT Solution" style="width: 100%; height: 100%; object-fit: contain;">
-    </div> 
+            
+            <div class="sidebar-brand-icon" style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #e8edf5; box-shadow: 0 2px 5px rgba(0,0,0,0.04); flex-shrink: 0;">
+                <img src="{{ asset('images/logo-perusahaan.jpg') }}" alt="Logo IT Solution" style="width: 100%; height: 100%; object-fit: contain;">
+            </div> 
 
-    <div class="sidebar-brand-text" style="display: flex; flex-direction: column; overflow: hidden;">
-        <span style="font-size: 14px; font-weight: 800; color: #172033; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            {{ Auth::user()->name ?? 'Nama Pimpinan' }}
-        </span>
-        <span style="font-size: 11px; font-weight: 600; color: #778195; text-transform: uppercase; letter-spacing: 0.5px;">
-            {{ Auth::user()->role ?? 'Manager / Owner' }}
-        </span>
-    </div>
-
-</div>
-            <div>
-                <div style="font-size: 15px; font-weight: 800; color: #172033;">Pimpinan / Owner</div>
-                <div style="font-size: 11px; color: #778195;">owner</div>
+            <div class="sidebar-brand-text" style="display: flex; flex-direction: column; overflow: hidden;">
+                <span style="font-size: 14px; font-weight: 800; color: #172033; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ Auth::user()->name ?? 'Nama Pimpinan' }}
+                </span>
+                <span style="font-size: 11px; font-weight: 600; color: #778195; text-transform: uppercase; letter-spacing: 0.5px;">
+                    {{ Auth::user()->role ?? 'Manager / Owner' }}
+                </span>
             </div>
+
         </div>
 
-        <!-- Area Menu dengan kemampuan Scroll (overflow-y: auto) -->
         <div class="sidebar-menu" style="padding: 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; flex-grow: 1;">
             
             <div class="menu-category" style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; padding: 6px 12px 2px;">Utama</div>
@@ -62,27 +55,16 @@
                 <span>Laporan</span>
             </a>
 
-            {{-- <a href="{{ route('branches.index') }}" class="menu-item {{ request()->routeIs('branches.index') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->routeIs('branches.index') ? '#006B3F' : '#64748b' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->routeIs('branches.index') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->routeIs('branches.index') ? '#e6f0eb' : 'transparent' }};">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                <span>Menu Branches</span>
-            </a> --}}
-
             <div class="menu-category" style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 2px; margin-top: 4px;">Pengaturan</div>
-
-            {{-- <a href="{{ url('/master-data') }}" class="menu-item {{ request()->is('master-data*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('master-data*') ? '#006B3F' : '#64748b' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('master-data*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('master-data*') ? '#e6f0eb' : 'transparent' }};">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span>Master Data</span>
-            </a> --}}
             
             <a href="{{ route('branches.index') }}" class="menu-item {{ request()->is('branches*', 'products*', 'lead-sources*', 'visit-purposes*', 'guest-categories*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('branches*', 'products*', 'lead-sources*', 'visit-purposes*', 'guest-categories*') ? '#006B3F' : '#64748b' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('branches*', 'products*', 'lead-sources*', 'visit-purposes*', 'guest-categories*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('branches*', 'products*', 'lead-sources*', 'visit-purposes*', 'guest-categories*') ? '#e6f0eb' : 'transparent' }};">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span>Master Data</span>
-</a>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Master Data</span>
+            </a>
 
         </div>
     </div>
 
-    <!-- Bagian Bawah: Tombol Keluar (Tetap Terkunci di Bawah) -->
     <div style="padding: 16px; border-top: 1px solid #e8edf5; background: #ffffff; flex-shrink: 0;">
         <form action="{{ route('logout') }}" method="post" style="margin: 0;">
             @csrf
