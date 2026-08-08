@@ -12,10 +12,7 @@
     <!-- Filter & Tombol Export -->
     <div style="display: flex; flex-direction: column; gap: 24px;">
 
-    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Laporan & Export Data Kunjungan 📥</h2>
-        <p style="font-size: 13px; color: #778195; margin: 0;">Unduh rekapitulasi data tamu dan konversi lead bulanan dalam format Excel atau PDF untuk laporan perusahaan.</p>
-    </div>
+    
 
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 16px;">Filter Periode Laporan Bulanan</h3>

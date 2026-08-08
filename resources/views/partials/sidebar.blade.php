@@ -4,10 +4,24 @@
     <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
         
         <div class="sidebar-brand" style="padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e8edf5; flex-shrink: 0;">
-            <div class="sidebar-brand-icon" style="width: 36px; height: 36px; background: #006B3F; color: #ffffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">OW</div>
+    
+    <div class="sidebar-brand-icon" style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #e8edf5; box-shadow: 0 2px 5px rgba(0,0,0,0.04);">
+        <img src="{{ asset('images/logo-perusahaan.png') }}" alt="Logo IT Solution" style="width: 100%; height: 100%; object-fit: contain;">
+    </div> 
+
+    <div class="sidebar-brand-text" style="display: flex; flex-direction: column; overflow: hidden;">
+        <span style="font-size: 14px; font-weight: 800; color: #172033; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ Auth::user()->name ?? 'Nama Pimpinan' }}
+        </span>
+        <span style="font-size: 11px; font-weight: 600; color: #778195; text-transform: uppercase; letter-spacing: 0.5px;">
+            {{ Auth::user()->role ?? 'Manager / Owner' }}
+        </span>
+    </div>
+
+</div>
             <div>
                 <div style="font-size: 15px; font-weight: 800; color: #172033;">Pimpinan / Owner</div>
-                <div style="font-size: 11px; color: #778195;">Executive Dashboard</div>
+                <div style="font-size: 11px; color: #778195;">owner</div>
             </div>
         </div>
 
