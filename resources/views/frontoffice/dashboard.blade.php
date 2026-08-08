@@ -11,7 +11,6 @@
     .custom-scroll::-webkit-scrollbar-track {
         background: transparent;
         margin: 16px 0;
-        /* Memberi ruang agar scrollbar tidak menempel di sudut melengkung */
     }
 
     .custom-scroll::-webkit-scrollbar-thumb {
@@ -132,7 +131,8 @@
                     {{-- TABEL AKSI --}}
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
+                            {{-- 1. Status TERJADWAL / SCHEDULED --}}
+                            @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
@@ -140,7 +140,6 @@
                                 </button>
                             </form>
 
-                            <!-- Form Pembatalan (Dipemicu Modal Custom) -->
                             <form id="cancel-form-{{ $visit->id }}" action="{{ route('frontoffice.cancel', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="button" onclick="confirmCancel('{{ $visit->id }}', '{{ addslashes($visit->guest->name ?? 'Tamu') }}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
@@ -148,10 +147,12 @@
                                 </button>
                             </form>
 
-                            @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
+                            {{-- 2. Status MENUNGGU / WAITING --}}
+                            @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
                             <span style="font-size: 11px; color: #d97706; font-weight: 600;">Menunggu</span>
 
-                            @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed', 'meeting selesai']))
+                            {{-- 3. Status SIAP CHECK-OUT (Sedang Bertemu / Meeting Selesai) --}}
+                            @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed', 'meeting selesai', 'meeting_selesai', 'dikonfirmasi']))
                             <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
@@ -159,9 +160,11 @@
                                 </button>
                             </form>
 
-                            @elseif(in_array($visit->status, ['Dibatalkan', 'cancelled']))
+                            {{-- 4. Status DIBATALKAN --}}
+                            @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
                             <span style="font-size: 11px; color: #dc2626; font-weight: 600;">Dibatalkan</span>
 
+                            {{-- 5. Status DEFAULT / SELESAI --}}
                             @else
                             <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
                             @endif
@@ -377,7 +380,16 @@
                     </h4>
 
                     <!-- Box Ringkasan -->
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; margin-bottom: 12px; max-height: 250px; overflow-y: auto;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; margin-bottom: 12px; max-height: 280px; overflow-y: auto;">
+
+                        <!-- Penampung Pratinjau Foto Tamu di Step 3 -->
+                        <div id="sum_photo_container" style="display: none; justify-content: center; margin-bottom: 16px;">
+                            <div style="text-align: center;">
+                                <img id="sum_photo_preview" src="" alt="Pratinjau Foto Tamu" style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 2px solid #006B3F; box-shadow: 0 4px 12px rgba(0,107,63,0.15);">
+                                <span style="display: block; font-size: 11px; color: #778195; margin-top: 4px; font-weight: 700;">Foto Tamu</span>
+                            </div>
+                        </div>
+
                         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Nama Tamu:</span>
@@ -486,6 +498,7 @@
 
 <script>
     let activeCancelVisitId = null;
+    let currentStep = 1;
 
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr("#input_scheduled_at", {
@@ -514,15 +527,31 @@
         const file = input.files[0];
         const errorElement = document.getElementById('fileError');
         const maxSizeBytes = 2 * 1024 * 1024; // 2 MB
+        const previewImg = document.getElementById('sum_photo_preview');
+        const previewContainer = document.getElementById('sum_photo_container');
 
         if (file) {
             if (file.size > maxSizeBytes) {
                 errorElement.textContent = 'Ukuran file terlalu besar! Maksimal 2 MB.';
                 errorElement.style.display = 'block';
-                input.value = ''; // Reset
+                input.value = ''; // Reset input file
+                if (previewImg) previewImg.src = '';
+                if (previewContainer) previewContainer.style.display = 'none';
             } else {
                 errorElement.style.display = 'none';
+
+                // Gunakan FileReader untuk membaca dan memuat foto ke penampung di Step 3
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (previewImg) previewImg.src = e.target.result;
+                    if (previewContainer) previewContainer.style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
             }
+        } else {
+            errorElement.style.display = 'none';
+            if (previewImg) previewImg.src = '';
+            if (previewContainer) previewContainer.style.display = 'none';
         }
     }
 
@@ -571,10 +600,9 @@
             }
         }
     }
-    let currentStep = 1;
 
     function changeStep(direction) {
-        // Validasi input wajib sebelum bisa pindah ke step berikutnya
+        // Validasi input wajib sebelum pindah ke step selanjutnya
         if (direction === 1 && !validateCurrentStep(currentStep)) {
             return;
         }
@@ -594,7 +622,7 @@
         for (let input of inputs) {
             if (!input.value.trim()) {
                 input.focus();
-                input.style.borderColor = '#ef4444'; // Tandai merah jika belum terisi
+                input.style.borderColor = '#ef4444'; // Tandai border merah
                 return false;
             } else {
                 input.style.borderColor = '#e8edf5';
@@ -604,7 +632,7 @@
     }
 
     function updateStepUI() {
-        // Sembunyikan semua step content
+        // Sembunyikan semua konten step
         document.getElementById('step-1-content').style.display = 'none';
         document.getElementById('step-2-content').style.display = 'none';
         document.getElementById('step-3-content').style.display = 'none';
@@ -612,18 +640,23 @@
         // Tampilkan step aktif
         document.getElementById(`step-${currentStep}-content`).style.display = 'block';
 
-        // Update Progress Indicator & Stepper Bar
+        // Perbarui teks indikator & bar progress
         document.getElementById('stepIndicatorText').innerText = `Langkah ${currentStep} dari 3`;
 
         document.getElementById('bar-step-1').style.background = currentStep >= 1 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-2').style.background = currentStep >= 2 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-3').style.background = currentStep >= 3 ? '#006B3F' : '#e2e8f0';
 
-        // Update Tombol Navigasi
+        // Perbarui visibilitas tombol navigasi
         document.getElementById('btnBatalModal').style.display = currentStep === 1 ? 'block' : 'none';
         document.getElementById('btnPrevStep').style.display = currentStep > 1 ? 'block' : 'none';
         document.getElementById('btnNextStep').style.display = currentStep < 3 ? 'block' : 'none';
         document.getElementById('btnSubmitForm').style.display = currentStep === 3 ? 'block' : 'none';
+
+        // Perbarui teks ringkasan jika menuju ke Step 3
+        if (currentStep === 3) {
+            updateSummary();
+        }
     }
 
     function updateSummary() {
