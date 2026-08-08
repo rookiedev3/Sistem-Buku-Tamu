@@ -292,6 +292,9 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             'due_at' => $request->due_at ?? now(),
             'result' => $request->result,
             'status' => $request->status,
+            // Simpan nilai deal yang berlaku SAAT update ini dibuat (baik nilai baru maupun nilai lama yang dipertahankan),
+            // supaya riwayat tiap update tetap punya jejak nilainya sendiri-sendiri.
+            'estimated_value' => $lead->estimated_value,
         ]);
 
         return redirect()->route('pic.followup')->with('success', 'Status pipeline lead berhasil diperbarui!');

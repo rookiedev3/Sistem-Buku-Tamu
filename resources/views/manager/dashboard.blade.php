@@ -107,10 +107,6 @@
         <span>Menampilkan data monitoring real-time</span>
         <span>Total Data: {{ $visits->count() }}</span>
     </div>
-                    {{-- <!-- Pagination -->
-        <div style="margin-top: 20px;">
-        @include('partials.pagination', ['paginator' => $visits])
-        </div> --}}
 
 </div>
 

@@ -72,7 +72,8 @@
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
                         <th style="padding: 14px;">Kategori</th>
                         <th style="padding: 14px;">Tujuan PIC</th>
-                        <th style="padding: 14px;">Keperluan & Hasil</th>
+                        <th style="padding: 14px;">Keperluan</th>
+                        <th style="padding: 14px; text-align: center;">Catatan Pertemuan</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status</th>
                     </tr>
                 </thead>
@@ -99,16 +100,16 @@
                             </span>
                         </td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
-<td style="padding: 14px; color: #475569;">
-    <strong>Keperluan:</strong> {{ $v->purpose->name ?? '-' }}<br>
-    @if($isCompleted)
-        <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px;">
-            📝 Lihat Catatan
-        </button>
-    @else
-        <span style="font-size: 11px; color: #94a3b8; font-style: italic;">Belum ada catatan.</span>
-    @endif
-</td>
+                        <td style="padding: 14px; color: #475569;">
+                            {{ $v->purpose->name ?? '-' }}
+                        </td>
+
+                        <!-- Kolom Tombol Modal Catatan -->
+                        <td style="padding: 14px; text-align: center;">
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                📝 Lihat Catatan
+                            </button>
+                        </td>
 
 <td style="padding: 14px; text-align: center;">
     @if(in_array($statusLower, ['cancelled', 'dibatalkan', 'ditolak']))
@@ -129,7 +130,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">
+                        <td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">
                             Belum ada data kunjungan yang cocok dengan filter.
                         </td>
                     </tr>
@@ -142,8 +143,6 @@
 <!-- ============================================== -->
 @foreach($visits as $v)
     @php
-        $statusLowerModal = strtolower(trim($v->status ?? ''));
-        $isCompletedModal = in_array($statusLowerModal, ['completed', 'selesai', 'meeting selesai']);
         $leadModal = $v->lead;
         $scheduleTextMap = [
             'deal' => 'Sudah Deal 🎉',
@@ -154,7 +153,6 @@
             : 'Kunjungan biasa, tidak dikonversi jadi lead';
     @endphp
 
-    @if($isCompletedModal)
         <div class="modal fade" id="noteModal{{ $v->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
@@ -230,15 +228,15 @@
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
                     </div>
                 </div>
+                
             </div>
         </div>
-    @endif
 @endforeach
         </div>
 
         <!-- Pagination -->
         <div style="margin-top: 20px;">
-            {{ $visits->links() }}
+@include('partials.pagination', ['paginator' => $visits])
         </div>
     </div>
 

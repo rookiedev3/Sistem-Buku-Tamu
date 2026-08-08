@@ -187,10 +187,9 @@
 @endforeach
         </div>
 
-        <div style="margin-top: 20px;">
-            {{ $leads->links() }}
-        </div>
+    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
+        <span>Menampilkan data monitoring real-time</span>
+        {{-- <span>Total Data: {{ $visits->count() }}</span> --}}
     </div>
-
 </div>
 @endsection

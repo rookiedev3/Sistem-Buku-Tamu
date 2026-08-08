@@ -63,7 +63,7 @@
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
                         <th style="padding: 14px;">Nama Klien & Instansi</th>
                         <th style="padding: 14px;">Kontak (WhatsApp)</th>
-                        <th style="padding: 14px;">Catatan Terakhir</th>
+                        <th style="padding: 14px;">Value</th>
                         <th style="padding: 14px;">Tgl Follow-Up</th>
                         <th style="padding: 14px;">Tahap Pipeline</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
@@ -72,18 +72,14 @@
                 <tbody>
                     @forelse($leads as $index => $lead)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 16px 20px; font-weight: 700;">{{ $visits->firstItem() + $index }}</td>
+                        <td style="padding: 16px 20px; font-weight: 700;">{{ $leads->firstItem() + $index }}</td>
                         <td style="padding: 14px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">{{ $lead->guest->name ?? '-' }}</strong>
                             <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
                         </td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $lead->guest->phone ?? '-' }}</td>
-                        <td style="padding: 14px; color: #475569;">
-                            @php
-                                $latestFollowUp = $lead->followUps->first();
-                                $note = $latestFollowUp->result ?? optional($lead->visit)->meeting_result;
-                            @endphp
-                            {{ Str::limit($note ?? 'Belum ada catatan follow-up.', 50) }}
+                        <td style="padding: 14px; color: #172033; font-weight: 700;">
+                            {{ $lead->estimated_value ? rupiah($lead->estimated_value, true) : '-' }}
                         </td>
                         <td style="padding: 14px;">
                             @if($lead->follow_up_at)
@@ -194,9 +190,14 @@
                                     <span>Tahap: <strong style="color: #006B3F;">{{ $badges[$fu->status]['label'] ?? $fu->status }}</strong></span>
                                 </div>
                                 <div style="color: #334155; font-size: 13px; white-space: pre-line;">{{ $fu->result ?? '-' }}</div>
-                                @if($fu->due_at)
-                                    <div style="font-size: 11px; color: #475569; margin-top: 6px;">Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
-                                @endif
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                                    <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
+                                        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+                                    </div>
+                                    @if($fu->due_at)
+                                        <div style="font-size: 11px; color: #475569;">Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
+                                    @endif
+                                </div>
                             </div>
                         @empty
                             <div style="font-style: italic; color: #94a3b8; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; text-align: center; font-size: 12px;">
@@ -248,9 +249,25 @@
 
                         <div style="margin-bottom: 16px;">
                             <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Estimasi Nilai Deal (Rp)</label>
-                            <input type="number" name="estimated_value" min="0" step="1000" value="{{ old('estimated_value', $lead->estimated_value) }}" placeholder="Contoh: 5000000" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">
-                            <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 0 0;">Kosongkan kalau belum ada perubahan dari estimasi sebelumnya.</p>
+                            <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                                <div style="position: absolute; left: 14px; color: #006B3F; font-weight: 700; font-size: 13px; pointer-events: none;">Rp</div>
+                                <input type="text"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    class="rupiah-input"
+                                    data-hidden-target="estimatedValueRaw{{ $lead->id }}"
+                                    id="estimatedValueDisplay{{ $lead->id }}"
+                                    value=""
+                                    placeholder="Contoh: 5.000.000"
+                                    style="width: 100%; padding: 10px 14px 10px 34px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; box-sizing: border-box;">
+                            </div>
+                            <input type="hidden" name="estimated_value" id="estimatedValueRaw{{ $lead->id }}" value="">
+                            <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 0 0;">
+                                Nilai saat ini: <strong style="color: #475569;">{{ $lead->estimated_value ? rupiah($lead->estimated_value, true) : 'Belum diisi' }}</strong>.
+                                Kosongkan kalau belum ada perubahan dari estimasi sebelumnya.
+                            </p>
                         </div>
+
 
                         <div style="margin-bottom: 20px;">
                             <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
@@ -288,6 +305,7 @@
     .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange { background: #006B3F !important; border-color: #006B3F !important; border-radius: 10px !important; }
     .flatpickr-day:hover { border-radius: 10px !important; }
     input[id^="dateInput"]:focus { border-color: #006B3F !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
+    input.rupiah-input:focus { border-color: #006B3F !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
@@ -319,6 +337,18 @@
             }
             handleDateAccess();
             select.addEventListener("change", handleDateAccess);
+        });
+
+        // Format input Rupiah otomatis: user ngetik "7000000" -> tampil "7.000.000"
+        // Nilai murni angkanya disimpan di hidden input yang dikirim ke server.
+        document.querySelectorAll(".rupiah-input").forEach(function (input) {
+            const hidden = document.getElementById(input.dataset.hiddenTarget);
+
+            input.addEventListener("input", function () {
+                const raw = this.value.replace(/\D/g, ""); // buang semua selain angka
+                this.value = raw ? new Intl.NumberFormat("id-ID").format(raw) : "";
+                if (hidden) hidden.value = raw;
+            });
         });
     });
 </script>

@@ -138,7 +138,7 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
 <td style="padding: 14px; color: #778195; font-weight: 600;">
     @if($visit->check_in_at)
         {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
-        <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Sudah check-in</div>
+        {{-- <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Sudah check-in</div> --}}
     @elseif($visit->scheduled_at)
         @php $schedDate = \Carbon\Carbon::parse($visit->scheduled_at); @endphp
         {{ $schedDate->format('H:i') }} WIB
@@ -271,33 +271,33 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                                         <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
                                     </div>
 
-<select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-    <option value="hot">Hot Lead</option>
-    <option value="warm">Warm Lead</option>
-    <option value="cold">Cold</option>
-    <option value="non_lead">Non-Lead</option>
-</select>
+                                <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+                                    <option value="hot">Hot Lead</option>
+                                    <option value="warm">Warm Lead</option>
+                                    <option value="cold">Cold</option>
+                                    <option value="non_lead">Non-Lead</option>
+                                </select>
 
-<div style="margin-bottom: 20px;">
-    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
 
-    <div style="position: relative; display: flex; align-items: center; width: 100%;">
-        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-        </div>
+                                    <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                                        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                        </div>
 
-        <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
-            value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
-            placeholder="Pilih tanggal follow-up..." readonly
-            style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
-    </div>
-    <p id="follow_up_note-{{ $visit->id }}" style="display:none; font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">Follow-up tidak diperlukan untuk status Deal / Cold.</p>
-</div>
+                                        <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
+                                            value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
+                                            placeholder="Pilih tanggal follow-up..." readonly
+                                            style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+                                    </div>
+                                    <p id="follow_up_note-{{ $visit->id }}" style="display:none; font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">Follow-up tidak diperlukan untuk status Deal / Cold.</p>
+                                </div>
 
                                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
                                         <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
@@ -329,6 +329,8 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
         <div style="margin-top: 20px;">
         @include('partials.pagination', ['paginator' => $visits])
         </div>
+    
+        
     </div>
 </div>
 
