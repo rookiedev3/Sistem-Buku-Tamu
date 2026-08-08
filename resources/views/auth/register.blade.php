@@ -204,7 +204,7 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Email <span class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                            value="{{ old('email') }}" placeholder="nama@perusahaan.com" required>
+                            value="{{ old('email') }}" placeholder="Masukkan email Anda" required>
                         @error('email')
                             <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
                         @enderror

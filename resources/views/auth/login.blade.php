@@ -208,13 +208,13 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 700; color: #172033;">Alamat Email</label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="nama@perusahaan.com">
+                    <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="Masukkan email Anda" autocomplete="email">
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 700; color: #172033;">Password</label>
                     <div class="password-container">
-                        <input type="password" name="password" id="password" class="form-control" required placeholder="••••••••">
+                        <input type="password" name="password" id="password" class="form-control" required placeholder="Masukkan password Anda">
                         <button type="button" class="password-toggle-btn" id="togglePassword">
                             <i class="bi bi-eye-slash" id="eyeIcon"></i>
                         </button>
