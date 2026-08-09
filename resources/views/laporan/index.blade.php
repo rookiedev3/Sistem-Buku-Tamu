@@ -23,7 +23,7 @@
             <span style="color: #778195; font-weight: 700;">s/d</span>
             <input type="date" value="2026-08-04" style="padding: 8px 12px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; color: #172033; background: #fbfcfe;">
         </div>
-        <button style="background: #1463ff; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; border: none; cursor: pointer;">Tampilkan</button>
+        <button style="background: #013220; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; border: none; cursor: pointer;">Tampilkan</button>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; width: 100%; box-sizing: border-box;">

@@ -1,4 +1,4 @@
-<div id="welcomeBanner" class="card border-0 rounded-4 p-4 mb-4 shadow-sm position-relative" style="background-color: #006B3F; color: white;">
+<div id="welcomeBanner" class="card border-0 rounded-4 p-4 mb-4 shadow-sm position-relative" style="background-color: #013220; color: white;">
     <button type="button" onclick="document.getElementById('welcomeBanner').style.display='none';" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close"></button>
 
     <div class="d-flex justify-content-between align-items-center pe-4">

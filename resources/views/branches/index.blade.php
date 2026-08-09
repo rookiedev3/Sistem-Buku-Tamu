@@ -9,7 +9,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data cabang (branch) perusahaan.</p>
     </div>
     
-    <a href="{{ route('branches.create') }}" style="background: #1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(20,99,255,.2); border: none; cursor: pointer;">
+    <a href="{{ route('branches.create') }}" style="background: #013220; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
         + Tambah Branch
     </a>
 </div>
@@ -77,15 +77,18 @@
                         @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                            <a href="{{ route('branches.edit', $b->id) }}" style="color: #1463ff; text-decoration: none; font-weight: 800;">
-                                Edit
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                            {{-- Tombol Edit --}}
+                            <a href="{{ route('branches.edit', $b->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
                             </a>
+
+                            {{-- Tombol Hapus --}}
                             <form action="{{ route('branches.destroy', $b->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Branch ini?')" style="margin: 0; display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" style="background: none; border: none; color: #e5484d; text-decoration: none; font-weight: 800; cursor: pointer; padding: 0; font-size: 13px; font-family: inherit;">
-                                    Hapus
+                                <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
                                 </button>
                             </form>
                         </div>

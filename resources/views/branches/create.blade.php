@@ -8,7 +8,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Lengkapi formulir di bawah ini untuk menambahkan data cabang baru.</p>
     </div>
     
-    <a href="{{ route('branches.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
+    <a href="{{ route('branches.index') }}" style="background: #e5484d; color: #ffffff; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
         &larr; Kembali
     </a>
 </div>

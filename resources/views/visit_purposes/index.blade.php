@@ -6,31 +6,31 @@
 <div class="d-flex gap-2 border-bottom pb-3 mb-4">
     <a href="{{ route('branches.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('branches*') ? 'text-white' : 'text-secondary' }}" 
-       style="background-color: {{ request()->routeIs('branches*') ? '#006B3F' : '#f1f5f9' }}; border: none; border-radius: 10px;">
+       style="background-color: {{ request()->routeIs('branches*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
        Branches
     </a>
     
     <a href="{{ route('products.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('products*') ? 'text-white' : 'text-secondary' }}" 
-       style="background-color: {{ request()->routeIs('products*') ? '#006B3F' : '#f1f5f9' }}; border: none; border-radius: 10px;">
+       style="background-color: {{ request()->routeIs('products*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
        Products
     </a>
     
     <a href="{{ route('lead-sources.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('lead-sources*') ? 'text-white' : 'text-secondary' }}" 
-       style="background-color: {{ request()->routeIs('lead-sources*') ? '#006B3F' : '#f1f5f9' }}; border: none; border-radius: 10px;">
+       style="background-color: {{ request()->routeIs('lead-sources*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
        Lead Sources
     </a>
     
     <a href="{{ route('visit-purposes.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('visit-purposes*') ? 'text-white' : 'text-secondary' }}" 
-       style="background-color: {{ request()->routeIs('visit-purposes*') ? '#006B3F' : '#f1f5f9' }}; border: none; border-radius: 10px;">
+       style="background-color: {{ request()->routeIs('visit-purposes*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
        Visit Purposes
     </a>
     
     <a href="{{ route('guest-categories.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('guest-categories*') ? 'text-white' : 'text-secondary' }}" 
-       style="background-color: {{ request()->routeIs('guest-categories*') ? '#006B3F' : '#f1f5f9' }}; border: none; border-radius: 10px;">
+       style="background-color: {{ request()->routeIs('guest-categories*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
        Guest Categories
     </a>
 </div>
@@ -41,7 +41,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data tujuan kunjungan perusahaan.</p>
     </div>
     
-    <a href="{{ route('visit-purposes.create') }}" style="background:#1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
+    <a href="{{ route('visit-purposes.create') }}" style="background:#013220; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
         + Tambah Visit Purposes
     </a>
 </div>
@@ -89,15 +89,18 @@
                         @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                            <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="color: #1463ff; text-decoration: none; font-weight: 800;">
-                                Edit
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                            {{-- Tombol Edit --}}
+                            <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
                             </a>
+
+                            {{-- Tombol Hapus --}}
                             <form action="{{ route('visit-purposes.destroy', $vst_purposes->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus Visit Purposes ini?')" style="margin: 0; display: inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" style="background: none; border: none; color: #e5484d; text-decoration: none; font-weight: 800; cursor: pointer; padding: 0; font-size: 13px; font-family: inherit;">
-                                    Hapus
+                                <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
                                 </button>
                             </form>
                         </div>

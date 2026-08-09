@@ -8,7 +8,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Pantau status tindak lanjut calon klien yang berminat pada produk.</p>
     </div>
     
-    <button onclick="document.getElementById('modalLead').style.display='flex'" style="background: #006B3F; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
+    <button onclick="document.getElementById('modalLead').style.display='flex'" style="background: #013220; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
         + Tambah Lead
     </button>
 

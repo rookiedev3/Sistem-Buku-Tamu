@@ -140,9 +140,9 @@
             <button type="button" onclick="ubahHalaman('prev')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Sebelumnya</button>
             
             {{-- Daftar Nomor Halaman --}}
-            <button type="button" onclick="pilihHalaman(1)" class="page-btn" data-page="1" style="padding: 6px 12px; border: 1px solid #006B3F; background: #006B3F; color: #fff; border-radius: 8px; font-weight: 800; cursor: pointer; pointer-events: auto !important;">1</button>
-            <button type="button" onclick="pilihHalaman(2)" class="page-btn" data-page="2" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">2</button>
-            <button type="button" onclick="pilihHalaman(3)" class="page-btn" data-page="3" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">3</button>
+            <button type="button" onclick="pilihHalaman(1)" class="page-btn" data-page="1" style="padding: 6px 12px; border: 1px solid #013220; background: #013220; color: #fff; border-radius: 8px; font-weight: 800; cursor: pointer; pointer-events: auto !important;">1</button>
+            <button type="button" onclick="pilihHalaman(2)" class="page-btn" data-page="2" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">2</button>
+            <button type="button" onclick="pilihHalaman(3)" class="page-btn" data-page="3" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">3</button>
             
             {{-- Tombol Selanjutnya --}}
             <button type="button" onclick="ubahHalaman('next')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Selanjutnya</button>
@@ -174,8 +174,8 @@
                 const halaman = parseInt(btn.getAttribute('data-page'));
                 if (halaman === halamanAktif) {
                     // Gaya saat tombol aktif (Warna Hijau)
-                    btn.style.background = '#006B3F';
-                    btn.style.borderColor = '#006B3F';
+                    btn.style.background = '#013220';
+                    btn.style.borderColor = '#013220';
                     btn.style.color = '#fff';
                     btn.style.fontWeight = '800';
                 } else {

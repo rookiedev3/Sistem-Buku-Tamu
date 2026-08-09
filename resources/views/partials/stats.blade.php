@@ -2,7 +2,9 @@
     
     <div class="stats-left-grid">
         <div class="stat-box">
-            <div class="stat-icon-wrap blue">👥</div>
+            <div class="stat-icon-wrap blue">
+                <i class="bi bi-people-fill"></i>
+            </div>
             <div class="stat-content">
                 <span class="stat-label-custom">Total Tamu Hari Ini</span>
                 <h3 class="stat-number-custom">24</h3>
@@ -10,7 +12,9 @@
         </div>
 
         <div class="stat-box">
-            <div class="stat-icon-wrap yellow">⏳</div>
+            <div class="stat-icon-wrap yellow">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
             <div class="stat-content">
                 <span class="stat-label-custom">Sedang Menunggu</span>
                 <h3 class="stat-number-custom">5</h3>
@@ -18,7 +22,9 @@
         </div>
 
         <div class="stat-box">
-            <div class="stat-icon-wrap green">🤝</div>
+            <div class="stat-icon-wrap green">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
             <div class="stat-content">
                 <span class="stat-label-custom">Sedang Bertemu</span>
                 <h3 class="stat-number-custom">7</h3>
@@ -26,7 +32,9 @@
         </div>
 
         <div class="stat-box">
-            <div class="stat-icon-wrap purple">💼</div>
+            <div class="stat-icon-wrap purple">
+                <i class="bi bi-briefcase-fill"></i>
+            </div>
             <div class="stat-content">
                 <span class="stat-label-custom">Menjadi Lead</span>
                 <h3 class="stat-number-custom">+4</h3>
@@ -36,7 +44,9 @@
 
     <div class="stats-right-stack">
         <div class="stat-box wide-box">
-            <div class="stat-icon-wrap teal">🔥</div>
+            <div class="stat-icon-wrap teal">
+                <i class="bi bi-fire"></i>
+            </div>
             <div class="stat-content w-100">
                 <span class="stat-label-custom">Produk Paling Sering Diminati</span>
                 <div class="d-flex justify-content-between align-items-center mt-1">
@@ -47,7 +57,9 @@
         </div>
 
         <div class="stat-box wide-box">
-            <div class="stat-icon-wrap orange">📊</div>
+            <div class="stat-icon-wrap orange">
+                <i class="bi bi-pie-chart-fill"></i>
+            </div>
             <div class="stat-content w-100">
                 <span class="stat-label-custom">Dominasi Kategori Tamu</span>
                 <div class="d-flex justify-content-between align-items-center mt-1">

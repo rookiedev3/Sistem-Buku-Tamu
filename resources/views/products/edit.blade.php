@@ -8,7 +8,7 @@
         <p style="font-size: 13px; color: #778195; margin: 0;">Perbarui data informasi produk perusahaan.</p>
     </div>
     
-    <a href="{{ route('products.index') }}" style="background: #ffffff; color: #778195; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
+   <a href="{{ route('products.index') }}" style="background: #e5484d; color: #ffffff; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s;">
         &larr; Kembali
     </a>
 </div>
@@ -74,7 +74,7 @@
         {{-- Tombol Aksi --}}
         <div style="display: flex; gap: 10px;">
             <button type="submit"
-                style="background:#1463ff; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
+                style="background:#013220; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2);">
                 Update Data
             </button>
             <a href="{{ route('products.index') }}"
