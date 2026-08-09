@@ -209,7 +209,7 @@
         </div>
 
         <!-- Inner Scroll Form Area -->
-        <div class="custom-scroll" style="padding: 28px 32px; overflow-y: auto; max-height: 70vh; box-sizing: border-box;">
+        <div id="modalFormContainer" class="custom-scroll" style="padding: 28px 32px; overflow-y: auto; max-height: 70vh; box-sizing: border-box;">
             <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
                 @csrf
 
@@ -632,6 +632,12 @@
     }
 
     function updateStepUI() {
+        // Reset scroll position to top
+        const container = document.getElementById('modalFormContainer');
+        if (container) {
+            container.scrollTop = 0;
+        }
+
         // Sembunyikan semua konten step
         document.getElementById('step-1-content').style.display = 'none';
         document.getElementById('step-2-content').style.display = 'none';

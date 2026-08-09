@@ -11,7 +11,7 @@
                     Guest Check-In
                 </span>
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
-                    Keperluan Kunjungan 
+                    Keperluan Kunjungan
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
                     Tentukan tujuan kunjungan, produk yang diminati, serta sampaikan detail keperluan Anda.
@@ -59,13 +59,13 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" disabled {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Staff / PIC Tujuan --</option>
                         @if($pic->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($pic as $sales)
-                                <option value="{{ $sales->id }}" {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == $sales->id ? 'selected' : '' }}>
-                                    {{ $sales->name }}
-                                </option>
-                            @endforeach
+                        @foreach($pic as $sales)
+                        <option value="{{ $sales->id }}" {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == $sales->id ? 'selected' : '' }}>
+                            {{ $sales->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -77,13 +77,13 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" disabled {{ old('branch_id', $step2Data['branch_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Cabang / Kantor Tujuan --</option>
                         @if($branches->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}" {{ old('branch_id', $step2Data['branch_id'] ?? '') == $branch->id ? 'selected' : '' }}>
-                                    {{ $branch->name }}
-                                </option>
-                            @endforeach
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}" {{ old('branch_id', $step2Data['branch_id'] ?? '') == $branch->id ? 'selected' : '' }}>
+                            {{ $branch->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -95,13 +95,13 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" disabled {{ old('purpose_id', $step2Data['purpose_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Jenis Kunjungan --</option>
                         @if($visitPurposes->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($visitPurposes as $purposes)
-                                <option value="{{ $purposes->id }}" {{ old('purpose_id', $step2Data['purpose_id'] ?? '') == $purposes->id ? 'selected' : '' }}>
-                                    {{ $purposes->name }}
-                                </option>
-                            @endforeach
+                        @foreach($visitPurposes as $purposes)
+                        <option value="{{ $purposes->id }}" {{ old('purpose_id', $step2Data['purpose_id'] ?? '') == $purposes->id ? 'selected' : '' }}>
+                            {{ $purposes->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -109,17 +109,18 @@
                 {{-- Produk Minat --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Produk / Layanan yang Diminati</label>
+                    {{-- UBAH name="product" MENJADI name="product_interest" --}}
                     <select name="product_interest"
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" {{ old('product_interest', $step2Data['product_interest'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Produk / Layanan --</option>
                         @if($products->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($products as $product)
-                                <option value="{{ $product->code }}" {{ old('product_interest', $step2Data['product_interest'] ?? '') == $product->code ? 'selected' : '' }}>
-                                    {{ $product->name }}
-                                </option>
-                            @endforeach
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}" {{ old('product_interest', $step2Data['product_interest'] ?? '') == $product->id ? 'selected' : '' }}>
+                            {{ $product->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -129,7 +130,7 @@
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">
                         Tanggal & Jam Kunjungan <span style="color: #e5484d;">*</span> <span style="font-weight: 400; color: #778195; font-size: 11px;">(08:00 - 17:00)</span>
                     </label>
-                    
+
                     <div style="position: relative; display: flex; align-items: center; width: 100%;">
                         {{-- Icon Prefix --}}
                         <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
@@ -140,7 +141,7 @@
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                         </div>
-                        
+
                         {{-- Input Text Flatpickr --}}
                         <input type="text" id="scheduled_at" name="scheduled_at"
                             value="{{ old('scheduled_at', $step2Data['scheduled_at'] ?? date('Y-m-d 08:00')) }}"
@@ -156,13 +157,13 @@
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" {{ old('source_id', $step2Data['source_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Sumber Informasi --</option>
                         @if($leadSources->isEmpty())
-                            <option value="" disabled>Data tidak ditemukan.</option>
+                        <option value="" disabled>Data tidak ditemukan.</option>
                         @else
-                            @foreach($leadSources as $lead)
-                                <option value="{{ $lead->id }}" {{ old('source_id', $step2Data['source_id'] ?? '') == $lead->id ? 'selected' : '' }}>
-                                    {{ $lead->name }}
-                                </option>
-                            @endforeach
+                        @foreach($leadSources as $lead)
+                        <option value="{{ $lead->id }}" {{ old('source_id', $step2Data['source_id'] ?? '') == $lead->id ? 'selected' : '' }}>
+                            {{ $lead->name }}
+                        </option>
+                        @endforeach
                         @endif
                     </select>
                 </div>
@@ -181,7 +182,7 @@
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #1463ff; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
-                        Selanjutnya: Konfirmasi Data 
+                        Selanjutnya: Konfirmasi Data
                     </button>
                 </div>
             </form>
@@ -201,31 +202,37 @@
         font-family: inherit !important;
         padding: 8px !important;
     }
-    .flatpickr-day.selected, 
-    .flatpickr-day.startRange, 
-    .flatpickr-day.endRange, 
-    .flatpickr-day.selected.inRange, 
-    .flatpickr-day.selected:focus, 
+
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected.inRange,
+    .flatpickr-day.selected:focus,
     .flatpickr-day.selected:hover {
         background: #006B3F !important;
         border-color: #006B3F !important;
         font-weight: 600;
         border-radius: 10px !important;
     }
+
     .flatpickr-day:hover {
         border-radius: 10px !important;
     }
+
     .flatpickr-months .flatpickr-month {
         color: #172033 !important;
         fill: #172033 !important;
     }
+
     .flatpickr-current-month .flatpickr-monthDropdown-months {
         font-weight: 700 !important;
     }
+
     span.flatpickr-weekday {
         color: #778195 !important;
         font-weight: 600 !important;
     }
+
     #scheduled_at:focus {
         border-color: #006B3F !important;
         background-color: #ffffff !important;
@@ -248,8 +255,8 @@
             time_24hr: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today",
-            minTime: "08:00",          // Membatasi jam mulai: 08:00 WIB
-            maxTime: "17:00",          // Membatasi jam selesai: 17:00 WIB
+            minTime: "08:00", // Membatasi jam mulai: 08:00 WIB
+            maxTime: "17:00", // Membatasi jam selesai: 17:00 WIB
             minuteIncrement: 15,
             disableMobile: "true",
             disable: [

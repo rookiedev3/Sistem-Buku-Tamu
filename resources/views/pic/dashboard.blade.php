@@ -59,60 +59,60 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
     </div>
 </div>
 
-    <!-- Tabel Daftar Tamu Ditugaskan -->
-    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Tamu Masuk & Kategori Pelanggan</h3>
-            <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-        </div>
+<!-- Tabel Daftar Tamu Ditugaskan -->
+<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Tamu Masuk & Kategori Pelanggan</h3>
+        <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+    </div>
 
-        <!-- Filter Cepat Dashboard -->
-<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
-    @php
+    <!-- Filter Cepat Dashboard -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+        @php
         $filterOptions = [
-            'all'      => 'Semua',
-            'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
-            'upcoming' => 'Terjadwal Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
+        'all' => 'Semua',
+        'today' => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
+        'upcoming' => 'Terjadwal Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
         ];
         $activeFilter = $filter ?? 'all';
-    @endphp
+        @endphp
 
-    @foreach($filterOptions as $key => $label)
+        @foreach($filterOptions as $key => $label)
         @php
-            $isActive = $activeFilter === $key;
-            $bg = $isActive ? '#006B3F' : '#f1f5f9';
-            $color = $isActive ? '#ffffff' : '#475569';
+        $isActive = $activeFilter === $key;
+        $bg = $isActive ? '#006B3F' : '#f1f5f9';
+        $color = $isActive ? '#ffffff' : '#475569';
         @endphp
         <a href="{{ route('pic.dashboard', ['filter' => $key]) }}"
-           style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+            style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
             {{ $label }}
         </a>
-    @endforeach
-</div>
-        
-        <div class="table-responsive">
-            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
-                <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
-                    <tr>
-                        <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
-                        <th style="padding: 14px;">Nama Tamu & Instansi</th>
-                        <th style="padding: 14px;">Kategori</th>
-                        <th style="padding: 14px;">Keperluan</th>
-                        <th style="padding: 14px; text-align: center;">Catatan</th>
-                        <th style="padding: 14px;">Waktu / Jadwal</th>
-                        <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
-                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($visits as $index => $visit)
-                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
-                            
-                            <td style="padding: 14px;">
-                                <strong style="display: block; color: #172033; font-weight: 800;">{{ $visit->guest->name ?? '-' }}</strong>
-                                <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }}</span>
-                            </td>
+        @endforeach
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
+            <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
+                <tr>
+                    <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
+                    <th style="padding: 14px;">Nama Tamu & Instansi</th>
+                    <th style="padding: 14px;">Kategori</th>
+                    <th style="padding: 14px;">Keperluan</th>
+                    <th style="padding: 14px; text-align: center;">Catatan</th>
+                    <th style="padding: 14px;">Waktu / Jadwal</th>
+                    <th style="padding: 14px; text-align: center;">Konfirmasi Kehadiran</th>
+                    <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($visits as $index => $visit)
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
+
+                    <td style="padding: 14px;">
+                        <strong style="display: block; color: #172033; font-weight: 800;">{{ $visit->guest->name ?? '-' }}</strong>
+                        <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }}</span>
+                    </td>
 
                     <td style="padding: 14px;">
                         @if(isset($visit->guest) && $visit->guest->is_vip)
@@ -122,49 +122,49 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                         @endif
                     </td>
 
-                            <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
+                    <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? $visit->purpose }}</td>
 
-                            <!-- Kolom Catatan (dari data awal pengirim, bukan hasil meeting) -->
-                            <td style="padding: 14px; text-align: center;">
-                                @if(!empty($visit->notes))
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatanTamu-{{ $visit->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                    📝 Lihat Catatan
-                                </button>
-                                @else
-                                <span style="font-style: italic; color: #94a3b8; font-size: 12px;">-</span>
-                                @endif
-                            </td>
-                            
-<td style="padding: 14px; color: #778195; font-weight: 600;">
-    @if($visit->check_in_at)
-        {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
-        {{-- <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Sudah check-in</div> --}}
-    @elseif($visit->scheduled_at)
-        @php $schedDate = \Carbon\Carbon::parse($visit->scheduled_at); @endphp
-        {{ $schedDate->format('H:i') }} WIB
-        @if($schedDate->isToday())
-            <div style="font-size: 10px; color: #d97706; margin-top: 2px; font-weight: 700;">🔥 Hari Ini</div>
-        @else
-            <div style="font-size: 10px; color: #1d4ed8; margin-top: 2px; font-weight: 700;">📅 {{ tgl($schedDate) }}</div>
-        @endif
-    @else
-        -
-    @endif
-</td>
-                            
-<!-- Kolom Konfirmasi Kehadiran -->
-<td style="padding: 14px; text-align: center;">
-    @php $statusLower = strtolower($visit->status); @endphp
-    
-    @if(in_array($statusLower, ['pending', 'waiting', 'menunggu']))
-        <div style="display: flex; justify-content: center; gap: 6px;">
-            <!-- Tombol Centang: Konfirmasi Bertemu -->
-            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="status" value="Dikonfirmasi">
-                <button type="submit" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✓</button>
-            </form>
+                    <!-- Kolom Catatan (dari data awal pengirim, bukan hasil meeting) -->
+                    <td style="padding: 14px; text-align: center;">
+                        @if(!empty($visit->notes))
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatanTamu-{{ $visit->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                            📝 Lihat Catatan
+                        </button>
+                        @else
+                        <span style="font-style: italic; color: #94a3b8; font-size: 12px;">-</span>
+                        @endif
+                    </td>
+
+                    <td style="padding: 14px; color: #778195; font-weight: 600;">
+                        @if($visit->check_in_at)
+                        {{ \Carbon\Carbon::parse($visit->check_in_at)->format('H:i') }} WIB
+                        {{-- <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Sudah check-in</div> --}}
+                        @elseif($visit->scheduled_at)
+                        @php $schedDate = \Carbon\Carbon::parse($visit->scheduled_at); @endphp
+                        {{ $schedDate->format('H:i') }} WIB
+                        @if($schedDate->isToday())
+                        <div style="font-size: 10px; color: #d97706; margin-top: 2px; font-weight: 700;">🔥 Hari Ini</div>
+                        @else
+                        <div style="font-size: 10px; color: #1d4ed8; margin-top: 2px; font-weight: 700;">📅 {{ tgl($schedDate) }}</div>
+                        @endif
+                        @else
+                        -
+                        @endif
+                    </td>
+
+                    <!-- Kolom Konfirmasi Kehadiran -->
+                    <td style="padding: 14px; text-align: center;">
+                        @php $statusLower = strtolower($visit->status); @endphp
+
+                        @if(in_array($statusLower, ['pending', 'waiting', 'menunggu']))
+                        <div style="display: flex; justify-content: center; gap: 6px;">
+                            <!-- Tombol Centang: Konfirmasi Bertemu -->
+                            <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="Dikonfirmasi">
+                                <button type="submit" title="Konfirmasi Benar Bertemu" style="background: #e6f4ed; color: #006B3F; border: 1px solid #bbf7d0; width: 34px; height: 34px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">✓</button>
+                            </form>
 
                             <!-- Tombol Silang: Batalkan -->
                             <form action="{{ route('pic.updateStatus', $visit->id) }}" method="POST" style="margin:0;">
@@ -264,41 +264,49 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                                     <strong style="color: #172033; font-size: 14px;">{{ $visit->guest->name ?? '-' }} ({{ $visit->guest->company_name ?? '-' }})</strong>
                                 </div>
 
-                                <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST">
+                                <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST" onsubmit="let btn = this.querySelector('button[type=\'submit\']'); btn.disabled = true; btn.innerHTML = 'Menyimpan...';">
                                     @csrf
+
+                                    {{-- Catatan / Ringkasan Diskusi --}}
                                     <div style="margin-bottom: 16px;">
                                         <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
                                         <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
                                     </div>
 
-                                <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-                                    <option value="hot">Hot Lead</option>
-                                    <option value="warm">Warm Lead</option>
-                                    <option value="cold">Cold</option>
-                                    <option value="non_lead">Non-Lead</option>
-                                </select>
-
-                                <div style="margin-bottom: 20px;">
-                                    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
-
-                                    <div style="position: relative; display: flex; align-items: center; width: 100%;">
-                                        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                                            </svg>
-                                        </div>
-
-                                        <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
-                                            value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
-                                            placeholder="Pilih tanggal follow-up..." readonly
-                                            style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+                                    {{-- Tingkat Potensi / Lead Level --}}
+                                    <div style="margin-bottom: 16px;">
+                                        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Potensi Klien</label>
+                                        <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+                                            <option value="hot" {{ $visit->potential_level == 'hot' ? 'selected' : '' }}>Hot Lead</option>
+                                            <option value="warm" {{ $visit->potential_level == 'warm' ? 'selected' : '' }}>Warm Lead</option>
+                                            <option value="cold" {{ $visit->potential_level == 'cold' ? 'selected' : '' }}>Cold</option>
+                                            <option value="non_lead" {{ $visit->potential_level == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
+                                        </select>
                                     </div>
-                                    <p id="follow_up_note-{{ $visit->id }}" style="display:none; font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">Follow-up tidak diperlukan untuk status Deal / Cold.</p>
-                                </div>
 
+                                    {{-- Jadwal Follow-Up --}}
+                                    <div style="margin-bottom: 20px;">
+                                        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+
+                                        <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                                            <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                </svg>
+                                            </div>
+
+                                            <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
+                                                value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
+                                                placeholder="Pilih tanggal follow-up..." readonly
+                                                style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+                                        </div>
+                                        <p id="follow_up_note-{{ $visit->id }}" style="display:none; font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">Follow-up tidak diperlukan untuk status Deal / Cold.</p>
+                                    </div>
+
+                                    {{-- Tombol Aksi --}}
                                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
                                         <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
                                             Batal
@@ -315,23 +323,23 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
                 </div>
                 <!-- END MODAL -->
 
-                    @empty
-                        <tr>
-                            <td colspan="8" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
-                                Belum ada kunjungan tamu hari ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-                <!-- Pagination -->
-        <div style="margin-top: 20px;">
-        @include('partials.pagination', ['paginator' => $visits])
-        </div>
-    
-        
+                @empty
+                <tr>
+                    <td colspan="8" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
+                        Belum ada kunjungan tamu hari ini.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+    <!-- Pagination -->
+    <div style="margin-top: 20px;">
+        @include('partials.pagination', ['paginator' => $visits])
+    </div>
+
+
+</div>
 </div>
 
 <!-- CDN CSS Flatpickr -->
@@ -347,6 +355,7 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
         font-family: inherit !important;
         padding: 8px !important;
     }
+
     .flatpickr-day.selected,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange,
@@ -358,20 +367,25 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
         font-weight: 600;
         border-radius: 10px !important;
     }
+
     .flatpickr-day:hover {
         border-radius: 10px !important;
     }
+
     .flatpickr-months .flatpickr-month {
         color: #172033 !important;
         fill: #172033 !important;
     }
+
     .flatpickr-current-month .flatpickr-monthDropdown-months {
         font-weight: 700 !important;
     }
+
     span.flatpickr-weekday {
         color: #778195 !important;
         font-weight: 600 !important;
     }
+
     #follow_up_at:focus {
         border-color: #006B3F !important;
         background-color: #ffffff !important;
@@ -382,44 +396,44 @@ $regularCount = $regularCount ?? ($visits->count() - $vipCount);
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         @foreach($visits as $visit)
-        (function() {
-            var inputEl  = document.getElementById('follow_up_at-{{ $visit->id }}');
-            var selectEl = document.getElementById('potential_level-{{ $visit->id }}');
-            var noteEl   = document.getElementById('follow_up_note-{{ $visit->id }}');
+            (function() {
+                var inputEl = document.getElementById('follow_up_at-{{ $visit->id }}');
+                var selectEl = document.getElementById('potential_level-{{ $visit->id }}');
+                var noteEl = document.getElementById('follow_up_note-{{ $visit->id }}');
 
-            if (!inputEl || !selectEl) return;
+                if (!inputEl || !selectEl) return;
 
-var fp = flatpickr(inputEl, {
-    locale: "id",
-    dateFormat: "Y-m-d",
-    minDate: "today",
-    disableMobile: "true"
-});
+                var fp = flatpickr(inputEl, {
+                    locale: "id",
+                    dateFormat: "Y-m-d",
+                    minDate: "today",
+                    disableMobile: "true"
+                });
 
-            function syncFollowUpState() {
-                var noFollowUp = ['deal', 'cold'].includes(selectEl.value);
+                function syncFollowUpState() {
+                    var noFollowUp = ['deal', 'cold'].includes(selectEl.value);
 
-                if (noFollowUp) {
-                    fp.clear();          // kosongkan tanggal yang sudah dipilih
-                    fp.set('clickOpens', false);
-                    inputEl.disabled = true;
-                    inputEl.style.background = '#f1f5f9';
-                    inputEl.style.color = '#94a3b8';
-                    inputEl.style.cursor = 'not-allowed';
-                    if (noteEl) noteEl.style.display = 'block';
-                } else {
-                    fp.set('clickOpens', true);
-                    inputEl.disabled = false;
-                    inputEl.style.background = '#fbfcfe';
-                    inputEl.style.color = '#172033';
-                    inputEl.style.cursor = 'pointer';
-                    if (noteEl) noteEl.style.display = 'none';
+                    if (noFollowUp) {
+                        fp.clear(); // kosongkan tanggal yang sudah dipilih
+                        fp.set('clickOpens', false);
+                        inputEl.disabled = true;
+                        inputEl.style.background = '#f1f5f9';
+                        inputEl.style.color = '#94a3b8';
+                        inputEl.style.cursor = 'not-allowed';
+                        if (noteEl) noteEl.style.display = 'block';
+                    } else {
+                        fp.set('clickOpens', true);
+                        inputEl.disabled = false;
+                        inputEl.style.background = '#fbfcfe';
+                        inputEl.style.color = '#172033';
+                        inputEl.style.cursor = 'pointer';
+                        if (noteEl) noteEl.style.display = 'none';
+                    }
                 }
-            }
 
-            selectEl.addEventListener('change', syncFollowUpState);
-            syncFollowUpState(); // jalankan sekali saat load, jaga-jaga default value bukan "warm"
-        })();
+                selectEl.addEventListener('change', syncFollowUpState);
+                syncFollowUpState(); // jalankan sekali saat load, jaga-jaga default value bukan "warm"
+            })();
         @endforeach
     });
 </script>

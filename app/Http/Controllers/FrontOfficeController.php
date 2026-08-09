@@ -276,12 +276,31 @@ class FrontOfficeController extends Controller
         $totalToday = $visits->count();
         $waitingToday = $visits->whereIn('status', ['Menunggu', 'waiting'])->count();
 
-        // Ambil data pendukung untuk modal input manual
+        // Ambil seluruh data pendukung untuk modal input manual 3-Step
         $pics = User::where('role', 'pic')->select('id', 'name')->get();
         $branches = branches::select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
+        $guestCategories = guest_categories::select('id', 'name')->get();
+        $products = products::select('code', 'name')->get();
+        $leadSources = lead_sources::select('id', 'name')->get();
 
-        return view('frontoffice.appointment', compact('visits', 'totalToday', 'waitingToday', 'pics', 'branches', 'purposes'));
+        // Ambil data notifikasi untuk navbar/layout
+        $notifications = notifications::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('frontoffice.appointment', compact(
+            'visits',
+            'totalToday',
+            'waitingToday',
+            'pics',
+            'branches',
+            'purposes',
+            'guestCategories',
+            'products',
+            'leadSources',
+            'notifications'
+        ));
     }
 
     public function storeAppointment(Request $request)

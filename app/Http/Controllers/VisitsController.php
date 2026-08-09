@@ -24,7 +24,6 @@ class VisitsController extends Controller
     // ==========================================
     public function step1()
     {
-        // Ambil data sementara dari session jika pengguna menekan tombol kembali
         $step1Data = session('step1_data', []);
         $guestCategories = guest_categories::select('id', 'name')->get();
 
@@ -35,7 +34,6 @@ class VisitsController extends Controller
     {
         $existingStep1 = session('step1_data', []);
 
-        // 1. Validasi Input Step 1
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
@@ -47,7 +45,6 @@ class VisitsController extends Controller
             'photo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Sanitasi Format Nomor Telepon / WhatsApp (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
@@ -57,26 +54,20 @@ class VisitsController extends Controller
         }
         $validatedData['phone'] = $phone;
 
-        // Cek apakah nomor WA ini sudah pernah terdaftar di database
         $existingGuestInDb = guests::where('phone', $phone)->first();
 
-        // 3. Handle Upload dan Penyimpanan Path Foto
         if ($request->hasFile('photo_path')) {
-            // Hapus file temporary lama di storage jika pengguna mengunggah ulang foto baru
             if (! empty($existingStep1['photo_path']) && Storage::disk('public')->exists($existingStep1['photo_path'])) {
                 Storage::disk('public')->delete($existingStep1['photo_path']);
             }
 
-            // Simpan file ke disk public dan simpan string path-nya
             $path = $request->file('photo_path')->store('photos', 'public');
             $validatedData['photo_path'] = $path;
         } else {
-            // Pertahankan path foto dari session sebelumnya atau dari DB
             $validatedData['photo_path'] = $existingStep1['photo_path']
                 ?? ($existingGuestInDb->photo_path ?? null);
         }
 
-        // 4. Simpan Seluruh Data ke Session
         session(['step1_data' => $validatedData]);
 
         return redirect()->route('check-in.step2');
@@ -97,7 +88,7 @@ class VisitsController extends Controller
         $pic = users::select('id', 'name')->where('role', 'pic')->get();
         $branches = branches::select('id', 'name', 'code')->get();
         $visitPurposes = visit_purposes::select('id', 'name')->get();
-        $products = products::select('code', 'name')->get();
+        $products = products::select('id', 'name')->get();
         $leadSources = lead_sources::select('id', 'name')->get();
 
         return view('check-in.step2', compact('step1Data', 'step2Data', 'pic', 'branches', 'visitPurposes', 'products', 'leadSources'));
@@ -109,7 +100,6 @@ class VisitsController extends Controller
             return redirect()->route('check-in.step1');
         }
 
-        // 1. Validasi Input Step 2
         $validated = $request->validate([
             'assigned_to' => 'required',
             'branch_id' => 'required',
@@ -120,7 +110,6 @@ class VisitsController extends Controller
             'notes' => 'required|string|max:1000',
         ]);
 
-        // 2. Simpan Sementara ke Session
         session(['step2_data' => $validated]);
 
         return redirect()->route('check-in.step3');
@@ -141,7 +130,12 @@ class VisitsController extends Controller
         $pic = users::find($step2Data['assigned_to']);
         $branch = branches::find($step2Data['branch_id']);
         $purposeType = visit_purposes::find($step2Data['purpose_id']);
-        $product = ! empty($step2Data['product_interest']) ? products::where('code', $step2Data['product_interest'])->first() : null;
+
+        $productIds = array_filter((array) ($step2Data['product_interest'] ?? []));
+        $productNames = ! empty($productIds)
+            ? products::whereIn('id', $productIds)->pluck('name')->implode(', ')
+            : '-';
+
         $source = ! empty($step2Data['source_id']) ? lead_sources::find($step2Data['source_id']) : null;
         $guestCategory = ! empty($step1Data['guest_category_id']) ? guest_categories::find($step1Data['guest_category_id']) : null;
 
@@ -151,28 +145,31 @@ class VisitsController extends Controller
             'pic',
             'branch',
             'purposeType',
-            'product',
             'source',
-            'guestCategory'
+            'guestCategory',
+            'productNames'
         ));
     }
 
     public function showStep3(Request $request)
     {
-        // Ambil data step 1 & 2 dari session
-        $step1Data = session('checkin_step1', []);
-        $step2Data = session('checkin_step2', []);
+        $step1Data = session('step1_data', session('checkin_step1', []));
+        $step2Data = session('step2_data', session('checkin_step2', []));
 
         if (empty($step1Data)) {
             return redirect()->route('check-in.step1')->with('error', 'Silakan isi identitas terlebih dahulu.');
         }
 
-        // Query Model berdasarkan ID dari session
         $guestCategory = isset($step1Data['guest_category_id']) ? guest_categories::find($step1Data['guest_category_id']) : null;
         $pic = isset($step2Data['assigned_to']) ? users::find($step2Data['assigned_to']) : null;
         $branch = isset($step2Data['branch_id']) ? branches::find($step2Data['branch_id']) : null;
-        $purposeType = isset($step2Data['purpose_type_id']) ? visit_purposes::find($step2Data['purpose_type_id']) : null;
-        $product = isset($step2Data['product_id']) ? products::find($step2Data['product_id']) : null;
+        $purposeType = isset($step2Data['purpose_id']) ? visit_purposes::find($step2Data['purpose_id']) : null;
+
+        $productIds = array_filter((array) ($step2Data['product_interest'] ?? $step2Data['product_id'] ?? []));
+        $productNames = ! empty($productIds)
+            ? products::whereIn('id', $productIds)->pluck('name')->implode(', ')
+            : '-';
+
         $source = isset($step2Data['source_id']) ? lead_sources::find($step2Data['source_id']) : null;
 
         return view('check-in.step3', compact(
@@ -182,8 +179,8 @@ class VisitsController extends Controller
             'pic',
             'branch',
             'purposeType',
-            'product',
-            'source'
+            'source',
+            'productNames'
         ));
     }
 
@@ -198,7 +195,6 @@ class VisitsController extends Controller
 
         $visit = DB::transaction(function () use ($step1, $step2) {
 
-            // 1. Cari / Buat Guest berdasarkan Nomor WhatsApp
             $guest = guests::where('phone', $step1['phone'])->first();
 
             if ($guest) {
@@ -216,23 +212,19 @@ class VisitsController extends Controller
                 $guest = guests::create($step1);
             }
 
-            // 2. Format Tanggal & Jam Check-In
             $rawCheckInDate = $step2['scheduled_at'] ?? now();
             $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
             $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
 
-            // 3. Hitung Jumlah Antrean berdasarkan Tanggal Kunjungan
             $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
-            // 4. Generate Visit Code
             $todayDate = Carbon::now()->format('Ymd');
             $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
             $visitCode = $prefixVisit . $sequenceVisit;
 
-            // 5. Simpan ke Tabel Visits
             $newVisit = visits::create([
                 'visit_code' => $visitCode,
                 'guest_id' => $guest->id,
@@ -240,14 +232,31 @@ class VisitsController extends Controller
                 'branch_id' => $step2['branch_id'],
                 'purpose_id' => $step2['purpose_id'],
                 'scheduled_at' => $checkInDateTime,
-                'product_interest' => $step2['product_interest'] ?? null,
                 'source_id' => $step2['source_id'] ?? null,
                 'notes' => $step2['notes'],
                 'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
             ]);
 
-            // 6. 🟢 Simpan Log Status Awal di Dalam Transaction
+            // Simpan produk ke tabel relasi visit_products
+            if (! empty($step2['product_interest'])) {
+                $productIds = array_filter((array) $step2['product_interest']);
+
+                $visitProducts = [];
+                foreach ($productIds as $pId) {
+                    $visitProducts[] = [
+                        'visit_id'   => $newVisit->id,
+                        'product_id' => $pId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                if (! empty($visitProducts)) {
+                    DB::table('visit_products')->insert($visitProducts);
+                }
+            }
+
             visit_status_logs::create([
                 'visit_id' => $newVisit->id,
                 'old_status' => null,
@@ -260,34 +269,27 @@ class VisitsController extends Controller
             $newVisit->check_in_at = now();
             $newVisit->save();
 
-            // Ambil data pendukung untuk isi notifikasi
             $purposeType = visit_purposes::find($step2['purpose_id']);
             $branch = branches::find($step2['branch_id']);
 
-            // 1. Ambil semua user yang memiliki role 'admin'
             $adminUsers = users::where('role', 'admin')->get();
 
-            // 2. Looping untuk kirim notifikasi ke masing-masing admin
             foreach ($adminUsers as $admin) {
-                    notifications::send(
-                        $admin->id,
-                        'guest_arrived',
-                        'Notifikasi Admin 🔔',
-                        'Tamu baru membuat jadwal pertemuan.' .
-                            "\n" . 'Nama: ' . ($guest->name ?? '-') .
-                            "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                            "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
-                            "\n" . 'Cabang: ' . ($branch->name ?? '-')
-                    );
+                notifications::send(
+                    $admin->id,
+                    'guest_arrived',
+                    'Notifikasi Admin 🔔',
+                    'Tamu baru membuat jadwal pertemuan.' .
+                        "\n" . 'Nama: ' . ($guest->name ?? '-') .
+                        "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
+                        "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
+                        "\n" . 'Cabang: ' . ($branch->name ?? '-')
+                );
             }
 
             return $newVisit;
         });
 
-        $pic = users::find($step2['assigned_to']);
-        $branch = branches::find($step2['branch_id']);
-
-        // Hapus session temporary
         session()->forget(['step1_data', 'step2_data']);
         session(['final_visit_id' => $visit->id]);
 
@@ -301,16 +303,11 @@ class VisitsController extends Controller
         return view('check-in.step4', compact('visit'));
     }
 
-    // ==========================================
-    // DASHBOARD PIC & MANAJEMEN PERTEMUAN
-    // ==========================================
     public function dashboardPic()
     {
-        // Mengambil data milik PIC yang sedang login
-        $visits = visits::with(['guest', 'notes', 'branch'])
+        $visits = visits::with(['guest', 'branch'])
             ->where('assigned_to', auth()->id())
             ->where(function ($query) {
-                // Tampilkan jika check-in hari ini ATAU statusnya masih menunggu/dikonfirmasi
                 $query->whereDate('scheduled_at', Carbon::today())
                     ->orWhereIn('status', ['pending', 'waiting', 'confirmed']);
             })
@@ -326,7 +323,6 @@ class VisitsController extends Controller
         return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount'));
     }
 
-    // Aksi untuk tombol Centang (✓) dan Silang (✕)
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -337,9 +333,13 @@ class VisitsController extends Controller
             ->where('assigned_to', auth()->id())
             ->firstOrFail();
 
-        $oldStatus = $visit->status;
+        $oldStatus = trim($visit->status ?? '');
         $isConfirmed = in_array($request->status, ['confirmed', 'Dikonfirmasi']);
         $newStatus = $isConfirmed ? 'Dikonfirmasi' : 'Dibatalkan';
+
+        if (strtolower($oldStatus) === strtolower($newStatus)) {
+            return back()->with('info', 'Status sudah sesuai, tidak ada perubahan.');
+        }
 
         $visit->status = $newStatus;
 
@@ -364,7 +364,6 @@ class VisitsController extends Controller
         return back()->with('success', $msg);
     }
 
-    // Aksi untuk simpan data dari Modal Pertemuan
     public function completeMeeting(Request $request, $id)
     {
         $request->validate([
@@ -373,16 +372,28 @@ class VisitsController extends Controller
             'follow_up_at' => 'nullable|date',
         ]);
 
-        // Pastikan hanya data kunjungan milik PIC yang sedang login yang bisa di-complete
         $visit = visits::where('id', $id)
             ->where('assigned_to', auth()->id())
             ->firstOrFail();
+
+        $oldStatus = trim($visit->status ?? '');
+        $newStatus = 'completed';
+
+        if (strtolower($oldStatus) !== strtolower($newStatus)) {
+            visit_status_logs::create([
+                'visit_id' => $visit->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'changed_by' => auth()->check() ? auth()->id() : null,
+                'changed_at' => now(),
+            ]);
+        }
 
         $visit->update([
             'meeting_result' => $request->meeting_result,
             'potential_level' => $request->potential_level,
             'follow_up_at' => $request->follow_up_at,
-            'status' => 'completed',
+            'status' => $newStatus,
             'check_out_at' => now(),
         ]);
 

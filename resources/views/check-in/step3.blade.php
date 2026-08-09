@@ -11,7 +11,7 @@
                     Guest Check-In
                 </span>
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
-                    Konfirmasi Data 
+                    Konfirmasi Data
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
                     Periksa kembali seluruh data Anda sebelum melakukan submit akhir dan mendapatkan token antrian.
@@ -119,7 +119,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Produk Diminati:</span>
-                    <span style="color: #172033; font-weight: 700;">{{ $product?->name ?? '-' }}</span>
+                    <span style="color: #172033; font-weight: 700; text-align: right; max-width: 220px;">{{ $productNames }}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                     <span style="color: #64748b; font-weight: 600;">Sumber Info:</span>
@@ -158,7 +158,7 @@
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #006B3F; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.25);">
-                        Konfirmasi & Check-In 
+                        Konfirmasi & Check-In
                     </button>
                 </div>
 
