@@ -99,4 +99,17 @@ public function products()
     return $this->belongsToMany(products::class, 'visit_products', 'visit_id', 'product_id');
 }
 
+    protected static function booted()
+    {
+        static::updating(function ($visit) {
+            if (auth()->check()) {
+                $visit->updated_by = auth()->id();
+            }
+        });
+    }
+
+    public function updatedBy(): BelongsTo
+{
+    return $this->belongsTo(User::class, 'updated_by');
+}
 }

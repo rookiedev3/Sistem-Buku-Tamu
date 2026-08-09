@@ -218,6 +218,7 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
         $newStatus = $isConfirmed ? 'Dikonfirmasi' : 'Dibatalkan';
 
         $visit->status = $newStatus;
+        $visit->updated_by = auth()->id(); 
 
         if ($isConfirmed) {
             $visit->meeting_start_at = now();
@@ -270,6 +271,7 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             'potential_level' => $request->potential_level,
             'follow_up_at' => $request->followup_date ?? $request->follow_up_at,
             'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot']),
+            'updated_by' => auth()->id(),   // tambahkan ini
         ]);
 
         if (in_array($request->potential_level, ['warm', 'hot'])) {
@@ -421,6 +423,7 @@ return view('pic.leads', compact(
         $visit->update([
             'status' => 'Sedang Bertemu',
             'meeting_start_at' => now(),
+            'updated_by' => auth()->id(),   // tambahkan ini
         ]);
 
         return redirect()->back()->with('success', 'Pertemuan dimulai. Silakan lakukan diskusi dengan tamu.');

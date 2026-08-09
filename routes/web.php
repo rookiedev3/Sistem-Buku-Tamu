@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     // Route::get('/', [DashboardController::class, 'index'])->name('home');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('/pengguna', UserController::class)->names('user');
+    // Route::resource('/pengguna', UserController::class)->names('user');
 
     // Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
     // Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
@@ -117,6 +117,7 @@ Route::resource('/products', ProductsController::class);
 Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
+    Route::resource('/pengguna', UserController::class)->names('user');
 
 Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
     // Route khusus untuk user dengan level 1 (admin)
@@ -219,6 +220,15 @@ Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class
 Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::class, 'markNotificationRead'])
     ->name('frontoffice.notifications.read');
 
+//     Route::middleware('auth')->prefix('security')->group(function () {
+//     Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+// });
+
+Route::middleware('auth')->prefix('security')->group(function () {
+    Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+    Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
+    Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
+});
 // Route::prefix('pic')->group(function () {
 
 //     // // Halaman Dashboard PIC
