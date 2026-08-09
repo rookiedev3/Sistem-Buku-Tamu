@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'halamanUtama'])->name('halamaanUtama');
 
+
 // Route untuk user belum login (guest)
 Route::middleware('guest')->group(function () {
     Route::controller(AuthController::class)->group(function () {

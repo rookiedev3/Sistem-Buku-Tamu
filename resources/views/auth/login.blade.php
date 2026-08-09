@@ -18,7 +18,6 @@
             padding: 0;
         }
 
-        /* Wallpaper background disamakan persis dengan halaman welcome (gradasi hijau korporat yang hidup) */
         body {
             min-height: 100vh;
             display: flex;
@@ -34,6 +33,7 @@
             background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px;
             position: relative;
             overflow-x: hidden;
+            padding: 20px;
         }
 
         /* Container Card Memanjang */
@@ -109,7 +109,7 @@
             right: 0;
         }
 
-        /* Kotak Khusus Password untuk ikon mata custom kita */
+        /* Kotak Khusus Password untuk ikon mata custom */
         .password-container {
             position: relative;
             display: flex;
@@ -153,12 +153,38 @@
             color: #fff;
         }
 
+        /* Tombol Kembali ke Beranda di bawah tombol utama */
+        .btn-back-home {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 11px 16px;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-back-home:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-color: #cbd5e1;
+        }
+
         /* Responsif untuk layar HP */
         @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
             .login-wrapper {
                 flex-direction: column;
                 max-width: 100%;
-                margin: 20px;
                 border-radius: 16px;
             }
             .login-brand-side {
@@ -231,12 +257,18 @@
                     <a href="{{ route('password.request') }}" style="color: #006B3F; text-decoration: none; font-weight: 700;">Lupa Password?</a>
                 </div>
 
-                <button type="submit" class="btn btn-custom-login w-100 shadow-sm">
+                <button type="submit" class="btn btn-custom-login w-100 shadow-sm mb-3">
                     Masuk ke Sistem
                 </button>
             </form>
 
-            <div class="text-center mt-4" style="font-size: 13px; color: #64748b;">
+            <div class="mb-4">
+                <a href="{{ url('/') }}" class="btn-back-home shadow-sm">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+                </a>
+            </div>
+
+            <div class="text-center" style="font-size: 13px; color: #64748b;">
                 Belum punya akun? 
                 <a href="{{ route('register') }}" style="color: #006B3F; text-decoration: none; font-weight: 700;">Daftar Sekarang</a>
             </div>
