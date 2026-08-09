@@ -100,8 +100,12 @@
     </div>
 
     <h2>Laporan Kunjungan Tamu</h2>
-    <p class="subtitle">Periode: {{ $monthLabel }} {{ $year }} @if($category) — Kategori: {{ ucfirst($category) }} @endif</p>
-
+<p class="subtitle">
+    Periode: {{ $monthLabel }} {{ $year }}
+    @if($category) — Kategori: {{ ucfirst($category) }} @endif
+    @if($branchName) — Cabang: {{ $branchName }} @endif
+    @if($picName) — PIC: {{ $picName }} @endif
+</p>
     <div class="narrative">
         Selama periode <strong>{{ $monthLabel }} {{ $year }}</strong>, IT Solution Yogyakarta menerima
         <strong>{{ $totalKunjungan }} kunjungan tamu</strong>@if($totalVip > 0), dengan <strong>{{ $totalVip }} di antaranya berkategori VIP</strong>@endif.

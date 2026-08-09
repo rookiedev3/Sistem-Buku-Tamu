@@ -31,70 +31,89 @@
 
         <form action="{{ route('manager.laporan') }}" method="GET" style="display: flex; flex-direction: column; gap: 20px;">
 
-            <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-                <div style="width: 220px;">
-                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Pilih Bulan</label>
-                    <select name="month" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                        @php
-                            $months = [
-                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                            ];
-                        @endphp
-                        @foreach($months as $num => $label)
-                            <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div>
+            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Pilih Bulan</label>
+            <select name="month" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
+                @php
+                    $months = [
+                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                    ];
+                @endphp
+                @foreach($months as $num => $label)
+                    <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
 
-                <div style="width: 180px;">
-                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Tahun</label>
-                    <select name="year" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                        @php $currentYear = date('Y'); @endphp
-                        @for($y = $currentYear; $y >= $currentYear - 3; $y--)
-                            <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
-                </div>
+        <div>
+            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Tahun</label>
+            <select name="year" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
+                @php $currentYear = date('Y'); @endphp
+                @for($y = $currentYear; $y >= $currentYear - 3; $y--)
+                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endfor
+            </select>
+        </div>
 
-                <div style="width: 200px;">
-                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Kategori Tamu</label>
-                    <select name="category" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                        <option value="" {{ $category === '' ? 'selected' : '' }}>Semua Kategori</option>
-                        <option value="vip" {{ $category === 'vip' ? 'selected' : '' }}>⭐ VIP</option>
-                        <option value="reguler" {{ $category === 'reguler' ? 'selected' : '' }}>Reguler</option>
-                    </select>
-                </div>
+        <div>
+            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Kategori Tamu</label>
+            <select name="category" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
+                <option value="" {{ $category === '' ? 'selected' : '' }}>Semua Kategori</option>
+                <option value="vip" {{ $category === 'vip' ? 'selected' : '' }}>⭐ VIP</option>
+                <option value="reguler" {{ $category === 'reguler' ? 'selected' : '' }}>Reguler</option>
+            </select>
+        </div>
 
-                <div>
-                    <button type="submit" style="background: #1e3a8a; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
-                        Tampilkan Preview
-                    </button>
-                </div>
-            </div>
+        <div>
+            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Cabang</label>
+            <select name="branch_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
+                <option value="" {{ $branchId === '' ? 'selected' : '' }}>Semua Cabang</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}" {{ $branchId == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 0;">
+        <div>
+            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">PIC</label>
+            <select name="pic_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
+                <option value="" {{ $picId === '' ? 'selected' : '' }}>Semua PIC</option>
+                @foreach($picUsers as $pic)
+                    <option value="{{ $pic->id }}" {{ $picId == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <span style="font-size: 13px; font-weight: 700; color: #172033;">Aksi Export File:</span>
+        <div style="display: flex; align-items: flex-end;">
+            <button type="submit" style="width: 100%; background: #1e3a8a; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
+                Tampilkan Preview
+            </button>
+        </div>
+    </div>
 
-                <button type="submit"
-                    formaction="{{ route('manager.laporan.exportExcel') }}"
-                    formmethod="GET"
-                    style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                    📊 Export Bulanan ke Excel (.xlsx)
-                </button>
+    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 0;">
 
-                <button type="submit"
-                    formaction="{{ route('manager.laporan.exportPdf') }}"
-                    formmethod="GET"
-                    style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                    📄 Export Bulanan ke PDF (.pdf)
-                </button>
-            </div>
-        </form>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <span style="font-size: 13px; font-weight: 700; color: #172033;">Export File:</span>
 
+        <button type="submit"
+            formaction="{{ route('manager.laporan.exportExcel') }}"
+            formmethod="GET"
+            style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            📊 Export Bulanan ke Excel (.xlsx)
+        </button>
+
+        <button type="submit"
+            formaction="{{ route('manager.laporan.exportPdf') }}"
+            formmethod="GET"
+            style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            📄 Export Bulanan ke PDF (.pdf)
+        </button>
+    </div>
+</form>
     </div>
 
     <!-- Tabel Preview Data -->
@@ -126,6 +145,7 @@
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
                         <th style="padding: 14px;">Tanggal</th>
                         <th style="padding: 14px;">Nama Tamu & Instansi</th>
+                        <th style="padding: 14px;">Cabang</th>
                         <th style="padding: 14px;">Tujuan PIC</th>
                         <th style="padding: 14px;">Keperluan</th>
                         <th style="padding: 14px;">Produk Diminati</th>
@@ -156,6 +176,7 @@
                             </strong>
                             <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                         </td>
+                    <td style="padding: 14px; color: #475569;">{{ optional($v->branch)->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569;">{{ optional($v->purpose)->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569;">

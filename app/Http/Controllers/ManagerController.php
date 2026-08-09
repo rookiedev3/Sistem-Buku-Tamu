@@ -169,8 +169,10 @@ public function laporan(Request $request)
     $month    = (int) $request->input('month', now()->month);
     $year     = (int) $request->input('year', now()->year);
     $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', ''); // <-- TAMBAHKAN
+    $picId    = (string) $request->input('pic_id', '');    // <-- TAMBAHKAN
 
-    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products']) // <-- tambahkan purpose, source, products
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
         ->whereMonth('check_in_at', $month)
         ->whereYear('check_in_at', $year);
 
@@ -182,6 +184,16 @@ public function laporan(Request $request)
                 $q->where('is_vip', false)->orWhereNull('is_vip');
             });
         }
+    }
+
+    // Filter Cabang <-- TAMBAHKAN BLOK INI
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+
+    // Filter PIC <-- TAMBAHKAN BLOK INI
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
     }
 
     $totalKunjungan = (clone $baseQuery)->count();
@@ -194,8 +206,15 @@ public function laporan(Request $request)
         ->paginate(15)
         ->appends($request->query());
 
+    // Data untuk dropdown filter <-- TAMBAHKAN BLOK INI
+    $branches = \App\Models\branches::orderBy('name')->get();
+    $picUsers = \App\Models\users::whereIn(
+        'id',
+        visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
+    )->orderBy('name')->get();
+
     return view('manager.laporan', compact(
-        'visits', 'month', 'year', 'category',
+        'visits', 'month', 'year', 'category', 'branchId', 'picId', 'branches', 'picUsers', // <-- tambahkan
         'totalKunjungan', 'totalDeal', 'totalVip'
     ));
 }
@@ -204,17 +223,9 @@ public function exportExcel(Request $request)
 {
     $month    = (int) $request->input('month', now()->month);
     $year     = (int) $request->input('year', now()->year);
-    $category = (string) $request->input('category', ''); 
-    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.xlsx';
-
-    return Excel::download(new KunjunganLaporanExport($month, $year, $category), $fileName);
-}
-
-public function exportPdf(Request $request)
-{
-    $month    = (int) $request->input('month', now()->month);
-    $year     = (int) $request->input('year', now()->year);
     $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
 
     $months = [
         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -222,7 +233,35 @@ public function exportPdf(Request $request)
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
 
-    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products'])
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName    = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
+
+    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.xlsx';
+
+    return Excel::download(
+        new KunjunganLaporanExport(
+            $month, $year, $category, $branchId, $picId,
+            $months[$month] ?? (string) $month, $branchName, $picName
+        ),
+        $fileName
+    );
+}
+
+public function exportPdf(Request $request)
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', ''); // <-- TAMBAHKAN
+    $picId    = (string) $request->input('pic_id', '');    // <-- TAMBAHKAN
+
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
         ->whereMonth('check_in_at', $month)
         ->whereYear('check_in_at', $year);
 
@@ -236,15 +275,21 @@ public function exportPdf(Request $request)
         }
     }
 
+    // Filter Cabang & PIC <-- TAMBAHKAN BLOK INI
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
     $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
 
-    // --- Statistik dasar ---
     $totalKunjungan = $visits->count();
     $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
     $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
     $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
 
-    // --- Sumber Terbaik (source dengan jumlah kunjungan terbanyak) ---
     $topSource = $visits->filter(fn($v) => $v->source)
         ->groupBy(fn($v) => $v->source->name)
         ->map->count()
@@ -252,7 +297,6 @@ public function exportPdf(Request $request)
     $topSourceName = $topSource->keys()->first();
     $topSourceCount = $topSource->first();
 
-    // --- Performa PIC Terbaik (PIC dengan jumlah kunjungan terbanyak) ---
     $topPic = $visits->filter(fn($v) => $v->assignedUser)
         ->groupBy(fn($v) => $v->assignedUser->name)
         ->map->count()
@@ -260,16 +304,21 @@ public function exportPdf(Request $request)
     $topPicName = $topPic->keys()->first();
     $topPicCount = $topPic->first();
 
-    // --- Rata-rata waktu tunggu (check-in sampai mulai pertemuan) ---
     $waitTimes = $visits->filter(fn($v) => $v->check_in_at && $v->meeting_start_at)
         ->map(fn($v) => \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->meeting_start_at)));
     $avgWaitMinutes = $waitTimes->count() > 0 ? round($waitTimes->avg()) : null;
+
+    // Nama cabang & PIC untuk ditampilkan di narasi PDF <-- TAMBAHKAN BLOK INI
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
 
     $pdf = Pdf::loadView('manager.laporan_pdf', [
         'visits'          => $visits,
         'monthLabel'      => $months[$month] ?? $month,
         'year'            => $year,
         'category'        => $category,
+        'branchName'      => $branchName, // <-- tambahkan
+        'picName'         => $picName,    // <-- tambahkan
         'totalKunjungan'  => $totalKunjungan,
         'totalDeal'       => $totalDeal,
         'totalVip'        => $totalVip,
