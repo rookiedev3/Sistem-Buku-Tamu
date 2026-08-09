@@ -8,20 +8,27 @@
 </div>
 @endif
 
+<div id="welcomeBanner" class="card border-0 rounded-4 p-4 mb-4 shadow-sm position-relative" style="background-color: #013220; color: white;">
+    <button type="button" onclick="document.getElementById('welcomeBanner').style.display='none';" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close"></button>
+
+    <div class="d-flex justify-content-between align-items-center pe-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Petugas Security' }} 👋</h4>
+            <p class="mb-0 text-white-50 fs-6">Berikut adalah daftar tamu yang masuk dan keluar berdasarkan tanggal penjagaan.</p>
+        </div>
+    </div>
+</div>
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
-        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
-            SECURITY PORTAL
-        </span>
-        <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
+        <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">
             Daftar Tamu 📋
         </h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">
-            Pantau daftar tamu yang masuk dan keluar berdasarkan tanggal penjagaan.
+            Pantau seluruh log aktivitas check-in dan check-out tamu secara real-time.
         </p>
     </div>
 
-    <!-- Form Filter Tanggal dengan Auto-Submit -->
     <form action="{{ route('security.dashboard') }}" method="GET" style="display: flex; gap: 8px; align-items: center; background: #ffffff; padding: 8px 12px; border-radius: 14px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
         <input type="text" id="selected_date" name="date" value="{{ $selectedDate }}" placeholder="Pilih tanggal..." readonly style="border: 1px solid #e8edf5; padding: 6px 10px; border-radius: 8px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; width: 170px;">
     </form>
@@ -60,7 +67,6 @@
                     </td>
                     <td style="padding: 16px 20px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
                     
-                    <!-- Waktu Check-in -->
                     <td style="padding: 16px 20px;">
                         <div style="font-weight: 700; color: #172033;">
                             {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '-' }}
@@ -68,7 +74,6 @@
                         <div style="font-size: 11px; color: #778195; margin-top: 2px;">Check-in</div>
                     </td>
 
-                    <!-- Waktu Check-out -->
                     <td style="padding: 16px 20px;">
                         <div style="font-weight: 700; color: #172033;">
                             {{ $v->check_out_at ? \Carbon\Carbon::parse($v->check_out_at)->format('H:i') . ' WIB' : '-' }}
@@ -76,7 +81,6 @@
                         <div style="font-size: 11px; color: #778195; margin-top: 2px;">Check-out</div>
                     </td>
 
-                    <!-- Status Kehadiran -->
                     <td style="padding: 16px 20px;">
                         <div>
                             @if($v->check_out_at)
@@ -104,7 +108,6 @@
 
 </div>
 
-<!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
@@ -144,7 +147,6 @@
     }
 </style>
 
-<!-- CDN JS Flatpickr & Bahasa Indonesia -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
@@ -158,7 +160,6 @@
             disableMobile: "true",
             defaultDate: "{{ $selectedDate }}",
             onChange: function(selectedDates, dateStr, instance) {
-                // Begitu tanggal diklik/dipilih, form langsung otomatis submit
                 instance.element.form.submit();
             }
         });
