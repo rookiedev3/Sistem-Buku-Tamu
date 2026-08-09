@@ -50,14 +50,15 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Role <span class="text-danger">*</span></label>
-                        <select name="role" class="form-select" required style="border-radius: 10px; padding: 10px 14px; font-size: 13px; border: 1px solid #e8edf5;">
-                            <option value="owner" {{ old('role', $user->role) == 'owner' ? 'selected' : '' }}>Owner</option>
-                            <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                            <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="pic" {{ old('role', $user->role) == 'pic' ? 'selected' : '' }}>PIC / Sales</option>
-                            <option value="security" {{ old('role', $user->role) == 'security' ? 'selected' : '' }}>Security</option>
-                            <option value="tamu" {{ old('role', $user->role) == 'tamu' ? 'selected' : '' }}>Tamu</option>
-                        </select>
+<select name="role" class="form-select" required style="border-radius: 10px; padding: 10px 14px; font-size: 13px; border: 1px solid #e8edf5;">
+    <option value="" disabled {{ old('role', $user->role) ? '' : 'selected' }}>-- Pilih Role --</option>
+    <option value="owner" {{ old('role', $user->role) == 'owner' ? 'selected' : '' }}>Owner</option>
+    <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
+    <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+    <option value="pic" {{ old('role', $user->role) == 'pic' ? 'selected' : '' }}>PIC / Sales</option>
+    <option value="security" {{ old('role', $user->role) == 'security' ? 'selected' : '' }}>Security</option>
+    <option value="tamu" {{ old('role', $user->role) == 'tamu' ? 'selected' : '' }}>Tamu</option>
+</select>
                     </div>
 
                     <div class="col-md-6 mb-3">

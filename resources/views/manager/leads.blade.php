@@ -26,35 +26,55 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Prospek & PIC Penanggung Jawab</h3>
         </div>
+<!-- Ganti div filter cepat lama dengan versi berikut (satu baris, sejajar) -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
 
-        <!-- Filter -->
-<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
-    @php
-        $filterOptions = [
-            'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
-            'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
-            'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
-            'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
-            'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
-            'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
-            'lost'     => 'Lost' . ($countLost > 0 ? " ({$countLost})" : ''),
-        ];
-        $activeFilter = $filter ?? 'active';
-    @endphp
-@foreach($filterOptions as $key => $label)
-    @php
-        $isActive = $activeFilter === $key;
-        $bg = $isActive ? '#006B3F' : '#f1f5f9';
-        $color = $isActive ? '#ffffff' : '#475569';
-        if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
-            $bg = '#fef2f2'; $color = '#dc2626';
-        }
-    @endphp
-    <a href="{{ route('manager.leads', ['filter' => $key]) }}"
-       style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
-        {{ $label }}
-    </a>
-@endforeach
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        @php
+            $filterOptions = [
+                'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
+                'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
+                'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
+                'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
+                'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
+                'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
+                'lost'     => 'Lost' . ($countLost > 0 ? " ({$countLost})" : ''),
+            ];
+            $activeFilter = $filter ?? 'active';
+        @endphp
+        @foreach($filterOptions as $key => $label)
+            @php
+                $isActive = $activeFilter === $key;
+                $bg = $isActive ? '#006B3F' : '#f1f5f9';
+                $color = $isActive ? '#ffffff' : '#475569';
+                if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
+                    $bg = '#fef2f2'; $color = '#dc2626';
+                }
+            @endphp
+            <a href="{{ route('manager.leads', array_merge(request()->query(), ['filter' => $key])) }}"
+               style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
+    <!-- TAMBAHKAN DROPDOWN INI -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="font-size: 12px; font-weight: 700; color: #5c6678;">Status:</label>
+        <select onchange="window.location.href=this.value" style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
+            @php
+                $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                $activeVipFilter = $vipFilter ?? 'all';
+            @endphp
+            @foreach($vipOptions as $key => $label)
+                <option
+                    value="{{ route('manager.leads', array_merge(request()->query(), ['vip_status' => $key])) }}"
+                    {{ $activeVipFilter === $key ? 'selected' : '' }}>
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 </div>
 
         @php
@@ -88,10 +108,15 @@
                     @endphp
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 14px; font-weight: 600;">{{ $leads->firstItem() + $index }}</td>
-                        <td style="padding: 14px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">{{ $lead->guest->name ?? '-' }}</strong>
-                            <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
-                        </td>
+<td style="padding: 14px;">
+    <strong style="display: block; color: #172033; font-weight: 800;">
+        {{ $lead->guest->name ?? '-' }}
+        @if(isset($lead->guest) && $lead->guest->is_vip)
+            <span title="VIP" style="color: #d97706;">⭐</span>
+        @endif
+    </strong>
+    <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
+</td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $lead->owner->name ?? '-' }}</td>
 <td style="padding: 14px; color: #475569;">
     @if($lead->followUps->isNotEmpty() || optional($lead->visit)->meeting_result)
@@ -189,7 +214,7 @@
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan data monitoring real-time</span>
-        {{-- <span>Total Data: {{ $visits->count() }}</span> --}}
+        <span>Total Data: {{ $leads->count() }}</span>
     </div>
 </div>
 @endsection

@@ -16,36 +16,37 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-       public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ], [
-            'email.required' => 'Email tidak boleh kosong',
-            'password.required' => 'Password tidak boleh kosong',
-        ]);
+public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required',
+        'password' => 'required',
+    ], [
+        'email.required' => 'Email tidak boleh kosong',
+        'password.required' => 'Password tidak boleh kosong',
+    ]);
 
-        $kredensial = $request->only('email', 'password');
+    $kredensial = $request->only('email', 'password');
+    $remember = $request->has('remember');
 
-        // Cek apakah checkbox "remember" dicentang (mengembalikan true/false)
-        $remember = $request->has('remember');
+    if (Auth::attempt($kredensial, $remember)) {
+        $user = Auth::user();
 
-        if (Auth::attempt($kredensial, $remember)) {
-            $request->session()->regenerate();
-            $user = Auth::user();
-
-            if ($user) {
-                return redirect()->intended('/dashboard');
-            }
-
-            return redirect()->intended('auth.login');
-        } else {
+        if (!$user->is_active) {
+            Auth::logout();
             return back()->withErrors([
-                'email' => 'Email atau password salah',
+                'email' => 'Akun Anda masih menunggu persetujuan admin.',
             ]);
         }
+
+        $request->session()->regenerate();
+        return redirect()->intended('/dashboard');
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah',
+    ]);
+}
 
     public function logout(Request $request)
     {
@@ -85,8 +86,8 @@ class AuthController extends Controller
         'phone'     => $request->phone,
         'branch_id' => $request->branch_id,
         'password'  => Hash::make($request->password),
-        'role'      => 'tamu',
-        'is_active' => true,
+        'role'      => null,
+        'is_active' => false,
     ]);
 
     return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silahkan login.');

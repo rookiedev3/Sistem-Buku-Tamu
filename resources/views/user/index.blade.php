@@ -59,12 +59,20 @@
                         <div style="font-size: 11px; color: #778195; margin-top: 2px;">{{ $u->phone ?? '-' }}</div>
                     </td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block;">
-                            {{ strtoupper($u->role) }}
-                        </span>
+                        @if($u->role)
+                            <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block;">
+                                {{ strtoupper($u->role) }}
+                            </span>
+                        @else
+                            <span style="color: #94a3b8; font-size: 11px;">Belum ditentukan</span>
+                        @endif
                     </td>
                     <td style="padding: 16px 20px;">
-                        @if($u->is_active)
+                        @if(is_null($u->role))
+                            <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                                Menunggu Persetujuan
+                            </span>
+                        @elseif($u->is_active)
                             <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                                 Aktif
                             </span>

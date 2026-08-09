@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 class PicController extends Controller
 {
     // dashboard menampilkan kunjungan yang sedang berlangsung, menunggu, atau pending follow-up
+<<<<<<< HEAD
     public function dashboardPic(Request $request)
     {
         $filter = $request->input('filter', 'all');
@@ -22,6 +23,18 @@ class PicController extends Controller
         $query = visits::with(['guest', 'purpose', 'branch'])
             ->where('assigned_to', auth()->id())
             ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+=======
+public function dashboardPic(Request $request)
+{
+    $filter = $request->input('filter', 'all');
+    $vipFilter = $request->input('vip_status', 'all'); // <-- ganti dari 'category'
+    $perPage = (int) $request->input('per_page', 10);
+    $today = Carbon::today();
+
+    $query = visits::with(['guest.category', 'purpose', 'branch'])
+        ->where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
 
         if ($filter === 'today') {
             $query->where(function ($q) use ($today) {
@@ -67,6 +80,56 @@ class PicController extends Controller
         return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
     }
 
+<<<<<<< HEAD
+=======
+    // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            // NULL dianggap reguler juga, bukan cuma is_vip = 0
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
+    $visits = $query->orderBy('created_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    // Kolom is_vip belum ada di database (masih tahap pengembangan bareng tim).
+    // Cek dulu sebelum query, supaya tidak error dan otomatis aktif begitu kolomnya sudah ada.
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        $vipCount = (clone $query)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count();
+        $regularCount = (clone $query)->whereHas('guest', function ($q) {
+            $q->where('is_vip', false)->orWhereNull('is_vip');
+        })->count();
+    } else {
+        $vipCount = 0;
+        $regularCount = (clone $query)->count();
+    }
+
+    $countToday = visits::where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+        ->where(function ($q) use ($today) {
+            $q->whereDate('check_in_at', $today)
+              ->orWhereDate('scheduled_at', $today);
+        })->count();
+
+    $countUpcoming = visits::where('assigned_to', auth()->id())
+        ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+        ->whereNull('check_in_at')
+        ->whereDate('scheduled_at', '>', $today)
+        ->count();
+
+    return view('pic.dashboard', compact(
+        'visits', 'vipCount', 'regularCount', 'filter', 'vipFilter', // <-- ganti 'category' jadi 'vipFilter'
+        'countToday', 'countUpcoming'
+    ));
+}
+
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
     /**
      * Menampilkan halaman pipeline follow-up aktif (new/contacted/negotiation)
      */
@@ -129,6 +192,7 @@ class PicController extends Controller
     /**
      * Riwayat Kunjungan PIC
      */
+<<<<<<< HEAD
     public function riwayatPic(Request $request)
     {
         $perPage = (int) $request->input('per_page', 10);
@@ -138,6 +202,18 @@ class PicController extends Controller
         ], [
             'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
         ]);
+=======
+public function riwayatPic(Request $request)
+{
+    $perPage = (int) $request->input('per_page', 10);
+    $vipFilter = $request->input('vip_status', 'all'); // <-- ganti dari 'category'
+    $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date'   => 'nullable|date|after_or_equal:start_date',
+    ], [
+        'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+    ]);
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
 
         $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('assigned_to', auth()->id())
@@ -165,6 +241,35 @@ class PicController extends Controller
         return view('pic.riwayat', compact('visits'));
     }
 
+<<<<<<< HEAD
+=======
+    if ($request->filled('start_date')) {
+        $query->whereDate('check_in_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('check_in_at', '<=', $request->end_date);
+    }
+
+        // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            // NULL dianggap reguler juga, bukan cuma is_vip = 0
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
+    $visits = $query->orderBy('check_in_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    return view('pic.riwayat', compact('visits', 'vipFilter'));
+}
+
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
     /**
      * Update Status Kehadiran / Kunjungan
      */
@@ -179,8 +284,16 @@ class PicController extends Controller
         $isConfirmed = in_array($request->status, ['confirmed', 'Dikonfirmasi']);
         $newStatus = $isConfirmed ? 'Dikonfirmasi' : 'Dibatalkan';
 
+<<<<<<< HEAD
         if (strtolower($oldStatus) === strtolower($newStatus)) {
             return back()->with('info', 'Status sudah sesuai, tidak ada perubahan.');
+=======
+        $visit->status = $newStatus;
+        $visit->updated_by = auth()->id(); 
+
+        if ($isConfirmed) {
+            $visit->meeting_start_at = now();
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
         }
 
         $terminalStatuses = ['meeting selesai', 'selesai', 'dibatalkan', 'completed', 'cancelled'];
@@ -237,6 +350,7 @@ class PicController extends Controller
             'potential_level' => $request->potential_level,
             'follow_up_at' => $request->followup_date ?? $request->follow_up_at,
             'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot']),
+            'updated_by' => auth()->id(),   // tambahkan ini
         ]);
 
         if (in_array($request->potential_level, ['warm', 'hot'])) {
@@ -298,13 +412,15 @@ class PicController extends Controller
     /**
      * Menampilkan halaman daftar klien yang sudah Deal (Leads)
      */
-    public function leadsIndex(Request $request)
-    {
-        $perPage = (int) $request->input('per_page', 10);
-        $today   = Carbon::today();
-        $filter  = $request->input('filter', 'active');
-        $ownerId = auth()->id();
+public function leadsIndex(Request $request)
+{
+    $perPage = (int) $request->input('per_page', 10);
+    $today   = Carbon::today();
+    $filter  = $request->input('filter', 'active');
+        $vipFilter = $request->input('vip_status', 'all');   // <-- TAMBAHKAN INI
+    $ownerId = auth()->id();
 
+<<<<<<< HEAD
         $query = leads::with(['guest', 'visit', 'followUps'])
             ->where('owner_id', $ownerId)
             ->whereNotIn('status', ['deal', 'lost']);
@@ -360,7 +476,71 @@ class PicController extends Controller
             'countUpcoming',
             'countDeal'
         ));
+=======
+    // Base query: cuma exclude 'lost', supaya filter 'deal' & 'all' tetap jalan
+    $query = leads::with(['guest', 'visit', 'followUps'])
+        ->where('owner_id', $ownerId)
+        ->where('status', '!=', 'lost');
+
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        // 'all' => tanpa filter tambahan
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
     }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('follow_up_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('follow_up_at', '<=', $request->end_date);
+    }
+
+    // Filter status VIP/Reguler (berdasarkan guests.is_vip)
+        if (Schema::hasColumn('guests', 'is_vip')) {
+            if ($vipFilter === 'vip') {
+                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+            } elseif ($vipFilter === 'reguler') {
+                $query->whereHas('guest', function ($q) {
+                    $q->where('is_vip', false)->orWhereNull('is_vip');
+                });
+            }
+        }
+
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    $baseCount = fn() => leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+
+    $countAll      = $baseCount()->count();
+    $countActive   = $baseCount()->whereNotIn('status', ['deal', 'lost'])->count();
+    $countOverdue  = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+    $countToday    = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+    $countUpcoming = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+    $countDeal     = $baseCount()->where('status', 'deal')->count();
+
+return view('pic.leads', compact(
+        'leads', 'filter', 'vipFilter',   // <-- tambahkan 'vipFilter' di sini
+        'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal'
+    ));
+}
 
     public function startMeeting($id)
     {
@@ -381,8 +561,14 @@ class PicController extends Controller
         }
 
         $visit->update([
+<<<<<<< HEAD
             'status' => $newStatus,
             'meeting_start_at' => $visit->meeting_start_at ?? now(),
+=======
+            'status' => 'Sedang Bertemu',
+            'meeting_start_at' => now(),
+            'updated_by' => auth()->id(),   // tambahkan ini
+>>>>>>> f26021978c6c27b253d322cd5fcd452d306b01bd
         ]);
 
         return redirect()->back()->with('success', 'Pertemuan dimulai. Silakan lakukan diskusi dengan tamu.');

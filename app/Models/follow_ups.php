@@ -14,6 +14,7 @@ class follow_ups extends Model
         'due_at',
         'result',
         'status',
+            'estimated_value',   // <-- tambahin ini
     ];
 
     public function visit()

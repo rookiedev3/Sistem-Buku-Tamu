@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     // Route::get('/', [DashboardController::class, 'index'])->name('home');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('/pengguna', UserController::class)->names('user');
+    // Route::resource('/pengguna', UserController::class)->names('user');
 
     // Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
     // Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // route laporan
-    Route::get('/laporan', function () {
+    Route::get('/laporan.index', function () {
         return view('laporan.index');
     });
 
@@ -117,6 +117,7 @@ Route::resource('/products', ProductsController::class);
 Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
+    Route::resource('/pengguna', UserController::class)->names('user');
 
 Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
     // Route khusus untuk user dengan level 1 (admin)
@@ -203,12 +204,13 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     // 2. Semua Kunjungan
     Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
 
+    // 3. Pipeline Lead Tim
     Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');
 
     // 4. Laporan & Export Data
-    Route::get('/laporan', function () {
-        return view('manager.laporan');
-    })->name('manager.laporan');
+    Route::get('/laporan', [ManagerController::class, 'laporan'])->name('manager.laporan');
+    Route::get('/laporan/export-excel', [ManagerController::class, 'exportExcel'])->name('manager.laporan.exportExcel');
+    Route::get('/laporan/export-pdf', [ManagerController::class, 'exportPdf'])->name('manager.laporan.exportPdf');
 
 });
 
@@ -218,6 +220,15 @@ Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class
 Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::class, 'markNotificationRead'])
     ->name('frontoffice.notifications.read');
 
+//     Route::middleware('auth')->prefix('security')->group(function () {
+//     Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+// });
+
+Route::middleware('auth')->prefix('security')->group(function () {
+    Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+    Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
+    Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
+});
 // Route::prefix('pic')->group(function () {
 
 //     // // Halaman Dashboard PIC
@@ -261,11 +272,11 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 //     })->name('manager.laporan');
 
 // });
-// 4. Laporan & Export Data
-Route::get('/laporan', function () {
-    return view('manager.laporan');
-})->name('manager.laporan');
-// });
+// // 4. Laporan & Export Data
+// Route::get('/laporan', function () {
+//     return view('manager.laporan');
+// })->name('manager.laporan');
+// // });
 
 // // Group Route untuk Role Security
 // Route::prefix('security')->group(function () {
