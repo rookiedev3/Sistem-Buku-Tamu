@@ -203,12 +203,13 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     // 2. Semua Kunjungan
     Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
 
+    // 3. Pipeline Lead Tim
     Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');
 
     // 4. Laporan & Export Data
-    Route::get('/laporan', function () {
-        return view('manager.laporan');
-    })->name('manager.laporan');
+    Route::get('/laporan', [ManagerController::class, 'laporan'])->name('manager.laporan');
+    Route::get('/laporan/export-excel', [ManagerController::class, 'exportExcel'])->name('manager.laporan.exportExcel');
+    Route::get('/laporan/export-pdf', [ManagerController::class, 'exportPdf'])->name('manager.laporan.exportPdf');
 
 });
 
@@ -261,11 +262,11 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 //     })->name('manager.laporan');
 
 // });
-// 4. Laporan & Export Data
-Route::get('/laporan', function () {
-    return view('manager.laporan');
-})->name('manager.laporan');
-// });
+// // 4. Laporan & Export Data
+// Route::get('/laporan', function () {
+//     return view('manager.laporan');
+// })->name('manager.laporan');
+// // });
 
 // // Group Route untuk Role Security
 // Route::prefix('security')->group(function () {

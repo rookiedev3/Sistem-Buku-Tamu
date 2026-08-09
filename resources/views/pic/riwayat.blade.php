@@ -25,15 +25,30 @@
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Sampai Tanggal</label>
                 <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" placeholder="Pilih tanggal..." readonly style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer;">
             </div>
+                        <!-- TAMBAHKAN BLOK INI -->
+            <div style="width: 160px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Status</label>
+                <select name="vip_status" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer; height: 41px;">
+                    @php
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $activeVipFilter = $vipFilter ?? 'all';
+                    @endphp
+                    @foreach($vipOptions as $key => $label)
+                        <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <!-- SAMPAI SINI -->
+
             <div style="display: flex; gap: 8px;">
                 <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
                     Filter
                 </button>
-                @if(request()->hasAny(['keyword', 'start_date', 'end_date']))
-                    <a href="{{ route('pic.riwayat') }}" style="background: #f1f5f9; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; height: 41px;">
-                        Reset
-                    </a>
-                @endif
+@if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
+    <a href="{{ route('pic.riwayat') }}" style="background: #f1f5f9; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; height: 41px;">
+        Reset
+    </a>
+@endif
             </div>
         </form>
     </div>
@@ -42,15 +57,16 @@
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 16px;">Daftar Arsip Kunjungan</h3>
 
-        @if(request()->hasAny(['keyword', 'start_date', 'end_date']))
-        <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
-            Menampilkan hasil filter
-            @if(request('keyword')) untuk "<strong>{{ request('keyword') }}</strong>" @endif
-            @if(request('start_date')) dari <strong>{{ tgl(request('start_date')) }}</strong> @endif
-            @if(request('end_date')) sampai <strong>{{ tgl(request('end_date')) }}</strong> @endif
-            — {{ $visits->total() }} data ditemukan.
-        </div>
-        @endif
+@if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
+<div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+    Menampilkan hasil filter
+    @if(request('keyword')) untuk "<strong>{{ request('keyword') }}</strong>" @endif
+    @if(request('start_date')) dari <strong>{{ tgl(request('start_date')) }}</strong> @endif
+    @if(request('end_date')) sampai <strong>{{ tgl(request('end_date')) }}</strong> @endif
+    @if(request('vip_status', 'all') !== 'all') status <strong>{{ request('vip_status') === 'vip' ? 'VIP' : 'Reguler' }}</strong> @endif
+    — {{ $visits->total() }} data ditemukan.
+</div>
+@endif
 
         @php
             $leadBadges = [
@@ -88,7 +104,12 @@
                             <span style="font-size: 11px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
                         </td>
                         <td style="padding: 14px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
+                            <strong style="display: block; color: #172033; font-weight: 800;">
+                                {{ $v->guest->name ?? '-' }}
+                                @if(isset($v->guest) && $v->guest->is_vip)
+                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                                @endif
+                            </strong>
                             <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                         </td>
                         <td style="padding: 14px; color: #475569;">
@@ -164,6 +185,7 @@
                     <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
                         <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
                             Riwayat & Hasil Pertemuan - {{ $v->guest->name ?? 'Tamu' }}
+                            @if(isset($v->guest) && $v->guest->is_vip)⭐@endif
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>

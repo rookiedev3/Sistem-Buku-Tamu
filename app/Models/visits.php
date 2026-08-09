@@ -94,4 +94,9 @@ public function latestFollowUp()
     return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
 }
 
+public function products()
+{
+    return $this->belongsToMany(products::class, 'visit_products', 'visit_id', 'product_id');
+}
+
 }

@@ -26,34 +26,54 @@
                     <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
 
-        <!-- Filter -->
-        <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
-            @php
-                $filterOptions = [
-                    'all'      => 'Semua' . ($countAll > 0 ? " ({$countActive})" : ''),
-                    'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
-                    'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
-                    'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
-                    'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
-                    // 'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
-                ];
-                $activeFilter = $filter ?? 'active';
-            @endphp
+<!-- Filter Cepat + Dropdown VIP (satu baris, sejajar seperti dashboard) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
 
-            @foreach($filterOptions as $key => $label)
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 @php
-                    $isActive = $activeFilter === $key;
-                    $bg = $isActive ? '#006B3F' : '#f1f5f9';
-                    $color = $isActive ? '#ffffff' : '#475569';
-                    if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
-                        $bg = '#fef2f2'; $color = '#dc2626';
-                    }
+                    $filterOptions = [
+                        'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
+                        'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
+                        'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
+                        'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
+                        'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
+                        // 'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
+                    ];
+                    $activeFilter = $filter ?? 'active';
                 @endphp
-                <a href="{{ route('pic.leads', ['filter' => $key]) }}"
-                   style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
-                    {{ $label }}
-                </a>
-            @endforeach
+                @foreach($filterOptions as $key => $label)
+                    @php
+                        $isActive = $activeFilter === $key;
+                        $bg = $isActive ? '#006B3F' : '#f1f5f9';
+                        $color = $isActive ? '#ffffff' : '#475569';
+                        if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
+                            $bg = '#fef2f2'; $color = '#dc2626';
+                        }
+                    @endphp
+                    <a href="{{ route('pic.leads', array_merge(request()->query(), ['filter' => $key])) }}"
+                       style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; font-weight: 700; color: #5c6678;">Status:</label>
+                <select onchange="window.location.href=this.value" style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
+                    @php
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $activeVipFilter = $vipFilter ?? 'all';
+                    @endphp
+                    @foreach($vipOptions as $key => $label)
+                        <option
+                            value="{{ route('pic.leads', array_merge(request()->query(), ['vip_status' => $key])) }}"
+                            {{ $activeVipFilter === $key ? 'selected' : '' }}>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
         </div>
 
         <div class="table-responsive">
@@ -74,7 +94,12 @@
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 16px 20px; font-weight: 700;">{{ $leads->firstItem() + $index }}</td>
                         <td style="padding: 14px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">{{ $lead->guest->name ?? '-' }}</strong>
+                            <strong style="display: block; color: #172033; font-weight: 800;">
+                                {{ $lead->guest->name ?? '-' }}
+                                @if(isset($lead->guest) && $lead->guest->is_vip)
+                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                                @endif
+                            </strong>
                             <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
                         </td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $lead->guest->phone ?? '-' }}</td>
@@ -159,7 +184,10 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                 <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
-                    <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">Riwayat & Hasil Pertemuan - {{ $lead->guest->name ?? 'Klien' }}</h5>
+                    <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
+                        Riwayat & Hasil Pertemuan - {{ $lead->guest->name ?? 'Klien' }}
+                        @if(isset($lead->guest) && $lead->guest->is_vip)⭐@endif
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6; max-height: 70vh; overflow-y: auto;">
@@ -224,7 +252,11 @@
                 <div class="modal-body" style="padding: 24px;">
                     <div style="background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
                         <span style="color: #778195; display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;">Klien Prospek:</span>
-                        <strong style="color: #172033; font-size: 14px;">{{ $lead->guest->name ?? '-' }} ({{ $lead->guest->company_name ?? '-' }})</strong>
+                        <strong style="color: #172033; font-size: 14px;">
+                            {{ $lead->guest->name ?? '-' }}
+                            @if(isset($lead->guest) && $lead->guest->is_vip)⭐@endif
+                            ({{ $lead->guest->company_name ?? '-' }})
+                        </strong>
                         <div style="color: #475569; font-size: 12px; margin-top: 2px;">WhatsApp: {{ $lead->guest->phone ?? '-' }}</div>
                     </div>
 

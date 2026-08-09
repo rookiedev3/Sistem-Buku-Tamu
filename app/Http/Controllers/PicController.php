@@ -16,10 +16,11 @@ class PicController extends Controller
 public function dashboardPic(Request $request)
 {
     $filter = $request->input('filter', 'all');
+    $vipFilter = $request->input('vip_status', 'all'); // <-- ganti dari 'category'
     $perPage = (int) $request->input('per_page', 10);
     $today = Carbon::today();
 
-    $query = visits::with(['guest', 'purpose', 'branch'])
+    $query = visits::with(['guest.category', 'purpose', 'branch'])
         ->where('assigned_to', auth()->id())
         ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
 
@@ -39,6 +40,18 @@ public function dashboardPic(Request $request)
         });
     }
 
+    // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            // NULL dianggap reguler juga, bukan cuma is_vip = 0
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
     $visits = $query->orderBy('created_at', 'desc')
         ->paginate($perPage)
         ->appends($request->query());
@@ -47,7 +60,9 @@ public function dashboardPic(Request $request)
     // Cek dulu sebelum query, supaya tidak error dan otomatis aktif begitu kolomnya sudah ada.
     if (Schema::hasColumn('guests', 'is_vip')) {
         $vipCount = (clone $query)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count();
-        $regularCount = (clone $query)->count() - $vipCount;
+        $regularCount = (clone $query)->whereHas('guest', function ($q) {
+            $q->where('is_vip', false)->orWhereNull('is_vip');
+        })->count();
     } else {
         $vipCount = 0;
         $regularCount = (clone $query)->count();
@@ -66,7 +81,10 @@ public function dashboardPic(Request $request)
         ->whereDate('scheduled_at', '>', $today)
         ->count();
 
-    return view('pic.dashboard', compact('visits', 'vipCount', 'regularCount', 'filter', 'countToday', 'countUpcoming'));
+    return view('pic.dashboard', compact(
+        'visits', 'vipCount', 'regularCount', 'filter', 'vipFilter', // <-- ganti 'category' jadi 'vipFilter'
+        'countToday', 'countUpcoming'
+    ));
 }
 
     /**
@@ -135,6 +153,7 @@ public function dashboardPic(Request $request)
 public function riwayatPic(Request $request)
 {
     $perPage = (int) $request->input('per_page', 10);
+    $vipFilter = $request->input('vip_status', 'all'); // <-- ganti dari 'category'
     $request->validate([
         'start_date' => 'nullable|date',
         'end_date'   => 'nullable|date|after_or_equal:start_date',
@@ -162,11 +181,23 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
         $query->whereDate('check_in_at', '<=', $request->end_date);
     }
 
+        // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            // NULL dianggap reguler juga, bukan cuma is_vip = 0
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
     $visits = $query->orderBy('check_in_at', 'desc')
         ->paginate($perPage)
         ->appends($request->query());
 
-    return view('pic.riwayat', compact('visits'));
+    return view('pic.riwayat', compact('visits', 'vipFilter'));
 }
 
     /**
@@ -303,66 +334,77 @@ $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
     /**
      * Menampilkan halaman daftar klien yang sudah Deal (Leads)
      */
-    public function leadsIndex(Request $request)
-    {
-        $perPage = (int) $request->input('per_page', 10);
-        $today   = Carbon::today();
-        $filter  = $request->input('filter', 'active');
-        $ownerId = auth()->id();
+public function leadsIndex(Request $request)
+{
+    $perPage = (int) $request->input('per_page', 10);
+    $today   = Carbon::today();
+    $filter  = $request->input('filter', 'active');
+        $vipFilter = $request->input('vip_status', 'all');   // <-- TAMBAHKAN INI
+    $ownerId = auth()->id();
 
-        // Base query: selalu exclude status 'lost' dari halaman ini
-        $query = leads::with(['guest', 'visit', 'followUps'])
-            ->where('owner_id', $ownerId)
-    ->whereNotIn('status', ['deal', 'lost']);   // ganti dari '!= lost' aja
-    
-        switch ($filter) {
-            case 'active':
-                $query->whereNotIn('status', ['deal', 'lost']);
-                break;
-            case 'overdue':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                      ->whereDate('follow_up_at', '<', $today);
-                break;
-            case 'today':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                      ->whereDate('follow_up_at', $today);
-                break;
-            case 'upcoming':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                      ->whereDate('follow_up_at', '>', $today);
-                break;
-            case 'deal':
-                $query->where('status', 'deal');
-                break;
-            // 'all' => tanpa filter tambahan (tapi tetap exclude lost dari base query)
-        }
+    // Base query: cuma exclude 'lost', supaya filter 'deal' & 'all' tetap jalan
+    $query = leads::with(['guest', 'visit', 'followUps'])
+        ->where('owner_id', $ownerId)
+        ->where('status', '!=', 'lost');
 
-        if ($request->filled('start_date')) {
-            $query->whereDate('follow_up_at', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('follow_up_at', '<=', $request->end_date);
-        }
-
-        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-            ->paginate($perPage)
-            ->appends($request->query());
-
-        // Semua counter juga exclude 'lost' secara permanen
-        $baseCount = fn() => leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
-
-        $countAll      = $baseCount()->count();
-        $countActive   = $baseCount()->whereNotIn('status', ['deal', 'lost'])->count();
-        $countOverdue  = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
-        $countToday    = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
-        $countUpcoming = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
-        $countDeal     = $baseCount()->where('status', 'deal')->count();
-
-        return view('pic.leads', compact(
-            'leads', 'filter',
-            'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal'
-        ));
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        // 'all' => tanpa filter tambahan
     }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('follow_up_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('follow_up_at', '<=', $request->end_date);
+    }
+
+    // Filter status VIP/Reguler (berdasarkan guests.is_vip)
+        if (Schema::hasColumn('guests', 'is_vip')) {
+            if ($vipFilter === 'vip') {
+                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+            } elseif ($vipFilter === 'reguler') {
+                $query->whereHas('guest', function ($q) {
+                    $q->where('is_vip', false)->orWhereNull('is_vip');
+                });
+            }
+        }
+
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    $baseCount = fn() => leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+
+    $countAll      = $baseCount()->count();
+    $countActive   = $baseCount()->whereNotIn('status', ['deal', 'lost'])->count();
+    $countOverdue  = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+    $countToday    = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+    $countUpcoming = $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+    $countDeal     = $baseCount()->where('status', 'deal')->count();
+
+return view('pic.leads', compact(
+        'leads', 'filter', 'vipFilter',   // <-- tambahkan 'vipFilter' di sini
+        'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal'
+    ));
+}
 
     public function startMeeting($id)
     {

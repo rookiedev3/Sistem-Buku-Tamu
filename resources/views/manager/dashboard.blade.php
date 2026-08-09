@@ -55,10 +55,15 @@
                 @forelse($visits as $index => $v)
                 <tr style="border-bottom: 1px solid #e8edf5;">
                     <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
-                    <td style="padding: 16px 20px;">
-                        <strong style="display: block; color: #172033; font-weight: 800;">{{ $v->guest->name ?? '-' }}</strong>
-                        <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
-                    </td>
+<td style="padding: 16px 20px;">
+    <strong style="display: block; color: #172033; font-weight: 800;">
+        {{ $v->guest->name ?? '-' }}
+        @if(isset($v->guest) && $v->guest->is_vip)
+            <span title="VIP" style="color: #d97706;">⭐</span>
+        @endif
+    </strong>
+    <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
+</td>
                     <td style="padding: 16px 20px;">
                         <span style="padding: 16px 20px; color: #475569; font-weight: 600;">
                              {{ $v->guest->category->name ?? 'Reguler' }}
