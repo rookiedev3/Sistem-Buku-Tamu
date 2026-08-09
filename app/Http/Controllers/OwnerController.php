@@ -245,4 +245,82 @@ public function kunjungan(Request $request)
 
     return view('kunjungan.index', compact('visits', 'vipFilter'));
 }
+
+public function leads(Request $request)
+{
+    $today  = Carbon::today();
+    $filter = $request->input('filter', 'active');
+    $vipFilter = $request->input('vip_status', 'all');
+
+    $query = leads::with([
+        'guest',
+        'visit',
+        'owner',
+        'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
+    ]);
+
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                  ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        case 'lost':
+            $query->where('status', 'lost');
+            break;
+        // 'all' => tanpa filter tambahan
+    }
+
+    if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                   ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('owner', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate(10)
+        ->appends($request->query());
+
+    $countAll      = leads::count();
+    $countActive   = leads::whereNotIn('status', ['deal', 'lost'])->count();
+    $countOverdue  = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+    $countToday    = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+    $countUpcoming = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+    $countDeal     = leads::where('status', 'deal')->count();
+    $countLost     = leads::where('status', 'lost')->count();
+
+    return view('leads.index', compact(
+        'leads', 'filter',
+        'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal', 'countLost', 'vipFilter'
+    ));
+}
 }

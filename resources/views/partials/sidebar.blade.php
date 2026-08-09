@@ -40,7 +40,7 @@
 
             <div class="menu-category" style="font-size: 10px; font-weight: 700; color: #8fa394; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 2px; margin-top: 4px;">Penjualan</div>
 
-            <a href="{{ url('/leads') }}" class="menu-item {{ request()->is('leads*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('leads*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('leads*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('leads*') ? '#C7AB6B' : 'transparent' }};">
+            <a href="{{ route('owner.leads') }}" class="menu-item {{ request()->is('leads*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('leads*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('leads*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('leads*') ? '#C7AB6B' : 'transparent' }};">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 <span>Lead & Follow Up</span>
             </a>
