@@ -102,6 +102,129 @@
             background-color: #f4f7fc;
         }
 
+        /* --- NOTIFICATION DROPDOWN --- */
+        .notification-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-bell {
+            background: #f1f5f9;
+            border: 1px solid #e8edf5;
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-bell:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+        .btn-bell .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 20px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-box {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 1px);
+            width: 320px;
+            background: #ffffff;
+            border: 1px solid #e8edf5;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .notification-dropdown:hover .dropdown-box {
+            display: flex;
+        }
+
+        .notif-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background: #f8fafc;
+        }
+
+        .notif-item-content {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .notif-item strong {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #172033;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .notif-item p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0 0 6px 0;
+            line-height: 1.5;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-line;
+        }
+
+        .notif-item small {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .notif-item-mark-btn {
+            background: #e6f4ed;
+            color: #006B3F;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 3px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
         /* --- MEDIA QUERY KHUSUS HP / TABLET (Layar di bawah 992px) --- */
         @media(max-width: 992px) {
             .sidebar {
@@ -202,7 +325,7 @@
                 </button>
 
                 <div>
-                    <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Portal Manager</h1>
+                    <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Dashboard Manager</h1>
                     <p style="font-size: 11px; font-weight: 600; color: #778195; margin: 0;">
                         {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                     </p>
@@ -210,6 +333,68 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 12px;">
+                @auth
+                @php
+                $myNotifications = auth()->user()->notifications()
+                    ->whereNull('read_at')
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+                $unreadCount = auth()->user()->notifications()
+                    ->whereNull('read_at')
+                    ->count();
+                @endphp
+
+                <div class="notification-dropdown">
+                    <button type="button" class="btn-bell">
+                        🔔
+                        @if($unreadCount > 0)
+                        <span class="badge">{{ $unreadCount }}</span>
+                        @endif
+                    </button>
+
+                    <div class="dropdown-box">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+                            <span style="font-size: 12px; font-weight: 700; color: #172033;">Notifikasi Baru</span>
+                            @if($unreadCount > 0)
+                            <form action="{{ route('frontoffice.notifications.readAll') }}" method="POST" style="margin: 0;">
+                                @csrf
+                                <button type="submit" style="background: none; border: none; color: #006B3F; font-size: 10px; font-weight: 700; cursor: pointer; padding: 0;">
+                                    Tandai semua dibaca
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+
+                        <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column;">
+                            @forelse($myNotifications as $notif)
+                            <div class="notif-item">
+                                <div class="notif-item-content">
+                                    <strong>
+                                        <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; flex-shrink: 0;"></span>
+                                        {{ $notif->title }}
+                                    </strong>
+                                    <p>{{ $notif->body }}</p>
+                                    <small>{{ $notif->created_at->diffForHumans() }}</small>
+                                </div>
+                                <form action="{{ route('frontoffice.notifications.read', $notif->id) }}" method="POST" style="margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="notif-item-mark-btn" title="Tandai dibaca">
+                                        ✓
+                                    </button>
+                                </form>
+                            </div>
+                            @empty
+                            <div style="padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
+                                Tidak ada notifikasi baru.
+                            </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+                @endauth
+
                 <div style="width: 1px; height: 24px; background: #e8edf5; margin: 0 4px;"></div>
                 <div style="display: flex; align-items: center;">
                     <img src="{{ asset('images/foto-perusahaan.jpg') }}" alt="Logo Perusahaan" style="width: 110px; height: 34px; object-fit: contain; display: block;">

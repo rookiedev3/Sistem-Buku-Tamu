@@ -3,120 +3,116 @@
 @section('content')
 <div style="display: flex; flex-direction: column; gap: 24px;">
 
-    <!-- Bagian Header -->
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Laporan & Export Data Kunjungan 📥</h2>
         <p style="font-size: 13px; color: #778195; margin: 0;">Unduh rekapitulasi data tamu dan konversi lead dalam format Excel atau PDF untuk laporan bulanan perusahaan.</p>
     </div>
 
-    <!-- Statistik Ringkas Periode -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Total Kunjungan</span>
             <strong style="font-size: 24px; font-weight: 900; color: #1e3a8a; display: block; margin-top: 4px;">{{ $totalKunjungan }} Kunjungan</strong>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Total Deal</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; display: block; margin-top: 4px;">{{ $totalDeal }} Klien</strong>
+            <strong style="font-size: 24px; font-weight: 900; color: #013220; display: block; margin-top: 4px;">{{ $totalDeal }} Klien</strong>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Total Tamu VIP</span>
             <strong style="font-size: 24px; font-weight: 900; color: #d97706; display: block; margin-top: 4px;">⭐ {{ $totalVip }} Tamu</strong>
         </div>
     </div>
 
-    <!-- Filter & Tombol Export -->
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 16px;">Filter Periode Laporan Bulanan</h3>
 
         <form action="{{ route('manager.laporan') }}" method="GET" style="display: flex; flex-direction: column; gap: 20px;">
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Pilih Bulan</label>
-            <select name="month" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                @php
-                    $months = [
-                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                    ];
-                @endphp
-                @foreach($months as $num => $label)
-                    <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
-        </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Pilih Bulan</label>
+                    <select name="month" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
+                        @php
+                            $months = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                            ];
+                        @endphp
+                        @foreach($months as $num => $label)
+                            <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Tahun</label>
-            <select name="year" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                @php $currentYear = date('Y'); @endphp
-                @for($y = $currentYear; $y >= $currentYear - 3; $y--)
-                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endfor
-            </select>
-        </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Tahun</label>
+                    <select name="year" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
+                        @php $currentYear = date('Y'); @endphp
+                        @for($y = $currentYear; $y >= $currentYear - 3; $y--)
+                            <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
 
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Kategori Tamu</label>
-            <select name="category" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                <option value="" {{ $category === '' ? 'selected' : '' }}>Semua Kategori</option>
-                <option value="vip" {{ $category === 'vip' ? 'selected' : '' }}>⭐ VIP</option>
-                <option value="reguler" {{ $category === 'reguler' ? 'selected' : '' }}>Reguler</option>
-            </select>
-        </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Kategori Tamu</label>
+                    <select name="category" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
+                        <option value="" {{ $category === '' ? 'selected' : '' }}>Semua Kategori</option>
+                        <option value="vip" {{ $category === 'vip' ? 'selected' : '' }}>⭐ VIP</option>
+                        <option value="reguler" {{ $category === 'reguler' ? 'selected' : '' }}>Reguler</option>
+                    </select>
+                </div>
 
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Cabang</label>
-            <select name="branch_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                <option value="" {{ $branchId === '' ? 'selected' : '' }}>Semua Cabang</option>
-                @foreach($branches as $branch)
-                    <option value="{{ $branch->id }}" {{ $branchId == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
-                @endforeach
-            </select>
-        </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Cabang</label>
+                    <select name="branch_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
+                        <option value="" {{ $branchId === '' ? 'selected' : '' }}>Semua Cabang</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ $branchId == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">PIC</label>
-            <select name="pic_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer;">
-                <option value="" {{ $picId === '' ? 'selected' : '' }}>Semua PIC</option>
-                @foreach($picUsers as $pic)
-                    <option value="{{ $pic->id }}" {{ $picId == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
-                @endforeach
-            </select>
-        </div>
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">PIC</label>
+                    <select name="pic_id" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
+                        <option value="" {{ $picId === '' ? 'selected' : '' }}>Semua PIC</option>
+                        @foreach($picUsers as $pic)
+                            <option value="{{ $pic->id }}" {{ $picId == $pic->id ? 'selected' : '' }}>{{ $pic->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <div style="display: flex; align-items: flex-end;">
-            <button type="submit" style="width: 100%; background: #1e3a8a; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
-                Tampilkan Preview
-            </button>
-        </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button type="submit" style="width: 100%; background: #1e3a8a; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
+                        Tampilkan Preview
+                    </button>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 0;">
+
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 13px; font-weight: 700; color: #172033;">Export File:</span>
+
+                <button type="submit"
+                    formaction="{{ route('manager.laporan.exportExcel') }}"
+                    formmethod="GET"
+                    style="background: #013220; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                    📊 Export Bulanan ke Excel (.xlsx)
+                </button>
+
+                <button type="submit"
+                    formaction="{{ route('manager.laporan.exportPdf') }}"
+                    formmethod="GET"
+                    style="background: #e5484d;; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                    📄 Export Bulanan ke PDF (.pdf)
+                </button>
+            </div>
+        </form>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 0;">
-
-    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <span style="font-size: 13px; font-weight: 700; color: #172033;">Export File:</span>
-
-        <button type="submit"
-            formaction="{{ route('manager.laporan.exportExcel') }}"
-            formmethod="GET"
-            style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-            📊 Export Bulanan ke Excel (.xlsx)
-        </button>
-
-        <button type="submit"
-            formaction="{{ route('manager.laporan.exportPdf') }}"
-            formmethod="GET"
-            style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-            📄 Export Bulanan ke PDF (.pdf)
-        </button>
-    </div>
-</form>
-    </div>
-
-    <!-- Tabel Preview Data -->
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 16px;">
             Preview Data — {{ $months[$month] ?? $month }} {{ $year }}
@@ -139,7 +135,7 @@
         @endphp
 
         <div class="table-responsive">
-            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
+            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0; min-width: 900px;">
                 <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <tr>
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
@@ -176,7 +172,7 @@
                             </strong>
                             <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                         </td>
-                    <td style="padding: 14px; color: #475569;">{{ optional($v->branch)->name ?? '-' }}</td>
+                        <td style="padding: 14px; color: #475569;">{{ optional($v->branch)->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569;">{{ optional($v->purpose)->name ?? '-' }}</td>
                         <td style="padding: 14px; color: #475569;">
@@ -205,7 +201,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 24px; color: #94a3b8;">
+                        <td colspan="10" style="text-align: center; padding: 24px; color: #94a3b8;">
                             Tidak ada data kunjungan pada periode ini.
                         </td>
                     </tr>
