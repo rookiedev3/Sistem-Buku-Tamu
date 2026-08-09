@@ -230,12 +230,16 @@ Route::middleware('auth')->prefix('security')->group(function () {
 Route::middleware('auth')->prefix('owner')->group(function () {
     Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
 
-    Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
-Route::resource('/products', ProductsController::class);
+     Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
+    Route::resource('/products', ProductsController::class);
 
-Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
-Route::resource('/guest-categories', GuestCategoriesController::class);
+    Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
+    Route::resource('/guest-categories', GuestCategoriesController::class);
+    Route::get('/owner/aktivitas', [OwnerController::class, 'activityLog'])
+        ->name('owner.activity-log');
+        Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
 });
+
 // Route::prefix('pic')->group(function () {
 
 //     // // Halaman Dashboard PIC

@@ -81,16 +81,22 @@ class ProductsController extends Controller
         }
     }
 
-    public function laporan()
+public function laporan(Request $request) // Pastikan menambahkan parameter Request $request
 {
+    // Mengambil limit per_page dari URL (default 10)
+    $perPage = (int) $request->input('per_page', 10);
+
+    // Hitung total KESELURUHAN permintaan produk (agar persentase tidak terbatas pada per halaman)
+    $totalPermintaan = DB::table('visit_products')->count();
+
+    // Query data statistik produk dengan pagination
     $productStats = DB::table('visit_products')
         ->join('products', 'products.id', '=', 'visit_products.product_id')
         ->select('products.id', 'products.name', DB::raw('count(*) as total'))
         ->groupBy('products.id', 'products.name')
         ->orderByDesc('total')
-        ->get();
-
-    $totalPermintaan = $productStats->sum('total');
+        ->paginate($perPage)
+        ->appends($request->query());
 
     return view('products.laporan', compact('productStats', 'totalPermintaan'));
 }

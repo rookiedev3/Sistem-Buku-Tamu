@@ -28,7 +28,7 @@
                 <span>Dashboard Utama</span>
             </a>
 
-            <a href="{{ url('/kunjungan') }}" class="menu-item {{ request()->is('kunjungan*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('kunjungan*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('kunjungan*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('kunjungan*') ? '#C7AB6B' : 'transparent' }};">
+            <a href="{{ route('owner.kunjungan') }}" class="menu-item {{ request()->is('kunjungan*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('kunjungan*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('kunjungan*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('kunjungan*') ? '#C7AB6B' : 'transparent' }};">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 <span>Daftar Kunjungan</span>
             </a>

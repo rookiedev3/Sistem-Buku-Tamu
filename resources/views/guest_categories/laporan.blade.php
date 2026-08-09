@@ -43,14 +43,86 @@
         margin-bottom: 30px;
     }
     .chart-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        align-items: center;
+        margin-bottom: 40px;
         background: #fcfcfd;
-        padding: 24px;
+        padding: 30px;
         border-radius: 12px;
         border: 1px solid #f3f4f6;
-        margin-bottom: 30px;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
+    }
+    .chart-container {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        flex-shrink: 0;
+        margin: 0 auto;
+    }
+    .chart-center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+    }
+    .chart-center-value {
+        font-size: 32px;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.2;
+    }
+    .chart-center-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .legend-container {
+        flex: 1;
+        min-width: 250px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        border: 1px solid #f3f4f6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .legend-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .legend-color {
+        width: 14px;
+        height: 14px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        margin-right: 12px;
+    }
+    .legend-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .legend-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .legend-subtitle {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 2px;
     }
     .custom-table {
         width: 100%;
@@ -96,7 +168,7 @@
     }
     .progress-bg {
         flex: 1;
-        max-width: 140px;
+        max-width: 120px;
         height: 8px;
         background-color: #e5e7eb;
         border-radius: 99px;
@@ -104,7 +176,6 @@
     }
     .progress-fill {
         height: 100%;
-        background-color: #013220;
         border-radius: 99px;
     }
     .percentage-text {
@@ -115,8 +186,8 @@
     }
 </style>
 
-<!-- TOMBOL KEMBALI SEPERTI KATEGORI TAMU -->
-<a href="{{ route('owner.dashboard') }}" class="back-btn">
+<!-- TOMBOL KEMBALI -->
+<a href="{{ route('dashboard') }}" class="back-btn">
     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -125,47 +196,72 @@
 
 <div class="report-card">
     <div class="report-header">
-        <h3>Laporan Produk Paling Diminati</h3>
-        <p>Ranking produk berdasarkan jumlah permintaan dari kunjungan tamu.</p>
+        <h3>Laporan Dominasi Kategori Tamu</h3>
+        <p>Analisis visual sebaran jumlah tamu berdasarkan kategori yang terdaftar.</p>
     </div>
 
-    @if($productStats->count() > 0)
+    @if($categoryStats->count() > 0)
         <div class="chart-wrapper">
-            <canvas id="productChart" style="max-height: 350px;"></canvas>
+            <!-- Bagian Chart -->
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+                <div class="chart-center-text">
+                    <div class="chart-center-value">{{ number_format($totalGuests) }}</div>
+                    <div class="chart-center-label">Total Tamu</div>
+                </div>
+            </div>
+
+            <!-- Bagian Legend (Keterangan) -->
+            <div class="legend-container">
+                @foreach($categoryStats as $index => $category)
+                    @php
+                        $percentage = $totalGuests > 0 ? round(($category->total / $totalGuests) * 100) : 0;
+                        $color = $chartColors[$index % count($chartColors)];
+                    @endphp
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: {{ $color }};"></div>
+                        <div class="legend-text">
+                            <span class="legend-title">{{ $category->name }}</span>
+                            <span class="legend-subtitle">{{ $category->total }} Tamu &bull; {{ $percentage }}%</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
 
-    <!-- BAGIAN TABEL DATA -->
+    <!-- Bagian Tabel -->
     <div style="overflow-x: auto;">
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th style="width: 80px; text-align: center;">Peringkat</th>
-                    <th>Nama Produk</th>
-                    <th style="text-align: right;">Jumlah Permintaan</th>
+                    <th style="width: 80px; text-align: center;">Rank</th>
+                    <th>Kategori Tamu</th>
+                    <th style="text-align: right;">Jumlah Tamu</th>
                     <th>Persentase</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($productStats as $index => $product)
+                @forelse($categoryStats as $index => $category)
                     @php
-                        $percentage = $totalPermintaan > 0 ? round(($product->total / $totalPermintaan) * 100) : 0;
+                        $percentage = $totalGuests > 0 ? round(($category->total / $totalGuests) * 100) : 0;
+                        $color = $chartColors[$index % count($chartColors)];
                     @endphp
                     <tr>
                         <td style="text-align: center;">
-                            <!-- Penomoran Peringkat Dinamis Sesuai Halaman Pagination -->
-                            <span class="rank-badge">#{{ ($productStats->firstItem() ?? 1) + $index }}</span>
+                            <!-- Perbaikan Nomor Urut agar sesuai halaman pagination -->
+                            <span class="rank-badge">#{{ ($categoryStats->firstItem() ?? 1) + $index }}</span>
                         </td>
                         <td style="font-weight: 700; color: #111827;">
-                            {{ $product->name }}
+                            {{ $category->name }}
                         </td>
                         <td style="text-align: right; font-weight: 600;">
-                            {{ number_format($product->total) }}
+                            {{ number_format($category->total) }}
                         </td>
                         <td>
                             <div class="progress-bar-container">
                                 <div class="progress-bg">
-                                    <div class="progress-fill" style="width: {{ $percentage }}%;"></div>
+                                    <div class="progress-fill" style="width: {{ $percentage }}%; background-color: {{ $color }};"></div>
                                 </div>
                                 <span class="percentage-text">{{ $percentage }}%</span>
                             </div>
@@ -175,42 +271,43 @@
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
                             <svg style="width: 48px; height: 48px; margin: 0 auto 12px; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                            Belum ada data permintaan produk.
+                            Belum ada data kategori tamu yang tercatat.
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-
+    
     <!-- INCLUDE PAGINATION COMPONENT -->
-    @if($productStats->total() > 0)
-        @include('partials.pagination', ['paginator' => $productStats])
+    @if($categoryStats->total() > 0)
+        @include('partials.pagination', ['paginator' => $categoryStats])
     @endif
 </div>
 
-@if($productStats->count() > 0)
+@if($categoryStats->count() > 0)
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const ctx = document.getElementById('productChart').getContext('2d');
-
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    
     new Chart(ctx, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
-            labels: {!! json_encode($productStats->pluck('name')) !!},
+            labels: {!! json_encode($categoryStats->pluck('name')) !!},
             datasets: [{
-                label: 'Jumlah Permintaan',
-                data: {!! json_encode($productStats->pluck('total')) !!},
-                backgroundColor: '#013220',
-                borderRadius: 8,
-                barThickness: 24,
+                data: {!! json_encode($categoryStats->pluck('total')) !!},
+                backgroundColor: {!! json_encode($chartColors) !!},
+                borderWidth: 3,
+                borderColor: '#ffffff',
+                hoverOffset: 8,
+                borderRadius: 5
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -219,23 +316,18 @@ document.addEventListener("DOMContentLoaded", function() {
                     bodyFont: { size: 13, family: "'Segoe UI', sans-serif" },
                     padding: 12,
                     cornerRadius: 8,
+                    displayColors: true,
                     callbacks: {
                         label: function(context) {
-                            return ' Permintaan: ' + context.parsed.x + ' kali';
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed !== null) { label += context.parsed + ' Tamu'; }
+                            return label;
                         }
                     }
                 }
             },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 },
-                    grid: { color: '#f3f4f6' }
-                },
-                y: {
-                    grid: { display: false }
-                }
-            }
+            animation: { animateScale: true, animateRotate: true }
         }
     });
 });

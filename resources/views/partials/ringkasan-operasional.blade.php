@@ -29,35 +29,34 @@
                     </div>
                 </a>
 
-                <a href="{{ route('owner.dashboard', ['status' => 'Menunggu']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
-                    <div class="stat-icon-wrap yellow">
-                        <i class="bi bi-hourglass-split"></i>
-                    </div>
-                    <div class="stat-content">
-                        <span class="stat-label-custom">Sedang Menunggu</span>
-                        <h3 class="stat-number-custom">{{ $sedangMenunggu }}</h3>
-                    </div>
-                </a>
+<a href="{{ route('owner.dashboard', ['status' => 'Terjadwal']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
+    <div class="stat-icon-wrap yellow">
+        <i class="bi bi-hourglass-split"></i>
+    </div>
+    <div class="stat-content">
+        <span class="stat-label-custom">Terjadwal</span>
+        <h3 class="stat-number-custom">{{ $terjadwalHariIni }}</h3>
+    </div>
+</a>
 
-                <a href="{{ route('owner.dashboard', ['status' => 'Sedang Bertemu']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
-                    <div class="stat-icon-wrap green">
-                        <i class="bi bi-chat-dots-fill"></i>
-                    </div>
-                    <div class="stat-content">
-                        <span class="stat-label-custom">Sedang Bertemu</span>
-                        <h3 class="stat-number-custom">{{ $sedangBertemu }}</h3>
-                    </div>
-                </a>
-
-                <a href="{{ route('pic.followup') }}" class="stat-box" style="text-decoration:none; color:inherit;">
-                    <div class="stat-icon-wrap purple">
-                        <i class="bi bi-briefcase-fill"></i>
-                    </div>
-                    <div class="stat-content">
-                        <span class="stat-label-custom">Menjadi Lead</span>
-                        <h3 class="stat-number-custom">+{{ $menjadiLeadHariIni }}</h3>
-                    </div>
-                </a>
+<a href="{{ route('owner.dashboard', ['status' => 'Selesai']) }}#kunjungan-hari-ini" class="stat-box" ...>
+    <div class="stat-icon-wrap green">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <div class="stat-content">
+        <span class="stat-label-custom">Pertemuan Selesai</span>
+        <h3 class="stat-number-custom">{{ $pertemuanSelesai }}</h3>
+    </div>
+</a>
+<a href="{{ route('owner.dashboard', ['lead_only' => 1]) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
+    <div class="stat-icon-wrap purple">
+        <i class="bi bi-briefcase-fill"></i>
+    </div>
+    <div class="stat-content">
+        <span class="stat-label-custom">Menjadi Lead</span>
+        <h3 class="stat-number-custom">+{{ $menjadiLeadHariIni }}</h3>
+    </div>
+</a>
             </div>
 
             <div class="stats-right-stack">
@@ -133,7 +132,7 @@
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru ⚡</h3>
-                        <a href="#" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
+                        <a href="{{ route('owner.activity-log') }}" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -160,76 +159,75 @@
 
     </div>
 
-    <div id="kunjungan-hari-ini" class="card mb-4 border-0 rounded-4 p-4 shadow-sm" style="background:#fff; border:1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.05);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+    <div id="kunjungan-hari-ini" class="card mb-4 border-0 rounded-4" style="background:#fff; border:1px solid #e8edf5 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.02); padding:24px;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div>
-                <h3 style="font-size:18px; font-weight:800; margin:0 0 4px; color:#172033;">Kunjungan Hari Ini 📋</h3>
-                <p style="color:#778195; font-size:13px; margin:0;">Daftar tamu yang terdaftar dan status pertemuan hari ini.</p>
+                <h2 style="font-size:18px; font-weight:800; color:#172033; margin-bottom:4px;">Kunjungan Hari Ini 📋</h2>
+                <p style="font-size:13px; color:#778195; margin:0;">Daftar tamu yang dijadwalkan atau check-in pada hari ini.</p>
+            </div>
+        </div>
+
+        <form id="filterKunjunganForm" method="GET" action="{{ route('owner.dashboard') }}" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Cari Nama / Instansi</label>
+                <div style="position:relative; display:flex; align-items:center;">
+                    <input type="text" name="keyword" id="keywordInput" value="{{ $keyword }}"
+                           autocomplete="off" placeholder="Cari nama/instansi..."
+                           style="width:100%; padding:10px 30px 10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; color:#172033; outline:none; box-sizing:border-box; background:#fbfcfe;">
+                    <button type="button" id="clearKeywordBtn"
+                            style="display:{{ $keyword ? 'flex' : 'none' }}; position:absolute; right:10px; align-items:center; justify-content:center; width:16px; height:16px; background:#e2e8f0; border:none; border-radius:50%; color:#64748b; cursor:pointer; font-size:11px; line-height:1; padding:0;">
+                        &times;
+                    </button>
+                </div>
             </div>
 
-            <form method="GET" action="{{ route('owner.dashboard') }}#kunjungan-hari-ini" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <select name="status" onchange="this.form.submit()" style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
+            <div style="flex:1; min-width:160px;">
+                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Status</label>
+                <select name="status" id="statusSelect" style="width:100%; padding:10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; height:41px; box-sizing:border-box;">
                     <option value="">Semua Status</option>
                     @foreach($statusOptions as $status)
                         <option value="{{ $status }}" @selected(strtolower(trim($statusFilter)) === strtolower(trim($status)))>{{ $status }}</option>
                     @endforeach
                 </select>
+            </div>
 
-                <select name="pic_id" onchange="this.form.submit()" style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
+            <div style="flex:1; min-width:160px;">
+                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">PIC</label>
+                <select name="pic_id" id="picSelect" style="width:100%; padding:10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; height:41px; box-sizing:border-box;">
                     <option value="">Semua PIC</option>
                     @foreach($picOptions as $pic)
                         <option value="{{ $pic->id }}" @selected((string) $picFilter === (string) $pic->id)>{{ $pic->name }}</option>
                     @endforeach
                 </select>
+            </div>
 
-                <input type="text" name="keyword" value="{{ $keyword }}" placeholder="Cari nama/instansi..." style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; width:160px; background:#fbfcfe; outline:none;">
-                <button type="submit" style="border:1px solid #013220; background:#013220; color:#fff; border-radius:10px; padding:10px 14px; font-size:12px; cursor:pointer;">Cari</button>
-
+            <div style="display:flex; gap:8px;">
+                <button type="submit" style="background:#013220; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; height:41px;">
+                    Filter
+                </button>
                 @if($statusFilter || $picFilter || $keyword)
-                    <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" style="font-size:12px; color:#778195; text-decoration:underline;">Reset</a>
+                    <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" id="resetFilterKunjungan" style="background:#f1f5f9; color:#475569; text-decoration:none; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; height:41px; box-sizing:border-box;">
+                        Reset
+                    </a>
                 @endif
-            </form>
+            </div>
+        </form>
+
+        <div id="kunjunganInfoBar">
+            @if($statusFilter || $picFilter || $keyword)
+            <div style="background-color:#d4edda; color:#155724; padding:10px; border-radius:8px; font-size:12px; margin-top:16px; border:1px solid #c3e6cb;">
+                Menampilkan hasil filter
+                @if($keyword) untuk "<strong>{{ $keyword }}</strong>" @endif
+                @if($statusFilter) status <strong>{{ $statusFilter }}</strong> @endif
+                @if($picFilter) PIC tertentu @endif
+                — {{ $visits->total() }} data ditemukan.
+            </div>
+            @endif
         </div>
 
-        <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
-                <thead>
-                    <tr style="border-bottom:1px solid #e8edf5; color:#778195; font-weight:700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <th style="padding:12px 10px;">Nama Tamu</th>
-                        <th style="padding:12px 10px;">Instansi</th>
-                        <th style="padding:12px 10px;">Keperluan</th>
-                        <th style="padding:12px 10px;">PIC</th>
-                        <th style="padding:12px 10px;">Jam</th>
-                        <th style="padding:12px 10px;">Status</th>
-                    </tr>
-                </thead>
-                <tbody style="color:#172033; font-weight:600;">
-                    @forelse($visits as $visit)
-                        <tr style="border-bottom:1px solid #f7faff;">
-                            <td style="padding:14px 10px;">{{ $visit->guest->name ?? '-' }}</td>
-                            <td style="padding:14px 10px;">{{ $visit->guest->company_name ?? '-' }}</td>
-                            <td style="padding:14px 10px;">{{ $visit->purpose->name ?? '-' }}</td>
-                            <td style="padding:14px 10px;">{{ $visit->assignedUser->name ?? '-' }}</td>
-                            <td style="padding:14px 10px; color:#778195; font-weight:normal; font-size:12px;">
-                                {{ optional($visit->scheduled_at)->format('H:i') }}
-                            </td>
-                            <td style="padding:14px 10px;">
-                                <span style="background:#e8f8f1; color:#21a86b; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700;">
-                                    {{ $visit->status }}
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" style="padding:24px 10px; text-align:center; color:#778195;">Tidak ada data kunjungan yang cocok.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="mt-3">
-            {{ $visits->links() }}
+        <div id="kunjunganTableWrapper" style="transition: opacity .15s ease; margin-top:20px;">
+            @include('partials.kunjungan-hari-ini-table', compact('visits'))
         </div>
     </div>
 
@@ -320,4 +318,112 @@
     }
 }
 </style>
+<script>
+(function () {
+    const form = document.getElementById('filterKunjunganForm');
+    const wrapper = document.getElementById('kunjunganTableWrapper');
+    if (!form || !wrapper) return;
+
+    let activeController = null;
+    let searchDebounceTimer = null;
+
+    async function loadKunjungan(url) {
+        if (activeController) activeController.abort();
+        const controller = new AbortController();
+        activeController = controller;
+
+        wrapper.style.opacity = '0.5';
+        try {
+            const fetchUrl = new URL(url, window.location.href);
+            fetchUrl.searchParams.set('partial', '1');
+            fetchUrl.searchParams.set('_ts', Date.now().toString());
+
+            const res = await fetch(fetchUrl.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            const html = await res.text();
+
+            if (controller.signal.aborted) return;
+            wrapper.innerHTML = html;
+
+            // --- FIX: sembunyikan notif kalau tidak ada filter aktif ---
+            const infoBar = document.getElementById('kunjunganInfoBar');
+            const keyword = fetchUrl.searchParams.get('keyword') || '';
+            const status  = fetchUrl.searchParams.get('status') || '';
+            const picId   = fetchUrl.searchParams.get('pic_id') || '';
+            const leadOnly = fetchUrl.searchParams.get('lead_only') || '';
+            const hasFilter = keyword || status || picId || leadOnly;
+
+            if (!hasFilter && infoBar) {
+                infoBar.innerHTML = '';
+            }
+            // -------------------------------------------------------------
+
+            const displayUrl = new URL(url, window.location.href);
+            displayUrl.searchParams.delete('partial');
+            history.replaceState(null, '', displayUrl.toString() + '#kunjungan-hari-ini');
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            console.error('Gagal memuat data kunjungan:', e);
+        } finally {
+            if (activeController === controller) {
+                wrapper.style.opacity = '1';
+                activeController = null;
+            }
+        }
+    }
+
+    function submitForm() {
+        clearTimeout(searchDebounceTimer);
+        loadKunjungan(form.action + '?' + new URLSearchParams(new FormData(form)).toString());
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitForm();
+    });
+
+    form.querySelectorAll('select').forEach(function (select) {
+        select.addEventListener('change', submitForm);
+    });
+
+    wrapper.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        e.preventDefault();
+        loadKunjungan(link.href);
+    });
+
+    const resetLink = document.getElementById('resetFilterKunjungan');
+    if (resetLink) {
+        resetLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            clearTimeout(searchDebounceTimer);
+            form.reset();
+            loadKunjungan(form.action);
+        });
+    }
+
+    const keywordInput = document.getElementById('keywordInput');
+    const clearBtn = document.getElementById('clearKeywordBtn');
+    if (keywordInput && clearBtn) {
+        const toggleClear = () => { clearBtn.style.display = keywordInput.value ? 'flex' : 'none'; };
+
+        keywordInput.addEventListener('input', function () {
+            toggleClear();
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(submitForm, 500);
+        });
+
+        clearBtn.addEventListener('click', function () {
+            clearTimeout(searchDebounceTimer);
+            keywordInput.value = '';
+            toggleClear();
+            submitForm();
+        });
+    }
+})();
+</script>
 @endsection

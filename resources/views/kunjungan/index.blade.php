@@ -1,150 +1,295 @@
 @extends('layouts.app')
 
 @section('content')
+<div style="display: flex; flex-direction: column; gap: 24px;">
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <div>
-        <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Daftar Kunjungan Tamu</h1>
-        <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data kunjungan tamu secara real-time.</p>
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 4px;">Daftar Kunjungan Tamu 📋</h2>
+                <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data kunjungan tamu secara real-time.</p>
+            </div>
+        </div>
+
+        <form action="{{ route('owner.kunjungan') }}" method="GET" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Cari Nama / Instansi / PIC</label>
+                <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Contoh: Budi atau Siska..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Dari Tanggal</label>
+                <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" placeholder="Pilih tanggal..." readonly style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Sampai Tanggal</label>
+                <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" placeholder="Pilih tanggal..." readonly style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box;">
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px; text-transform: uppercase;">Status</label>
+                <select name="vip_status" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer; height: 41px; box-sizing: border-box;">
+                    @php
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $activeVipFilter = $vipFilter ?? 'all';
+                    @endphp
+                    @foreach($vipOptions as $key => $label)
+                        <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" style="background: #013220; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
+                    Filter
+                </button>
+                @if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
+                    <a href="{{ route('owner.kunjungan') }}" style="background: #f1f5f9; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; height: 41px; box-sizing: border-box;">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
     </div>
-    
-    {{-- <a href="{{ url('/check-in') }}" style="background: #1463ff; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(20,99,255,.2);">
-        + Tambah Tamu
-    </a> --}}
+
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 16px;">Daftar Seluruh Kunjungan</h3>
+
+        @if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
+        <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+            Menampilkan hasil filter
+            @if(request('keyword')) untuk "<strong>{{ request('keyword') }}</strong>" @endif
+            @if(request('start_date')) dari <strong>{{ \Carbon\Carbon::parse(request('start_date'))->translatedFormat('d F Y') }}</strong> @endif
+            @if(request('end_date')) sampai <strong>{{ \Carbon\Carbon::parse(request('end_date'))->translatedFormat('d F Y') }}</strong> @endif
+            @if(request('vip_status', 'all') !== 'all') status <strong>{{ request('vip_status') === 'vip' ? 'VIP' : 'Reguler' }}</strong> @endif
+            — {{ $visits->total() }} data ditemukan.
+        </div>
+        @endif
+
+        @php
+            $leadBadges = [
+                'new'         => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
+                'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
+                'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
+                'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
+                'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
+            ];
+        @endphp
+
+        <div class="table-responsive">
+            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0; min-width: 800px;">
+                <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
+                    <tr>
+                        <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
+                        <th style="padding: 14px;">Tanggal & Waktu</th>
+                        <th style="padding: 14px;">Nama Tamu & Instansi</th>
+                        <th style="padding: 14px;">Kategori</th>
+                        <th style="padding: 14px;">Tujuan PIC</th>
+                        <th style="padding: 14px;">Keperluan</th>
+                        <th style="padding: 14px; text-align: center;">Catatan Pertemuan</th>
+                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($visits as $index => $v)
+                    @php
+                        $statusLower = strtolower(trim($v->status ?? ''));
+                        $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                        $leadStatus = optional($v->lead)->status;
+                    @endphp
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 14px; font-weight: 600;">{{ $visits->firstItem() + $index }}</td>
+                        <td style="padding: 14px; color: #778195; font-weight: 600;">
+                            {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}<br>
+                            <span style="font-size: 11px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
+                        </td>
+                        <td style="padding: 14px;">
+                            <strong style="display: block; color: #172033; font-weight: 800;">
+                                {{ $v->guest->name ?? '-' }}
+                                @if(isset($v->guest) && $v->guest->is_vip)
+                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                                @endif
+                            </strong>
+                            <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
+                        </td>
+                        <td style="padding: 14px;">
+                            <span style="color: #475569;">{{ $v->guest->category->name ?? 'Reguler' }}</span>
+                        </td>
+                        <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
+                        <td style="padding: 14px; color: #475569;">{{ $v->purpose->name ?? '-' }}</td>
+
+                        <td style="padding: 14px; text-align: center;">
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                📝 Lihat Catatan
+                            </button>
+                        </td>
+
+                        <td style="padding: 14px; text-align: center;">
+                            @if(in_array($statusLower, ['cancelled', 'dibatalkan', 'ditolak']))
+                                <span style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Dibatalkan</span>
+                            @elseif($isCompleted && $leadStatus)
+                                @php $b = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
+                                <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
+                            @elseif($isCompleted)
+                                <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Non-Lead</span>
+                            @elseif(in_array($statusLower, ['sedang bertemu']))
+                                <span style="background: #f1eaff; color: #6741b5; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Sedang Bertemu</span>
+                            @elseif(in_array($statusLower, ['dikonfirmasi', 'confirmed']))
+                                <span style="background: #dbeafe; color: #1d4ed8; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Dikonfirmasi</span>
+                            @elseif(in_array($statusLower, ['terjadwal']))
+                                <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Terjadwal</span>
+                            @else
+                                <span style="background: #fef3c7; color: #b45309; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Menunggu</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">
+                            Belum ada data kunjungan yang cocok dengan filter.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @foreach($visits as $v)
+            @php
+                $leadModal = $v->lead;
+                $scheduleTextMap = [
+                    'deal' => 'Sudah Deal 🎉',
+                    'lost' => 'Lead Hilang / Lost',
+                ];
+                $scheduleText = $leadModal
+                    ? ($scheduleTextMap[$leadModal->status] ?? ($leadModal->follow_up_at ? \Carbon\Carbon::parse($leadModal->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan'))
+                    : 'Kunjungan biasa, tidak dikonversi jadi lead';
+            @endphp
+
+            <div class="modal fade" id="noteModal{{ $v->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
+                            <div>
+                                <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">
+                                    Riwayat & Hasil Pertemuan – {{ $v->guest->name ?? 'Tamu' }}
+                                </h5>
+                                <span style="font-size: 11px; color: #778195; font-weight: 600;">
+                                    Ditangani oleh: {{ $v->assignedUser->name ?? '-' }} (PIC)
+                                </span>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6; max-height: 70vh; overflow-y: auto;">
+
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
+                                <div>
+                                    <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Tahap Pipeline Terakhir:</div>
+                                    <div style="font-weight: 800; color: #172033; text-transform: capitalize;">
+                                        {{ $leadModal ? ($leadBadges[$leadModal->status]['label'] ?? $leadModal->status) : 'Bukan Lead' }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal / Keterangan Status:</div>
+                                    <div style="font-weight: 700; color: #006B3F;">{{ $scheduleText }}</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                                    📌 Catatan Pertemuan Awal:
+                                </label>
+                                <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+                                    {{ $v->meeting_result ?? 'Tidak ada catatan awal yang ditinggalkan.' }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">
+                                    🔄 Riwayat Update Pipeline:
+                                </label>
+
+                                @forelse(optional($leadModal)->followUps ?? [] as $fu)
+                                    <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
+                                            <span>📅 Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
+                                            <span>Tahap: <strong style="text-transform: uppercase; color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
+                                        </div>
+                                        <div style="color: #334155; font-size: 13px; white-space: pre-line;">
+                                            {{ $fu->result ?? 'Tidak ada detail catatan pada pembaruan ini.' }}
+                                        </div>
+                                        @if($fu->due_at)
+                                            <div style="font-size: 11px; color: #475569; margin-top: 6px;">
+                                                Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div style="font-style: italic; color: #94a3b8; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; text-align: center; font-size: 12px;">
+                                        Tidak ada riwayat update pipeline untuk kunjungan ini.
+                                    </div>
+                                @endforelse
+                            </div>
+
+                        </div>
+                        <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+
+        <div style="margin-top: 20px;">
+            @include('partials.pagination', ['paginator' => $visits])
+        </div>
+    </div>
+
 </div>
 
-<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); overflow: hidden;">
-    
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
-        <input type="text" placeholder="Cari nama tamu atau instansi..." style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
-        <div style="font-size: 13px; color: #778195; font-weight: 600;">
-            Total Tamu Hari Ini: <strong style="color: #172033; font-weight: 800;">2 Orang</strong>
-        </div>
-    </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-            <thead>
-                <tr style="background: #f8fafc; color: #778195; border-bottom: 1px solid #e8edf5;">
-                    <th style="padding: 14px 20px; font-weight: 800;">No</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Nama Tamu</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Instansi / Jabatan</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Produk Diminati</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">PIC Tujuan</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Status</th>
-                    <th style="padding: 14px 20px; font-weight: 800; text-align: center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody style="color: #172033;">
-                
-                <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">1</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Ahmad Fauzan</div>
-                        <div style="font-size: 11px; color: #778195;">081234567890</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">PT Maju Jaya</div>
-                        <div style="font-size: 11px; color: #778195;">Manager</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
-                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">SEO</span>
-                    </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">Budi (IT Support)</td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ea; color: #137333; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Selesai</span>
-                    </td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #1463ff; text-decoration: none; font-weight: 800; margin-right: 12px;">Detail</a>
-                        <a href="#" style="color: #e5484d; text-decoration: none; font-weight: 800;">Hapus</a>
-                    </td>
-                </tr>
+<style>
+    .flatpickr-calendar { border-radius: 16px !important; box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important; border: 1px solid #e8edf5 !important; font-family: inherit !important; padding: 8px !important; }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.selected:focus, .flatpickr-day.selected:hover { background: #006B3F !important; border-color: #006B3F !important; font-weight: 600; border-radius: 10px !important; }
+    .flatpickr-day.inRange { background: #e6f4ed !important; border-color: #e6f4ed !important; box-shadow: -5px 0 0 #e6f4ed, 5px 0 0 #e6f4ed !important; }
+    .flatpickr-day:hover { border-radius: 10px !important; }
+    .flatpickr-months .flatpickr-month { color: #172033 !important; fill: #172033 !important; }
+    .flatpickr-current-month .flatpickr-monthDropdown-months { font-weight: 700 !important; }
+    span.flatpickr-weekday { color: #778195 !important; font-weight: 600 !important; }
+    #start_date:focus, #end_date:focus { border-color: #006B3F !important; background-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
+</style>
 
-                <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">2</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Siti Aminah</div>
-                        <div style="font-size: 11px; color: #778195;">089876543211</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">CV Berkah Mandiri</div>
-                        <div style="font-size: 11px; color: #778195;">Owner</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Sistem POS</span>
-                    </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">Rina (Sales)</td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #fef7e0; color: #b06000; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Meeting</span>
-                    </td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #1463ff; text-decoration: none; font-weight: 800; margin-right: 12px;">Detail</a>
-                        <a href="#" style="color: #e5484d; text-decoration: none; font-weight: 800;">Hapus</a>
-                    </td>
-                </tr>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
-            </tbody>
-        </table>
-    </div>
-
-    <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; font-size: 12px; color: #778195;">
-        <span>Menampilkan data kunjungan</span>
-        <div style="display: flex; gap: 6px; align-items: center;" id="pagination-wrapper">
-            {{-- Tombol Sebelumnya --}}
-            <button type="button" onclick="ubahHalaman('prev')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Sebelumnya</button>
-            
-            {{-- Daftar Nomor Halaman --}}
-            <button type="button" onclick="pilihHalaman(1)" class="page-btn" data-page="1" style="padding: 6px 12px; border: 1px solid #013220; background: #013220; color: #fff; border-radius: 8px; font-weight: 800; cursor: pointer; pointer-events: auto !important;">1</button>
-            <button type="button" onclick="pilihHalaman(2)" class="page-btn" data-page="2" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">2</button>
-            <button type="button" onclick="pilihHalaman(3)" class="page-btn" data-page="3" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">3</button>
-            
-            {{-- Tombol Selanjutnya --}}
-            <button type="button" onclick="ubahHalaman('next')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Selanjutnya</button>
-        </div>
-    </div>
-
-   {{-- Script Interaktif untuk Memindahkan Warna Kuning --}}
 <script>
-    let halamanAktif = 1;
-    const totalHalaman = 3; // Ubah sesuai jumlah total halaman yang kamu inginkan
-
-    function pilihHalaman(nomor) {
-        halamanAktif = nomor;
-        perbaruiTampilanTombol();
-    }
-
-    function ubahHalaman(arah) {
-        if (arah === 'prev' && halamanAktif > 1) {
-            halamanAktif--;
-        } else if (arah === 'next' && halamanAktif < totalHalaman) {
-            halamanAktif++;
+document.addEventListener('DOMContentLoaded', function() {
+    const startPicker = flatpickr("#start_date", {
+        locale: "id",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d F Y",
+        disableMobile: "true",
+        onChange: function(selectedDates) {
+            if (selectedDates[0]) endPicker.set('minDate', selectedDates[0]);
         }
-        perbaruiTampilanTombol();
-    }
+    });
 
-    function perbaruiTampilanTombol() {
-        const tombolNomor = document.querySelectorAll('.page-btn');
+    const endPicker = flatpickr("#end_date", {
+        locale: "id",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d F Y",
+        disableMobile: "true",
+        onChange: function(selectedDates) {
+            if (selectedDates[0]) startPicker.set('maxDate', selectedDates[0]);
+        }
+    });
 
-        tombolNomor.forEach(btn => {
-            const halaman = parseInt(btn.getAttribute('data-page'));
-
-            if (halaman === halamanAktif) {
-                // Gaya saat tombol aktif (Warna Kuning/Gold)
-                btn.style.background = '#013220';
-                btn.style.borderColor = '#013220';
-                btn.style.color = '#fff';
-                btn.style.fontWeight = '800';
-            } else {
-                // Gaya saat tombol tidak aktif
-                btn.style.background = '#fff';
-                btn.style.borderColor = '#e8edf5';
-                btn.style.color = '#778195';
-                btn.style.fontWeight = '700';
-            }
-        });
-    }
+    const startVal = document.getElementById('start_date').value;
+    const endVal = document.getElementById('end_date').value;
+    if (startVal) endPicker.set('minDate', startVal);
+    if (endVal) startPicker.set('maxDate', endVal);
+});
 </script>
-</div>
-
 @endsection

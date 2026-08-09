@@ -75,17 +75,27 @@ class GuestCategoriesController extends Controller
         }
     }
 
-    public function laporan()
+public function laporan(Request $request) // Pastikan memasukkan Request
 {
+    // Mengambil nilai per_page dari URL, default 10
+    $perPage = (int) $request->input('per_page', 10);
+
+    // Hitung total KESELURUHAN tamu (agar kalkulasi persen tidak hanya dari halaman aktif)
+    $totalGuests = DB::table('guests')
+        ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
+        ->count();
+
+    // Mengambil data dengan paginate
     $categoryStats = DB::table('guests')
         ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
         ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
         ->groupBy('guest_categories.id', 'guest_categories.name')
         ->orderByDesc('total')
-        ->get();
+        ->paginate($perPage)
+        ->appends($request->query());
 
-    $totalGuests = $categoryStats->sum('total');
+    $chartColors = ['#013220', '#1463ff', '#ca8a04', '#7c3aed', '#0284c7', '#c2410c', '#21a86b', '#dc2626'];
 
-    return view('guest-categories.laporan', compact('categoryStats', 'totalGuests'));
+    return view('guest_categories.laporan', compact('categoryStats', 'totalGuests', 'chartColors'));
 }
 }
