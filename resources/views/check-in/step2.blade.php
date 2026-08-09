@@ -1,11 +1,35 @@
 @extends('layouts.guest')
 
 @section('content')
-<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f7faf8; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(245, 235, 224, 0.7) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.04) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.3) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
+<style>
+    /* Responsive Styling untuk Tampilan Mobile & Tablet */
+    @media (max-width: 991px) {
+        .checkin-container {
+            grid-template-columns: 1fr !important;
+        }
+        .checkin-sidebar {
+            padding: 40px 30px !important;
+        }
+        .checkin-form-area {
+            padding: 40px 30px !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .checkin-sidebar {
+            padding: 30px 20px !important;
+        }
+        .checkin-form-area {
+            padding: 30px 20px !important;
+        }
+    }
+</style>
 
-    <div style="width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid rgba(255, 255, 255, 0.95); overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+<div style="width: 100vw; min-height: 100vh; display: flex; box-sizing: border-box; margin: -24px; background-color: #ffffff; position: relative; overflow-x: hidden;">
 
-        <div style="background: linear-gradient(135deg, #006B3F, #159A5C); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+    <div class="checkin-container" style="width: 100%; max-width: 100%; background: #ffffff; border-radius: 0; box-shadow: none; border: none; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+
+        <!-- Sidebar Kiri -->
+        <div class="checkin-sidebar" style="background: linear-gradient(135deg, #013220, #159A5C); padding: 60px 50px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
                     Guest Check-In
@@ -42,7 +66,11 @@
             </div>
         </div>
 
-        <div style="padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
+        <!-- Area Form Kanan -->
+        <div class="checkin-form-area" style="padding: 60px 80px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
+
+            <!-- Tombol Kembali -->
+            
 
             <div style="margin-bottom: 20px;">
                 <h2 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 6px 0;">Tahap 2: Keperluan Kunjungan</h2>
@@ -109,7 +137,6 @@
                 {{-- Produk Minat --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">Produk / Layanan yang Diminati</label>
-                    {{-- UBAH name="product" MENJADI name="product_interest" --}}
                     <select name="product_interest"
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" {{ old('product_interest', $step2Data['product_interest'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Produk / Layanan --</option>
@@ -125,14 +152,13 @@
                     </select>
                 </div>
 
-                {{-- Tanggal & Jam Kunjungan (Datepicker & Timepicker) --}}
+                {{-- Tanggal & Jam Kunjungan --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 4px;">
                         Tanggal & Jam Kunjungan <span style="color: #e5484d;">*</span> <span style="font-weight: 400; color: #778195; font-size: 11px;">(08:00 - 17:00)</span>
                     </label>
 
                     <div style="position: relative; display: flex; align-items: center; width: 100%;">
-                        {{-- Icon Prefix --}}
                         <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -141,8 +167,6 @@
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                         </div>
-
-                        {{-- Input Text Flatpickr --}}
                         <input type="text" id="scheduled_at" name="scheduled_at"
                             value="{{ old('scheduled_at', $step2Data['scheduled_at'] ?? date('Y-m-d 08:00')) }}"
                             placeholder="Pilih tanggal & jam kunjungan..." required readonly
@@ -177,11 +201,11 @@
 
                 {{-- Navigation Buttons --}}
                 <div style="display: flex; gap: 12px; margin-top: 6px;">
-                    <a href="{{ route('check-in.step1') }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
+                    <a href="{{ route('check-in.step1') }}" style="flex: 1; background: #1463ff; color: #ffff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box;">
                         ⬅ Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #1463ff; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
                         Selanjutnya: Konfirmasi Data
                     </button>
                 </div>
@@ -245,9 +269,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const liburNasional = [
-
-        ];
+        const liburNasional = [];
 
         flatpickr("#scheduled_at", {
             locale: "id",
@@ -255,16 +277,14 @@
             time_24hr: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today",
-            minTime: "08:00", // Membatasi jam mulai: 08:00 WIB
-            maxTime: "17:00", // Membatasi jam selesai: 17:00 WIB
+            minTime: "08:00",
+            maxTime: "17:00",
             minuteIncrement: 15,
             disableMobile: "true",
             disable: [
-                // 1. Blokir Hari Minggu
                 function(date) {
                     return (date.getDay() === 0);
                 },
-                // 2. Blokir Tanggal Merah / Libur Nasional
                 function(date) {
                     const formattedDate = flatpickr.formatDate(date, "Y-m-d");
                     return liburNasional.includes(formattedDate);

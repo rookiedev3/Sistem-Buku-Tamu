@@ -1,11 +1,35 @@
 @extends('layouts.guest')
 
 @section('content')
-<div style="width: 100vw; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; margin: -24px; background-color: #f7faf8; background-image: radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.15) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(245, 235, 224, 0.7) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.04) 0%, transparent 60%), linear-gradient(to right, rgba(203, 213, 225, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.3) 1px, transparent 1px); background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px; position: relative; overflow-x: hidden;">
+<style>
+    /* Responsive Styling untuk Tampilan Mobile */
+    @media (max-width: 991px) {
+        .checkin-container {
+            grid-template-columns: 1fr !important;
+        }
+        .checkin-sidebar {
+            padding: 40px 30px !important;
+        }
+        .checkin-form-area {
+            padding: 40px 30px !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .checkin-sidebar {
+            padding: 30px 20px !important;
+        }
+        .checkin-form-area {
+            padding: 30px 20px !important;
+        }
+    }
+</style>
 
-    <div style="width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 24px 60px rgba(31,53,97,0.1); border: 1px solid rgba(255, 255, 255, 0.95); overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+<div style="width: 100vw; min-height: 100vh; display: flex; box-sizing: border-box; margin: -24px; background-color: #f7faf8; position: relative; overflow-x: hidden;">
 
-        <div style="background: linear-gradient(135deg, #006B3F, #159A5C); padding: 60px 40px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+    <div class="checkin-container" style="width: 100%; max-width: 100%; background: #ffffff; border-radius: 0; box-shadow: none; border: none; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
+
+        <!-- Sidebar Kiri -->
+        <div class="checkin-sidebar" style="background: linear-gradient(135deg, #013220, #159A5C); padding: 60px 50px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
             <div>
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
                     Guest Check-In
@@ -53,7 +77,10 @@
                     <span>Senin-Sabtu, 08.00-16.00 WIB</span>
                 </div>
             </div>
-        </div> <div style="padding: 50px 60px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
+        </div> 
+
+        <!-- Area Form Kanan -->
+        <div class="checkin-form-area" style="padding: 60px 80px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
 
             <div style="margin-bottom: 20px;">
                 <h2 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 6px 0;">Tahap 1: Mengisi Identitas</h2>
@@ -125,7 +152,6 @@
                     </div>
                     @endif
                     
-                    {{--  Diberi onchange="validateFileSize(this)" agar JS tereksekusi --}}
                     <input type="file" id="photoInput" name="photo_path" accept="image/*" onchange="validateFileSize(this)"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box; cursor: pointer;">
                     
@@ -137,9 +163,13 @@
                     @enderror
                 </div>
 
-                <div style="margin-top: 10px;">
+                <!-- Navigasi Tombol (Kembali & Selanjutnya) -->
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                    <a href="{{ url()->previous() }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 15px; line-height: 1; color: #475569;">&#8592;</span> Kembali
+                    </a>
                     <button type="submit"
-                        style="width: 100%; background: #1463ff; color: #fff; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
                         Selanjutnya: Keperluan Kunjungan 
                     </button>
                 </div>
