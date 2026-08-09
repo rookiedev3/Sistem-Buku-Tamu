@@ -15,84 +15,84 @@
 
     <div>
         <h5 class="fw-bold mb-3" style="color: #172033; font-size: 16px;">Ringkasan Operasional & Wawasan</h5>
-        
+
         <div class="dashboard-split-wrapper">
-            
+
             <div class="stats-left-grid">
-                <div class="stat-box">
+                <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap blue">
                         <i class="bi bi-people-fill"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label-custom">Total Tamu Hari Ini</span>
-                        <h3 class="stat-number-custom">24</h3>
+                        <h3 class="stat-number-custom">{{ $totalTamuHariIni }}</h3>
                     </div>
-                </div>
+                </a>
 
-                <div class="stat-box">
+                <a href="{{ route('owner.dashboard', ['status' => 'Menunggu']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap yellow">
                         <i class="bi bi-hourglass-split"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label-custom">Sedang Menunggu</span>
-                        <h3 class="stat-number-custom">5</h3>
+                        <h3 class="stat-number-custom">{{ $sedangMenunggu }}</h3>
                     </div>
-                </div>
+                </a>
 
-                <div class="stat-box">
+                <a href="{{ route('owner.dashboard', ['status' => 'Sedang Bertemu']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap green">
                         <i class="bi bi-chat-dots-fill"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label-custom">Sedang Bertemu</span>
-                        <h3 class="stat-number-custom">7</h3>
+                        <h3 class="stat-number-custom">{{ $sedangBertemu }}</h3>
                     </div>
-                </div>
+                </a>
 
-                <div class="stat-box">
+                <a href="{{ route('pic.followup') }}" class="stat-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap purple">
                         <i class="bi bi-briefcase-fill"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label-custom">Menjadi Lead</span>
-                        <h3 class="stat-number-custom">+4</h3>
+                        <h3 class="stat-number-custom">+{{ $menjadiLeadHariIni }}</h3>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="stats-right-stack">
-                <div class="stat-box wide-box">
+                <a href="{{ route('products.laporan') }}" class="stat-box wide-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap teal">
                         <i class="bi bi-fire"></i>
                     </div>
                     <div class="stat-content w-100">
                         <span class="stat-label-custom">Produk Paling Sering Diminati</span>
                         <div class="d-flex justify-content-between align-items-center mt-1">
-                            <h5 class="fw-bold text-dark m-0" style="font-size: 14px;">Cloud Server Enterprise</h5>
-                            <span class="badge bg-success bg-opacity-10 text-success px-2 py-1 rounded-pill" style="font-size: 11px; font-weight: 700;">12 Permintaan</span>
+                            <h5 class="fw-bold text-dark m-0" style="font-size: 14px;">{{ $topProduct->name ?? '-' }}</h5>
+                            <span class="badge bg-success bg-opacity-10 text-success px-2 py-1 rounded-pill" style="font-size: 11px; font-weight: 700;">{{ $topProduct->total ?? 0 }} Permintaan</span>
                         </div>
                     </div>
-                </div>
+                </a>
 
-                <div class="stat-box wide-box">
+                <a href="{{ route('guest-categories.laporan') }}" class="stat-box wide-box" style="text-decoration:none; color:inherit;">
                     <div class="stat-icon-wrap orange">
                         <i class="bi bi-pie-chart-fill"></i>
                     </div>
                     <div class="stat-content w-100">
                         <span class="stat-label-custom">Dominasi Kategori Tamu</span>
                         <div class="d-flex justify-content-between align-items-center mt-1">
-                            <h5 class="fw-bold text-dark m-0" style="font-size: 14px;">Klien Korporat / Instansi</h5>
-                            <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill" style="font-size: 11px; font-weight: 700;">65% total</span>
+                            <h5 class="fw-bold text-dark m-0" style="font-size: 14px;">{{ $topCategory->name ?? '-' }}</h5>
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill" style="font-size: 11px; font-weight: 700;">{{ $topCategoryPercentage }}% total</span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
         </div>
     </div>
 
     <div class="row g-4 align-items-stretch">
-        
+
         <div class="col-lg-6">
             <div class="card border-0 rounded-4 p-4 shadow-sm h-100" style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 10px 30px rgba(31,53,97,0.05); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
@@ -101,26 +101,26 @@
 
                     <div style="display: flex; flex-direction: column; gap: 16px;">
                         <div style="display: flex; gap: 14px; align-items: flex-start;">
-                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #edf4ff; color: #1463ff; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">10</div>
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #edf4ff; color: #1463ff; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">{{ $avgWaitMinutes }}</div>
                             <div>
                                 <h4 style="font-size: 13px; font-weight: 800; color: #172033; margin: 0 0 2px;">Rata-rata waktu tunggu</h4>
-                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">10 menit sebelum bertemu PIC.</p>
+                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">{{ $avgWaitMinutes }} menit sebelum bertemu PIC.</p>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 14px; align-items: flex-start;">
-                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #e8f8f1; color: #21a86b; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">82</div>
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #e8f8f1; color: #21a86b; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">{{ $serviceRate }}</div>
                             <div>
                                 <h4 style="font-size: 13px; font-weight: 800; color: #172033; margin: 0 0 2px;">Tingkat pelayanan</h4>
-                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">82% tamu dilayani di bawah SLA.</p>
+                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">{{ $serviceRate }}% tamu telah diselesaikan.</p>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 14px; align-items: flex-start;">
-                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #f5f3ff; color: #7c3aed; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">37</div>
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: #f5f3ff; color: #7c3aed; display: grid; place-items: center; font-weight: 900; font-size: 15px; flex: none;">{{ $conversionRate }}</div>
                             <div>
                                 <h4 style="font-size: 13px; font-weight: 800; color: #172033; margin: 0 0 2px;">Conversion rate</h4>
-                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">37% kunjungan potensial menjadi lead.</p>
+                                <p style="font-size: 12px; color: #778195; margin: 0; line-height: 1.4;">{{ $conversionRate }}% kunjungan menjadi lead.</p>
                             </div>
                         </div>
                     </div>
@@ -135,34 +135,24 @@
                         <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru ⚡</h3>
                         <a href="#" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
                     </div>
-                    
+
                     <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
-                            <div style="width: 38px; height: 38px; background: #e8f8f1; color: #21a86b; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">BP</div>
-                            <div class="flex-grow-1" style="overflow: hidden;">
-                                <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Budi Prasetyo (PT Telkom)</h6>
-                                <span class="text-muted" style="font-size: 11px;">Check-in untuk bertemu Bapak Direktur</span>
+                        @forelse($recentActivities as $activity)
+                            <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
+                                <div style="width: 38px; height: 38px; background: #e8f8f1; color: #21a86b; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">
+                                    {{ strtoupper(substr($activity->guest_name, 0, 2)) }}
+                                </div>
+                                <div class="flex-grow-1" style="overflow: hidden;">
+                                    <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ $activity->guest_name }}@if($activity->company_name) ({{ $activity->company_name }})@endif
+                                    </h6>
+                                    <span class="text-muted" style="font-size: 11px;">Status diubah: {{ $activity->new_status }}</span>
+                                </div>
+                                <span class="text-muted" style="font-size: 10px; white-space: nowrap;">{{ \Carbon\Carbon::parse($activity->changed_at)->format('H:i') }}</span>
                             </div>
-                            <span class="text-muted" style="font-size: 10px; white-space: nowrap;">10:42</span>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
-                            <div style="width: 38px; height: 38px; background: #edf4ff; color: #1463ff; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">SN</div>
-                            <div class="flex-grow-1" style="overflow: hidden;">
-                                <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Siti Nurhaliza (Universitas GМM)</h6>
-                                <span class="text-muted" style="font-size: 11px;">Status kunjungan diubah: Sedang Bertemu</span>
-                            </div>
-                            <span class="text-muted" style="font-size: 10px; white-space: nowrap;">10:15</span>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
-                            <div style="width: 38px; height: 38px; background: #f5f3ff; color: #7c3aed; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">RA</div>
-                            <div class="flex-grow-1" style="overflow: hidden;">
-                                <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rian Aditiya (Mandiri Corp)</h6>
-                                <span class="text-muted" style="font-size: 11px;">Berhasil dikonversi menjadi Lead Penjualan</span>
-                            </div>
-                            <span class="text-muted" style="font-size: 10px; white-space: nowrap;">09:50</span>
-                        </div>
+                        @empty
+                            <p class="text-muted mb-0" style="font-size: 12px;">Belum ada aktivitas terbaru.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -170,29 +160,35 @@
 
     </div>
 
-    <div class="card mb-4 border-0 rounded-4 p-4 shadow-sm" style="background:#fff; border:1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.05);">
+    <div id="kunjungan-hari-ini" class="card mb-4 border-0 rounded-4 p-4 shadow-sm" style="background:#fff; border:1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.05);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
             <div>
                 <h3 style="font-size:18px; font-weight:800; margin:0 0 4px; color:#172033;">Kunjungan Hari Ini 📋</h3>
                 <p style="color:#778195; font-size:13px; margin:0;">Daftar tamu yang terdaftar dan status pertemuan hari ini.</p>
             </div>
-            
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <select style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
+
+            <form method="GET" action="{{ route('owner.dashboard') }}#kunjungan-hari-ini" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <select name="status" onchange="this.form.submit()" style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
                     <option value="">Semua Status</option>
-                    <option value="bertemu">Sedang Bertemu</option>
-                    <option value="menunggu">Menunggu</option>
-                    <option value="selesai">Selesai</option>
+                    @foreach($statusOptions as $status)
+                        <option value="{{ $status }}" @selected(strtolower(trim($statusFilter)) === strtolower(trim($status)))>{{ $status }}</option>
+                    @endforeach
                 </select>
 
-                <select style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
+                <select name="pic_id" onchange="this.form.submit()" style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; background:#fbfcfe; color:#4a5568; outline:none; cursor:pointer;">
                     <option value="">Semua PIC</option>
-                    <option value="budi">Budi (IT)</option>
-                    <option value="rina">Rina (Sales)</option>
+                    @foreach($picOptions as $pic)
+                        <option value="{{ $pic->id }}" @selected((string) $picFilter === (string) $pic->id)>{{ $pic->name }}</option>
+                    @endforeach
                 </select>
 
-                <input type="text" placeholder="Cari..." style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; width:160px; background:#fbfcfe; outline:none;">
-            </div>
+                <input type="text" name="keyword" value="{{ $keyword }}" placeholder="Cari nama/instansi..." style="border:1px solid #e8edf5; border-radius:10px; padding:10px 14px; font-size:12px; width:160px; background:#fbfcfe; outline:none;">
+                <button type="submit" style="border:1px solid #013220; background:#013220; color:#fff; border-radius:10px; padding:10px 14px; font-size:12px; cursor:pointer;">Cari</button>
+
+                @if($statusFilter || $picFilter || $keyword)
+                    <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" style="font-size:12px; color:#778195; text-decoration:underline;">Reset</a>
+                @endif
+            </form>
         </div>
 
         <div style="overflow-x:auto;">
@@ -208,24 +204,32 @@
                     </tr>
                 </thead>
                 <tbody style="color:#172033; font-weight:600;">
-                    <tr style="border-bottom:1px solid #f7faff;">
-                        <td style="padding:14px 10px;">Ahmad Fauzan</td>
-                        <td style="padding:14px 10px;">Aqiqah Berkah</td>
-                        <td style="padding:14px 10px;">Konsultasi Bisnis</td>
-                        <td style="padding:14px 10px;">Budi (IT)</td>
-                        <td style="padding:14px 10px; color:#778195; font-weight:normal; font-size:12px;">09:30 - 10:15</td>
-                        <td style="padding:14px 10px;"><span style="background:#e8f8f1; color:#21a86b; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700;">Sedang Bertemu</span></td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #f7faff;">
-                        <td style="padding:14px 10px;">Siti Aminah</td>
-                        <td style="padding:14px 10px;">CV Maju Jaya</td>
-                        <td style="padding:14px 10px;">Demo Sistem POS</td>
-                        <td style="padding:14px 10px;">Rina (Sales)</td>
-                        <td style="padding:14px 10px; color:#778195; font-weight:normal; font-size:12px;">10:00 - Selesai</td>
-                        <td style="padding:14px 10px;"><span style="background:#fefce8; color:#ca8a04; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700;">Menunggu</span></td>
-                    </tr>
+                    @forelse($visits as $visit)
+                        <tr style="border-bottom:1px solid #f7faff;">
+                            <td style="padding:14px 10px;">{{ $visit->guest->name ?? '-' }}</td>
+                            <td style="padding:14px 10px;">{{ $visit->guest->company_name ?? '-' }}</td>
+                            <td style="padding:14px 10px;">{{ $visit->purpose->name ?? '-' }}</td>
+                            <td style="padding:14px 10px;">{{ $visit->assignedUser->name ?? '-' }}</td>
+                            <td style="padding:14px 10px; color:#778195; font-weight:normal; font-size:12px;">
+                                {{ optional($visit->scheduled_at)->format('H:i') }}
+                            </td>
+                            <td style="padding:14px 10px;">
+                                <span style="background:#e8f8f1; color:#21a86b; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700;">
+                                    {{ $visit->status }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="padding:24px 10px; text-align:center; color:#778195;">Tidak ada data kunjungan yang cocok.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="mt-3">
+            {{ $visits->links() }}
         </div>
     </div>
 
@@ -261,6 +265,12 @@
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(31,53,97,0.10);
 }
 
 .wide-box {
@@ -280,7 +290,6 @@
     flex-shrink: 0;
 }
 
-/* Variasi Warna Ikon & Background */
 .stat-icon-wrap.blue { background: #edf4ff; color: #1463ff; }
 .stat-icon-wrap.yellow { background: #fefce8; color: #ca8a04; }
 .stat-icon-wrap.green { background: #e8f8f1; color: #21a86b; }
@@ -305,7 +314,6 @@
     margin: 0;
 }
 
-/* Responsif untuk Layar Tablet / HP */
 @media(max-width: 992px) {
     .dashboard-split-wrapper {
         grid-template-columns: 1fr;

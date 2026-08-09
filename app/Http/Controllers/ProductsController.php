@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductsController extends Controller
 {
@@ -79,4 +80,18 @@ class ProductsController extends Controller
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menghapus Product. Silakan coba lagi.']);
         }
     }
+
+    public function laporan()
+{
+    $productStats = DB::table('visit_products')
+        ->join('products', 'products.id', '=', 'visit_products.product_id')
+        ->select('products.id', 'products.name', DB::raw('count(*) as total'))
+        ->groupBy('products.id', 'products.name')
+        ->orderByDesc('total')
+        ->get();
+
+    $totalPermintaan = $productStats->sum('total');
+
+    return view('products.laporan', compact('productStats', 'totalPermintaan'));
+}
 }

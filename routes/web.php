@@ -7,6 +7,7 @@ use App\Http\Controllers\FrontOfficeController;
 use App\Http\Controllers\GuestCategoriesController;
 use App\Http\Controllers\LeadSourcesController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SecurityController;
@@ -118,10 +119,6 @@ Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
     Route::resource('/pengguna', UserController::class)->names('user');
-
-Route::group(['middleware' => [CheckUserLogin::class.':owner']], function () {
-    // Route khusus untuk user dengan level 1 (admin)
-});
 // });
 
 Route::middleware('auth')->prefix('security')->group(function () {
@@ -228,6 +225,16 @@ Route::middleware('auth')->prefix('security')->group(function () {
     Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
     Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
     Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
+});
+
+Route::middleware('auth')->prefix('owner')->group(function () {
+    Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
+
+    Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
+Route::resource('/products', ProductsController::class);
+
+Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
+Route::resource('/guest-categories', GuestCategoriesController::class);
 });
 // Route::prefix('pic')->group(function () {
 

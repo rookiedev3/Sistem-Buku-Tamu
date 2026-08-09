@@ -42,27 +42,7 @@ class DashboardController extends Controller
      */
     protected function ownerDashboard()
     {
-        $totalGuests    = DB::table('guests')->count();
-        $totalVisits    = DB::table('visits')->count();
-        $totalBranches  = DB::table('branches')->count();
-        $totalLeads     = DB::table('leads')->count();
-
-        $visitHariIni = DB::table('visits')
-            ->whereDate('check_in_at', now())
-            ->count();
-
-        $visitMenunggu = DB::table('visits')
-            ->where('status', 'waiting')
-            ->count();
-
-        return view('dashboard.index', compact(
-            'totalGuests',
-            'totalVisits',
-            'totalBranches',
-            'totalLeads',
-            'visitHariIni',
-            'visitMenunggu'
-        ));
+    return redirect()->route('owner.dashboard');
     }
 
     public function halamanUtama(){

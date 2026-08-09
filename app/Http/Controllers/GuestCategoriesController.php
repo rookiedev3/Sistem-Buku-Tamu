@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\guest_categories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GuestCategoriesController extends Controller
 {
@@ -73,4 +74,18 @@ class GuestCategoriesController extends Controller
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menghapus Guest Category. Silakan coba lagi.']);
         }
     }
+
+    public function laporan()
+{
+    $categoryStats = DB::table('guests')
+        ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
+        ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
+        ->groupBy('guest_categories.id', 'guest_categories.name')
+        ->orderByDesc('total')
+        ->get();
+
+    $totalGuests = $categoryStats->sum('total');
+
+    return view('guest-categories.laporan', compact('categoryStats', 'totalGuests'));
+}
 }
