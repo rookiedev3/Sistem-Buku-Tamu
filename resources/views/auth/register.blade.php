@@ -19,81 +19,89 @@
         }
 
         body {
+            width: 100vw;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f7f4;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(0, 107, 63, 0.18) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(0, 107, 63, 0.06) 0%, transparent 60%),
-                linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 35px 35px, 35px 35px;
+            background-color: #ffffff;
             position: relative;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Lebar card pembungkus sama persis dengan Login (950px) */
+        /* Container Card Full Layar */
         .login-wrapper {
-            width: 100%;
-            max-width: 950px; 
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(31, 53, 97, 0.1);
+            width: 100vw;
+            min-height: 100vh;
+            background: #ffffff;
+            box-shadow: none;
+            border-radius: 0;
             overflow: hidden;
-            display: flex;
-            border: 1px solid rgba(255, 255, 255, 0.95);
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            box-sizing: border-box;
+            border: none;
         }
 
         /* Sisi Kiri: Branding */
         .login-brand-side {
-            flex: 1;
-            background: linear-gradient(135deg, #006B3F 0%, #004d2e 100%);
+            background: linear-gradient(135deg, #013220, #159A5C);
             color: white;
-            padding: 50px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-sizing: border-box;
         }
 
-        /* Sisi Kanan: Form Register (Padding dibuat lega agar card naik tingginya) */
+        /* Sisi Kanan: Form Register (Diperlebar dan disesuaikan agar lebih lega ke atas) */
         .login-form-side {
-            flex: 1.1;
-            padding: 45px 50px;
+            padding: 40px 80px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            box-sizing: border-box;
+            background: #ffffff;
         }
 
         .logo-box {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 20px;
+            font-size: 22px;
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
+        /* Input & Select Diperbesar */
         .form-control, .form-select {
             border-radius: 12px;
-            padding: 11px 14px;
-            font-size: 13px;
-            border: 1px solid #e8edf5;
-            background-color: #fafbfc;
+            padding: 13px 18px;
+            font-size: 14.5px;
+            border: 1px solid #d1d9e2;
+            background-color: #fbfcfe;
+            color: #172033;
         }
 
         .form-control:focus, .form-select:focus {
             border-color: #006B3F;
-            box-shadow: 0 0 0 4px rgba(0, 107, 63, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1);
             background-color: #fff;
+        }
+
+        /* Label Diperbesar */
+        .form-label {
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: #172033 !important;
+            margin-bottom: 6px !important;
         }
 
         /* Menghilangkan ikon mata bawaan dari browser (Edge & Chrome) */
@@ -115,12 +123,12 @@
         }
 
         .password-container .form-control {
-            padding-right: 45px;
+            padding-right: 48px;
         }
 
         .password-toggle-btn {
             position: absolute;
-            right: 14px;
+            right: 16px;
             background: transparent;
             border: none;
             color: #64748b;
@@ -128,22 +136,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .password-toggle-btn:hover {
             color: #006B3F;
         }
 
+        /* Tombol Daftar Diperbesar */
         .btn-custom-login {
             background-color: #006B3F;
             color: #fff;
             border: none;
             border-radius: 12px;
-            padding: 12px;
+            padding: 14px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             transition: 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 107, 63, 0.25);
         }
 
         .btn-custom-login:hover {
@@ -151,18 +161,24 @@
             color: #fff;
         }
 
-        @media (max-width: 768px) {
+        /* Responsif untuk layar HP & Tablet */
+        @media (max-width: 991px) {
             .login-wrapper {
-                flex-direction: column;
-                max-width: 100%;
-                margin: 20px;
-                border-radius: 16px;
+                grid-template-columns: 1fr !important;
             }
             .login-brand-side {
-                padding: 30px;
+                padding: 40px 30px !important;
             }
             .login-form-side {
-                padding: 30px;
+                padding: 40px 30px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .login-brand-side {
+                padding: 30px 20px !important;
+            }
+            .login-form-side {
+                padding: 30px 20px !important;
             }
         }
     </style>
@@ -175,54 +191,54 @@
         <div class="login-brand-side">
             <div>
                 <div class="logo-box">IT</div>
-                <h2 class="fw-bold mb-2" style="font-size: 24px;">IT Solution</h2>
-                <p class="text-white-50" style="font-size: 13.5px;">Sistem Buku Tamu & Registrasi Kunjungan Digital Perusahaan.</p>
+                <h2 class="fw-bold mb-2" style="font-size: 32px; line-height: 1.3;">IT Solution</h2>
+                <p class="text-white-50" style="font-size: 14px; line-height: 1.6;">Sistem Buku Tamu & Registrasi Kunjungan Digital Perusahaan.</p>
             </div>
             <div>
-                <p class="text-white-50 mb-0" style="font-size: 12px;">&copy; 2026 IT Solution Corp. All rights reserved.</p>
+                <p class="text-white-50 mb-0" style="font-size: 12px;">&copy; {{ date('Y') }} IT Solution Corp. All rights reserved.</p>
             </div>
         </div>
 
         <div class="login-form-side">
             
-            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 22px;">Buat Akun Baru 🚀</h3>
-            <p class="text-secondary mb-3" style="font-size: 13px;">Silakan lengkapi data untuk mendaftar.</p>
+            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 24px;">Buat Akun Baru 🚀</h3>
+            <p class="text-secondary mb-4" style="font-size: 14px;">Silakan lengkapi data untuk mendaftar ke sistem.</p>
 
             <form method="POST" action="{{ route('register.proses') }}">
                 @csrf
 
                 <div class="row g-3">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Nama Lengkap <span class="text-danger">*</span></label>
+                        <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                            value="{{ old('name') }}" placeholder="Nama lengkap" required>
+                            value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
                         @error('name')
-                            <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Email <span class="text-danger">*</span></label>
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                            value="{{ old('email') }}" placeholder="Masukkan email Anda" required>
+                            value="{{ old('email') }}" placeholder="Masukkan email aktif" required>
                         @error('email')
-                            <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">No. WhatsApp <span class="text-danger">*</span></label>
+                        <label class="form-label">No. WhatsApp <span class="text-danger">*</span></label>
                         <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror"
                             value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" required>
                         @error('phone')
-                            <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Cabang <span class="text-danger">*</span></label>
+                        <label class="form-label">Cabang <span class="text-danger">*</span></label>
                         <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Cabang --</option>
                             @foreach ($branches as $branch)
@@ -232,14 +248,14 @@
                             @endforeach
                         </select>
                         @error('branch_id')
-                            <div class="invalid-feedback" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Password <span class="text-danger">*</span></label>
+                        <label class="form-label">Password <span class="text-danger">*</span></label>
                         <div class="password-container">
                             <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror"
                                 placeholder="Min. 6 karakter" required>
@@ -248,12 +264,12 @@
                             </button>
                         </div>
                         @error('password')
-                            <div class="invalid-feedback d-block" style="font-size: 11px;">{{ $message }}</div>
+                            <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label mb-1" style="font-size: 12px; font-weight: 700; color: #172033;">Konfirmasi <span class="text-danger">*</span></label>
+                        <label class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
                         <div class="password-container">
                             <input type="password" name="password_confirmation" id="password_confirmation" class="form-control"
                                 placeholder="Ulangi password" required>
@@ -264,12 +280,12 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-custom-login w-100 shadow-sm mt-1">
-                    Daftar Akun
+                <button type="submit" class="btn btn-custom-login w-100 shadow-sm mt-2">
+                    Daftar Akun Sekarang
                 </button>
             </form>
 
-            <div class="text-center mt-3" style="font-size: 13px; color: #64748b;">
+            <div class="text-center mt-4" style="font-size: 14px; color: #64748b;">
                 Sudah punya akun? 
                 <a href="{{ route('login') }}" style="color: #006B3F; text-decoration: none; font-weight: 700;">Login di sini</a>
             </div>
