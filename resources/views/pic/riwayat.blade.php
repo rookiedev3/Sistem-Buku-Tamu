@@ -41,7 +41,7 @@
             <!-- SAMPAI SINI -->
 
             <div style="display: flex; gap: 8px;">
-                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
+                <button type="submit" style="background: #013220; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; height: 41px;">
                     Filter
                 </button>
 @if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')

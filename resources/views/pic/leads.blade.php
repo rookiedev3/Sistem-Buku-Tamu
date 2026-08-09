@@ -3,30 +3,27 @@
 @section('content')
 <div style="display: flex; flex-direction: column; gap: 24px;">
 
-    <!-- Header + Statistik -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Lead & Follow-Up Penjualan 📈</h2>
             <p style="font-size: 13px; color: #778195; margin: 0;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis dipindah ke Riwayat Kunjungan.</p>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #006B3F; margin-top: 4px;">{{ $countDeal }} Klien</strong>
+            <strong style="font-size: 24px; font-weight: 900; color: #013220; margin-top: 4px;">{{ $countDeal }} Klien</strong>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Pipeline Aktif</span>
             <strong style="font-size: 24px; font-weight: 900; color: #d97706; margin-top: 4px;">{{ $countActive }} Lead</strong>
         </div>
     </div>
 
-    <!-- Tabel Pipeline -->
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Pipeline Lead & Status Konversi</h3>
-                    <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+            <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
 
-<!-- Filter Cepat + Dropdown VIP (satu baris, sejajar seperti dashboard) -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
 
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -37,14 +34,13 @@
                         'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
                         'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
                         'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
-                        // 'deal'     => 'Deal' . ($countDeal > 0 ? " ({$countDeal})" : ''),
                     ];
                     $activeFilter = $filter ?? 'active';
                 @endphp
                 @foreach($filterOptions as $key => $label)
                     @php
                         $isActive = $activeFilter === $key;
-                        $bg = $isActive ? '#006B3F' : '#f1f5f9';
+                        $bg = $isActive ? '#013220' : '#f1f5f9';
                         $color = $isActive ? '#ffffff' : '#475569';
                         if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
                             $bg = '#fef2f2'; $color = '#dc2626';
@@ -77,7 +73,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0;">
+            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0; min-width: 700px;">
                 <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <tr>
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
@@ -114,7 +110,7 @@
                                 @endphp
                                 <div style="font-weight: 700; color: #172033; margin-bottom: 4px;">{{ $fuDate->translatedFormat('d M Y') }}</div>
                                 @if($lead->status === 'deal')
-                                    {{-- tidak perlu badge terlambat/hari ini kalau sudah deal --}}
+                                    {{-- selesai --}}
                                 @elseif($fuDate->lt($today))
                                     <span style="background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">⚠ Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
                                 @elseif($fuDate->eq($today))
@@ -132,7 +128,7 @@
                         <td style="padding: 14px;">
                             @php
                                 $badges = [
-                                    'new'         => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
+                                    'new'       => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
                                     'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
                                     'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
                                     'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
@@ -142,19 +138,19 @@
                             @endphp
                             <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
                         </td>
-<td style="padding: 14px; text-align: center; white-space: nowrap;">
-    <div style="display: flex; gap: 6px; justify-content: center;">
-        <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
+                        <td style="padding: 14px; text-align: center; white-space: nowrap;">
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
 
-        @if($lead->status === 'deal')
-            <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: not-allowed;">
-                ✔ Selesai
-            </button>
-        @else
-            <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Update Tahap</button>
-        @endif
-    </div>
-</td>
+                                @if($lead->status === 'deal')
+                                    <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: not-allowed;">
+                                        ✔ Selesai
+                                    </button>
+                                @else
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Update Tahap</button>
+                                @endif
+                            </div>
+                        </td>
                     </tr>
                     @empty
                     <tr>
@@ -166,7 +162,7 @@
         </div>
 
         <div style="margin-top: 20px;">
-@include('partials.pagination', ['paginator' => $leads])
+            @include('partials.pagination', ['paginator' => $leads])
         </div>
     </div>
 </div>
@@ -179,7 +175,6 @@
             ?? ($lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan');
     @endphp
 
-    <!-- MODAL RIWAYAT -->
     <div class="modal fade" id="noteModal{{ $lead->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
@@ -191,7 +186,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="padding: 24px; color: #334155; font-size: 13px; line-height: 1.6; max-height: 70vh; overflow-y: auto;">
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 20px;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
                         <div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Tahap Pipeline Terakhir:</div>
                             <div style="font-weight: 800; color: #172033;">{{ $badges[$lead->status]['label'] ?? $lead->status }}</div>
@@ -213,7 +208,7 @@
                         <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">🔄 Riwayat Update Pipeline:</label>
                         @forelse($lead->followUps as $fu)
                             <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
                                     <span>📅 {{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</span>
                                     <span>Tahap: <strong style="color: #006B3F;">{{ $badges[$fu->status]['label'] ?? $fu->status }}</strong></span>
                                 </div>
@@ -241,7 +236,6 @@
         </div>
     </div>
 
-    <!-- MODAL UPDATE TAHAP -->
     <div class="modal fade" id="modalUpdateStatus{{ $lead->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
@@ -299,7 +293,6 @@
                                 Kosongkan kalau belum ada perubahan dari estimasi sebelumnya.
                             </p>
                         </div>
-
 
                         <div style="margin-bottom: 20px;">
                             <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
@@ -371,13 +364,11 @@
             select.addEventListener("change", handleDateAccess);
         });
 
-        // Format input Rupiah otomatis: user ngetik "7000000" -> tampil "7.000.000"
-        // Nilai murni angkanya disimpan di hidden input yang dikirim ke server.
         document.querySelectorAll(".rupiah-input").forEach(function (input) {
             const hidden = document.getElementById(input.dataset.hiddenTarget);
 
             input.addEventListener("input", function () {
-                const raw = this.value.replace(/\D/g, ""); // buang semua selain angka
+                const raw = this.value.replace(/\D/g, "");
                 this.value = raw ? new Intl.NumberFormat("id-ID").format(raw) : "";
                 if (hidden) hidden.value = raw;
             });

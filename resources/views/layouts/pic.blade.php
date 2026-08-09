@@ -334,7 +334,7 @@
                 </button>
 
                 <div>
-                    <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Portal PIC</h1>
+                    <h1 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0 0 2px 0; letter-spacing: -0.2px;">Dashboard PIC</h1>
                     <p style="font-size: 11px; font-weight: 600; color: #778195; margin: 0;">
                         {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                     </p>
