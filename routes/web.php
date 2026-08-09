@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // route laporan
-    Route::get('/laporan', function () {
+    Route::get('/laporan.index', function () {
         return view('laporan.index');
     });
 
