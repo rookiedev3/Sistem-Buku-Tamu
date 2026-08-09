@@ -18,6 +18,9 @@ use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'halamanUtama'])->name('halamaanUtama');
+ Route::get('/laporan.index', [OwnerController::class, 'laporan'])->name('laporan.index');
+    Route::get('/laporan/export-excel', [OwnerController::class, 'exportExcel'])->name('laporan.exportExcel');
+    Route::get('/laporan/export-pdf', [OwnerController::class, 'exportPdf'])->name('laporan.exportPdf');
 
 
 // Route untuk user belum login (guest)
@@ -90,15 +93,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/database-tamu/{id}', function ($id) {
         return view('tamu.detail', ['id' => $id]);
     });
-    // route lead dan follow up
-    Route::get('/leads', function () {
-        return view('leads.index');
-    });
+    // // route lead dan follow up
+    // Route::get('/leads', function () {
+    //     return view('leads.index');
+    // });
 
     // route laporan
-    Route::get('/laporan.index', function () {
-        return view('laporan.index');
-    });
+    // Route::get('/laporan.index', function () {
+    //     return view('laporan.index');
+    // });
 
     // route master data
     Route::get('/master-data', function () {

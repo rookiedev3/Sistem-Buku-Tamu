@@ -9,6 +9,7 @@ use App\Models\users;
 use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
@@ -322,5 +323,173 @@ public function leads(Request $request)
         'leads', 'filter',
         'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal', 'countLost', 'vipFilter'
     ));
+}
+
+public function laporan(Request $request)
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
+
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->whereMonth('check_in_at', $month)
+        ->whereYear('check_in_at', $year);
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($category === 'vip') {
+            $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($category === 'reguler') {
+            $baseQuery->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
+    $totalKunjungan = (clone $baseQuery)->count();
+    $totalDeal = (clone $baseQuery)->whereHas('lead', fn($q) => $q->where('status', 'deal'))->count();
+    $totalVip = \Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')
+        ? (clone $baseQuery)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count()
+        : 0;
+
+    $visits = $baseQuery->orderBy('check_in_at', 'desc')
+        ->paginate(15)
+        ->appends($request->query());
+
+    $branches = \App\Models\branches::orderBy('name')->get();
+    $picUsers = users::whereIn(
+        'id',
+        visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
+    )->orderBy('name')->get();
+
+    return view('laporan.index', compact(
+        'visits', 'month', 'year', 'category', 'branchId', 'picId', 'branches', 'picUsers',
+        'totalKunjungan', 'totalDeal', 'totalVip'
+    ));
+}
+
+public function exportExcel(Request $request)
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
+
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName    = $picId !== '' ? optional(users::find($picId))->name : null;
+
+    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.xlsx';
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\KunjunganLaporanExport(
+            $month, $year, $category, $branchId, $picId,
+            $months[$month] ?? (string) $month, $branchName, $picName
+        ),
+        $fileName
+    );
+}
+
+public function exportPdf(Request $request)
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
+
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->whereMonth('check_in_at', $month)
+        ->whereYear('check_in_at', $year);
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($category === 'vip') {
+            $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($category === 'reguler') {
+            $baseQuery->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
+        }
+    }
+
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
+    $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
+
+    $totalKunjungan = $visits->count();
+    $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
+    $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
+    $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
+
+    $topSource = $visits->filter(fn($v) => $v->source)
+        ->groupBy(fn($v) => $v->source->name)
+        ->map->count()
+        ->sortDesc();
+    $topSourceName = $topSource->keys()->first();
+    $topSourceCount = $topSource->first();
+
+    $topPic = $visits->filter(fn($v) => $v->assignedUser)
+        ->groupBy(fn($v) => $v->assignedUser->name)
+        ->map->count()
+        ->sortDesc();
+    $topPicName = $topPic->keys()->first();
+    $topPicCount = $topPic->first();
+
+    $waitTimes = $visits->filter(fn($v) => $v->check_in_at && $v->meeting_start_at)
+        ->map(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->meeting_start_at)));
+    $avgWaitMinutes = $waitTimes->count() > 0 ? round($waitTimes->avg()) : null;
+
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName = $picId !== '' ? optional(users::find($picId))->name : null;
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('manager.laporan_pdf', [
+        'visits'          => $visits,
+        'monthLabel'      => $months[$month] ?? $month,
+        'year'            => $year,
+        'category'        => $category,
+        'branchName'      => $branchName,
+        'picName'         => $picName,
+        'totalKunjungan'  => $totalKunjungan,
+        'totalDeal'       => $totalDeal,
+        'totalVip'        => $totalVip,
+        'conversionRate'  => $conversionRate,
+        'topSourceName'   => $topSourceName,
+        'topSourceCount'  => $topSourceCount,
+        'topPicName'      => $topPicName,
+        'topPicCount'     => $topPicCount,
+        'avgWaitMinutes'  => $avgWaitMinutes,
+        'generatedBy'     => auth()->user()->name ?? '-',
+        'generatedAt'     => now(),
+    ])->setPaper('a4', 'landscape');
+
+    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.pdf';
+
+    return $pdf->download($fileName);
 }
 }
