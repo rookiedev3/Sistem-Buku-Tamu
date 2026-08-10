@@ -89,19 +89,17 @@
 </div>
 @endif
 
-{{-- Header Halaman --}}
-<div style="margin-bottom: 24px;">
-    <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #e6f4ed; color: #006B3F; padding: 6px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">
-        FRONT OFFICE SYSTEM
-    </span>
-    <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">
-        Kelola Janji Temu (Appointment)
-    </h1>
-    <p style="font-size: 13.5px; color: #778195; margin: 0; line-height: 1.5;">
-        Daftar jadwal kunjungan yang diajukan oleh tamu secara reservasi sebelum kedatangan di kantor.
-    </p>
-</div>
+{{-- Banner Halaman Kelola Janji Temu --}}
+<div id="welcomeBanner" class="card border-0 rounded-4 p-4 mb-4 shadow-sm position-relative" style="background-color: #013220; color: white;">
+    <button type="button" onclick="document.getElementById('welcomeBanner').style.display='none';" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close"></button>
 
+    <div class="d-flex justify-content-between align-items-center pe-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} 👋</h4>
+            <p class="mb-0 text-white-50 fs-6">Berikut adalah ringkasan aktivitas buku tamu dan kunjungan kantor hari ini.</p>
+        </div>
+    </div>
+</div>
 {{-- Kartu Statistik Rangkuman --}}
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
     <div style="background: #ffffff; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); display: flex; justify-content: space-between; align-items: center;">
