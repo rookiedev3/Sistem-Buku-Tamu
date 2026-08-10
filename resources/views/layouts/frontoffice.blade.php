@@ -340,6 +340,11 @@
                     </svg>
                     <span>Manajemen Pengguna</span>
                 </a>
+
+                 <div class="menu-category" style="font-size: 10px; font-weight: 700; color: #8fa394; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 2px; margin-top: 4px;">Pengaturan</div>
+            
+           
+
             </div>
         </div>
 
