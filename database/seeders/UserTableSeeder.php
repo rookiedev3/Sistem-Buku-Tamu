@@ -15,7 +15,7 @@ class UserTableSeeder extends Seeder
     {
         $users = [
         [
-            'name' => 'Owner',
+            'name' => 'Bapak owner',
             'email' => 'owner@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('owner123'),
@@ -24,7 +24,7 @@ class UserTableSeeder extends Seeder
             'last_login' => null,
         ],
         [
-            'name' => 'Manager',
+            'name' => 'Bapak manager',
             'email' => 'manager@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('manager123'),
@@ -33,7 +33,7 @@ class UserTableSeeder extends Seeder
             'last_login' => null,
         ],
         [
-            'name' => 'Admin',
+            'name' => 'Bapak admin',
             'email' => 'admin@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('admin123'),
@@ -42,7 +42,7 @@ class UserTableSeeder extends Seeder
             'last_login' => null,
         ],
         [
-            'name' => 'PIC',
+            'name' => 'Bapak PIC',
             'email' => 'pic@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('pic123'),
@@ -51,7 +51,7 @@ class UserTableSeeder extends Seeder
             'last_login' => null,
         ],
         [
-            'name' => 'Security',
+            'name' => 'Bapak Security',
             'email' => 'security@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('security123'),
@@ -60,7 +60,7 @@ class UserTableSeeder extends Seeder
             'last_login' => null,
         ],
         [
-            'name' => 'Tamu',
+            'name' => 'Bapak Tamu',
             'email' => 'tamu@gmail.com',
             'phone' =>  '',
             'password' => bcrypt('tamu123'),

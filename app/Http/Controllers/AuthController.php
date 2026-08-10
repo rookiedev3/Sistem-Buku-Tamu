@@ -122,7 +122,7 @@ public function sendResetLinkEmail(Request $request)
     );
 
     return $status === Password::RESET_LINK_SENT
-        ? back()->with('success', 'Link reset password telah dikirim ke email Anda.')
+        ? back()->with('status', 'Link reset password telah dikirim ke email Anda.')
         : back()->withErrors(['email' => __($status)]);
 }
 
@@ -163,4 +163,7 @@ public function resetPassword(Request $request)
         ? redirect()->route('login')->with('success', 'Password berhasil diubah, silakan login.')
         : back()->withErrors(['email' => __($status)]);
 }
+
+
+
 }

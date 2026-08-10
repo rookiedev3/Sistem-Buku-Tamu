@@ -21,6 +21,7 @@ Route::get('/', [DashboardController::class, 'halamanUtama'])->name('halamaanUta
  Route::get('/laporan.index', [OwnerController::class, 'laporan'])->name('laporan.index');
     Route::get('/laporan/export-excel', [OwnerController::class, 'exportExcel'])->name('laporan.exportExcel');
     Route::get('/laporan/export-pdf', [OwnerController::class, 'exportPdf'])->name('laporan.exportPdf');
+    // route('password.reset', ['token' => $token, 'email' => $user->email]);
 
 
 // Route untuk user belum login (guest)

@@ -267,7 +267,7 @@
                 </div> 
 
                 <div class="sidebar-brand-text" style="display: flex; flex-direction: column; overflow: hidden;">
-                    <span style="font-size: 14px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span style="font-size: 14px; font-weight: 800; color: #ffffff; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         {{ Auth::user()->name ?? 'Portal PIC' }}
                     </span>
                     <span style="font-size: 11px; font-weight: 600; color: #C7AB6B; text-transform: uppercase; letter-spacing: 0.5px;">
