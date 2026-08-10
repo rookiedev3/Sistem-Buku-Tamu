@@ -23,17 +23,21 @@
     </a>
 </div>
 
+{{-- KONTAINER UTAMA KOTAK TABEL --}}
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
 
+    {{-- Header Pencarian --}}
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Daftar Akun Aktif</h3>
 
-        <div style="width: 100%; sm:width: auto;">
+        <div style="width: 100%; max-width: 260px;">
             <input type="text" id="searchUser" placeholder="Cari nama / email pengguna..." onkeyup="filterUserTable()"
-                style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; width: 100%; sm:width: 240px; box-sizing: border-box;">
+                style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; width: 100%; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
         </div>
     </div>
 
+    {{-- Pembungkus Tabel (Scrollable Horizontal) --}}
     <div style="overflow-x: auto;">
         <table id="userTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 850px;">
             <thead>
@@ -48,8 +52,11 @@
             </thead>
             <tbody style="color: #172033;">
                 @forelse($users as $index => $u)
-                <tr style="border-bottom: 1px solid #e8edf5;">
-                    <td style="padding: 16px 20px; font-weight: 700; color: #64748b;">{{ $index + 1 }}</td>
+                <tr class="user-row" style="border-bottom: 1px solid #e8edf5;">
+                    {{-- Penomoran Dinamis Antar Halaman --}}
+                    <td class="row-number" style="padding: 16px 20px; font-weight: 700; color: #64748b;">
+                        {{ method_exists($users, 'firstItem') && $users->firstItem() ? $users->firstItem() + $index : $index + 1 }}
+                    </td>
                     <td style="padding: 16px 20px; font-weight: 700; color: #172033;">{{ $u->name }}</td>
                     <td style="padding: 16px 20px;">
                         <div style="font-weight: 700; color: #172033;">{{ $u->email }}</div>
@@ -57,26 +64,26 @@
                     </td>
                     <td style="padding: 16px 20px;">
                         @if($u->role)
-                            <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block;">
-                                {{ strtoupper($u->role) }}
-                            </span>
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block;">
+                            {{ strtoupper($u->role) }}
+                        </span>
                         @else
-                            <span style="color: #94a3b8; font-size: 11px;">Belum ditentukan</span>
+                        <span style="color: #94a3b8; font-size: 11px;">Belum ditentukan</span>
                         @endif
                     </td>
                     <td style="padding: 16px 20px;">
                         @if(is_null($u->role))
-                            <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                                Menunggu Persetujuan
-                            </span>
+                        <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Menunggu Persetujuan
+                        </span>
                         @elseif($u->is_active)
-                            <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                                Aktif
-                            </span>
+                        <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Aktif
+                        </span>
                         @else
-                            <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                                Nonaktif
-                            </span>
+                        <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                            Nonaktif
+                        </span>
                         @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
@@ -86,12 +93,12 @@
                                 <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
                             </a>
 
-                            {{-- Tombol Hapus (Memicu Modal Konfirmasi Custom) --}}
+                            {{-- Tombol Hapus --}}
                             <button type="button" onclick="confirmDelete('{{ $u->id }}', '{{ addslashes($u->name) }}')" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
                                 <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
                             </button>
 
-                            {{-- Form Tersembunyi untuk Eksekusi Hapus --}}
+                            {{-- Form Tersembunyi Hapus --}}
                             <form id="delete-form-{{ $u->id }}" action="{{ route('user.destroy', $u->id) }}" method="POST" style="display: none;">
                                 @csrf
                                 @method('DELETE')
@@ -108,16 +115,17 @@
         </table>
     </div>
 
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
-        <span>Menampilkan data pengguna terdaftar</span>
-        <span>Total: {{ count($users) }} Pengguna</span>
+    {{-- FOOTER KOTAK (PAGINATION LINK & PER_PAGE SELECTOR) --}}
+    <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe;">
+        @include('partials.pagination', ['paginator' => $users])
     </div>
 
 </div>
 
+{{-- MODAL KONFIRMASI HAPUS --}}
 <div id="deleteConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
-        
+
         <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
             ⚠️
         </div>
@@ -160,18 +168,28 @@
 
     function filterUserTable() {
         const input = document.getElementById('searchUser');
-        const filter = input.value.toLowerCase();
+        const filter = input.value.toLowerCase().trim();
         const table = document.getElementById('userTable');
         const tr = table.getElementsByTagName('tr');
+        let visibleIndex = 1;
 
         for (let i = 1; i < tr.length; i++) {
+            if (tr[i].getElementsByTagName('td').length <= 1) continue;
+
             let tdName = tr[i].getElementsByTagName('td')[1];
             let tdEmail = tr[i].getElementsByTagName('td')[2];
+            let tdNum = tr[i].querySelector('.row-number');
+
             if (tdName || tdEmail) {
                 let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
                 let txtEmail = tdEmail ? (tdEmail.textContent || tdEmail.innerText) : '';
+
                 if (txtName.toLowerCase().indexOf(filter) > -1 || txtEmail.toLowerCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
+                    if (tdNum) {
+                        tdNum.textContent = visibleIndex;
+                        visibleIndex++;
+                    }
                 } else {
                     tr[i].style.display = "none";
                 }

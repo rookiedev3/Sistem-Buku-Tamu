@@ -263,24 +263,49 @@ class FrontOfficeController extends Controller
 
     public function history(Request $request)
     {
-        $query = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->whereIn('status', ['Selesai', 'completed']);
-
-        if ($request->has('date') && ! empty($request->date)) {
-            $query->whereDate('scheduled_at', $request->date);
+        // 1. Ambil nilai per_page dinamis (Default 10)
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
         }
 
-        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->whereIn('status', ['Selesai', 'completed', 'checkout'])
-            ->when($request->date, function ($query, $date) {
-                return $query->whereDate('check_out_at', $date);
-            })
-            ->latest('check_out_at')
-            ->paginate(10)
-            ->appends(request()->query()); // 👈 Penting agar parameter 'date' tetap ada saat berpindah halaman
+        // 2. Query Data Kunjungan yang Sudah Selesai
+        $query = visits::with(['guest', 'purpose', 'assignedUser'])
+            ->whereIn('status', ['Selesai', 'completed', 'checkout']);
+
+        // Filter Berdasarkan Tanggal Check-out / Scheduled
+        if ($request->filled('date')) {
+            $query->whereDate('check_out_at', $request->date);
+        }
+
+        // Filter Pencarian Keyword (Nama Tamu / Instansi / PIC / Token)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('guest', function ($g) use ($keyword) {
+                    $g->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('company_name', 'like', "%{$keyword}%");
+                })->orWhereHas('assignedUser', function ($u) use ($keyword) {
+                    $u->where('name', 'like', "%{$keyword}%");
+                })->orWhere('visit_code', 'like', "%{$keyword}%");
+            });
+        }
+
+        // 3. Eksekusi Pagination dengan Mempertahankan Query String
+        $visits = $query->latest('check_out_at')
+            ->paginate($perPage)
+            ->withQueryString();
+
         $filterDate = $request->query('date', '');
 
-        return view('frontoffice.history', compact('visits', 'filterDate'));
+        // 4. Data Notifikasi untuk Header Navbar (opsional jika dibutuhkan)
+        $notifications = notifications::where('user_id', auth()->id())
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('frontoffice.history', compact('visits', 'filterDate', 'notifications'));
     }
 
     public function appointment(Request $request)
@@ -468,40 +493,38 @@ class FrontOfficeController extends Controller
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
-
     public function guest(Request $request)
     {
-        // 1. Ambil nilai per_page dinamis (Mendukung 'perpage' atau 'per_page', default 10)
+        // 1. Ambil nilai per_page dinamis (Default 10)
         $allowedPerPage = [10, 25, 50, 100];
-        $perPage = (int) $request->input('perpage', $request->input('per_page', 10));
+        $perPage = (int) $request->input('per_page', 10);
         if (!in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
 
-        // 2. Query dasar dengan menghitung total kunjungan tamu
+        // 2. Query Data Tamu beserta Jumlah Kunjungannya
         $query = guests::withCount('visits');
 
-        // 3. Filter berdasarkan Status VIP (Hanya VIP / Reguler / Semua)
-        // Menggunakan checks !== null agar nilai '0' (Reguler) tidak terlewat
+        // Filter Kategori VIP (0 = Reguler, 1 = VIP)
         if ($request->has('vip') && $request->vip !== null && $request->vip !== '') {
             $query->where('is_vip', $request->vip);
         }
 
-        // 4. Filter Pencarian Keyword (Nama / Instansi / Jabatan / No. HP)
+        // Filter Pencarian Keyword (Nama / Instansi / No HP / Jabatan)
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
                     ->orWhere('company_name', 'like', "%{$keyword}%")
-                    ->orWhere('position', 'like', "%{$keyword}%")
-                    ->orWhere('phone', 'like', "%{$keyword}%");
+                    ->orWhere('phone', 'like', "%{$keyword}%")
+                    ->orWhere('position', 'like', "%{$keyword}%");
             });
         }
 
-        // 5. Eksekusi Pagination dengan Mempertahankan Query String
+        // 3. Eksekusi Pagination dengan Mempertahankan Query String
         $guests = $query->latest()
             ->paginate($perPage)
-            ->withQueryString(); // 👈 KUNCI: Menjaga parameter ?vip=1&keyword=...&perpage=10 tetap terbawa di Page 2, 3, dst.
+            ->withQueryString();
 
         return view('frontoffice.listGuests', compact('guests'));
     }

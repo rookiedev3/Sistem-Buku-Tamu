@@ -10,9 +10,37 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     // 1. Tampil Daftar User
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('branch')->latest()->get();
+        // 1. Ambil nilai per_page dinamis (Default 10)
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        // 2. Query Data User beserta Relasi Branch
+        $query = User::with('branch');
+
+        // Filter Pencarian Keyword Server-Side (Nama / Email / Telepon / Role / Cabang)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('email', 'like', "%{$keyword}%")
+                    ->orWhere('phone', 'like', "%{$keyword}%")
+                    ->orWhere('role', 'like', "%{$keyword}%")
+                    ->orWhereHas('branch', function ($b) use ($keyword) {
+                        $b->where('name', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        // 3. Eksekusi Pagination dengan Mempertahankan Query String
+        $users = $query->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
         return view('user.index', compact('users'));
     }
 
@@ -114,11 +142,11 @@ class UserController extends Controller
         $clean = preg_replace('/[^0-9]/', '', $phone);
 
         if (str_starts_with($clean, '0')) {
-            $clean = '62'.substr($clean, 1);
+            $clean = '62' . substr($clean, 1);
         }
 
         if (! str_starts_with($clean, '+')) {
-            $clean = '+'.$clean;
+            $clean = '+' . $clean;
         }
 
         return $clean;

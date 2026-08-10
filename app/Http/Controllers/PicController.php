@@ -85,8 +85,13 @@ class PicController extends Controller
             ->count();
 
         $payload = compact(
-            'visits', 'vipCount', 'regularCount', 'filter', 'vipFilter',
-            'countToday', 'countUpcoming'
+            'visits',
+            'vipCount',
+            'regularCount',
+            'filter',
+            'vipFilter',
+            'countToday',
+            'countUpcoming'
         );
 
         if ($request->ajax()) {
@@ -302,19 +307,28 @@ class PicController extends Controller
 
             // 🔔 KIRIM NOTIFIKASI LEAD BARU KE MANAGER / OWNER
             $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
-            
+
             $guestName = $visit->guest->name ?? 'Tamu';
             $companyName = $visit->guest->company_name ?? 'Instansi';
             $formattedValue = 'Rp ' . number_format($estValue, 0, ',', '.');
             $picName = auth()->user()->name ?? 'PIC';
             $potensiText = strtoupper($request->potential_level);
 
+            $title = "🚀 Lead Baru Masuk: {$guestName}";
+
+            $message = implode("\n", [
+                "Terdapat Lead baru dari {$guestName} ({$companyName})",
+                "• Potensi: {$potensiText}",
+                "• Est. Nilai: {$formattedValue}",
+                "• PIC: {$picName}",
+            ]);
+
             foreach ($managers as $manager) {
                 notifications::send(
                     $manager->id,
                     'new_lead',
-                    'Lead Baru Masuk: ' . $guestName,
-                    "Terdapat Lead baru dari {$guestName} ({$companyName}) dengan Potensi: {$potensiText}, Est. Nilai: {$formattedValue}. PIC: {$picName}."
+                    $title,
+                    $message
                 );
             }
         }
@@ -429,8 +443,15 @@ class PicController extends Controller
         $countDeal     = $baseCount()->where('status', 'deal')->count();
 
         return view('pic.leads', compact(
-            'leads', 'filter', 'vipFilter',
-            'countAll', 'countActive', 'countOverdue', 'countToday', 'countUpcoming', 'countDeal'
+            'leads',
+            'filter',
+            'vipFilter',
+            'countAll',
+            'countActive',
+            'countOverdue',
+            'countToday',
+            'countUpcoming',
+            'countDeal'
         ));
     }
 

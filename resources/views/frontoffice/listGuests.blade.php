@@ -29,7 +29,7 @@ use App\Helpers\DateHelper;
                 <option value="1" {{ request('vip') === '1' ? 'selected' : '' }}>Hanya VIP</option>
                 <option value="0" {{ request('vip') === '0' ? 'selected' : '' }}>Reguler</option>
             </select>
-            @if(request()->has('vip') && request('vip') !== null)
+            @if(request()->has('vip') && request('vip') !== null && request('vip') !== '')
             <a href="{{ route('frontoffice.guest') }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 2px; white-space: nowrap;">Reset</a>
             @endif
         </form>
@@ -42,7 +42,8 @@ use App\Helpers\DateHelper;
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Direktori Data Tamu</h3>
 
         <div>
-            <input type="text" id="searchGuests" placeholder="Cari nama / instansi / no hp..." onkeyup="filterGuestTable()"
+            {{-- Updated Placeholder --}}
+            <input type="text" id="searchGuests" placeholder="Cari nama / instansi..." onkeyup="filterGuestTable()"
                 style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; width: 260px;">
         </div>
     </div>
@@ -62,9 +63,9 @@ use App\Helpers\DateHelper;
             </thead>
             <tbody style="color: #172033;">
                 @forelse($guests as $index => $guest)
-                <tr style="border-bottom: 1px solid #e8edf5;">
-                    {{-- Penomoran Dinamis & Aman --}}
-                    <td style="padding: 16px 20px; font-weight: 600; color: #64748b;">
+                <tr class="guest-row" style="border-bottom: 1px solid #e8edf5;">
+                    {{-- Penomoran Dinamis --}}
+                    <td class="row-number" style="padding: 16px 20px; font-weight: 600; color: #64748b;">
                         {{ method_exists($guests, 'firstItem') && $guests->firstItem() ? $guests->firstItem() + $index : $index + 1 }}
                     </td>
 
@@ -131,21 +132,15 @@ use App\Helpers\DateHelper;
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Footer Pagination --}}
+        <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px; margin-top: 0px;">
+            <div style="margin-top: 0px; width: 100%;">
+                @include('partials.pagination', ['paginator' => $guests])
+            </div>
+        </div>
     </div>
-
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
-        <span>Menampilkan seluruh master data tamu</span>
-        <span>Total: <strong>{{ method_exists($guests, 'total') ? $guests->total() : count($guests) }}</strong> Tamu</span>
-    </div>
-
 </div>
-
-{{-- 🟢 PAGINATION LINK --}}
-@if(method_exists($guests, 'hasPages') && $guests->hasPages())
-<div style="margin-top: 20px;">
-    @include('partials.pagination', ['paginator' => $guests])
-</div>
-@endif
 
 {{-- MODAL DETAIL TAMU --}}
 <div id="guestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
@@ -252,20 +247,31 @@ use App\Helpers\DateHelper;
 <script>
     function filterGuestTable() {
         const input = document.getElementById('searchGuests');
-        const filter = input.value.toLowerCase();
-        const table = document.getElementById('guestTable');
-        const tr = table.getElementsByTagName('tr');
+        const filter = input.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.guest-row');
+        let visibleIndex = 1;
 
-        for (let i = 1; i < tr.length; i++) {
-            let tdText = tr[i].textContent || tr[i].innerText;
-            if (tdText) {
-                if (tdText.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            
+            // Mengambil hanya teks Profil Tamu (Nama) & Instansi/Jabatan
+            // cells[1] = Profil Tamu, cells[2] = Instansi & Jabatan
+            const guestProfile = cells[1] ? (cells[1].textContent || cells[1].innerText) : '';
+            const companyPosition = cells[2] ? (cells[2].textContent || cells[2].innerText) : '';
+            
+            const targetText = (guestProfile + ' ' + companyPosition).toLowerCase();
+            const tdNum = row.querySelector('.row-number');
+
+            if (targetText.indexOf(filter) > -1) {
+                row.style.display = "";
+                if (tdNum) {
+                    tdNum.textContent = visibleIndex;
+                    visibleIndex++;
                 }
+            } else {
+                row.style.display = "none";
             }
-        }
+        });
     }
 
     function updateVipStatus(guestId, selectElem) {

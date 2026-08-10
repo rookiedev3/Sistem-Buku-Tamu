@@ -539,14 +539,20 @@ class OwnerController extends Controller
      */
     public function databaseOwner(Request $request)
     {
-        // Mengatur bahasa Carbon ke Indonesia untuk format tanggal
         Carbon::setLocale('id');
 
-        // Pencarian opsional berdasarkan nama, telepon, atau perusahaan
+        // 1. Ambil & validasi jumlah data per halaman (Default: 10)
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
         $search = $request->input('search');
 
-        $guests = guests::with(['category']) // Mengambil relasi kategori/minat produk
-            ->withCount('visits')          // Menghitung total kunjungan jika ada tabel relasi visits
+        // 2. Query Data Tamu
+        $guests = guests::with(['category'])
+            ->withCount('visits')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -555,12 +561,11 @@ class OwnerController extends Controller
                 });
             })
             ->latest('updated_at')
-            ->paginate(10)
-            ->withQueryString(); // Mempertahankan query search saat pagination
+            ->paginate($perPage)
+            ->withQueryString(); // Mempertahankan query search/per_page di URL
 
         return view('tamu.index', compact('guests'));
     }
-
     /**
      * Halaman Detail & Riwayat Kunjungan Tamu
      */
