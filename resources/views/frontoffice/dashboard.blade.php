@@ -23,9 +23,17 @@
     }
 </style>
 
+{{-- Alert Sukses --}}
 @if(session('success'))
 <div style="background: #dcfce7; border: 1px solid #10b981; color: #15803d; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
     {{ session('success') }}
+</div>
+@endif
+
+{{-- Alert Error / Validasi --}}
+@if(session('error'))
+<div style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+    {{ session('error') }}
 </div>
 @endif
 
@@ -73,6 +81,7 @@
         <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
+                    <th style="padding: 14px 20px; font-weight: 700;">No</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Token / Waktu</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
@@ -82,8 +91,13 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                @forelse($visits as $visit)
+                @forelse($visits as $index => $visit)
                 <tr style="border-bottom: 1px solid #e8edf5;">
+                    {{-- PENOMORAN DINAMIS & AMAN DARI PAGINATION --}}
+                    <td style="padding: 16px 20px; font-weight: 600;">
+                        {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() + $index : $index + 1 }}
+                    </td>
+
                     <td style="padding: 16px 20px;">
                         <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
                         <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
@@ -101,23 +115,23 @@
 
                     {{-- TABEL STATUS --}}
                     <td style="padding: 16px 20px;">
-                        @if(in_array($visit->status, ['Terjadwal', 'scheduled']))
+                        @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
                         <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Terjadwal
                         </span>
-                        @elseif(in_array($visit->status, ['Menunggu', 'waiting']))
+                        @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
                         <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Menunggu
                         </span>
-                        @elseif(in_array($visit->status, ['Sedang Bertemu', 'confirmed']))
+                        @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed']))
                         <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Sedang Bertemu
                         </span>
-                        @elseif(in_array($visit->status, ['Selesai', 'completed']))
+                        @elseif(in_array(strtolower($visit->status), ['selesai', 'completed']))
                         <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Selesai
                         </span>
-                        @elseif(in_array($visit->status, ['Dibatalkan', 'cancelled']))
+                        @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
                         <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Dibatalkan
                         </span>
@@ -131,7 +145,6 @@
                     {{-- TABEL AKSI --}}
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            {{-- 1. Status TERJADWAL / SCHEDULED --}}
                             @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
@@ -147,11 +160,9 @@
                                 </button>
                             </form>
 
-                            {{-- 2. Status MENUNGGU / WAITING --}}
                             @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
                             <span style="font-size: 11px; color: #d97706; font-weight: 600;">Menunggu</span>
 
-                            {{-- 3. Status SIAP CHECK-OUT (Sedang Bertemu / Meeting Selesai) --}}
                             @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed', 'meeting selesai', 'meeting_selesai', 'dikonfirmasi']))
                             <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
@@ -160,11 +171,9 @@
                                 </button>
                             </form>
 
-                            {{-- 4. Status DIBATALKAN --}}
                             @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
                             <span style="font-size: 11px; color: #dc2626; font-weight: 600;">Dibatalkan</span>
 
-                            {{-- 5. Status DEFAULT / SELESAI --}}
                             @else
                             <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
                             @endif
@@ -173,13 +182,14 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
+                    <td colspan="7" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
+    {{-- FOOTER RINGKASAN DATA --}}
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan data kunjungan hari ini</span>
         <span>Total: {{ $totalToday }}</span>
@@ -187,10 +197,16 @@
 
 </div>
 
+{{-- 🟢 PAGINATIONS LINK (SAMA PERSIS DENGAN PIC DASHBOARD) --}}
+@if(method_exists($visits, 'hasPages') && $visits->hasPages())
+    <div style="margin-top: 20px;">
+        @include('partials.pagination', ['paginator' => $visits])
+    </div>
+@endif
+
 <!-- MODAL INPUT TAMU MANUAL 3-STEP -->
 <div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999;">
 
-    <!-- Outer Card dengan Overflow Hidden agar Scrollbar Rapi -->
     <div style="background: #ffffff; width: 100%; max-width: 520px; max-height: 90vh; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;">
 
         <!-- Header & Progress Stepper -->
@@ -200,7 +216,6 @@
                 <span id="stepIndicatorText" style="font-size: 11px; font-weight: 700; color: #006B3F; background: #e6f4ed; padding: 4px 10px; border-radius: 20px;">Langkah 1 dari 3</span>
             </div>
 
-            <!-- Visual Stepper Progress Bar -->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div id="bar-step-1" style="flex: 1; height: 6px; background: #006B3F; border-radius: 10px; transition: all 0.3s ease;"></div>
                 <div id="bar-step-2" style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 10px; transition: all 0.3s ease;"></div>
@@ -213,9 +228,8 @@
             <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
                 @csrf
 
-                <!-- ================= STEP 1: IDENTITAS TAMU ================= -->
+                <!-- STEP 1: IDENTITAS TAMU -->
                 <div id="step-1-content">
-                    <!-- Nama Lengkap -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nama Lengkap <span style="color: #dc2626;">*</span>
@@ -225,7 +239,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Asal Instansi / Perusahaan -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Asal Instansi / Perusahaan <span style="color: #dc2626;">*</span>
@@ -235,7 +248,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Alamat Instansi -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Alamat Instansi / Perusahaan
@@ -245,7 +257,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Jabatan -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Jabatan di Perusahaan <span style="color: #dc2626;">*</span>
@@ -255,7 +266,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Nomor WhatsApp -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nomor WhatsApp (Aktif) <span style="color: #dc2626;">*</span>
@@ -265,7 +275,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Email -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Email <span style="color: #dc2626;">*</span>
@@ -275,7 +284,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Kategori Pengunjung -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Kategori Pengunjung <span style="color: #dc2626;">*</span>
@@ -292,7 +300,6 @@
                         </select>
                     </div>
 
-                    <!-- Foto Tamu -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Foto Tamu <span style="font-weight: 500; color: #778195;">(Opsional)</span>
@@ -306,7 +313,7 @@
                     </div>
                 </div>
 
-                <!-- ================= STEP 2: DETAIL TUJUAN ================= -->
+                <!-- STEP 2: DETAIL TUJUAN -->
                 <div id="step-2-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         2. Tujuan & Keperluan Kunjungan
@@ -344,10 +351,10 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Produk / Layanan yang Diminati</label>
-                        <select name="product_interest" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select name="product_id" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
                             <option value="">-- Pilih Produk / Layanan --</option>
                             @foreach($products as $product)
-                            <option value="{{ $product->code }}">{{ $product->name }}</option>
+                            <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -373,16 +380,14 @@
                     </div>
                 </div>
 
-                <!-- ================= STEP 3: JADWAL & KONFIRMASI ================= -->
+                <!-- STEP 3: JADWAL & KONFIRMASI -->
                 <div id="step-3-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         3. Konfirmasi Data Check-In
                     </h4>
 
-                    <!-- Box Ringkasan -->
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; margin-bottom: 12px; max-height: 280px; overflow-y: auto;">
 
-                        <!-- Penampung Pratinjau Foto Tamu di Step 3 -->
                         <div id="sum_photo_container" style="display: none; justify-content: center; margin-bottom: 16px;">
                             <div style="text-align: center;">
                                 <img id="sum_photo_preview" src="" alt="Pratinjau Foto Tamu" style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 2px solid #006B3F; box-shadow: 0 4px 12px rgba(0,107,63,0.15);">
@@ -534,13 +539,12 @@
             if (file.size > maxSizeBytes) {
                 errorElement.textContent = 'Ukuran file terlalu besar! Maksimal 2 MB.';
                 errorElement.style.display = 'block';
-                input.value = ''; // Reset input file
+                input.value = '';
                 if (previewImg) previewImg.src = '';
                 if (previewContainer) previewContainer.style.display = 'none';
             } else {
                 errorElement.style.display = 'none';
 
-                // Gunakan FileReader untuk membaca dan memuat foto ke penampung di Step 3
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     if (previewImg) previewImg.src = e.target.result;
@@ -589,7 +593,7 @@
         const tr = table.getElementsByTagName('tr');
 
         for (let i = 1; i < tr.length; i++) {
-            let tdName = tr[i].getElementsByTagName('td')[1];
+            let tdName = tr[i].getElementsByTagName('td')[2]; // Kolom nama tamu
             if (tdName) {
                 let txtValue = tdName.textContent || tdName.innerText;
                 if (txtValue.toLowerCase().indexOf(filter) > -1) {
@@ -602,7 +606,6 @@
     }
 
     function changeStep(direction) {
-        // Validasi input wajib sebelum pindah ke step selanjutnya
         if (direction === 1 && !validateCurrentStep(currentStep)) {
             return;
         }
@@ -622,7 +625,7 @@
         for (let input of inputs) {
             if (!input.value.trim()) {
                 input.focus();
-                input.style.borderColor = '#ef4444'; // Tandai border merah
+                input.style.borderColor = '#ef4444';
                 return false;
             } else {
                 input.style.borderColor = '#e8edf5';
@@ -632,60 +635,54 @@
     }
 
     function updateStepUI() {
-        // Reset scroll position to top
         const container = document.getElementById('modalFormContainer');
         if (container) {
             container.scrollTop = 0;
         }
 
-        // Sembunyikan semua konten step
         document.getElementById('step-1-content').style.display = 'none';
         document.getElementById('step-2-content').style.display = 'none';
         document.getElementById('step-3-content').style.display = 'none';
 
-        // Tampilkan step aktif
         document.getElementById(`step-${currentStep}-content`).style.display = 'block';
 
-        // Perbarui teks indikator & bar progress
         document.getElementById('stepIndicatorText').innerText = `Langkah ${currentStep} dari 3`;
 
         document.getElementById('bar-step-1').style.background = currentStep >= 1 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-2').style.background = currentStep >= 2 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-3').style.background = currentStep >= 3 ? '#006B3F' : '#e2e8f0';
 
-        // Perbarui visibilitas tombol navigasi
         document.getElementById('btnBatalModal').style.display = currentStep === 1 ? 'block' : 'none';
         document.getElementById('btnPrevStep').style.display = currentStep > 1 ? 'block' : 'none';
         document.getElementById('btnNextStep').style.display = currentStep < 3 ? 'block' : 'none';
         document.getElementById('btnSubmitForm').style.display = currentStep === 3 ? 'block' : 'none';
 
-        // Perbarui teks ringkasan jika menuju ke Step 3
         if (currentStep === 3) {
             updateSummary();
         }
     }
 
     function updateSummary() {
-        document.getElementById('sum_name').innerText = document.getElementById('input_name').value || '-';
-        document.getElementById('sum_company').innerText = document.getElementById('input_company').value || '-';
+        document.getElementById('sum_name').innerText = document.getElementById('input_name').value.trim() || '-';
+        document.getElementById('sum_company').innerText = document.getElementById('input_company').value.trim() || '-';
 
         const picSelect = document.getElementById('select_pic');
-        document.getElementById('sum_pic').innerText = picSelect.options[picSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_pic').innerText = picSelect.value ? picSelect.options[picSelect.selectedIndex].text : '-';
 
         const branchSelect = document.getElementById('select_branch');
-        document.getElementById('sum_branch').innerText = branchSelect.options[branchSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_branch').innerText = branchSelect.value ? branchSelect.options[branchSelect.selectedIndex].text : '-';
 
         const purposeSelect = document.getElementById('select_purpose');
-        document.getElementById('sum_purpose').innerText = purposeSelect.options[purposeSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_purpose').innerText = purposeSelect.value ? purposeSelect.options[purposeSelect.selectedIndex].text : '-';
 
         const productSelect = document.getElementById('select_product');
-        document.getElementById('sum_product').innerText = productSelect.options[productSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_product').innerText = productSelect.value ? productSelect.options[productSelect.selectedIndex].text : '-';
 
         const sourceSelect = document.getElementById('select_source');
-        document.getElementById('sum_source').innerText = sourceSelect.options[sourceSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_source').innerText = sourceSelect.value ? sourceSelect.options[sourceSelect.selectedIndex].text : '-';
 
         document.getElementById('sum_schedule').innerText = document.getElementById('input_scheduled_at').value || '-';
-        document.getElementById('sum_notes').innerText = document.getElementById('input_notes').value || '-';
+        document.getElementById('sum_notes').innerText = document.getElementById('input_notes').value.trim() || '-';
     }
 
     function submitMultiStepForm() {

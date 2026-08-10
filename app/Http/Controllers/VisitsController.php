@@ -399,4 +399,6 @@ class VisitsController extends Controller
 
         return back()->with('success', 'Hasil pertemuan berhasil disimpan!');
     }
+
+    
 }

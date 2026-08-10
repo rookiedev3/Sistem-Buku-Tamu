@@ -28,6 +28,11 @@
     {{ session('success') }}
 </div>
 @endif
+@if(session('error'))
+<div style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+    {{ session('error') }}
+</div>
+@endif
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
     <div>
@@ -62,6 +67,7 @@
         <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
+                    <th style="padding: 14px 20px; font-weight: 700;">No</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Token / Waktu</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
@@ -71,8 +77,13 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                @forelse($visits as $visit)
+                @forelse($visits as $index => $visit)
                 <tr style="border-bottom: 1px solid #e8edf5;">
+                    {{-- PENOMORAN AMAN (SUPPORT PAGINATION / COLLECTION) --}}
+                    <td style="padding: 16px 20px; font-weight: 600;">
+                        {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() + $index : $index + 1 }}
+                    </td>
+
                     <td style="padding: 16px 20px;">
                         <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
                         <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
@@ -158,7 +169,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
+                    <td colspan="7" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -167,10 +178,17 @@
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan data kunjungan hari ini</span>
-        <span>Total: {{ $totalToday ?? count($visits) }}</span>
+        <span>Total: {{ $totalToday ?? (method_exists($visits, 'total') ? $visits->total() : count($visits)) }}</span>
     </div>
 
 </div>
+
+{{-- 🟢 PAGINATION (MUNCUL JIKA DATA LEBIH DARI 1 HALAMAN) --}}
+@if(method_exists($visits, 'hasPages') && $visits->hasPages())
+    <div style="margin-top: 20px;">
+        @include('partials.pagination', ['paginator' => $visits])
+    </div>
+@endif
 
 <!-- MODAL INPUT TAMU MANUAL 3-STEP -->
 <div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999;">
@@ -270,11 +288,11 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                             <option value="">-- Pilih Kategori --</option>
                             @if(isset($guestCategories))
-                                @foreach($guestCategories as $categories)
-                                <option value="{{ $categories->id }}">
-                                    {{ $categories->name }}
-                                </option>
-                                @endforeach
+                            @foreach($guestCategories as $categories)
+                            <option value="{{ $categories->id }}">
+                                {{ $categories->name }}
+                            </option>
+                            @endforeach
                             @endif
                         </select>
                     </div>
@@ -331,12 +349,12 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Produk / Layanan yang Diminati</label>
-                        <select name="product_interest" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select name="product_id" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
                             <option value="">-- Pilih Produk / Layanan --</option>
                             @if(isset($products))
-                                @foreach($products as $product)
-                                <option value="{{ $product->code }}">{{ $product->name }}</option>
-                                @endforeach
+                            @foreach($products as $product)
+                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                            @endforeach
                             @endif
                         </select>
                     </div>
@@ -351,9 +369,9 @@
                         <select name="source_id" id="select_source" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
                             <option value="">-- Pilih Sumber Informasi --</option>
                             @if(isset($leadSources))
-                                @foreach($leadSources as $lead)
-                                <option value="{{ $lead->id }}">{{ $lead->name }}</option>
-                                @endforeach
+                            @foreach($leadSources as $lead)
+                            <option value="{{ $lead->id }}">{{ $lead->name }}</option>
+                            @endforeach
                             @endif
                         </select>
                     </div>
@@ -584,8 +602,8 @@
         const tr = table.getElementsByTagName('tr');
 
         for (let i = 1; i < tr.length; i++) {
-            let tdName = tr[i].getElementsByTagName('td')[1]; // Kolom Tamu & Jabatan
-            let tdPic = tr[i].getElementsByTagName('td')[3];  // Kolom Tujuan PIC
+            let tdName = tr[i].getElementsByTagName('td')[2]; // Index 2: Kolom Tamu & Jabatan
+            let tdPic = tr[i].getElementsByTagName('td')[4];  // Index 4: Kolom Tujuan PIC
             if (tdName || tdPic) {
                 let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
                 let txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
@@ -599,7 +617,6 @@
     }
 
     function changeStep(direction) {
-        // Validasi input wajib sebelum pindah ke step berikutnya
         if (direction === 1 && !validateCurrentStep(currentStep)) {
             return;
         }
@@ -629,34 +646,28 @@
     }
 
     function updateStepUI() {
-        // Reset scroll position to top
         const container = document.getElementById('modalFormContainer');
         if (container) {
             container.scrollTop = 0;
         }
 
-        // Sembunyikan semua konten step
         document.getElementById('step-1-content').style.display = 'none';
         document.getElementById('step-2-content').style.display = 'none';
         document.getElementById('step-3-content').style.display = 'none';
 
-        // Tampilkan step aktif
         document.getElementById(`step-${currentStep}-content`).style.display = 'block';
 
-        // Teks indikator & bar progress
         document.getElementById('stepIndicatorText').innerText = `Langkah ${currentStep} dari 3`;
 
         document.getElementById('bar-step-1').style.background = currentStep >= 1 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-2').style.background = currentStep >= 2 ? '#006B3F' : '#e2e8f0';
         document.getElementById('bar-step-3').style.background = currentStep >= 3 ? '#006B3F' : '#e2e8f0';
 
-        // Tombol navigasi
         document.getElementById('btnBatalModal').style.display = currentStep === 1 ? 'block' : 'none';
         document.getElementById('btnPrevStep').style.display = currentStep > 1 ? 'block' : 'none';
         document.getElementById('btnNextStep').style.display = currentStep < 3 ? 'block' : 'none';
         document.getElementById('btnSubmitForm').style.display = currentStep === 3 ? 'block' : 'none';
 
-        // Update ringkasan saat pindah ke Step 3
         if (currentStep === 3) {
             updateSummary();
         }

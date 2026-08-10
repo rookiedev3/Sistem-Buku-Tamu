@@ -14,6 +14,7 @@ use App\Models\visit_purposes;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,26 +22,30 @@ class FrontOfficeController extends Controller
 {
     public function dashboard()
     {
-        // Ambil data kunjungan hari ini
         $today = Carbon::today();
 
-        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
+        // 1. Buat Query Dasar untuk Visits
+        $visitQuery = visits::with(['guest', 'purpose', 'assignedUser']);
 
-        // Hitung statistik
-        $totalToday = $visits->count();
-        $waitingToday = $visits->whereIn('status', ['Menunggu', 'waiting'])->count();
+        // Opsional: Jika ingin membatasi antrian HANYA untuk hari ini saja, buka komentar baris di bawah:
+        // $visitQuery->whereDate('scheduled_at', $today);
 
-        // Ambil data pendukung untuk modal input manual
-        $pics = User::where('role', 'pic')->select('id', 'name')->get();
-        $branches = branches::select('id', 'name')->get();
-        $purposes = visit_purposes::select('id', 'name')->get();
+        // 2. Hitung Total Statistik SEBELUM di-paginate (agar jumlah statistik tidak berubah saat pindah halaman)
+        $totalToday   = (clone $visitQuery)->count();
+        $waitingToday = (clone $visitQuery)->whereIn('status', ['Menunggu', 'waiting', 'Terjadwal', 'scheduled'])->count();
+
+        // 3. Eksekusi Pagination (10 data per halaman)
+        $visits = $visitQuery->orderBy('scheduled_at', 'asc')->paginate(10);
+
+        // 4. Data Pendukung Modal
+        $pics            = User::where('role', 'pic')->select('id', 'name')->get();
+        $branches        = branches::select('id', 'name')->get();
+        $purposes        = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products = products::select('code', 'name')->get();
-        $leadSources = lead_sources::select('id', 'name')->get();
+        $products        = products::select('id', 'name')->get(); // ⚠️ Diubah ke 'id' agar sesuai dengan value select di Blade
+        $leadSources     = lead_sources::select('id', 'name')->get();
 
-        // 3. Dengan Pagination (jika datanya banyak/halaman khusus notifikasi)
+        // 5. Data Notifikasi
         $notifications = notifications::where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
@@ -86,7 +91,7 @@ class FrontOfficeController extends Controller
                 $pic->id,
                 'guest_arrived',
                 'Tamu Anda Sudah Datang 🔔',
-                'Tamu '.($guest->name ?? 'Tamu').' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
             );
         }
 
@@ -115,137 +120,136 @@ class FrontOfficeController extends Controller
 
     public function storeManual(Request $request)
     {
-        $request->validate([
-            // Step 1
-            'name' => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'email' => 'required|email|max:150',
-            'guest_category_id' => 'required|string|max:20',
-            'position' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'photo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            // Step 2
-            'assigned_to' => 'required|exists:users,id',
-            'branch_id' => 'required|exists:branches,id',
-            'purpose_id' => 'required|exists:visit_purposes,id',
-            'scheduled_at' => 'required',
-            'product_interest' => 'nullable|string|max:255',
-            'source_id' => 'nullable|exists:lead_sources,id',
-            'notes' => 'required|string|max:1000',
+        // 1. Validasi Input
+        $validator = Validator::make($request->all(), [
+            'name'              => 'required|string|max:255',
+            'company_name'      => 'required|string|max:255',
+            'position'          => 'required|string|max:255',
+            'phone'             => 'required|string',
+            'email'             => 'required|email|max:150',
+            'guest_category_id' => 'required|exists:guest_categories,id',
+            'assigned_to'       => 'required|exists:users,id',
+            'branch_id'         => 'required|exists:branches,id',
+            'purpose_id'        => 'required|exists:visit_purposes,id',
+            'product_id'        => 'nullable',
+            'scheduled_at'      => 'required|date',
+            'notes'             => 'required|string',
+            'photo_path'        => 'nullable|image|max:2048',
         ]);
 
-        // Sanitasi nomor telepon/WA
+        if ($validator->fails()) {
+            return redirect()->back()->with('error', 'Cek Isian Anda: ' . implode(', ', $validator->errors()->all()));
+        }
+
+        $validated = $validator->validated();
+
+        // Sanitasi Format Nomor Telepon (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+            $phone = '+' . $phone;
         }
 
-        // Handle profile photo upload
-        $photoPath = null;
-        if ($request->hasFile('photo_path')) {
-            $photoPath = $request->file('photo_path')->store('photos', 'public');
-        }
+        DB::beginTransaction();
+        try {
+            // 2. Handle Upload Foto Tamu
+            $photoPath = null;
+            if ($request->hasFile('photo_path')) {
+                $photoPath = $request->file('photo_path')->store('photos', 'public');
+            }
 
-        DB::transaction(function () use ($request, $phone, $photoPath) {
-            // 1. Cari / Buat Guest
+            // 3. Simpan / Update Data Tamu (Guest)
             $guest = guests::where('phone', $phone)->first();
 
-            $guestData = [
-                'name' => $request->name,
-                'company_name' => $request->company_name,
-                'address' => $request->address,
-                'email' => $request->email,
-                'guest_category_id' => $request->guest_category_id,
-                'position' => $request->position,
-                'phone' => $phone,
-            ];
-
-            if ($photoPath) {
-                $guestData['photo_path'] = $photoPath;
-            }
-
             if ($guest) {
-                $guest->update($guestData);
+                $updateData = [
+                    'name'              => $validated['name'],
+                    'company_name'      => $validated['company_name'],
+                    'position'          => $validated['position'],
+                    'email'             => $validated['email'],
+                    'guest_category_id' => $validated['guest_category_id'],
+                ];
+                if ($photoPath) {
+                    $updateData['photo_path'] = $photoPath;
+                }
+                $guest->update($updateData);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-'.$todayDate.'-';
+                $prefixGuest = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
-                $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
+                $sequenceGuest = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
-                $guestData['guest_code'] = $prefix.$sequence;
-                if (! isset($guestData['photo_path'])) {
-                    $guestData['photo_path'] = null;
-                }
-                $guest = guests::create($guestData);
+                $guest = guests::create([
+                    'guest_code'        => $prefixGuest . $sequenceGuest,
+                    'name'              => $validated['name'],
+                    'company_name'      => $validated['company_name'],
+                    'position'          => $validated['position'],
+                    'phone'             => $phone,
+                    'email'             => $validated['email'],
+                    'guest_category_id' => $validated['guest_category_id'],
+                    'photo_path'        => $photoPath,
+                ]);
             }
 
-            // 2. Format Tanggal & Jam Check-In
-            $rawCheckInDate = $request->scheduled_at ?? now();
-            $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
-            $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
+            // 4. Generate Tanggal, Queue Number, dan Visit Code
+            $checkInDateTime = Carbon::parse($validated['scheduled_at'])->format('Y-m-d H:i:s');
+            $checkInDateOnly = Carbon::parse($validated['scheduled_at'])->format('Y-m-d');
 
-            // 3. Hitung antrean berdasarkan tanggal kunjungan
             $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
-            // 4. Generate Visit Code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-'.$todayDate.'-';
+            $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit.$sequenceVisit;
+            $visitCode = $prefixVisit . $sequenceVisit;
 
-            // 5. Simpan ke tabel visits (status: Terjadwal)
-            $newVisit = visits::create([
-                'visit_code' => $visitCode,
-                'guest_id' => $guest->id,
-                'assigned_to' => $request->assigned_to,
-                'branch_id' => $request->branch_id,
-                'purpose_id' => $request->purpose_id,
+            // 5. Simpan Data Kunjungan (Visit)
+            $visit = visits::create([
+                'visit_code'   => $visitCode,
+                'guest_id'     => $guest->id,
+                'assigned_to'  => $validated['assigned_to'],
+                'branch_id'    => $validated['branch_id'],
+                'purpose_id'   => $validated['purpose_id'],
                 'scheduled_at' => $checkInDateTime,
-                'product_interest' => $request->product_interest ?? null,
-                'source_id' => $request->source_id ?? null,
-                'notes' => $request->notes,
-                'status' => 'Terjadwal',
+                'source_id'    => $request->input('source_id'),
+                'notes'        => $validated['notes'],
+                'status'       => 'Terjadwal',
                 'queue_number' => $queueNumber,
+                'check_in_at'  => now(),
             ]);
 
-            // 6. Simpan Log Status Awal
+            // 6. Simpan ke Tabel visit_products
+            $inputProduct = $request->input('product_id') ?? $request->input('product_interest');
+
+            if (!empty($inputProduct)) {
+                DB::table('visit_products')->insert([
+                    'visit_id'   => $visit->id,
+                    'product_id' => (int) $inputProduct,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // 7. Simpan Log Status Awal
             visit_status_logs::create([
-                'visit_id' => $newVisit->id,
+                'visit_id'   => $visit->id,
                 'old_status' => null,
                 'new_status' => 'Terjadwal',
                 'changed_by' => auth()->check() ? auth()->id() : null,
                 'changed_at' => now(),
             ]);
 
-            // Ambil data pendukung untuk isi notifikasi
-            $purposeType = visit_purposes::find($request->purpose_id);
-            $branch = branches::find($request->branch_id);
+            DB::commit();
 
-            // 7. Ambil semua user yang memiliki role 'admin'
-            $adminUsers = users::where('role', 'admin')->get();
-
-            // 8. Kirim notifikasi ke masing-masing admin
-            foreach ($adminUsers as $admin) {
-                notifications::send(
-                    $admin->id,
-                    'guest_arrived',
-                    'Notifikasi Admin 🔔',
-                    'Tamu baru (manual) membuat jadwal pertemuan.'.
-                        "\n".'Nama: '.($guest->name ?? '-').
-                        "\n".'Instansi: '.($guest->company_name ?? '-').
-                        "\n".'Tujuan: '.($purposeType->name ?? '-').
-                        "\n".'Cabang: '.($branch->name ?? '-')
-                );
-            }
-        });
-
-        return redirect()->back()->with('success', 'Tamu manual berhasil didaftarkan ke antrian!');
+            // 🟢 PERBAIKAN: Hapus .$product_id dari pesan success
+            return redirect()->back()->with('success', 'Berhasil membuat antrian janji temu!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
     }
 
     public function history(Request $request)
@@ -257,7 +261,14 @@ class FrontOfficeController extends Controller
             $query->whereDate('scheduled_at', $request->date);
         }
 
-        $visits = $query->orderBy('scheduled_at', 'desc')->get();
+        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
+            ->whereIn('status', ['Selesai', 'completed', 'checkout'])
+            ->when($request->date, function ($query, $date) {
+                return $query->whereDate('check_out_at', $date);
+            })
+            ->latest('check_out_at')
+            ->paginate(10)
+            ->appends(request()->query()); // 👈 Penting agar parameter 'date' tetap ada saat berpindah halaman
         $filterDate = $request->query('date', '');
 
         return view('frontoffice.history', compact('visits', 'filterDate'));
@@ -269,8 +280,8 @@ class FrontOfficeController extends Controller
         $today = Carbon::today();
 
         $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
+            ->orderBy('scheduled_at', 'desc')
+            ->paginate(10);
 
         // Hitung statistik
         $totalToday = $visits->count();
@@ -318,10 +329,10 @@ class FrontOfficeController extends Controller
         // Sanitasi nomor telepon/WA
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+            $phone = '+' . $phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
@@ -329,12 +340,12 @@ class FrontOfficeController extends Controller
             $guest = guests::where('phone', $phone)->first();
             if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-'.$todayDate.'-';
+                $prefix = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code' => $prefix.$sequence,
+                    'guest_code' => $prefix . $sequence,
                     'name' => $request->name,
                     'phone' => $phone,
                     'company_name' => $request->company_name,
@@ -348,10 +359,10 @@ class FrontOfficeController extends Controller
 
             // Generate visit code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-'.$todayDate.'-';
+            $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit.$sequenceVisit;
+            $visitCode = $prefixVisit . $sequenceVisit;
 
             // Hitung nomor antrean
             $todayVisitCount = visits::whereDate('scheduled_at', Carbon::today())->count();
@@ -424,13 +435,15 @@ class FrontOfficeController extends Controller
 
     public function guest(Request $request)
     {
-        $query = guests::query();
+        $query = guests::withCount('visits');
 
-        if ($request->has('vip') && $request->vip !== null) {
+        if ($request->filled('vip')) {
             $query->where('is_vip', $request->vip);
         }
 
-        $guests = $query->latest()->get();
+        $guests = $query->latest()
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('frontoffice.listGuests', compact('guests'));
     }

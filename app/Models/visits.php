@@ -79,25 +79,25 @@ class visits extends Model
         return $this->belongsTo(users::class, 'created_by');
     }
 
-public function followUps()
-{
-    return $this->hasMany(follow_ups::class, 'visit_id')->latest(); 
-}
+    public function followUps()
+    {
+        return $this->hasMany(follow_ups::class, 'visit_id')->latest();
+    }
 
-public function lead()
-{
-    return $this->hasOne(leads::class, 'visit_id');
-}
-public function latestFollowUp()
-{
-    // Beritahu Laravel bahwa primary key-nya adalah 'follow_up_id'
-    return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
-}
+    public function lead()
+    {
+        return $this->hasOne(leads::class, 'visit_id');
+    }
+    public function latestFollowUp()
+    {
+        // Beritahu Laravel bahwa primary key-nya adalah 'follow_up_id'
+        return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
+    }
 
-public function products()
-{
-    return $this->belongsToMany(products::class, 'visit_products', 'visit_id', 'product_id');
-}
+    public function products()
+    {
+        return $this->belongsToMany(products::class, 'visit_products', 'visit_id', 'product_id');
+    }
 
     protected static function booted()
     {
@@ -109,7 +109,7 @@ public function products()
     }
 
     public function updatedBy(): BelongsTo
-{
-    return $this->belongsTo(User::class, 'updated_by');
-}
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

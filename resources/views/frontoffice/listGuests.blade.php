@@ -22,15 +22,10 @@ use App\Helpers\DateHelper;
         </p>
     </div>
 
-    <!-- Tambahkan di sebelah Filter VIP -->
     <div style="display: flex; gap: 10px; align-items: center;">
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button onclick="openCreateGuestModal()" style="background: #006B3F; color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                + Tambah Tamu Baru
-            </button>
-
-            <!-- Filter VIP yang sudah ada... -->
-        </div>
+        <button onclick="openCreateGuestModal()" style="background: #006B3F; color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.15);">
+            + Tambah Tamu Baru
+        </button>
 
         <!-- Filter Status VIP -->
         <form action="{{ route('frontoffice.guest') }}" method="GET" id="vipFilterForm" style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
@@ -62,6 +57,7 @@ use App\Helpers\DateHelper;
         <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
+                    <th style="padding: 14px 20px; font-weight: 700;">No</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Profil Tamu</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Instansi & Jabatan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">No. WhatsApp</th>
@@ -71,8 +67,13 @@ use App\Helpers\DateHelper;
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                @forelse($guests as $guest)
+                @forelse($guests as $index => $guest)
                 <tr style="border-bottom: 1px solid #e8edf5;">
+                    {{-- Penomoran Dinamis & Aman --}}
+                    <td style="padding: 16px 20px; font-weight: 600; color: #64748b;">
+                        {{ method_exists($guests, 'firstItem') && $guests->firstItem() ? $guests->firstItem() + $index : $index + 1 }}
+                    </td>
+
                     <!-- Foto & Nama Tamu -->
                     <td style="padding: 16px 20px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -137,7 +138,7 @@ use App\Helpers\DateHelper;
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="padding: 30px; text-align: center; color: #64748b;">Belum ada data tamu terdaftar.</td>
+                    <td colspan="7" style="padding: 30px; text-align: center; color: #64748b;">Belum ada data tamu terdaftar.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -146,10 +147,17 @@ use App\Helpers\DateHelper;
 
     <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
         <span>Menampilkan seluruh master data tamu</span>
-        <span>Total: {{ count($guests) }} Tamu</span>
+        <span>Total: <strong>{{ method_exists($guests, 'total') ? $guests->total() : count($guests) }}</strong> Tamu</span>
     </div>
 
 </div>
+
+{{-- 🟢 PAGINATION LINK --}}
+@if(method_exists($guests, 'hasPages') && $guests->hasPages())
+<div style="margin-top: 20px;">
+    @include('partials.pagination', ['paginator' => $guests])
+</div>
+@endif
 
 <!-- Modal Detail Tamu -->
 <div id="guestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
@@ -275,16 +283,9 @@ use App\Helpers\DateHelper;
     function updateVipStatus(guestId, selectElem) {
         const nextStatus = selectElem.value === '1';
         const prevValue = selectElem.getAttribute('data-previous-value');
-
-        // Konfirmasi perubahan
-        if (!confirm(`Apakah Anda yakin ingin mengubah status tamu ini menjadi ${nextStatus ? 'VIP' : 'REGULER'}?`)) {
-            selectElem.value = prevValue; // Kembalikan nilai dropdown jika dibatalkan
-            return;
-        }
-
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Kirim request AJAX ke route update VIP
+        // Langsung kirim request AJAX tanpa confirm/alert
         fetch(`/frontoffice/guests/${guestId}/toggle-vip`, {
                 method: 'PATCH',
                 headers: {
@@ -299,7 +300,7 @@ use App\Helpers\DateHelper;
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update warna latar belakang dropdown berdasarkan status baru
+                    // Update tampilan visual dropdown secara langsung
                     if (data.is_vip) {
                         selectElem.style.cssText = 'padding: 6px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; outline: none; cursor: pointer; transition: all 0.2s; background: #fef3c7; color: #b45309; border: 1px solid #fcd34d;';
                         selectElem.setAttribute('data-previous-value', '1');
@@ -308,13 +309,12 @@ use App\Helpers\DateHelper;
                         selectElem.setAttribute('data-previous-value', '0');
                     }
                 } else {
-                    alert('Gagal memperbarui status VIP.');
+                    // Kembalikan ke nilai sebelumnya hanya jika server gagal memproses
                     selectElem.value = prevValue;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan sistem.');
                 selectElem.value = prevValue;
             });
     }

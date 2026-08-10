@@ -24,4 +24,9 @@ class guests extends Model
     {
         return $this->belongsTo(guest_categories::class, 'guest_category_id');
     }
+
+    public function visits()
+    {
+        return $this->hasMany(Visits::class, 'guest_id'); // 👈 Pastikan nama Model Visits sesuai
+    }
 }
