@@ -165,11 +165,11 @@
 
                 <!-- Navigasi Tombol (Kembali & Selanjutnya) -->
                 <div style="display: flex; gap: 12px; margin-top: 10px;">
-                    <a href="{{ url()->previous() }}" style="flex: 1; background: #f1f5f9; color: #475569; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span style="font-size: 15px; line-height: 1; color: #475569;">&#8592;</span> Kembali
+                    <a href="{{ route('halamaanUtama') }}" style="flex: 1; background: #1463ff; color: #ffffff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 15px; line-height: 1; color: #ffffff;">&#8592;</span> Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #C7AB6B; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
                         Selanjutnya: Keperluan Kunjungan 
                     </button>
                 </div>

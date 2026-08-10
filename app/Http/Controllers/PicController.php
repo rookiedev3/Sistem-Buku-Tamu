@@ -17,6 +17,7 @@ class PicController extends Controller
     {
         $filter = $request->input('filter', 'all');
         $vipFilter = $request->input('vip_status', 'all');
+        $keyword = trim((string) $request->input('keyword', ''));
         $perPage = (int) $request->input('per_page', 10);
         $today = Carbon::today();
 
@@ -30,13 +31,18 @@ class PicController extends Controller
                     ->orWhereDate('scheduled_at', $today);
             });
         } elseif ($filter === 'upcoming') {
-            $query->whereNull('check_in_at')
-                ->whereDate('scheduled_at', '>', $today);
-        } else {
-            $query->where(function ($q) use ($today) {
-                $q->whereIn('status', ['pending', 'waiting', 'Menunggu', 'confirmed', 'Disetujui', 'meeting'])
-                    ->orWhereDate('check_in_at', $today)
-                    ->orWhereDate('scheduled_at', $today);
+            // Terjadwal Mendatang: murni berdasarkan tanggal jadwal (scheduled_at).
+            // TIDAK boleh bergantung ke check_in_at, karena input manual dari Front Office
+            // bisa saja langsung mengisi check_in_at meski jadwalnya masih di masa depan.
+            $query->whereDate('scheduled_at', '>', $today);
+        }
+        // filter 'all' (default): tanpa syarat tambahan, base query di atas (exclude completed/cancelled) sudah cukup
+
+        // 🔎 Pencarian nama tamu / instansi (baru, meniru search box di frontoffice)
+        if ($keyword !== '') {
+            $query->whereHas('guest', function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
             });
         }
 
@@ -52,10 +58,6 @@ class PicController extends Controller
             }
         }
 
-        $visits = $query->orderBy('created_at', 'desc')
-            ->paginate($perPage)
-            ->appends($request->query());
-
         // Kolom is_vip belum ada di database (masih tahap pengembangan bareng tim).
         // Cek dulu sebelum query, supaya tidak error dan otomatis aktif begitu kolomnya sudah ada.
         if (Schema::hasColumn('guests', 'is_vip')) {
@@ -63,10 +65,20 @@ class PicController extends Controller
             $regularCount = (clone $query)->whereHas('guest', function ($q) {
                 $q->where('is_vip', false)->orWhereNull('is_vip');
             })->count();
+
+            // 🌟 Tamu VIP di atas, lalu diurutkan sesuai siapa duluan membuat jadwal (visits.created_at)
+            $query->leftJoin('guests', 'visits.guest_id', '=', 'guests.id')
+                ->select('visits.*')
+                ->orderByRaw('CASE WHEN guests.is_vip = 1 THEN 0 ELSE 1 END ASC')
+                ->orderBy('visits.created_at', 'asc');
         } else {
             $vipCount = 0;
             $regularCount = (clone $query)->count();
+
+            $query->orderBy('created_at', 'asc');
         }
+
+        $visits = $query->paginate($perPage)->appends($request->query());
 
         $countToday = visits::where('assigned_to', auth()->id())
             ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
@@ -75,16 +87,25 @@ class PicController extends Controller
                     ->orWhereDate('scheduled_at', $today);
             })->count();
 
+        // 🟢 PERBAIKAN: sama seperti filter 'upcoming' di atas, jangan syaratkan check_in_at IS NULL,
+        // supaya badge "Terjadwal Mendatang (N)" ikut menghitung visit yang check_in_at-nya
+        // kadung keisi meski jadwalnya masih di masa depan.
         $countUpcoming = visits::where('assigned_to', auth()->id())
             ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
-            ->whereNull('check_in_at')
             ->whereDate('scheduled_at', '>', $today)
             ->count();
 
-        return view('pic.dashboard', compact(
+        $payload = compact(
             'visits', 'vipCount', 'regularCount', 'filter', 'vipFilter',
             'countToday', 'countUpcoming'
-        ));
+        );
+
+        // 🔄 Request AJAX (filter/search/pagination) -> balikin partial saja, tanpa reload halaman
+        if ($request->ajax()) {
+            return view('pic.partials._dashboard_panel', $payload);
+        }
+
+        return view('pic.dashboard', $payload);
     }
 
     /**

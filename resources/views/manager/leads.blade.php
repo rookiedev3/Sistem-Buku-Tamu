@@ -89,10 +89,13 @@
                 <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <tr>
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
-                        <th style="padding: 14px;">Nama Klien & Instansi</th>
+                        <th style="padding: 14px;">Token</th>
+                        <th style="padding: 14px;">Tamu & Jabatan</th>
                         <th style="padding: 14px;">PIC / Sales</th>
+                        <th style="padding: 14px;">Value</th>
+                        <th style="padding: 14px;">Tgl Follow Up</th>
+                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Tahap Pipeline</th>
                         <th style="padding: 14px;">Minat / Catatan Terakhir</th>
-                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status Lead</th>
                     </tr>
                 </thead>
                 <tbody>

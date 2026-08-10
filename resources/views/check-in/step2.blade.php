@@ -205,7 +205,7 @@
                         ⬅ Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #C7AB6B; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
                         Selanjutnya: Konfirmasi Data
                     </button>
                 </div>

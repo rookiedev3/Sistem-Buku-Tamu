@@ -69,9 +69,7 @@
 {{-- Header Halaman --}}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
-        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
-            FRONT OFFICE SYSTEM
-        </span>
+       
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
             Kelola Janji Temu (Appointment)
         </h1>

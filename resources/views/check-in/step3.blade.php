@@ -182,7 +182,7 @@
                         <span style="font-size: 15px; line-height: 1; color: #ffffff;">&#8592;</span> Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #C7AB6B; color: #fff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.25);">
                         Konfirmasi & Check-In
                     </button>
                 </div>

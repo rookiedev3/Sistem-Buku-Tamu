@@ -103,7 +103,7 @@
             background: linear-gradient(rgba(0, 38, 26, 0.55), rgba(0, 38, 26, 0.55)),
             url('{{ asset("images/foto-dashboard.jpg") }}');
             background-size: 100% auto;
-            background-position: 80% 75%;
+            background-position: 100% 75%;
             background-repeat: no-repeat;
             color: var(--text-light);
             padding: 80px 20px;
@@ -165,6 +165,21 @@
             flex-direction: column;
             justify-content: space-between;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+
+        /* Membuat bagian atas card (ikon & judul) menjadi sejajar (horizontal) */
+        .card-header-flex {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .card-header-flex .icon-box {
+            margin-bottom: 0 !important; /* Menghilangkan jarak bawah bawaan ikon */
+        }
+        .card-header-flex .card-title {
+            margin-bottom: 0 !important; /* Menghilangkan jarak bawah bawaan judul */
+        }
+
         }
         .portal-card:hover {
             transform: translateY(-6px);
@@ -181,8 +196,8 @@
             color: #d97706;
         }
         .card-guest .portal-btn {
-            background-color: #f1f5f9;
-            color: var(--text-dark);
+            background-color: #C7AB6B;
+            color: var(--text-light);
         }
         .card-guest:hover {
             border-color: rgba(196, 167, 125, 0.5);
@@ -285,6 +300,25 @@
             padding: 40px 0 30px 0;
             margin-top: auto;
         }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-brand {
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .footer-desc {
+            font-size: 11.5px;
+            opacity: 0.7;
+            margin: 0;
+        }
         .footer-brand {
             color: white;
             font-weight: 700;
@@ -386,15 +420,16 @@
                 <p class="section-subtitle">Pilih jalur akses sesuai dengan kredensial Anda.</p>
             </div>
 
-            <div class="row justify-content-center g-4">
-                <!-- Card Registrasi Tamu -->
+           <div class="row justify-content-center g-4">
                 <div class="col-md-6 col-lg-5" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">
                     <a href="{{ route('check-in.step1') }}" class="portal-card card-guest">
                         <div>
-                            <div class="icon-box">
-                                <i class="bi bi-briefcase-fill"></i>
+                            <div class="card-header-flex">
+                                <div class="icon-box">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </div>
+                                <h3 class="card-title">Registrasi Tamu</h3>
                             </div>
-                            <h3 class="card-title">Registrasi Tamu</h3>
                             <p class="card-desc">
                                 Layanan lapor diri mandiri untuk pengunjung, vendor, dan tamu VIP. Proses cepat dan terdata secara real-time.
                             </p>
@@ -406,16 +441,17 @@
                     </a>
                 </div>
 
-                <!-- Card Akses Pegawai -->
                 <div class="col-md-6 col-lg-5" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
                     <a href="{{ route('login') }}" class="portal-card card-employee">
                         <div>
-                            <div class="icon-box">
-                                <i class="bi bi-shield-lock-fill"></i>
+                            <div class="card-header-flex">
+                                <div class="icon-box">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                </div>
+                                <h3 class="card-title">Akses Pegawai</h3>
                             </div>
-                            <h3 class="card-title">Akses Pegawai</h3>
                             <p class="card-desc">
-                                Portal internal aman untuk staf dan manajemen. Memerlukan autentikasi dua faktor untuk masuk ke sistem terpusat.
+                                Portal internal aman untuk staf dan manajemen. Memerlukan autentikasi untuk masuk ke sistem terpusat.
                             </p>
                         </div>
                         <div class="portal-btn">
@@ -424,6 +460,9 @@
                         </div>
                     </a>
                 </div>
+            </div>
+
+               
             </div>
         </div>
     </section>
@@ -459,19 +498,20 @@
 
    
     <!-- FOOTER -->
-    <!-- FOOTER -->
     <footer class="site-footer">
-        <div class="container text-center">
-            <div class="footer-brand">IT Solution Yogyakarta</div>
-            <p class="footer-desc mb-3">© {{ \Carbon\Carbon::now()->year }} IT Solution Yogyakarta. All rights reserved.</p>
+        <div class="container footer-container">
+            <div>
+                <div class="footer-brand">IT Solution Yogyakarta</div>
+                <p class="footer-desc">© {{ \Carbon\Carbon::now()->year }} IT Solution Yogyakarta. All rights reserved.</p>
+            </div>
             
-            <!-- Tombol Konsultasi WhatsApp -->
-            <a href="https://wa.me/6281239048517" target="_blank" class="btn-footer-wa">
-                <i class="bi bi-whatsapp"></i> Konsultasi
-            </a>
+            <div>
+                <a href="https://wa.me/6281239048517" target="_blank" class="btn-footer-wa">
+                    <i class="bi bi-whatsapp"></i> Konsultasi
+                </a>
+            </div>
         </div>
     </footer>
-
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>

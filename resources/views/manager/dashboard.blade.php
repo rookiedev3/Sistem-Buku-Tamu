@@ -47,10 +47,13 @@
                 <thead>
                     <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
                         <th style="padding: 14px 20px; font-weight: 700;">No</th>
-                        <th style="padding: 14px 20px; font-weight: 700;">Nama Tamu & Instansi</th>
-                        <th style="padding: 14px 20px; font-weight: 700;">Kategori</th>
-                        <th style="padding: 14px 20px; font-weight: 700;">Tujuan (PIC)</th>
-                        <th style="padding: 14px 20px; font-weight: 700;">Waktu Masuk</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Token</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Waktu </th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Keperluan</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">PIC / Sales</th>
+                        <th style="padding: 14px 20px; font-weight: 700;">Check In</th>
                         <th style="padding: 14px 20px; font-weight: 700; text-align: center;">Status</th>
                     </tr>
                 </thead>
