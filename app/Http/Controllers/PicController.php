@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\follow_ups;
 use App\Models\leads;
+use App\Models\notifications; // 🟢 TAMBAHAN: Import Model Notifications
+use App\Models\User;          // 🟢 TAMBAHAN: Import Model User
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
@@ -31,14 +33,9 @@ class PicController extends Controller
                     ->orWhereDate('scheduled_at', $today);
             });
         } elseif ($filter === 'upcoming') {
-            // Terjadwal Mendatang: murni berdasarkan tanggal jadwal (scheduled_at).
-            // TIDAK boleh bergantung ke check_in_at, karena input manual dari Front Office
-            // bisa saja langsung mengisi check_in_at meski jadwalnya masih di masa depan.
             $query->whereDate('scheduled_at', '>', $today);
         }
-        // filter 'all' (default): tanpa syarat tambahan, base query di atas (exclude completed/cancelled) sudah cukup
 
-        // 🔎 Pencarian nama tamu / instansi (baru, meniru search box di frontoffice)
         if ($keyword !== '') {
             $query->whereHas('guest', function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
@@ -46,27 +43,22 @@ class PicController extends Controller
             });
         }
 
-        // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
         if (Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
                 $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
             } elseif ($vipFilter === 'reguler') {
-                // NULL dianggap reguler juga, bukan cuma is_vip = 0
                 $query->whereHas('guest', function ($q) {
                     $q->where('is_vip', false)->orWhereNull('is_vip');
                 });
             }
         }
 
-        // Kolom is_vip belum ada di database (masih tahap pengembangan bareng tim).
-        // Cek dulu sebelum query, supaya tidak error dan otomatis aktif begitu kolomnya sudah ada.
         if (Schema::hasColumn('guests', 'is_vip')) {
             $vipCount = (clone $query)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count();
             $regularCount = (clone $query)->whereHas('guest', function ($q) {
                 $q->where('is_vip', false)->orWhereNull('is_vip');
             })->count();
 
-            // 🌟 Tamu VIP di atas, lalu diurutkan sesuai siapa duluan membuat jadwal (visits.created_at)
             $query->leftJoin('guests', 'visits.guest_id', '=', 'guests.id')
                 ->select('visits.*')
                 ->orderByRaw('CASE WHEN guests.is_vip = 1 THEN 0 ELSE 1 END ASC')
@@ -87,9 +79,6 @@ class PicController extends Controller
                     ->orWhereDate('scheduled_at', $today);
             })->count();
 
-        // 🟢 PERBAIKAN: sama seperti filter 'upcoming' di atas, jangan syaratkan check_in_at IS NULL,
-        // supaya badge "Terjadwal Mendatang (N)" ikut menghitung visit yang check_in_at-nya
-        // kadung keisi meski jadwalnya masih di masa depan.
         $countUpcoming = visits::where('assigned_to', auth()->id())
             ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
             ->whereDate('scheduled_at', '>', $today)
@@ -100,7 +89,6 @@ class PicController extends Controller
             'countToday', 'countUpcoming'
         );
 
-        // 🔄 Request AJAX (filter/search/pagination) -> balikin partial saja, tanpa reload halaman
         if ($request->ajax()) {
             return view('pic.partials._dashboard_panel', $payload);
         }
@@ -200,12 +188,10 @@ class PicController extends Controller
             $query->whereDate('check_in_at', '<=', $request->end_date);
         }
 
-        // Filter status VIP/Reguler (berdasarkan guests.is_vip, BUKAN guest_category_id)
         if (Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
                 $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
             } elseif ($vipFilter === 'reguler') {
-                // NULL dianggap reguler juga, bukan cuma is_vip = 0
                 $query->whereHas('guest', function ($q) {
                     $q->where('is_vip', false)->orWhereNull('is_vip');
                 });
@@ -272,14 +258,14 @@ class PicController extends Controller
             'estimated_value' => 'nullable|numeric',
         ]);
 
-        $visit = visits::where('id', $id)
+        $visit = visits::with('guest')
+            ->where('id', $id)
             ->where('assigned_to', auth()->id())
             ->firstOrFail();
 
         $oldStatus = trim($visit->status ?? '');
         $newStatus = 'Meeting Selesai';
 
-        // CEK KUNCI: Buat log HANYA JIKA status berubah (mencegah duplikasi saat edit catatan)
         if (strtolower($oldStatus) !== strtolower($newStatus)) {
             visit_status_logs::create([
                 'visit_id'   => $visit->id,
@@ -290,7 +276,6 @@ class PicController extends Controller
             ]);
         }
 
-        // Update data hasil pertemuan & status
         $visit->update([
             'status' => $newStatus,
             'meeting_result' => $request->notes ?? $request->meeting_result,
@@ -300,17 +285,38 @@ class PicController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
+        // 🟢 PROSES LEAD DAN PENGIRIMAN NOTIFIKASI
         if (in_array($request->potential_level, ['warm', 'hot'])) {
-            leads::updateOrCreate(
+            $estValue = $request->estimated_value ?? 0;
+
+            $lead = leads::updateOrCreate(
                 ['visit_id' => $visit->id],
                 [
                     'guest_id' => $visit->guest_id,
                     'owner_id' => auth()->id(),
                     'status' => 'new',
-                    'estimated_value' => $request->estimated_value ?? 0,
+                    'estimated_value' => $estValue,
                     'follow_up_at' => $request->followup_date ?? $request->follow_up_at,
                 ]
             );
+
+            // 🔔 KIRIM NOTIFIKASI LEAD BARU KE MANAGER / OWNER
+            $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
+            
+            $guestName = $visit->guest->name ?? 'Tamu';
+            $companyName = $visit->guest->company_name ?? 'Instansi';
+            $formattedValue = 'Rp ' . number_format($estValue, 0, ',', '.');
+            $picName = auth()->user()->name ?? 'PIC';
+            $potensiText = strtoupper($request->potential_level);
+
+            foreach ($managers as $manager) {
+                notifications::send(
+                    $manager->id,
+                    'new_lead',
+                    'Lead Baru Masuk: ' . $guestName,
+                    "Terdapat Lead baru dari {$guestName} ({$companyName}) dengan Potensi: {$potensiText}, Est. Nilai: {$formattedValue}. PIC: {$picName}."
+                );
+            }
         }
 
         return redirect()->back()->with('success', 'Catatan hasil pertemuan dan data lead berhasil disimpan!');
@@ -367,7 +373,6 @@ class PicController extends Controller
         $vipFilter = $request->input('vip_status', 'all');
         $ownerId = auth()->id();
 
-        // Base query: cuma exclude 'lost', supaya filter 'deal' & 'all' tetap jalan
         $query = leads::with(['guest', 'visit', 'followUps'])
             ->where('owner_id', $ownerId)
             ->where('status', '!=', 'lost');
@@ -391,7 +396,6 @@ class PicController extends Controller
             case 'deal':
                 $query->where('status', 'deal');
                 break;
-            // 'all' => tanpa filter tambahan
         }
 
         if ($request->filled('start_date')) {
@@ -401,7 +405,6 @@ class PicController extends Controller
             $query->whereDate('follow_up_at', '<=', $request->end_date);
         }
 
-        // Filter status VIP/Reguler (berdasarkan guests.is_vip)
         if (Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
                 $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
@@ -438,7 +441,6 @@ class PicController extends Controller
         $oldStatus = trim($visit->status ?? '');
         $newStatus = 'Sedang Bertemu';
 
-        // Mencegah duplikasi log saat tombol diklik berulang kali
         if (strtolower($oldStatus) !== strtolower($newStatus)) {
             visit_status_logs::create([
                 'visit_id'   => $visit->id,

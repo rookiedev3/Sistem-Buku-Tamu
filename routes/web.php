@@ -18,10 +18,10 @@ use App\Http\Middleware\CheckUserLogin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'halamanUtama'])->name('halamaanUtama');
- Route::get('/laporan.index', [OwnerController::class, 'laporan'])->name('laporan.index');
-    Route::get('/laporan/export-excel', [OwnerController::class, 'exportExcel'])->name('laporan.exportExcel');
-    Route::get('/laporan/export-pdf', [OwnerController::class, 'exportPdf'])->name('laporan.exportPdf');
-    // route('password.reset', ['token' => $token, 'email' => $user->email]);
+Route::get('/laporan.index', [OwnerController::class, 'laporan'])->name('laporan.index');
+Route::get('/laporan/export-excel', [OwnerController::class, 'exportExcel'])->name('laporan.exportExcel');
+Route::get('/laporan/export-pdf', [OwnerController::class, 'exportPdf'])->name('laporan.exportPdf');
+// route('password.reset', ['token' => $token, 'email' => $user->email]);
 
 
 // Route untuk user belum login (guest)
@@ -35,10 +35,10 @@ Route::middleware('guest')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])->name('register.proses');
 
         Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+        Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
     });
 });
 
@@ -87,13 +87,10 @@ Route::middleware('auth')->group(function () {
     });
 
     // 3. Halaman Database Tamu (Arsip & Riwayat Master Tamu)
-    Route::get('/database-tamu', function () {
-        return view('tamu.index');
-    });
-    // Route untuk melihat detail riwayat kunjungan tamu berdasarkan ID
-    Route::get('/database-tamu/{id}', function ($id) {
-        return view('tamu.detail', ['id' => $id]);
-    });
+    Route::get('/database-tamu', [OwnerController::class, 'databaseOwner'])->name('owner.databaseTamu');
+
+    // Route detail (tambahkan '/' sebelum {id})
+    Route::get('/database-tamu/{id}', [OwnerController::class, 'databaseOwnerDetail'])->name('owner.databaseTamuDetail');
     // // route lead dan follow up
     // Route::get('/leads', function () {
     //     return view('leads.index');
@@ -123,7 +120,7 @@ Route::resource('/products', ProductsController::class);
 Route::resource('/lead-sources', LeadSourcesController::class);
 Route::resource('/visit-purposes', VisitPurposesController::class);
 Route::resource('/guest-categories', GuestCategoriesController::class);
-    Route::resource('/pengguna', UserController::class)->names('user');
+Route::resource('/pengguna', UserController::class)->names('user');
 // });
 
 Route::middleware('auth')->prefix('security')->group(function () {
@@ -213,7 +210,6 @@ Route::prefix('manager')->middleware('auth')->group(function () {
     Route::get('/laporan', [ManagerController::class, 'laporan'])->name('manager.laporan');
     Route::get('/laporan/export-excel', [ManagerController::class, 'exportExcel'])->name('manager.laporan.exportExcel');
     Route::get('/laporan/export-pdf', [ManagerController::class, 'exportPdf'])->name('manager.laporan.exportPdf');
-
 });
 
 Route::post('/frontoffice/notifications/read-all', [FrontOfficeController::class, 'markAllNotificationsRead'])
@@ -235,15 +231,15 @@ Route::middleware('auth')->prefix('security')->group(function () {
 Route::middleware('auth')->prefix('owner')->group(function () {
     Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
 
-     Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
+    Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
     Route::resource('/products', ProductsController::class);
 
     Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
     Route::resource('/guest-categories', GuestCategoriesController::class);
     Route::get('/owner/aktivitas', [OwnerController::class, 'activityLog'])
         ->name('owner.activity-log');
-        Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
-        Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
+    Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
+    Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
 });
 
 // Route::prefix('pic')->group(function () {
