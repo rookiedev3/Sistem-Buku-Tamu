@@ -169,54 +169,52 @@
         </div>
 
         <form id="filterKunjunganForm" method="GET" action="{{ route('owner.dashboard') }}" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
-            {{-- Dipertahankan sebagai hidden input supaya filter "Menjadi Lead" tidak hilang
-                 saat user menggabungkannya dengan pencarian keyword/status/PIC lain. --}}
-            <input type="hidden" name="lead_only" id="leadOnlyInput" value="{{ $leadOnly ? '1' : '' }}">
+    <input type="hidden" name="lead_only" id="leadOnlyInput" value="{{ $leadOnly ? '1' : '' }}">
 
-            <div style="flex:1; min-width:220px;">
-                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Cari Nama / Instansi</label>
-                <div style="position:relative; display:flex; align-items:center;">
-                    <input type="text" name="keyword" id="keywordInput" value="{{ $keyword }}"
-                           autocomplete="off" placeholder="Cari nama/instansi..."
-                           style="width:100%; padding:10px 30px 10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; color:#172033; outline:none; box-sizing:border-box; background:#fbfcfe;">
-                    <button type="button" id="clearKeywordBtn"
-                            style="display:{{ $keyword ? 'flex' : 'none' }}; position:absolute; right:10px; align-items:center; justify-content:center; width:16px; height:16px; background:#e2e8f0; border:none; border-radius:50%; color:#64748b; cursor:pointer; font-size:11px; line-height:1; padding:0;">
-                        &times;
-                    </button>
-                </div>
-            </div>
+    <div style="flex:1; min-width:220px;">
+        <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Cari Nama / Instansi</label>
+        <div style="position:relative; display:flex; align-items:center;">
+            <input type="text" name="keyword" id="keywordInput" value="{{ $keyword }}"
+                   autocomplete="off" placeholder="Cari nama/instansi..."
+                   style="width:100%; height:41px; padding:0 30px 0 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; color:#172033; outline:none; box-sizing:border-box; background:#fbfcfe;">
+            <button type="button" id="clearKeywordBtn"
+                    style="display:{{ $keyword ? 'flex' : 'none' }}; position:absolute; right:10px; align-items:center; justify-content:center; width:16px; height:16px; background:#e2e8f0; border:none; border-radius:50%; color:#64748b; cursor:pointer; font-size:11px; line-height:1; padding:0;">
+                &times;
+            </button>
+        </div>
+    </div>
 
-            <div style="flex:1; min-width:160px;">
-                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Status</label>
-                <select name="status" id="statusSelect" style="width:100%; padding:10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; height:41px; box-sizing:border-box;">
-                    <option value="">Semua Status</option>
-                    @foreach($statusOptions as $status)
-                        <option value="{{ $status }}" @selected(strtolower(trim($statusFilter)) === strtolower(trim($status)))>{{ $status }}</option>
-                    @endforeach
-                </select>
-            </div>
+    <div style="flex:1; min-width:160px;">
+        <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Status</label>
+        <select name="status" id="statusSelect" style="width:100%; height:41px; padding:0 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; box-sizing:border-box;">
+            <option value="">Semua Status</option>
+            @foreach($statusOptions as $status)
+                <option value="{{ $status }}" @selected(strtolower(trim($statusFilter)) === strtolower(trim($status)))>{{ $status }}</option>
+            @endforeach
+        </select>
+    </div>
 
-            <div style="flex:1; min-width:160px;">
-                <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">PIC</label>
-                <select name="pic_id" id="picSelect" style="width:100%; padding:10px 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; height:41px; box-sizing:border-box;">
-                    <option value="">Semua PIC</option>
-                    @foreach($picOptions as $pic)
-                        <option value="{{ $pic->id }}" @selected((string) $picFilter === (string) $pic->id)>{{ $pic->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+    <div style="flex:1; min-width:160px;">
+        <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">PIC</label>
+        <select name="pic_id" id="picSelect" style="width:100%; height:41px; padding:0 14px; border:1px solid #e8edf5; border-radius:10px; font-size:13px; font-weight:700; color:#172033; background:#fff; outline:none; cursor:pointer; box-sizing:border-box;">
+            <option value="">Semua PIC</option>
+            @foreach($picOptions as $pic)
+                <option value="{{ $pic->id }}" @selected((string) $picFilter === (string) $pic->id)>{{ $pic->name }}</option>
+            @endforeach
+        </select>
+    </div>
 
-            <div style="display:flex; gap:8px;">
-                <button type="submit" style="background:#013220; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; height:41px;">
-                    Filter
-                </button>
-                @if($statusFilter || $picFilter || $keyword || $leadOnly)
-                    <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" id="resetFilterKunjungan" style="background:#f1f5f9; color:#475569; text-decoration:none; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; height:41px; box-sizing:border-box;">
-                        Reset
-                    </a>
-                @endif
-            </div>
-        </form>
+    <div style="display:flex; gap:8px;">
+        <button type="submit" style="height:41px; background:#013220; color:#fff; border:none; padding:0 20px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; box-sizing:border-box;">
+            Filter
+        </button>
+        @if($statusFilter || $picFilter || $keyword || $leadOnly)
+            <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" id="resetFilterKunjungan" style="height:41px; background:#f1f5f9; color:#475569; text-decoration:none; padding:0 16px; border-radius:10px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; box-sizing:border-box;">
+                Reset
+            </a>
+        @endif
+    </div>
+</form>
 
         <div id="kunjunganInfoBar">
             @if($statusFilter || $picFilter || $keyword || $leadOnly)

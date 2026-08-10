@@ -34,8 +34,15 @@ public function login(Request $request)
 
         if (!$user->is_active) {
             Auth::logout();
+
+            // Bedakan pesan: akun baru daftar & belum pernah disetujui (activated_at masih null)
+            // vs akun yang sudah pernah aktif tapi kemudian dinonaktifkan admin.
+            $message = is_null($user->activated_at)
+                ? 'Akun Anda masih menunggu persetujuan admin.'
+                : 'Akun Anda telah dinonaktifkan oleh admin. Silakan hubungi admin jika ini adalah kesalahan.';
+
             return back()->withErrors([
-                'email' => 'Akun Anda masih menunggu persetujuan admin.',
+                'email' => $message,
             ]);
         }
 
@@ -88,9 +95,10 @@ public function login(Request $request)
         'password'  => Hash::make($request->password),
         'role'      => null,
         'is_active' => false,
+        'activated_at' => null,
     ]);
 
-    return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Silahkan login.');
+    return redirect()->route('login')->with('success', 'Pendaftaran berhasil! Tunggu persetujuan admin untuk dapat login.');
     } catch (\Exception $e) {
         return back()->withErrors(['error' => 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.']);
     }

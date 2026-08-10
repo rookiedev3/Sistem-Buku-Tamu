@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class GuestVisitSeeder extends Seeder
+class GuestVisitsSeeder extends Seeder
 {
     /**
      * Jalankan: php artisan db:seed --class=GuestVisitSeeder

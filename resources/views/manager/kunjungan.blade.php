@@ -11,53 +11,53 @@
             </div>
         </div>
 
-        <form action="{{ route('manager.kunjungan') }}" method="GET" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 180px;">
-                <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Cari Nama / Instansi / PIC</label>
-                <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Contoh: Budi atau Siska..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; color: #172033; outline: none; box-sizing: border-box;">
-            </div>
+       <form action="{{ route('manager.kunjungan') }}" method="GET" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 180px;">
+        <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Cari Nama / Instansi / PIC</label>
+        <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="Contoh: Budi atau Siska..." style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; color: #172033; outline: none; box-sizing: border-box;">
+    </div>
 
-            <div style="width: 130px;">
-                <label style="font-size: 9px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 3px; text-transform: uppercase;">Dari Tanggal</label>
-                <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" placeholder="Pilih tanggal..." readonly style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid #e8edf5; border-radius: 6px; font-size: 11px; font-weight: 600; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
-            </div>
+    <div style="width: 145px;">
+        <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Dari Tanggal</label>
+        <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" placeholder="Pilih tanggal..." readonly>
+    </div>
 
-            <div style="width: 130px;">
-                <label style="font-size: 9px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 3px; text-transform: uppercase;">Sampai Tanggal</label>
-                <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" placeholder="Pilih tanggal..." readonly style="width: 100%; height: 38px; padding: 8px 12px; border: 1px solid #e8edf5; border-radius: 6px; font-size: 11px; font-weight: 600; color: #172033; outline: none; background: #fff; cursor: pointer; box-sizing: border-box;">
-            </div>
+    <div style="width: 145px;">
+        <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Sampai Tanggal</label>
+        <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" placeholder="Pilih tanggal..." readonly>
+    </div>
 
-            <div style="width: 160px;">
-                <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Status</label>
-                <div style="position: relative; width: 100%;">
-                    <select name="vip_status" style="width: 100%; height: 38px; padding: 8px 30px 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; font-weight: 700; color: #172033; background-color: #fff; outline: none; cursor: pointer; box-sizing: border-box; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
-                        @php
-                            $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
-                            $activeVipFilter = $vipFilter ?? 'all';
-                        @endphp
-                        @foreach($vipOptions as $key => $label)
-                            <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #5c6678; display: flex; align-items: center;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                </div>
+    <div style="width: 160px;">
+        <label style="font-size: 10px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 5px; text-transform: uppercase;">Status</label>
+        <div style="position: relative; width: 100%;">
+            <select name="vip_status" style="width: 100%; height: 38px; padding: 8px 30px 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; font-weight: 700; color: #172033; background-color: #fff; outline: none; cursor: pointer; box-sizing: border-box; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                @php
+                    $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                    $activeVipFilter = $vipFilter ?? 'all';
+                @endphp
+                @foreach($vipOptions as $key => $label)
+                    <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+            <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #5c6678; display: flex; align-items: center;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </div>
+        </div>
+    </div>
 
-            <div style="display: flex; gap: 8px;">
-                <button type="submit" style="height: 38px; background: #013220; color: #fff; border: none; padding: 0 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                    Filter
-                </button>
-                @if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
-                    <a href="{{ route('manager.kunjungan') }}" style="height: 38px; background: #f1f5f9; color: #475569; text-decoration: none; padding: 0 14px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center;">
-                        Reset
-                    </a>
-                @endif
-            </div>
-        </form>
+    <div style="display: flex; gap: 8px;">
+        <button type="submit" style="height: 38px; background: #013220; color: #fff; border: none; padding: 0 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+            Filter
+        </button>
+        @if(request()->hasAny(['keyword', 'start_date', 'end_date']) || request('vip_status', 'all') !== 'all')
+            <a href="{{ route('manager.kunjungan') }}" style="height: 38px; background: #f1f5f9; color: #475569; text-decoration: none; padding: 0 14px; border-radius: 8px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center;">
+                Reset
+            </a>
+        @endif
+    </div>
+</form>
     </div>
 
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 14px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -361,6 +361,29 @@
         background-color: #ffffff !important;
         box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
     }
+
+    .flatpickr-custom-input[readonly] {
+    background-color: #ffffff !important;
+    cursor: pointer !important;
+    height: 38px !important;
+    padding: 8px 12px !important;
+    border: 1px solid #e8edf5 !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #172033 !important;
+    outline: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.flatpickr-custom-input:focus,
+.flatpickr-custom-input.active {
+    border-color: #006B3F !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -373,6 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dateFormat: "Y-m-d",
         altInput: true,
         altFormat: "d F Y",
+        altInputClass: "flatpickr-custom-input",
         disableMobile: "true",
         onChange: function(selectedDates) {
             if (selectedDates[0]) {
@@ -386,6 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dateFormat: "Y-m-d",
         altInput: true,
         altFormat: "d F Y",
+        altInputClass: "flatpickr-custom-input",
         disableMobile: "true",
         onChange: function(selectedDates) {
             if (selectedDates[0]) {

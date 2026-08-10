@@ -63,14 +63,18 @@ class UserController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
+        $isActive = $request->has('is_active') ? 1 : 0;
+
         User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'phone'     => $this->normalizePhone($request->phone),
-            'password'  => Hash::make($request->password),
-            'role'      => $request->role,
-            'branch_id' => $request->branch_id,
-            'is_active' => $request->has('is_active') ? 1 : 0,
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'phone'        => $this->normalizePhone($request->phone),
+            'password'     => Hash::make($request->password),
+            'role'         => $request->role,
+            'branch_id'    => $request->branch_id,
+            'is_active'    => $isActive,
+            // Kalau admin langsung mencentang aktif saat membuat user, catat waktu aktivasinya.
+            'activated_at' => $isActive ? now() : null,
         ]);
 
         return redirect()->route('user.index')->with('success', 'Pengguna berhasil ditambahkan.');
@@ -97,14 +101,23 @@ class UserController extends Controller
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
+        $isActive = $request->has('is_active') ? 1 : 0;
+
         $data = [
             'name'      => $request->name,
             'email'     => $request->email,
             'phone'     => $this->normalizePhone($request->phone),
             'role'      => $request->role,
             'branch_id' => $request->branch_id,
-            'is_active' => $request->has('is_active') ? 1 : 0,
+            'is_active' => $isActive,
         ];
+
+        // Catat waktu aktivasi HANYA saat pertama kali user diaktifkan (activated_at masih null).
+        // Kalau admin menonaktifkan lagi setelah ini, activated_at TIDAK dihapus/direset,
+        // supaya sistem tetap tahu bahwa user ini "pernah aktif" (bukan pending baru daftar).
+        if ($isActive && is_null($user->activated_at)) {
+            $data['activated_at'] = now();
+        }
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
