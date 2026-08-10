@@ -196,8 +196,8 @@
             color: #d97706;
         }
         .card-guest .portal-btn {
-            background-color: #f1f5f9;
-            color: var(--text-dark);
+            background-color: #C7AB6B;
+            color: var(--text-light);
         }
         .card-guest:hover {
             border-color: rgba(196, 167, 125, 0.5);
