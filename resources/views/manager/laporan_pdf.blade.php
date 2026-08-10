@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Laporan Kunjungan - {{ $monthLabel }} {{ $year }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 10px; color: #172033; }
+        body { font-family: sans-serif; font-size: 9px; color: #172033; }
 
         .letterhead {
             display: table;
@@ -74,8 +74,9 @@
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        th, td { border: 1px solid #e2e8f0; padding: 5px 6px; text-align: left; }
+        th, td { border: 1px solid #e2e8f0; padding: 4px 5px; text-align: left; word-wrap: break-word; }
         th { background: #f8fafc; font-weight: 700; }
+        td.center, th.center { text-align: center; }
 
         .footer-note {
             margin-top: 18px;
@@ -117,8 +118,8 @@
         @if($topPicName)
             PIC dengan jumlah penanganan kunjungan terbanyak adalah <strong>{{ $topPicName }}</strong> ({{ $topPicCount }} kunjungan).
         @endif
-        @if($avgWaitMinutes !== null)
-            Rata-rata waktu tunggu tamu sebelum pertemuan dimulai adalah <strong>{{ $avgWaitMinutes }} menit</strong>.
+        @if($avgDuration !== null)
+            Rata-rata durasi pertemuan (check-in sampai check-out) adalah <strong>{{ $avgDuration }} menit</strong>.
         @endif
     </div>
 
@@ -140,25 +141,31 @@
             <div class="stat-value">{{ $totalVip }}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Rata-rata Tunggu</div>
-            <div class="stat-value">{{ $avgWaitMinutes !== null ? $avgWaitMinutes . ' mnt' : '-' }}</div>
+            <div class="stat-label">Rata-rata Durasi</div>
+            <div class="stat-value">{{ $avgDuration !== null ? $avgDuration . ' mnt' : '-' }}</div>
         </div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>No</th>
+                <th class="center">No</th>
                 <th>Tanggal</th>
+                <th class="center">Jam Masuk</th>
+                <th class="center">Jam Keluar</th>
+                <th class="center">Durasi</th>
                 <th>Nama Tamu</th>
+                <th class="center">Status VIP</th>
                 <th>Instansi</th>
-                <th>Status</th>
-                <th>Tujuan PIC</th>
+                <th>Telepon</th>
+                <th>Cabang</th>
+                <th>PIC</th>
                 <th>Keperluan</th>
                 <th>Produk Diminati</th>
                 <th>Sumber Lead</th>
                 <th>Potential Level</th>
-                <th>Tahap Lead</th>
+                <th>Catatan Hasil</th>
+                <th class="center">Status Akhir</th>
             </tr>
         </thead>
         <tbody>
@@ -167,21 +174,47 @@
                 $potentialLabels = ['hot' => 'Hot', 'warm' => 'Warm', 'cold' => 'Cold', 'non_lead' => 'Non-Lead'];
             @endphp
             @forelse($visits as $index => $v)
+            @php
+                $statusLower = strtolower(trim($v->status ?? ''));
+                $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                $leadStatus = optional($v->lead)->status;
+
+                if (in_array($statusLower, ['cancelled', 'dibatalkan', 'ditolak'])) {
+                    $statusAkhir = 'Dibatalkan';
+                } elseif ($isCompleted && $leadStatus) {
+                    $statusAkhir = $leadLabels[$leadStatus] ?? ucfirst($leadStatus);
+                } elseif ($isCompleted) {
+                    $statusAkhir = 'Non-Lead';
+                } else {
+                    $statusAkhir = 'Menunggu';
+                }
+
+                $durasi = '-';
+                if ($v->check_in_at && $v->check_out_at) {
+                    $durasi = \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at)) . ' mnt';
+                }
+            @endphp
             <tr>
-                <td>{{ $index + 1 }}</td>
+                <td class="center">{{ $index + 1 }}</td>
                 <td>{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}</td>
-                <td>{{ $v->guest->name ?? '-' }} {{ (isset($v->guest) && $v->guest->is_vip) ? '(VIP)' : '' }}</td>
+                <td class="center">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') : '-' }}</td>
+                <td class="center">{{ $v->check_out_at ? \Carbon\Carbon::parse($v->check_out_at)->format('H:i') : '-' }}</td>
+                <td class="center">{{ $durasi }}</td>
+                <td>{{ $v->guest->name ?? '-' }}</td>
+                <td class="center">{{ (isset($v->guest) && $v->guest->is_vip) ? 'VIP' : 'Reguler' }}</td>
                 <td>{{ $v->guest->company_name ?? '-' }}</td>
-                <td>{{ $v->status ?? '-' }}</td>
+                <td>{{ $v->guest->phone ?? '-' }}</td>
+                <td>{{ optional($v->branch)->name ?? '-' }}</td>
                 <td>{{ $v->assignedUser->name ?? '-' }}</td>
                 <td>{{ optional($v->purpose)->name ?? '-' }}</td>
                 <td>{{ $v->products && $v->products->isNotEmpty() ? $v->products->pluck('name')->implode(', ') : '-' }}</td>
                 <td>{{ optional($v->source)->name ?? '-' }}</td>
                 <td>{{ $potentialLabels[$v->potential_level] ?? '-' }}</td>
-                <td>{{ $leadLabels[optional($v->lead)->status] ?? '-' }}</td>
+                <td>{{ $v->notes ?? '-' }}</td>
+                <td class="center">{{ $statusAkhir }}</td>
             </tr>
             @empty
-            <tr><td colspan="11" style="text-align:center; padding: 16px;">Tidak ada data pada periode ini.</td></tr>
+            <tr><td colspan="17" style="text-align:center; padding: 16px;">Tidak ada data pada periode ini.</td></tr>
             @endforelse
         </tbody>
     </table>

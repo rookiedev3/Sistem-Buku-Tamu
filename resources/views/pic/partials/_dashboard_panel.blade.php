@@ -77,8 +77,8 @@
                 <tr>
                     <th style="padding: 8px 10px;">No</th>
                     <th style="padding: 8px 10px;">Token</th>
-                    <th style="padding: 8px 10px;">Waktu</th>
                     <th style="padding: 8px 10px;">Tamu & Jabatan</th>
+                    <th style="padding: 8px 10px;">Waktu</th>
                     <th style="padding: 8px 10px;">Jenis Kunjungan</th>
                     <th style="padding: 8px 10px;">Keperluan</th>
                     <th style="padding: 8px 10px; text-align: center;">Catatan</th>
@@ -96,6 +96,19 @@
                             <strong style="color: #006B3F; font-weight: 800;">
                                 {{ $visit->visit_code ?? ('VST-' . str_pad($visit->id, 4, '0', STR_PAD_LEFT)) }}
                             </strong>
+                        </td>
+                        
+                        <td style="padding: 8px 10px;">
+                            <strong style="display: block; color: #172033; font-weight: 800;">
+                                {{ $visit->guest->name ?? '-' }}
+                                @if(isset($visit->guest) && $visit->guest->is_vip)
+                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                                @endif
+                            </strong>
+                            {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
+                            <span style="font-size: 10px; color: #778195;">
+                                {{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})
+                            </span>
                         </td>
 
                         <td style="padding: 8px 10px; color: #778195; font-weight: 600;">
@@ -116,19 +129,6 @@
                                     <div style="font-size: 9px; color: #1d4ed8; margin-top: 2px; font-weight: 700;">📅 {{ $schedDate->translatedFormat('d M Y') }}</div>
                                 @endif
                             @endif
-                        </td>
-
-                        <td style="padding: 8px 10px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">
-                                {{ $visit->guest->name ?? '-' }}
-                                @if(isset($visit->guest) && $visit->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
-                                @endif
-                            </strong>
-                            {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
-                            <span style="font-size: 10px; color: #778195;">
-                                {{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})
-                            </span>
                         </td>
 
                         <td style="padding: 8px 10px;">

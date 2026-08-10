@@ -242,8 +242,8 @@ Route::middleware('auth')->prefix('owner')->group(function () {
     Route::resource('/guest-categories', GuestCategoriesController::class);
     Route::get('/owner/aktivitas', [OwnerController::class, 'activityLog'])
         ->name('owner.activity-log');
-        Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
-        Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
+    Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
+    Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
 });
 
 // Route::prefix('pic')->group(function () {
