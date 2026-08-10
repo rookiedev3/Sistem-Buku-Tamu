@@ -1,32 +1,32 @@
 @extends('layouts.pic')
 
 @section('content')
-<div style="display: flex; flex-direction: column; gap: 24px;">
+<div style="display: flex; flex-direction: column; gap: 16px;">
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h2 style="font-size: 18px; font-weight: 800; color: #172033; margin-bottom: 6px;">Lead & Follow-Up Penjualan 📈</h2>
-            <p style="font-size: 13px; color: #778195; margin: 0;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis dipindah ke Riwayat Kunjungan.</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 4px;">Lead & Follow-Up Penjualan 📈</h2>
+            <p style="font-size: 11px; color: #778195; margin: 0; line-height: 1.5;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis dipindah ke Riwayat Kunjungan.</p>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #013220; margin-top: 4px;">{{ $countDeal }} Klien</strong>
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <span style="font-size: 10px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
+            <strong style="font-size: 19px; font-weight: 900; color: #013220; margin-top: 2px;">{{ $countDeal }} Klien</strong>
         </div>
-        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <span style="font-size: 11px; font-weight: 700; color: #778195; text-transform: uppercase;">Pipeline Aktif</span>
-            <strong style="font-size: 24px; font-weight: 900; color: #d97706; margin-top: 4px;">{{ $countActive }} Lead</strong>
+        <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <span style="font-size: 10px; font-weight: 700; color: #778195; text-transform: uppercase;">Pipeline Aktif</span>
+            <strong style="font-size: 19px; font-weight: 900; color: #d97706; margin-top: 2px;">{{ $countActive }} Lead</strong>
         </div>
     </div>
 
-    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Pipeline Lead & Status Konversi</h3>
-            <span style="font-size: 12px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+    <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 14px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <h3 style="font-size: 14px; font-weight: 800; color: #172033; margin: 0;">Pipeline Lead & Status Konversi</h3>
+            <span style="font-size: 11px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
 
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                 @php
                     $filterOptions = [
                         'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
@@ -47,15 +47,15 @@
                         }
                     @endphp
                     <a href="{{ route('pic.leads', array_merge(request()->query(), ['filter' => $key])) }}"
-                       style="background: {{ $bg }}; color: {{ $color }}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+                       style="background: {{ $bg }}; color: {{ $color }}; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
                         {{ $label }}
                     </a>
                 @endforeach
             </div>
 
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <label style="font-size: 12px; font-weight: 700; color: #5c6678;">Status:</label>
-                <select onchange="window.location.href=this.value" style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <label style="font-size: 11px; font-weight: 700; color: #5c6678;">Status:</label>
+                <select onchange="window.location.href=this.value" style="height: 32px; padding: 4px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
                     @php
                         $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
                         $activeVipFilter = $vipFilter ?? 'all';
@@ -73,59 +73,71 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table align-middle" style="font-size: 13px; color: #172033; margin: 0; min-width: 700px;">
+            <table class="table align-middle" style="font-size: 12px; color: #172033; margin: 0; min-width: 700px;">
                 <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <tr>
-                        <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
-                        <th style="padding: 14px;">Nama Klien & Instansi</th>
-                        <th style="padding: 14px;">Kontak (WhatsApp)</th>
-                        <th style="padding: 14px;">Value</th>
-                        <th style="padding: 14px;">Tgl Follow-Up</th>
-                        <th style="padding: 14px;">Tahap Pipeline</th>
-                        <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
+                        <th style="padding: 8px 10px;">No</th>
+                        <th style="padding: 8px 10px;">Token</th>
+                        <th style="padding: 8px 10px;">Tamu & Jabatan</th>
+                        <th style="padding: 8px 10px;">Kontak (WA)</th>
+                        <th style="padding: 8px 10px;">Value</th>
+                        <th style="padding: 8px 10px;">Tgl Follow-Up</th>
+                        <th style="padding: 8px 10px;">Tahap Pipeline</th>
+                        <th style="padding: 8px 10px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($leads as $index => $lead)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 16px 20px; font-weight: 700;">{{ $leads->firstItem() + $index }}</td>
-                        <td style="padding: 14px;">
+                        <td style="padding: 8px 10px; font-weight: 700;">{{ $leads->firstItem() + $index }}</td>
+
+                        {{-- TOKEN: diambil dari relasi visit milik lead ini (bukan $visit dari dashboard) --}}
+                        <td style="padding: 8px 10px;">
+                            <strong style="color: #006B3F; font-weight: 800;">
+                                {{ optional($lead->visit)->visit_code ?? ('VST-' . str_pad(optional($lead->visit)->id ?? $lead->id, 4, '0', STR_PAD_LEFT)) }}
+                            </strong>
+                        </td>
+
+                        <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $lead->guest->name ?? '-' }}
                                 @if(isset($lead->guest) && $lead->guest->is_vip)
                                     <span title="VIP" style="color: #d97706;">⭐</span>
                                 @endif
                             </strong>
-                            <span style="font-size: 11px; color: #778195;">{{ $lead->guest->company_name ?? '-' }}</span>
+                            {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
+                            <span style="font-size: 10px; color: #778195;">
+                                {{ $lead->guest->company_name ?? '-' }} ({{ $lead->guest->position ?? '-' }})
+                            </span>
                         </td>
-                        <td style="padding: 14px; color: #475569; font-weight: 600;">{{ $lead->guest->phone ?? '-' }}</td>
-                        <td style="padding: 14px; color: #172033; font-weight: 700;">
+                        <td style="padding: 8px 10px; color: #475569; font-weight: 600;">{{ $lead->guest->phone ?? '-' }}</td>
+                        <td style="padding: 8px 10px; color: #172033; font-weight: 700;">
                             {{ $lead->estimated_value ? rupiah($lead->estimated_value, true) : '-' }}
                         </td>
-                        <td style="padding: 14px;">
+                        <td style="padding: 8px 10px;">
                             @if($lead->follow_up_at)
                                 @php
                                     $fuDate = \Carbon\Carbon::parse($lead->follow_up_at)->startOfDay();
                                     $today  = \Carbon\Carbon::today();
                                 @endphp
-                                <div style="font-weight: 700; color: #172033; margin-bottom: 4px;">{{ $fuDate->translatedFormat('d M Y') }}</div>
+                                <div style="font-weight: 700; color: #172033; margin-bottom: 3px;">{{ $fuDate->translatedFormat('d M Y') }}</div>
                                 @if($lead->status === 'deal')
                                     {{-- selesai --}}
                                 @elseif($fuDate->lt($today))
-                                    <span style="background: #fef2f2; color: #dc2626; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">⚠ Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
+                                    <span style="background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">⚠ Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
                                 @elseif($fuDate->eq($today))
-                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">🔥 Hari Ini</span>
+                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">🔥 Hari Ini</span>
                                 @else
                                     @php $diff = abs($fuDate->diffInDays($today)); @endphp
-                                    <span style="background: #e6f4ed; color: #006B3F; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;">
+                                    <span style="background: #e6f4ed; color: #006B3F; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 700;">
                                         @if($diff == 1) Besok @else {{ $diff }} hari mendatang @endif
                                     </span>
                                 @endif
                             @else
-                                <span style="color: #94a3b8; font-size: 12px;">Belum dijadwalkan</span>
+                                <span style="color: #94a3b8; font-size: 11px;">Belum dijadwalkan</span>
                             @endif
                         </td>
-                        <td style="padding: 14px;">
+                        <td style="padding: 8px 10px;">
                             @php
                                 $badges = [
                                     'new'       => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
@@ -136,32 +148,32 @@
                                 ];
                                 $b = $badges[$lead->status] ?? $badges['new'];
                             @endphp
-                            <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">{{ $b['label'] }}</span>
+                            <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 800;">{{ $b['label'] }}</span>
                         </td>
-                        <td style="padding: 14px; text-align: center; white-space: nowrap;">
-                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
+                        <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
+                            <div style="display: flex; gap: 5px; justify-content: center;">
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 5px 9px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
 
                                 @if($lead->status === 'deal')
-                                    <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: not-allowed;">
+                                    <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 5px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: not-allowed;">
                                         ✔ Selesai
                                     </button>
                                 @else
-                                    <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Update Tahap</button>
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#modalUpdateStatus{{ $lead->id }}" style="background: #006B3F; color: white; border: none; padding: 5px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">Update Tahap</button>
                                 @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">Belum ada prospek lead.</td>
+                        <td colspan="8" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 12px;">Belum ada prospek lead.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div style="margin-top: 20px;">
+        <div style="margin-top: 14px;">
             @include('partials.pagination', ['paginator' => $leads])
         </div>
     </div>

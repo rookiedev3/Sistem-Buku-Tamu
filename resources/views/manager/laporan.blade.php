@@ -140,7 +140,7 @@
                     <tr>
                         <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
                         <th style="padding: 14px;">Tanggal</th>
-                        <th style="padding: 14px;">Nama Tamu & Instansi</th>
+                        <th style="padding: 14px;">Tamu & Jabatan</th>
                         <th style="padding: 14px;">Cabang</th>
                         <th style="padding: 14px;">Tujuan PIC</th>
                         <th style="padding: 14px;">Keperluan</th>
