@@ -140,7 +140,7 @@ class FrontOfficeController extends Controller
             'assigned_to'       => 'required|exists:users,id',
             'branch_id'         => 'required|exists:branches,id',
             'purpose_id'        => 'required|exists:visit_purposes,id',
-            'product_id'        => 'nullable',
+            'product_id'        => 'nullable|exists:products,id', // Diperketat ke tabel products
             'scheduled_at'      => 'required|date',
             'notes'             => 'required|string',
             'photo_path'        => 'nullable|image|max:2048',
@@ -230,13 +230,11 @@ class FrontOfficeController extends Controller
                 'check_in_at'  => now(),
             ]);
 
-            // 6. Simpan ke Tabel visit_products
-            $inputProduct = $request->input('product_id') ?? $request->input('product_interest');
-
-            if (!empty($inputProduct)) {
+            // 6. Simpan ke Tabel visit_products (DIPERBAIKI)
+            if ($request->filled('product_id')) {
                 DB::table('visit_products')->insert([
                     'visit_id'   => $visit->id,
-                    'product_id' => (int) $inputProduct,
+                    'product_id' => (int) $request->input('product_id'),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -253,7 +251,6 @@ class FrontOfficeController extends Controller
 
             DB::commit();
 
-            // 🟢 PERBAIKAN: Hapus .$product_id dari pesan success
             return redirect()->back()->with('success', 'Berhasil membuat antrian janji temu!');
         } catch (\Exception $e) {
             DB::rollBack();

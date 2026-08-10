@@ -24,7 +24,20 @@
         background: #94a3b8;
     }
 
-    /* Style Fokus Input Flatpickr & Form */
+    /* ==========================================================
+       STYLING FLATPICKR - COMPACT, SOFT BORDER & MINIMALIS
+       ========================================================== */
+
+    /* Input Field Datepicker */
+    .flatpickr-custom-input {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        color: #172033 !important;
+        font-weight: 600 !important;
+        border: 1px solid #e8edf5 !important;
+        border-radius: 10px !important;
+    }
+
     .flatpickr-custom-input[readonly] {
         background-color: #ffffff !important;
         cursor: pointer !important;
@@ -33,23 +46,108 @@
     .flatpickr-custom-input:focus,
     .flatpickr-custom-input.active {
         border-color: #006B3F !important;
-        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+        box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.08) !important;
     }
 
-    /* Calendar Popup Custom Color */
+    /* Popup Kalender Ringkas & Border Soft */
     .flatpickr-calendar {
-        border-radius: 16px !important;
-        box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important;
-        border: 1px solid #e8edf5 !important;
+        z-index: 99999 !important;
+        width: 215px !important;
+        border-radius: 12px !important;
+        border: 1px solid #f1f5f9 !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
         font-family: inherit !important;
-        padding: 10px !important;
+        padding: 6px !important;
+        background: #ffffff !important;
     }
 
+    .flatpickr-innerContainer {
+        justify-content: center !important;
+    }
+
+    .flatpickr-days,
+    .dayContainer {
+        width: 196px !important;
+        min-width: 196px !important;
+        max-width: 196px !important;
+    }
+
+    /* Header Bulan & Navigasi */
+    .flatpickr-months .flatpickr-month {
+        height: 26px !important;
+    }
+
+    .flatpickr-current-month {
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        padding-top: 0 !important;
+    }
+
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+        padding: 2px !important;
+        height: 22px !important;
+        width: 22px !important;
+    }
+
+    /* Header Nama Hari */
+    span.flatpickr-weekday {
+        color: #006B3F !important;
+        font-weight: 700 !important;
+        font-size: 9.5px !important;
+    }
+
+    /* Grid Angka Tanggal */
+    .flatpickr-day {
+        border-radius: 6px !important;
+        color: #172033 !important;
+        font-weight: 500 !important;
+        font-size: 10px !important;
+        max-width: 28px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        margin-top: 1px !important;
+        border: none !important;
+    }
+
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
+        background: #f0fdf4 !important;
+        color: #006B3F !important;
+        border: none !important;
+    }
+
+    /* Indikator Hari Ini (Today) */
+    .flatpickr-day.today {
+        border: 1px solid #86efac !important;
+        color: #006B3F !important;
+        font-weight: 700 !important;
+    }
+
+    /* Tanggal Terpilih */
     .flatpickr-day.selected,
-    .flatpickr-day.startRange,
-    .flatpickr-day.endRange {
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.selected:focus {
         background: #006B3F !important;
-        border-color: #006B3F !important;
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+    }
+
+    /* Pembatas Time Picker (Jam & Menit) */
+    .flatpickr-time {
+        border-top: 1px solid #f8fafc !important;
+        margin-top: 4px !important;
+        padding-top: 2px !important;
+        height: 28px !important;
+        line-height: 28px !important;
+    }
+
+    .flatpickr-time input {
+        font-weight: 700 !important;
+        color: #172033 !important;
+        font-size: 11px !important;
     }
 
     /* Style Tombol Filter Tab */
@@ -100,6 +198,7 @@
         </div>
     </div>
 </div>
+
 {{-- Kartu Statistik Rangkuman --}}
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
     <div style="background: #ffffff; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); display: flex; justify-content: space-between; align-items: center;">
@@ -129,7 +228,7 @@
     </div>
 </div>
 
-{{-- Container Utama Tabel (Style Dashboard PIC & Appointment) --}}
+{{-- Container Utama Tabel --}}
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
 
     {{-- Filter & Header Tabel --}}
@@ -144,7 +243,7 @@
                     Semua
                 </button>
                 <button type="button" id="btnFilterToday" onclick="setDateFilter('today')" class="btn-filter-tab">
-                     Hari Ini
+                    Hari Ini
                 </button>
             </div>
         </div>
@@ -434,6 +533,7 @@
                         </select>
                     </div>
 
+                    {{-- PILIH PRODUK / LAYANAN (dikirim sebagai product_id) --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Produk / Layanan yang Diminati</label>
                         <select name="product_id" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
@@ -591,7 +691,7 @@
 <script>
     let activeCancelVisitId = null;
     let currentStep = 1;
-    let activeDateFilter = 'all'; // State filter tanggal ('all' atau 'today')
+    let activeDateFilter = 'all';
 
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr("#input_scheduled_at", {
@@ -608,6 +708,7 @@
             minuteIncrement: 15,
             disableMobile: "true",
             defaultDate: new Date(),
+            static: true, // Nempel presisi di dalam modal tanpa merusak overflow
             disable: [
                 function(date) {
                     return (date.getDay() === 0); // Sembunyikan hari Minggu
@@ -619,7 +720,6 @@
         });
     });
 
-    // FUNGSI UNTUK SET FILTER TANGGAL (SEMUA / HARI INI)
     function setDateFilter(filterType) {
         activeDateFilter = filterType;
 
@@ -637,7 +737,6 @@
         filterAppTable();
     }
 
-    // FUNGSI FILTER TABEL (MENDUKUNG PENCARIAN TEKS + FILTER HARI INI/SEMUA)
     function filterAppTable() {
         const input = document.getElementById('searchApp');
         const filterText = input.value.toLowerCase();
@@ -647,7 +746,6 @@
         const startNumber = {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() : 1 }};
         let visibleCount = 0;
 
-        // Dapatkan tanggal hari ini dalam format YYYY-MM-DD
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -663,10 +761,7 @@
             const txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
             const txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
 
-            // Cek pencocokan teks pencarian
             const matchesText = txtName.toLowerCase().indexOf(filterText) > -1 || txtPic.toLowerCase().indexOf(filterText) > -1;
-
-            // Cek pencocokan filter tanggal
             const matchesDate = (activeDateFilter === 'all') || (activeDateFilter === 'today' && rowDate === todayStr);
 
             if (matchesText && matchesDate) {

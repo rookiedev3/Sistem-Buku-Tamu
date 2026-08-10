@@ -25,6 +25,16 @@
     }
 
     /* Style Fokus Input Flatpickr & Form */
+    .flatpickr-custom-input {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        color: #172033 !important;
+        font-weight: 600 !important;
+        border: 1px solid #e8edf5 !important;
+        /* Border tipis netral */
+        border-radius: 10px !important;
+    }
+
     .flatpickr-custom-input[readonly] {
         background-color: #ffffff !important;
         cursor: pointer !important;
@@ -33,23 +43,117 @@
     .flatpickr-custom-input:focus,
     .flatpickr-custom-input.active {
         border-color: #006B3F !important;
-        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+        box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.08) !important;
+        /* Shadow fokus ditipiskan */
     }
 
-    /* Calendar Popup Custom Color */
+    /* 2. Popup Kalender - Border & Shadow Diperhalus */
     .flatpickr-calendar {
-        border-radius: 16px !important;
-        box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important;
-        border: 1px solid #e8edf5 !important;
+        z-index: 99999 !important;
+        width: 215px !important;
+        border-radius: 12px !important;
+        border: 1px solid #f1f5f9 !important;
+        /* Border kalender lebih samar */
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
+        /* Shadow dibuat lembut */
         font-family: inherit !important;
-        padding: 10px !important;
+        padding: 6px !important;
+        background: #ffffff !important;
     }
 
+    .flatpickr-innerContainer {
+        justify-content: center !important;
+    }
+
+    .flatpickr-days,
+    .dayContainer {
+        width: 196px !important;
+        min-width: 196px !important;
+        max-width: 196px !important;
+    }
+
+    /* 3. Header Bulan & Tahun */
+    .flatpickr-months .flatpickr-month {
+        height: 26px !important;
+    }
+
+    .flatpickr-current-month {
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        padding-top: 0 !important;
+    }
+
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+        padding: 2px !important;
+        height: 22px !important;
+        width: 22px !important;
+    }
+
+    /* 4. Header Nama Hari (Sen, Sel, Rab...) */
+    span.flatpickr-weekday {
+        color: #006B3F !important;
+        font-weight: 700 !important;
+        font-size: 9.5px !important;
+    }
+
+    /* 5. Angka Tanggal */
+    .flatpickr-day {
+        border-radius: 6px !important;
+        color: #172033 !important;
+        font-weight: 500 !important;
+        font-size: 10px !important;
+        max-width: 28px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        margin-top: 1px !important;
+        border: none !important;
+        /* Menghapus border tebal default */
+    }
+
+    /* Hover Tanggal */
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
+        background: #f0fdf4 !important;
+        /* Warna hijau sangat muda saat di-hover */
+        color: #006B3F !important;
+        border: none !important;
+    }
+
+    /* Indikator Hari Ini (Today) - Garis Ditipiskan */
+    .flatpickr-day.today {
+        border: 1px solid #86efac !important;
+        /* Garis hijau tipis soft */
+        color: #006B3F !important;
+        font-weight: 700 !important;
+    }
+
+    /* Tanggal Terpilih (Selected) - Tanpa Shadow Tebal */
     .flatpickr-day.selected,
-    .flatpickr-day.startRange,
-    .flatpickr-day.endRange {
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.selected:focus {
         background: #006B3F !important;
-        border-color: #006B3F !important;
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+        /* Dihapus agar tidak berkesan tebal */
+    }
+
+    /* 6. Pembatas Time Picker (Jam & Menit) */
+    .flatpickr-time {
+        border-top: 1px solid #f8fafc !important;
+        /* Garis pemisah paling tipis & samar */
+        margin-top: 4px !important;
+        padding-top: 2px !important;
+        height: 28px !important;
+        line-height: 28px !important;
+    }
+
+    .flatpickr-time input {
+        font-weight: 700 !important;
+        color: #172033 !important;
+        font-size: 11px !important;
     }
 </style>
 
@@ -69,7 +173,6 @@
 {{-- Header Halaman --}}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
-       
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
             Kelola Janji Temu (Appointment)
         </h1>
@@ -83,7 +186,7 @@
     </button>
 </div>
 
-{{-- Container Utama Tabel (Style Dashboard PIC) --}}
+{{-- Container Utama Tabel --}}
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
 
     {{-- Filter & Header Tabel --}}
@@ -141,7 +244,7 @@
                         </span>
                     </td>
 
-                    {{-- TABEL STATUS BADGES (Style Dashboard PIC) --}}
+                    {{-- TABEL STATUS BADGES --}}
                     <td style="padding: 14px;">
                         @php $statusLower = strtolower($visit->status ?? ''); @endphp
 
@@ -609,33 +712,28 @@
         const table = document.getElementById('guestTable');
         const tr = table.getElementsByTagName('tr');
 
-        // Ambil offset nomor awal jika menggunakan pagination (misal halaman 2, mulai dari No 11)
-        // Jika tidak ada pagination, default mulai dari 1
         let visibleIndex = 1;
 
         for (let i = 1; i < tr.length; i++) {
-            // Abaikan baris "Belum ada antrian..." jika ada
             if (tr[i].getElementsByTagName('td').length <= 1) continue;
 
-            let tdName = tr[i].getElementsByTagName('td')[2]; // Kolom Tamu & Jabatan
-            let tdPic = tr[i].getElementsByTagName('td')[4]; // Kolom Tujuan PIC
-            let tdNum = tr[i].querySelector('.row-number'); // Kolom Nomor
+            let tdName = tr[i].getElementsByTagName('td')[2];
+            let tdPic = tr[i].getElementsByTagName('td')[4];
+            let tdNum = tr[i].querySelector('.row-number');
 
             if (tdName || tdPic) {
                 let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
                 let txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
 
-                // Cek apakah teks cocok dengan kata kunci pencarian
                 if (txtName.toLowerCase().indexOf(filter) > -1 || txtPic.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = ""; // Tampilkan baris
+                    tr[i].style.display = "";
 
-                    // Ubah nomor urut sesuai urutan yang tampil saja
                     if (tdNum) {
                         tdNum.textContent = visibleIndex;
                         visibleIndex++;
                     }
                 } else {
-                    tr[i].style.display = "none"; // Sembunyikan baris
+                    tr[i].style.display = "none";
                 }
             }
         }
@@ -703,19 +801,19 @@
         document.getElementById('sum_company').innerText = document.getElementById('input_company').value || '-';
 
         const picSelect = document.getElementById('select_pic');
-        document.getElementById('sum_pic').innerText = picSelect.options[picSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_pic').innerText = (picSelect.selectedIndex > 0 && picSelect.options[picSelect.selectedIndex]) ? picSelect.options[picSelect.selectedIndex].text : '-';
 
         const branchSelect = document.getElementById('select_branch');
-        document.getElementById('sum_branch').innerText = branchSelect.options[branchSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_branch').innerText = (branchSelect.selectedIndex > 0 && branchSelect.options[branchSelect.selectedIndex]) ? branchSelect.options[branchSelect.selectedIndex].text : '-';
 
         const purposeSelect = document.getElementById('select_purpose');
-        document.getElementById('sum_purpose').innerText = purposeSelect.options[purposeSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_purpose').innerText = (purposeSelect.selectedIndex > 0 && purposeSelect.options[purposeSelect.selectedIndex]) ? purposeSelect.options[purposeSelect.selectedIndex].text : '-';
 
         const productSelect = document.getElementById('select_product');
-        document.getElementById('sum_product').innerText = productSelect.options[productSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_product').innerText = (productSelect.selectedIndex > 0 && productSelect.options[productSelect.selectedIndex]) ? productSelect.options[productSelect.selectedIndex].text : '-';
 
         const sourceSelect = document.getElementById('select_source');
-        document.getElementById('sum_source').innerText = sourceSelect.options[sourceSelect.selectedIndex]?.text || '-';
+        document.getElementById('sum_source').innerText = (sourceSelect.selectedIndex > 0 && sourceSelect.options[sourceSelect.selectedIndex]) ? sourceSelect.options[sourceSelect.selectedIndex].text : '-';
 
         document.getElementById('sum_schedule').innerText = document.getElementById('input_scheduled_at').value || '-';
         document.getElementById('sum_notes').innerText = document.getElementById('input_notes').value || '-';
