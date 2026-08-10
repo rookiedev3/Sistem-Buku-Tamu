@@ -62,6 +62,7 @@
         font-family: inherit !important;
         padding: 8px !important;
     }
+
     .flatpickr-day.selected,
     .flatpickr-day.startRange,
     .flatpickr-day.endRange,
@@ -73,16 +74,20 @@
         font-weight: 600;
         border-radius: 8px !important;
     }
+
     .flatpickr-day:hover {
         border-radius: 8px !important;
     }
+
     .flatpickr-months .flatpickr-month {
         color: #172033 !important;
         fill: #172033 !important;
     }
+
     .flatpickr-current-month .flatpickr-monthDropdown-months {
         font-weight: 700 !important;
     }
+
     span.flatpickr-weekday {
         color: #778195 !important;
         font-weight: 600 !important;

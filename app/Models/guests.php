@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class guests extends Model
 {
+    use HasFactory;
+
     protected $table = 'guests';
     protected $fillable = [
         'guest_code',

@@ -7,14 +7,14 @@
         <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Database Tamu</h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">Arsip lengkap seluruh riwayat kunjungan dan data instansi tamu.</p>
     </div>
-    
+
     <button onclick="alert('Fitur ekspor data Excel/PDF akan diproses backend.')" style="background: #ffffff; color: #172033; border: 1px solid #e8edf5; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(31,53,97,.05);">
         📥 Export Data
     </button>
 </div>
 
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); overflow: hidden;">
-    
+
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; gap: 10px; align-items: center;">
             <input type="text" placeholder="Cari nama, instansi, atau nomor WA..." style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
@@ -44,91 +44,56 @@
                 </tr>
             </thead>
             <tbody style="color: #172033;">
-                
-                <!-- Data Dummy 1 -->
+                @forelse ($guests as $index => $guest)
                 <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">1</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Ahmad Fauzan</div>
-                        <div style="font-size: 11px; color: #778195;">081234567890</div>
+                    {{-- Nomor Urut (Mendukung Pagination) --}}
+                    <td style="padding: 16px 20px; font-weight: 700;">
+                        {{ method_exists($guests, 'firstItem') ? $guests->firstItem() + $index : $loop->iteration }}
                     </td>
+
+                    {{-- Nama & Phone --}}
                     <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">PT Maju Jaya</div>
-                        <div style="font-size: 11px; color: #778195;">Manager</div>
+                        <div style="font-weight: 800;">{{ $guest->name }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $guest->phone }}</div>
                     </td>
+
+                    {{-- Perusahaan & Jabatan --}}
                     <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
+                        <div style="font-weight: 700;">{{ $guest->company_name ?? '-' }}</div>
+                        <div style="font-size: 11px; color: #778195;">{{ $guest->position ?? '-' }}</div>
                     </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">3 Kali</td>
-                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Selasa, 04 Agu 2026</td>
+
+                    {{-- Minat Produk (Dari Relasi/Kategori) --}}
+                    <td style="padding: 16px 20px;">
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">
+                            {{ $guest->category->name ?? $guest->product_interest ?? '-' }}
+                        </span>
+                    </td>
+
+                    {{-- Total Kunjungan (Dari Relasi visits_count) --}}
+                    <td style="padding: 16px 20px; font-weight: 700;">
+                        {{ $guest->visits_count ?? 1 }} Kali
+                    </td>
+
+                    {{-- Terakhir Berkunjung --}}
+                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">
+                        {{ $guest->updated_at ? $guest->updated_at->translatedFormat('l, d M Y') : '-' }}
+                    </td>
+
+                    {{-- Aksi --}}
                     <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                        <a href="{{ route('owner.databaseTamuDetail', $guest->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
+                            Lihat Riwayat
+                        </a>
                     </td>
                 </tr>
-
-                <!-- Data Dummy 2 -->
-                <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">2</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Siti Aminah</div>
-                        <div style="font-size: 11px; color: #778195;">089876543211</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">CV Berkah Mandiri</div>
-                        <div style="font-size: 11px; color: #778195;">Owner</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Sistem POS</span>
-                    </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">1 Kali</td>
-                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Senin, 03 Agu 2026</td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
+                @empty
+                <tr>
+                    <td colspan="7" style="padding: 20px; text-align: center; color: #778195;">
+                        Data tamu belum tersedia.
                     </td>
                 </tr>
-
-                <!-- Data Dummy 3 -->
-                <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">3</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Rian Pratama</div>
-                        <div style="font-size: 11px; color: #778195;">085711223344</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">PT Solusi Digital Nusantara</div>
-                        <div style="font-size: 11px; color: #778195;">IT Consultant</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">SEO</span>
-                    </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">2 Kali</td>
-                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Minggu, 02 Agu 2026</td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
-                    </td>
-                </tr>
-
-                <!-- Data Dummy 4 -->
-                <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">4</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 800;">Dewi Lestari</div>
-                        <div style="font-size: 11px; color: #778195;">082199887766</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">UD Sumber Rejeki</div>
-                        <div style="font-size: 11px; color: #778195;">Purchasing</div>
-                    </td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">Website</span>
-                    </td>
-                    <td style="padding: 16px 20px; font-weight: 700;">4 Kali</td>
-                    <td style="padding: 16px 20px; color: #778195; font-size: 12px;">Sabtu, 01 Agu 2026</td>
-                    <td style="padding: 16px 20px; text-align: center;">
-                        <a href="#" style="color: #006B3F; text-decoration: none; font-weight: 800;">Lihat Riwayat</a>
-                    </td>
-                </tr>
-
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -138,12 +103,12 @@
         <div style="display: flex; gap: 6px; align-items: center;" id="pagination-wrapper">
             {{-- Tombol Sebelumnya --}}
             <button type="button" onclick="ubahHalaman('prev')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Sebelumnya</button>
-            
+
             {{-- Daftar Nomor Halaman --}}
             <button type="button" onclick="pilihHalaman(1)" class="page-btn" data-page="1" style="padding: 6px 12px; border: 1px solid #013220; background: #013220; color: #fff; border-radius: 8px; font-weight: 800; cursor: pointer; pointer-events: auto !important;">1</button>
             <button type="button" onclick="pilihHalaman(2)" class="page-btn" data-page="2" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">2</button>
             <button type="button" onclick="pilihHalaman(3)" class="page-btn" data-page="3" style="padding: 6px 12px; border: 1px solid #013220; background: #fff; color: #778195; border-radius: 8px; font-weight: 700; cursor: pointer; pointer-events: auto !important;">3</button>
-            
+
             {{-- Tombol Selanjutnya --}}
             <button type="button" onclick="ubahHalaman('next')" style="padding: 6px 12px; border: 1px solid #e8edf5; background: #fff; border-radius: 8px; color: #778195; font-weight: 700; cursor: pointer; pointer-events: auto !important;">Selanjutnya</button>
         </div>
@@ -188,4 +153,4 @@
             });
         }
     </script>
-@endsection
+    @endsection

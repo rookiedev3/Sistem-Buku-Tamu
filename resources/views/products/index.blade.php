@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.frontoffice')
 
 @section('content')
 
-{{-- Navigasi Tab Master Data --}}
-<div class="d-flex gap-2 border-bottom pb-3 mb-4">
+{{-- Navigasi Tab Master Data (Responsif) --}}
+<div class="d-flex gap-2 border-bottom pb-3 mb-4" style="overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;">
     <a href="{{ route('branches.index') }}" 
        class="btn btn-sm px-3 fw-semibold {{ request()->routeIs('branches*') ? 'text-white' : 'text-secondary' }}" 
        style="background-color: {{ request()->routeIs('branches*') ? '#013220' : '#f1f5f9' }}; border: none; border-radius: 10px;">
@@ -35,13 +35,13 @@
     </a>
 </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Daftar Product</h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">Kelola dan pantau seluruh data produk perusahaan.</p>
     </div>
     
-    <a href="{{ route('products.create') }}" style="background:#013220; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer;">
+    <a href="{{ route('products.create') }}" style="background:#013220; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 8px 20px rgba(0,107,63,.2); border: none; cursor: pointer; white-space: nowrap;">
         + Tambah Product
     </a>
 </div>
@@ -55,15 +55,16 @@
 
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); overflow: hidden;">
     
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
-        <input type="text" placeholder="Cari kode atau nama product..." style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
+        <input type="text" id="searchProduct" placeholder="Cari kode atau nama product..." onkeyup="filterProductTable()" style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 100%; max-width: 300px; outline: none; background: #fff; color: #172033; box-sizing: border-box;">
         <div style="font-size: 13px; color: #778195; font-weight: 600;">
             Total Products: <strong style="color: #172033; font-weight: 800;">{{ $products->count() }} Produk</strong>
         </div>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+    {{-- Wadah overflow-x agar tabel aman dan bisa digeser di layar HP / Tablet --}}
+    <div style="overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch;">
+        <table id="productTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 800px;">
             <thead>
                 <tr style="background: #f8fafc; color: #778195; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 800; width: 60px;">No</th>
@@ -79,7 +80,7 @@
                 <tr style="border-bottom: 1px solid #f1f4f9;">
                     <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">
+                        <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">
                             {{ $product->code }}
                         </span>
                     </td>
@@ -97,7 +98,7 @@
                         @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
                             {{-- Tombol Edit dengan Desain Button Pill --}}
                             <a href="{{ route('products.edit', $product->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
                                 <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
@@ -125,10 +126,34 @@
         </table>
     </div>
 
-    <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; font-size: 12px; color: #778195;">
+    <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; font-size: 12px; color: #778195; flex-wrap: wrap; gap: 8px;">
         <span>Menampilkan {{ $products->count() }} data produk</span>
     </div>
 
 </div>
+
+{{-- Script JavaScript untuk Pencarian Real-Time Produk --}}
+<script>
+    function filterProductTable() {
+        const input = document.getElementById('searchProduct');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('productTable');
+        const tr = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < tr.length; i++) {
+            let tdCode = tr[i].getElementsByTagName('td')[1];
+            let tdName = tr[i].getElementsByTagName('td')[2];
+            if (tdCode || tdName) {
+                let txtCode = tdCode ? (tdCode.textContent || tdCode.innerText) : '';
+                let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
+                if (txtCode.toLowerCase().indexOf(filter) > -1 || txtName.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
 
 @endsection
