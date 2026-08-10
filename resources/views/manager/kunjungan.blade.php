@@ -85,7 +85,7 @@
         @endphp
 
         <div class="table-responsive">
-            <table class="table align-middle" style="font-size: 12px; color: #172033; margin: 0; min-width: 800px;">
+            <table class="table align-middle" style="font-size: 12px; color: #172033; margin: 0; min-width: 900px;">
                 <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <tr>
                         <th style="padding: 8px 10px;">No</th>
@@ -95,6 +95,7 @@
                         <th style="padding: 8px 10px;">Jenis Kunjungan</th>
                         <th style="padding: 8px 10px;">Keperluan</th>
                         <th style="padding: 8px 10px;">PIC / Sales</th>
+                        <th style="padding: 8px 10px;">Value</th>
                         <th style="padding: 8px 10px; text-align: center;">Catatan</th>
                         <th style="padding: 8px 10px; text-align: center;">Tahap Pipeline</th>
                     </tr>
@@ -144,6 +145,10 @@
 
                         <td style="padding: 8px 10px; color: #475569; font-weight: 600;">{{ $v->assignedUser->name ?? '-' }}</td>
 
+                        <td style="padding: 8px 10px; color: #172033; font-weight: 700;">
+                            {{ optional($v->lead)->estimated_value ? rupiah($v->lead->estimated_value, true) : '-' }}
+                        </td>
+
                         <td style="padding: 8px 10px; text-align: center;">
                             <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">
                                 📝 Lihat Catatan
@@ -163,7 +168,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 12px;">
+                        <td colspan="10" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 12px;">
                             Belum ada data kunjungan yang sudah selesai dan cocok dengan filter.
                         </td>
                     </tr>
@@ -211,6 +216,12 @@
                                     <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Jadwal / Keterangan Status:</div>
                                     <div style="font-weight: 700; color: #006B3F;">
                                         {{ $scheduleText }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Estimasi Value:</div>
+                                    <div style="font-weight: 700; color: #172033;">
+                                        {{ $leadModal && $leadModal->estimated_value ? rupiah($leadModal->estimated_value, true) : '-' }}
                                     </div>
                                 </div>
                             </div>

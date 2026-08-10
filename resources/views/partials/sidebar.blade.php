@@ -54,6 +54,12 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 <span>Lead & Follow Up</span>
             </a>
+
+            <a href="{{ route('laporan.index') }}" class="menu-item {{ request()->is('laporan.index*') ? 'active' : '' }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('laporan.index*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('laporan.index*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('laporan.index*') ? '#C7AB6B' : 'transparent' }};">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Laporan</span>
+            </a>
+
             
         </div>
     </div>
