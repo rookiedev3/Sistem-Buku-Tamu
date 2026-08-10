@@ -75,27 +75,34 @@ class GuestCategoriesController extends Controller
         }
     }
 
-public function laporan(Request $request) // Pastikan memasukkan Request
+public function laporan(Request $request)
 {
-    // Mengambil nilai per_page dari URL, default 10
-    $perPage = (int) $request->input('per_page', 10);
+    $month = (int) $request->input('month', now()->month);
+    $year  = (int) $request->input('year', now()->year);
 
-    // Hitung total KESELURUHAN tamu (agar kalkulasi persen tidak hanya dari halaman aktif)
-    $totalGuests = DB::table('guests')
+    $baseQuery = DB::table('guests')
         ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
-        ->count();
+        ->whereMonth('guests.created_at', $month)
+        ->whereYear('guests.created_at', $year);
 
-    // Mengambil data dengan paginate
-    $categoryStats = DB::table('guests')
-        ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
+    // Total keseluruhan tamu pada bulan terpilih (untuk basis persentase)
+    $totalGuests = (clone $baseQuery)->count();
+
+    // Data statistik kategori, tanpa pagination
+    $categoryStats = (clone $baseQuery)
         ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
         ->groupBy('guest_categories.id', 'guest_categories.name')
         ->orderByDesc('total')
-        ->paginate($perPage)
-        ->appends($request->query());
+        ->get();
 
     $chartColors = ['#013220', '#1463ff', '#ca8a04', '#7c3aed', '#0284c7', '#c2410c', '#21a86b', '#dc2626'];
 
-    return view('guest_categories.laporan', compact('categoryStats', 'totalGuests', 'chartColors'));
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
+    return view('guest_categories.laporan', compact('categoryStats', 'totalGuests', 'chartColors', 'month', 'year', 'months'));
 }
 }

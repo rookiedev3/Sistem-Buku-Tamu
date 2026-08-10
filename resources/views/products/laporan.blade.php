@@ -23,6 +23,20 @@
         color: #111827;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .filter-bar select {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+    }
     .report-card {
         background-color: #ffffff;
         border-radius: 16px;
@@ -129,6 +143,20 @@
         <p>Ranking produk berdasarkan jumlah permintaan dari kunjungan tamu.</p>
     </div>
 
+    <!-- FILTER BULAN & TAHUN -->
+    <form method="GET" action="{{ route('products.laporan') }}" class="filter-bar">
+        <select name="month" onchange="this.form.submit()">
+            @foreach($months as $num => $label)
+                <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $label }}</option>
+            @endforeach
+        </select>
+        <select name="year" onchange="this.form.submit()">
+            @for($y = now()->year; $y >= now()->year - 4; $y--)
+                <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+            @endfor
+        </select>
+    </form>
+
     @if($productStats->count() > 0)
         <div class="chart-wrapper">
             <canvas id="productChart" style="max-height: 350px;"></canvas>
@@ -153,8 +181,7 @@
                     @endphp
                     <tr>
                         <td style="text-align: center;">
-                            <!-- Penomoran Peringkat Dinamis Sesuai Halaman Pagination -->
-                            <span class="rank-badge">#{{ ($productStats->firstItem() ?? 1) + $index }}</span>
+                            <span class="rank-badge">#{{ $index + 1 }}</span>
                         </td>
                         <td style="font-weight: 700; color: #111827;">
                             {{ $product->name }}
@@ -175,18 +202,13 @@
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
                             <svg style="width: 48px; height: 48px; margin: 0 auto 12px; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                            Belum ada data permintaan produk.
+                            Belum ada data permintaan produk pada periode ini.
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-
-    <!-- INCLUDE PAGINATION COMPONENT -->
-    @if($productStats->total() > 0)
-        @include('partials.pagination', ['paginator' => $productStats])
-    @endif
 </div>
 
 @if($productStats->count() > 0)

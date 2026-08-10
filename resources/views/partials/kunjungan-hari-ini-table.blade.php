@@ -28,12 +28,13 @@
         <thead style="background:#f8fafc; color:#5c6678; font-weight:700;">
             <tr>
                 <th style="padding:14px; border-top-left-radius:10px; border-bottom-left-radius:10px;">No</th>
-                <th style="padding:14px;">Nama Tamu & Instansi</th>
-                <th style="padding:14px;">Kategori</th>
-                <th style="padding:14px;">Tujuan PIC</th>
+                <th style="padding:14px;">Token</th>
+                <th style="padding:14px;">Tamu & Jabatan</th>
+                <th style="padding:14px;">Waktu</th>
+                <th style="padding:14px;">Jenis Kunjungan</th>
                 <th style="padding:14px;">Keperluan</th>
-                <th style="padding:14px;">Jam</th>
-                <th style="padding:14px; text-align:center;">Catatan Pertemuan</th>
+                <th style="padding:14px;">PIC / Sales</th>
+                <th style="padding:14px; text-align:center;">Catatan</th>
                 <th style="padding:14px; text-align:center;">Status Kunjungan</th>
                 <th style="padding:14px; border-top-right-radius:10px; border-bottom-right-radius:10px; text-align:center;">Status Lead</th>
             </tr>
@@ -44,25 +45,54 @@
                     $statusLower = strtolower(trim($visit->status ?? ''));
                     $leadStatus = optional($visit->lead)->status;
                     $vb = $visitStatusBadges[$statusLower] ?? ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => $visit->status ?? '-'];
+                    $catName  = $visit->guest->category->name ?? 'Reguler';
+                    $catColor = $visit->guest->category->color ?? '#006B3F';
                 @endphp
                 <tr style="border-bottom:1px solid #f1f5f9;">
-                    <td style="padding:14px; font-weight:600;">{{ $visits->firstItem() + $index }}</td>
+                    <td style="padding:14px; font-weight:600;">{{ $index + 1 }}</td>
+
                     <td style="padding:14px;">
-                        <strong style="display:block; color:#172033; font-weight:800;">{{ $visit->guest->name ?? '-' }}</strong>
-                        <span style="font-size:11px; color:#778195;">{{ $visit->guest->company_name ?? '-' }}</span>
+                        <strong style="color:#006B3F; font-weight:800;">
+                            {{ $visit->visit_code ?? ('VST-' . str_pad($visit->id, 4, '0', STR_PAD_LEFT)) }}
+                        </strong>
                     </td>
-                    <td style="padding:14px; color:#475569;">{{ $visit->guest->category->name ?? 'Reguler' }}</td>
-                    <td style="padding:14px; color:#475569; font-weight:600;">{{ $visit->assignedUser->name ?? '-' }}</td>
+
+                    <td style="padding:14px;">
+                        <strong style="display:block; color:#172033; font-weight:800;">
+                            {{ $visit->guest->name ?? '-' }}
+                            @if(isset($visit->guest) && $visit->guest->is_vip)
+                                <span title="VIP" style="color:#d97706;">⭐</span>
+                            @endif
+                        </strong>
+                        <span style="font-size:11px; color:#778195;">
+                            {{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})
+                        </span>
+                    </td>
+
+                    <td style="padding:14px; color:#778195; font-weight:600;">
+                        {{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}
+                    </td>
+
+                    <td style="padding:14px;">
+                        <span style="background:{{ $catColor }}22; color:{{ $catColor }}; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:800;">
+                            {{ $catName }}
+                        </span>
+                    </td>
+
                     <td style="padding:14px; color:#475569;">{{ $visit->purpose->name ?? '-' }}</td>
-                    <td style="padding:14px; color:#778195; font-weight:600;">{{ optional($visit->scheduled_at)->format('H:i') }}</td>
+
+                    <td style="padding:14px; color:#475569; font-weight:600;">{{ $visit->assignedUser->name ?? '-' }}</td>
+
                     <td style="padding:14px; text-align:center;">
                         <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $visit->id }}" style="background:transparent; color:#006B3F; border:1px solid #006B3F; padding:6px 12px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">
                             📝 Lihat Catatan
                         </button>
                     </td>
+
                     <td style="padding:14px; text-align:center;">
                         <span style="background:{{ $vb['bg'] }}; color:{{ $vb['color'] }}; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800;">{{ $vb['label'] }}</span>
                     </td>
+
                     <td style="padding:14px; text-align:center;">
                         @if($leadStatus)
                             @php $lb = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
@@ -74,7 +104,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" style="text-align:center; padding:24px; color:#94a3b8;">
+                    <td colspan="10" style="text-align:center; padding:24px; color:#94a3b8;">
                         Tidak ada data kunjungan yang cocok.
                     </td>
                 </tr>
@@ -84,10 +114,10 @@
 </div>
 
 
-        <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
-            <span>Menampilkan data monitoring real-time</span>
-            <span>Total Data: {{ $visits->count() }}</span>
-        </div>
+<div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
+    <span>Menampilkan data monitoring real-time</span>
+    <span>Total Data: {{ $visits->count() }}</span>
+</div>
 
 {{-- ============================================== --}}
 {{-- MODAL CATATAN PER KUNJUNGAN                     --}}

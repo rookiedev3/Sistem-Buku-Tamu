@@ -169,6 +169,10 @@
         </div>
 
         <form id="filterKunjunganForm" method="GET" action="{{ route('owner.dashboard') }}" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+            {{-- Dipertahankan sebagai hidden input supaya filter "Menjadi Lead" tidak hilang
+                 saat user menggabungkannya dengan pencarian keyword/status/PIC lain. --}}
+            <input type="hidden" name="lead_only" id="leadOnlyInput" value="{{ $leadOnly ? '1' : '' }}">
+
             <div style="flex:1; min-width:220px;">
                 <label style="font-size:11px; font-weight:700; color:#5c6678; display:block; margin-bottom:6px; text-transform:uppercase;">Cari Nama / Instansi</label>
                 <div style="position:relative; display:flex; align-items:center;">
@@ -206,7 +210,7 @@
                 <button type="submit" style="background:#013220; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; height:41px;">
                     Filter
                 </button>
-                @if($statusFilter || $picFilter || $keyword)
+                @if($statusFilter || $picFilter || $keyword || $leadOnly)
                     <a href="{{ route('owner.dashboard') }}#kunjungan-hari-ini" id="resetFilterKunjungan" style="background:#f1f5f9; color:#475569; text-decoration:none; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; height:41px; box-sizing:border-box;">
                         Reset
                     </a>
@@ -215,12 +219,13 @@
         </form>
 
         <div id="kunjunganInfoBar">
-            @if($statusFilter || $picFilter || $keyword)
+            @if($statusFilter || $picFilter || $keyword || $leadOnly)
             <div style="background-color:#d4edda; color:#155724; padding:10px; border-radius:8px; font-size:12px; margin-top:16px; border:1px solid #c3e6cb;">
                 Menampilkan hasil filter
                 @if($keyword) untuk "<strong>{{ $keyword }}</strong>" @endif
                 @if($statusFilter) status <strong>{{ $statusFilter }}</strong> @endif
                 @if($picFilter) PIC tertentu @endif
+                @if($leadOnly) khusus kunjungan yang <strong>menjadi lead</strong> (hot/warm) @endif
                 — {{ $visits->total() }} data ditemukan.
             </div>
             @endif
@@ -402,6 +407,8 @@
             e.preventDefault();
             clearTimeout(searchDebounceTimer);
             form.reset();
+            const leadOnlyInput = document.getElementById('leadOnlyInput');
+            if (leadOnlyInput) leadOnlyInput.value = '';
             loadKunjungan(form.action);
         });
     }

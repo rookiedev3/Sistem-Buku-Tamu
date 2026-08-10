@@ -81,23 +81,33 @@ class ProductsController extends Controller
         }
     }
 
-public function laporan(Request $request) // Pastikan menambahkan parameter Request $request
+public function laporan(Request $request)
 {
-    // Mengambil limit per_page dari URL (default 10)
-    $perPage = (int) $request->input('per_page', 10);
+    $month = (int) $request->input('month', now()->month);
+    $year  = (int) $request->input('year', now()->year);
 
-    // Hitung total KESELURUHAN permintaan produk (agar persentase tidak terbatas pada per halaman)
-    $totalPermintaan = DB::table('visit_products')->count();
-
-    // Query data statistik produk dengan pagination
-    $productStats = DB::table('visit_products')
+    $baseQuery = DB::table('visit_products')
         ->join('products', 'products.id', '=', 'visit_products.product_id')
+        ->join('visits', 'visits.id', '=', 'visit_products.visit_id')
+        ->whereMonth('visits.check_in_at', $month)
+        ->whereYear('visits.check_in_at', $year);
+
+    // Total keseluruhan permintaan produk pada bulan terpilih (untuk basis persentase)
+    $totalPermintaan = (clone $baseQuery)->count();
+
+    // Data statistik produk, tanpa pagination
+    $productStats = (clone $baseQuery)
         ->select('products.id', 'products.name', DB::raw('count(*) as total'))
         ->groupBy('products.id', 'products.name')
         ->orderByDesc('total')
-        ->paginate($perPage)
-        ->appends($request->query());
+        ->get();
 
-    return view('products.laporan', compact('productStats', 'totalPermintaan'));
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
+    return view('products.laporan', compact('productStats', 'totalPermintaan', 'month', 'year', 'months'));
 }
 }

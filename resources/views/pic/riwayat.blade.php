@@ -96,7 +96,7 @@
                         <th style="padding: 8px 10px;">Tamu & Jabatan</th>
                         <th style="padding: 8px 10px;">Tanggal & Waktu</th>
                         <th style="padding: 8px 10px;">Keperluan</th>
-                        <th style="padding: 8px 10px; text-align: center;">Catatan Pertemuan</th>
+                        <th style="padding: 8px 10px; text-align: center;">Catatan</th>
                         <th style="padding: 8px 10px; text-align: center;">Status Akhir</th>
                     </tr>
                 </thead>
