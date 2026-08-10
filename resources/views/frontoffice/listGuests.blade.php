@@ -6,14 +6,10 @@ use App\Helpers\DateHelper;
 
 @section('content')
 
-<!-- Meta CSRF Token untuk AJAX Request -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
-        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
-            FRONT OFFICE SYSTEM
-        </span>
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
             Daftar Master Tamu
         </h1>
@@ -22,21 +18,20 @@ use App\Helpers\DateHelper;
         </p>
     </div>
 
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <button onclick="openCreateGuestModal()" style="background: #006B3F; color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.15);">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: nowrap;">
+        <button onclick="openCreateGuestModal()" style="background: #013220; color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.15); white-space: nowrap;">
             + Tambah Tamu Baru
         </button>
 
-        <!-- Filter Status VIP -->
-        <form action="{{ route('frontoffice.guest') }}" method="GET" id="vipFilterForm" style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
-            <span style="font-size: 12px; font-weight: 600; color: #64748b;">Kategori VIP:</span>
+        <form action="{{ route('frontoffice.guest') }}" method="GET" id="vipFilterForm" style="display: flex; gap: 8px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
+            <span style="font-size: 12px; font-weight: 600; color: #64748b; white-space: nowrap;">Kategori VIP:</span>
             <select name="vip" onchange="document.getElementById('vipFilterForm').submit()" style="padding: 6px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; outline: none; color: #172033; background: #fff;">
                 <option value="">Semua Tamu</option>
                 <option value="1" {{ request('vip') === '1' ? 'selected' : '' }}>Hanya VIP</option>
                 <option value="0" {{ request('vip') === '0' ? 'selected' : '' }}>Reguler</option>
             </select>
             @if(request()->has('vip') && request('vip') !== null)
-            <a href="{{ route('frontoffice.guest') }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 5px;">Reset</a>
+            <a href="{{ route('frontoffice.guest') }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 2px; white-space: nowrap;">Reset</a>
             @endif
         </form>
     </div>
@@ -44,7 +39,7 @@ use App\Helpers\DateHelper;
 
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
 
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Direktori Data Tamu</h3>
 
         <div>
@@ -54,7 +49,7 @@ use App\Helpers\DateHelper;
     </div>
 
     <div style="overflow-x: auto;">
-        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 850px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 700;">No</th>
@@ -74,13 +69,12 @@ use App\Helpers\DateHelper;
                         {{ method_exists($guests, 'firstItem') && $guests->firstItem() ? $guests->firstItem() + $index : $index + 1 }}
                     </td>
 
-                    <!-- Foto & Nama Tamu -->
                     <td style="padding: 16px 20px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             @if($guest->photo_path)
                             <img src="{{ asset('storage/' . $guest->photo_path) }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e8edf5;" alt="Foto">
                             @else
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #006B3F; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #006B3F; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0;">
                                 {{ strtoupper(substr($guest->name ?? 'G', 0, 1)) }}
                             </div>
                             @endif
@@ -91,18 +85,15 @@ use App\Helpers\DateHelper;
                         </div>
                     </td>
 
-                    <!-- Instansi & Jabatan -->
                     <td style="padding: 16px 20px;">
                         <div style="font-weight: 600;">{{ $guest->company_name ?? '-' }}</div>
                         <div style="font-size: 11px; color: #778195;">{{ $guest->position ?? '-' }}</div>
                     </td>
 
-                    <!-- Nomor Telepon -->
                     <td style="padding: 16px 20px; font-weight: 600; color: #0369a1;">
                         {{ $guest->phone ?? '-' }}
                     </td>
 
-                    <!-- Kolom VIP & Tombol Change VIP -->
                     <td style="padding: 16px 20px; text-align: center;">
                         <select onchange="updateVipStatus({{ $guest->id }}, this)"
                             id="vip-select-{{ $guest->id }}"
@@ -113,14 +104,12 @@ use App\Helpers\DateHelper;
                         </select>
                     </td>
 
-                    <!-- Total Kunjungan -->
                     <td style="padding: 16px 20px; text-align: center;">
                         <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px;">
                             {{ $guest->visits_count ?? 0 }} Kali
                         </span>
                     </td>
 
-                    <!-- Detail Modal -->
                     <td style="padding: 16px 20px; text-align: center;">
                         <button onclick="openGuestModal(
                             '{{ addslashes($guest->name) }}',
@@ -145,7 +134,7 @@ use App\Helpers\DateHelper;
         </table>
     </div>
 
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
+    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
         <span>Menampilkan seluruh master data tamu</span>
         <span>Total: <strong>{{ method_exists($guests, 'total') ? $guests->total() : count($guests) }}</strong> Tamu</span>
     </div>
@@ -159,9 +148,8 @@ use App\Helpers\DateHelper;
 </div>
 @endif
 
-<!-- Modal Detail Tamu -->
-<div id="guestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; width: 480px; max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;">
+<div id="guestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box;">
 
         <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Profil Tamu 👤</h3>
@@ -179,11 +167,11 @@ use App\Helpers\DateHelper;
 
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Instansi:</span>
-                <span id="modalCompany" style="font-weight: 700;">-</span>
+                <span id="modalCompany" style="font-weight: 700; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Jabatan:</span>
-                <span id="modalPosition" style="font-weight: 600;">-</span>
+                <span id="modalPosition" style="font-weight: 600; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">No. WhatsApp:</span>
@@ -203,16 +191,15 @@ use App\Helpers\DateHelper;
     </div>
 </div>
 
-<!-- Modal Form Tambah Tamu Baru -->
-<div id="createGuestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; width: 500px; max-width: 90%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden;">
+<div id="createGuestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 500px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; max-height: 90vh; display: flex; flex-direction: column;">
 
-        <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
+        <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
             <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Tambah Tamu Baru 👤</h3>
             <button onclick="closeCreateGuestModal()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
         </div>
 
-        <form action="{{ route('frontoffice.store') }}" method="POST" enctype="multipart/form-data" style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+        <form action="{{ route('frontoffice.store') }}" method="POST" enctype="multipart/form-data" style="padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
             @csrf
 
             <div>
@@ -220,12 +207,12 @@ use App\Helpers\DateHelper;
                 <input type="text" name="name" required placeholder="Masukkan nama tamu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
             </div>
 
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Instansi / Perusahaan</label>
                     <input type="text" name="company_name" placeholder="Nama instansi" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                 </div>
-                <div style="flex: 1;">
+                <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Jabatan</label>
                     <input type="text" name="position" placeholder="Jabatan tamu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                 </div>
@@ -246,14 +233,14 @@ use App\Helpers\DateHelper;
 
             <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Foto Profil (Opsional)</label>
-                <input type="file" name="photo" accept="image/*" style="font-size: 12px;">
+                <input type="file" name="photo" accept="image/*" style="font-size: 12px; width: 100%;">
             </div>
 
-            <div style="padding-top: 10px; display: flex; justify-content: flex-end; gap: 10px;">
+            <div style="padding-top: 10px; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
                 <button type="button" onclick="closeCreateGuestModal()" style="background: #e2e8f0; color: #475569; border: none; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
                     Batal
                 </button>
-                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                <button type="submit" style="background: #013220; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
                     Simpan Data
                 </button>
             </div>
@@ -285,7 +272,6 @@ use App\Helpers\DateHelper;
         const prevValue = selectElem.getAttribute('data-previous-value');
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Langsung kirim request AJAX tanpa confirm/alert
         fetch(`/frontoffice/guests/${guestId}/toggle-vip`, {
                 method: 'PATCH',
                 headers: {
@@ -300,7 +286,6 @@ use App\Helpers\DateHelper;
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update tampilan visual dropdown secara langsung
                     if (data.is_vip) {
                         selectElem.style.cssText = 'padding: 6px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; outline: none; cursor: pointer; transition: all 0.2s; background: #fef3c7; color: #b45309; border: 1px solid #fcd34d;';
                         selectElem.setAttribute('data-previous-value', '1');
@@ -309,7 +294,6 @@ use App\Helpers\DateHelper;
                         selectElem.setAttribute('data-previous-value', '0');
                     }
                 } else {
-                    // Kembalikan ke nilai sebelumnya hanya jika server gagal memproses
                     selectElem.value = prevValue;
                 }
             })
@@ -329,10 +313,10 @@ use App\Helpers\DateHelper;
         const vipBadge = document.getElementById('modalVipBadge');
         if (isVip === '1') {
             vipBadge.innerText = '⭐ VIP Member';
-            vipBadge.style.cssText = 'background: #fef3c7; color: #b45309; border: 1px solid #fcd34d;';
+            vipBadge.style.cssText = 'background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;';
         } else {
             vipBadge.innerText = 'Reguler';
-            vipBadge.style.cssText = 'background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;';
+            vipBadge.style.cssText = 'background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;';
         }
 
         const photoContainer = document.getElementById('modalPhotoContainer');

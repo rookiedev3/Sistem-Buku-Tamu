@@ -2,10 +2,8 @@
 
 @section('content')
 
-<!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<!-- Styling Scrollbar Kustom & Flatpickr Hijau -->
 <style>
     .custom-scroll::-webkit-scrollbar {
         width: 6px;
@@ -33,6 +31,7 @@
         color: #172033 !important;
         outline: none !important;
         width: 170px !important;
+        max-width: 100% !important;
         transition: all 0.2s ease !important;
     }
 
@@ -81,9 +80,6 @@
 {{-- Header Halaman --}}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
-        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
-            FRONT OFFICE SYSTEM
-        </span>
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
             Riwayat Kunjungan Tamu 
         </h1>
@@ -93,7 +89,7 @@
     </div>
 
     {{-- Filter Tanggal Menggunakan Flatpickr --}}
-    <form action="{{ route('frontoffice.history') }}" method="GET" id="dateFilterForm" style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
+    <form action="{{ route('frontoffice.history') }}" method="GET" id="dateFilterForm" style="display: flex; gap: 10px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); flex-wrap: wrap;">
         <span style="font-size: 12px; font-weight: 600; color: #64748b;">Filter Tanggal:</span>
         
         <input type="text" id="filter_date" name="date" value="{{ $filterDate }}" placeholder="Pilih tanggal..." readonly>
@@ -110,14 +106,14 @@
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Arsip Data Kunjungan Selesai</h3>
         
-        <div>
+        <div style="width: 100%; sm:width: auto;">
             <input type="text" id="searchHistory" placeholder="Cari nama tamu / instansi / PIC..." onkeyup="filterHistoryTable()"
-                style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 260px; transition: all 0.2s ease;">
+                style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 100%; sm:width: 260px; transition: all 0.2s ease; box-sizing: border-box;">
         </div>
     </div>
 
     <div style="overflow-x: auto;">
-        <table id="historyTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table id="historyTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 900px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 700;">No</th>
@@ -208,7 +204,7 @@
     </div>
 
     {{-- Ringkasan Jumlah Data --}}
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
+    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
         <span>Menampilkan arsip kunjungan selesai</span>
         <span>Total: <strong>{{ method_exists($visits, 'total') ? $visits->total() : $visits->count() }}</strong> Kunjungan</span>
     </div>
@@ -222,9 +218,8 @@
     </div>
 @endif
 
-<!-- MODAL DETAIL KUNJUNGAN -->
-<div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: #ffffff; width: 520px; max-width: 90%; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column;">
+<div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 520px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; box-sizing: border-box;">
         
         <div style="padding: 20px 24px; background: #fbfcfe; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Detail Kunjungan Tamu </h3>
@@ -251,11 +246,11 @@
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Nama Lengkap:</span>
-                <span id="modalName" style="font-weight: 700;">-</span>
+                <span id="modalName" style="font-weight: 700; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Asal Instansi & Jabatan:</span>
-                <span id="modalInstansi" style="font-weight: 600; text-align: right;">-</span>
+                <span id="modalInstansi" style="font-weight: 600; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Nomor WhatsApp:</span>
@@ -263,11 +258,11 @@
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Jenis Kunjungan:</span>
-                <span id="modalKeperluan" style="font-weight: 600;">-</span>
+                <span id="modalKeperluan" style="font-weight: 600; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Tujuan PIC Pegawai:</span>
-                <span id="modalPic" style="font-weight: 600; color: #0369a1;">-</span>
+                <span id="modalPic" style="font-weight: 600; color: #0369a1; text-align: right; max-width: 60%;"> -</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Waktu Check-in:</span>
@@ -288,7 +283,6 @@
     </div>
 </div>
 
-<!-- CDN JS Flatpickr & Bahasa Indonesia -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 

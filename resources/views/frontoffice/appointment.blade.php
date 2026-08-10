@@ -2,7 +2,8 @@
 
 @section('content')
 
-<!-- Styling Scrollbar Kustom Ramping -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <style>
     .custom-scroll::-webkit-scrollbar {
         width: 6px;
@@ -34,7 +35,7 @@
 </div>
 @endif
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
             FRONT OFFICE SYSTEM
@@ -47,24 +48,24 @@
         </p>
     </div>
 
-    <button onclick="openAppointmentModal()" style="background: #006B3F; color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
+    <button onclick="openAppointmentModal()" style="background: #013220; color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.2); white-space: nowrap;">
         + Buat Janji Temu
     </button>
 </div>
 
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
 
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Daftar Jadwal Tamu Terjadwal</h3>
 
-        <div>
+        <div style="width: 100%; sm:width: auto;">
             <input type="text" id="searchApp" placeholder="Cari nama tamu / PIC..." onkeyup="filterAppTable()"
-                style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 240px; transition: all 0.2s ease;">
+                style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 100%; sm:width: 240px; transition: all 0.2s ease; box-sizing: border-box;">
         </div>
     </div>
 
     <div style="overflow-x: auto;">
-        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 900px;">
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 700;">No</th>
@@ -105,32 +106,38 @@
                         <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Terjadwal
                         </span>
+
                         @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
                         <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Menunggu
                         </span>
+
                         @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed']))
                         <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Sedang Bertemu
                         </span>
+
                         @elseif(in_array(strtolower($visit->status), ['selesai', 'completed']))
                         <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Selesai
                         </span>
+
                         @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
                         <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             Dibatalkan
                         </span>
+
                         @else
                         <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                             {{ $visit->status }}
                         </span>
+
                         @endif
                     </td>
 
                     {{-- TABEL AKSI --}}
                     <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
                             @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
@@ -139,7 +146,6 @@
                                 </button>
                             </form>
 
-                            <!-- Form Pembatalan (Dipemicu Modal Custom) -->
                             <form id="cancel-form-{{ $visit->id }}" action="{{ route('frontoffice.cancel', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 <button type="button" onclick="confirmCancel('{{ $visit->id }}', '{{ addslashes($visit->guest->name ?? 'Tamu') }}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
@@ -176,7 +182,7 @@
         </table>
     </div>
 
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px;">
+    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
         <span>Menampilkan data kunjungan hari ini</span>
         <span>Total: {{ $totalToday ?? (method_exists($visits, 'total') ? $visits->total() : count($visits)) }}</span>
     </div>
@@ -190,20 +196,16 @@
     </div>
 @endif
 
-<!-- MODAL INPUT TAMU MANUAL 3-STEP -->
-<div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999;">
+<div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999; padding: 16px; box-sizing: border-box;">
 
-    <!-- Outer Card dengan Overflow Hidden agar Scrollbar Rapi -->
     <div style="background: #ffffff; width: 100%; max-width: 520px; max-height: 90vh; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;">
 
-        <!-- Header & Progress Stepper -->
         <div style="padding: 24px 32px 16px 32px; border-bottom: 1px solid #e8edf5; background: #fbfcfe;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0;">Input Tamu Manual</h3>
                 <span id="stepIndicatorText" style="font-size: 11px; font-weight: 700; color: #006B3F; background: #e6f4ed; padding: 4px 10px; border-radius: 20px;">Langkah 1 dari 3</span>
             </div>
 
-            <!-- Visual Stepper Progress Bar -->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div id="bar-step-1" style="flex: 1; height: 6px; background: #006B3F; border-radius: 10px; transition: all 0.3s ease;"></div>
                 <div id="bar-step-2" style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 10px; transition: all 0.3s ease;"></div>
@@ -211,14 +213,11 @@
             </div>
         </div>
 
-        <!-- Inner Scroll Form Area -->
         <div id="modalFormContainer" class="custom-scroll" style="padding: 28px 32px; overflow-y: auto; max-height: 70vh; box-sizing: border-box;">
             <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
                 @csrf
 
-                <!-- ================= STEP 1: IDENTITAS TAMU ================= -->
                 <div id="step-1-content">
-                    <!-- Nama Lengkap -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nama Lengkap <span style="color: #dc2626;">*</span>
@@ -228,7 +227,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Asal Instansi / Perusahaan -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Asal Instansi / Perusahaan <span style="color: #dc2626;">*</span>
@@ -238,7 +236,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Alamat Instansi -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Alamat Instansi / Perusahaan
@@ -248,7 +245,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Jabatan -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Jabatan di Perusahaan <span style="color: #dc2626;">*</span>
@@ -258,7 +254,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Nomor WhatsApp -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nomor WhatsApp (Aktif) <span style="color: #dc2626;">*</span>
@@ -268,7 +263,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Email -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Email <span style="color: #dc2626;">*</span>
@@ -278,7 +272,6 @@
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
 
-                    <!-- Kategori Pengunjung -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Kategori Pengunjung <span style="color: #dc2626;">*</span>
@@ -297,7 +290,6 @@
                         </select>
                     </div>
 
-                    <!-- Foto Tamu -->
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Foto Tamu <span style="font-weight: 500; color: #778195;">(Opsional)</span>
@@ -311,7 +303,6 @@
                     </div>
                 </div>
 
-                <!-- ================= STEP 2: DETAIL TUJUAN ================= -->
                 <div id="step-2-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         2. Tujuan & Keperluan Kunjungan
@@ -382,16 +373,13 @@
                     </div>
                 </div>
 
-                <!-- ================= STEP 3: JADWAL & KONFIRMASI ================= -->
                 <div id="step-3-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         3. Konfirmasi Data Check-In
                     </h4>
 
-                    <!-- Box Ringkasan -->
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; margin-bottom: 12px; max-height: 280px; overflow-y: auto;">
 
-                        <!-- Penampung Pratinjau Foto Tamu di Step 3 -->
                         <div id="sum_photo_container" style="display: none; justify-content: center; margin-bottom: 16px;">
                             <div style="text-align: center;">
                                 <img id="sum_photo_preview" src="" alt="Pratinjau Foto Tamu" style="width: 80px; height: 80px; object-fit: cover; border-radius: 14px; border: 2px solid #006B3F; box-shadow: 0 4px 12px rgba(0,107,63,0.15);">
@@ -402,46 +390,46 @@
                         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Nama Tamu:</span>
-                                <strong id="sum_name" style="color: #172033;">-</strong>
+                                <strong id="sum_name" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Instansi:</span>
-                                <strong id="sum_company" style="color: #172033;">-</strong>
+                                <strong id="sum_company" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
-                                <strong id="sum_pic" style="color: #006B3F;">-</strong>
+                                <strong id="sum_pic" style="color: #006B3F; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Cabang:</span>
-                                <strong id="sum_branch" style="color: #172033;">-</strong>
+                                <strong id="sum_branch" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Jenis Kunjungan:</span>
-                                <strong id="sum_purpose" style="color: #172033;">-</strong>
+                                <strong id="sum_purpose" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Produk Minat:</span>
-                                <strong id="sum_product" style="color: #172033;">-</strong>
+                                <strong id="sum_product" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Sumber Info:</span>
-                                <strong id="sum_source" style="color: #172033;">-</strong>
+                                <strong id="sum_source" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Jadwal:</span>
-                                <strong id="sum_schedule" style="color: #172033;">-</strong>
+                                <strong id="sum_schedule" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Keperluan:</span>
-                                <strong id="sum_notes" style="color: #172033; text-align: right; max-width: 200px; word-break: break-all;">-</strong>
+                                <strong id="sum_notes" style="color: #172033; text-align: right; max-width: 60%; word-break: break-all;">-</strong>
                             </div>
                         </div>
                     </div>
 
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
                         <input type="checkbox" name="privacy_consent" id="manual_privacy_consent" value="1" required
-                            style="width: 18px; height: 18px; accent-color: #006B3F; cursor: pointer; margin-top: 2px;">
+                            style="width: 18px; height: 18px; accent-color: #006B3F; cursor: pointer; margin-top: 2px; flex-shrink: 0;">
                         <label for="manual_privacy_consent" style="font-size: 12px; color: #475569; line-height: 1.5; cursor: pointer;">
                             Saya menyetujui penggunaan data ini untuk keperluan pencatatan kunjungan dan tindak lanjut layanan IT Solution.
                         </label>
@@ -454,21 +442,20 @@
             </form>
         </div>
 
-        <!-- Action Footer Controls -->
-        <div style="padding: 16px 32px 24px 32px; border-top: 1px solid #e8edf5; background: #ffffff; display: flex; gap: 10px;">
-            <button type="button" id="btnBatalModal" onclick="closeManualModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        <div style="padding: 16px 32px 24px 32px; border-top: 1px solid #e8edf5; background: #ffffff; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" id="btnBatalModal" onclick="closeManualModal()" style="flex: 1; min-width: 90px; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
                 Batal
             </button>
 
-            <button type="button" id="btnPrevStep" onclick="changeStep(-1)" style="flex: 1; display: none; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            <button type="button" id="btnPrevStep" onclick="changeStep(-1)" style="flex: 1; min-width: 90px; display: none; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
                 ← Kembali
             </button>
 
-            <button type="button" id="btnNextStep" onclick="changeStep(1)" style="flex: 2; background: #006B3F; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
+            <button type="button" id="btnNextStep" onclick="changeStep(1)" style="flex: 2; min-width: 120px; background: #013220; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
                 Lanjut →
             </button>
 
-            <button type="button" id="btnSubmitForm" onclick="submitMultiStepForm()" style="flex: 2; display: none; background: #006B3F; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
+            <button type="button" id="btnSubmitForm" onclick="submitMultiStepForm()" style="flex: 2; min-width: 120px; display: none; background: #013220; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
                 Simpan & Buat Antrian ✓
             </button>
         </div>
@@ -476,8 +463,7 @@
     </div>
 </div>
 
-<!-- MODAL KONFIRMASI PEMBATALAN CUSTOM -->
-<div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;">
+<div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
         <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
@@ -500,7 +486,6 @@
     </div>
 </div>
 
-<!-- Flatpickr CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
