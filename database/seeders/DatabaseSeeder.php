@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             ProductsSeeder::class,
             VisitPurposesSeeder::class,
             LeadSourcesSeeder::class,
-            GuestCategoriesSeeder::class
+            GuestCategoriesSeeder::class,
+            GuestVisitSeeder::class,
         ]);
     }
 }
