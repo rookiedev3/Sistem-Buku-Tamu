@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class FrontOfficeController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $today = Carbon::today();
 
@@ -35,7 +35,16 @@ class FrontOfficeController extends Controller
         $waitingToday = (clone $visitQuery)->whereIn('status', ['Menunggu', 'waiting', 'Terjadwal', 'scheduled'])->count();
 
         // 3. Eksekusi Pagination (10 data per halaman)
-        $visits = $visitQuery->orderBy('scheduled_at', 'asc')->paginate(10);
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
+            ->orderBy('scheduled_at', 'asc')
+            ->paginate($perPage)
+            ->appends($request->query());
 
         // 4. Data Pendukung Modal
         $pics            = User::where('role', 'pic')->select('id', 'name')->get();
@@ -274,31 +283,58 @@ class FrontOfficeController extends Controller
         return view('frontoffice.history', compact('visits', 'filterDate'));
     }
 
-    public function appointment()
+    public function appointment(Request $request)
     {
-        // Ambil data kunjungan hari ini
         $today = Carbon::today();
 
-        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->orderBy('scheduled_at', 'desc')
-            ->paginate(10);
+        // 1. Ambil nilai per_page dinamis (Default 10)
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
 
-        // Hitung statistik
-        $totalToday = $visits->count();
-        $waitingToday = $visits->whereIn('status', ['Menunggu', 'waiting'])->count();
+        // 2. Query Data Kunjungan Hari Ini
+        $query = visits::with(['guest', 'purpose', 'assignedUser'])
+            ->whereDate('scheduled_at', $today);
 
-        // Ambil seluruh data pendukung untuk modal input manual 3-Step
-        $pics = User::where('role', 'pic')->select('id', 'name')->get();
-        $branches = branches::select('id', 'name')->get();
-        $purposes = visit_purposes::select('id', 'name')->get();
+        // Filter Pencarian Keyword (Nama Tamu / Instansi / PIC)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('guest', function ($g) use ($keyword) {
+                    $g->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('company_name', 'like', "%{$keyword}%");
+                })->orWhereHas('assignedUser', function ($u) use ($keyword) {
+                    $u->where('name', 'like', "%{$keyword}%");
+                })->orWhere('visit_code', 'like', "%{$keyword}%");
+            });
+        }
+
+        // 3. Eksekusi Pagination dengan Mempertahankan Query String
+        $visits = $query->orderBy('scheduled_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // 4. Hitung Statistik Akurat Langsung dari Database
+        $totalToday = visits::whereDate('scheduled_at', $today)->count();
+        $waitingToday = visits::whereDate('scheduled_at', $today)
+            ->whereIn('status', ['Menunggu', 'waiting', 'Check-in'])
+            ->count();
+
+        // 5. Data Pendukung Modal Input 3-Step
+        $pics            = users::where('role', 'pic')->select('id', 'name')->get();
+        $branches        = branches::select('id', 'name')->get();
+        $purposes        = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products = products::select('code', 'name')->get();
-        $leadSources = lead_sources::select('id', 'name')->get();
+        $products        = products::select('id', 'name')->get(); // 🟢 PERBAIKAN: Sertakan 'id'
+        $leadSources     = lead_sources::select('id', 'name')->get();
 
-        // Ambil data notifikasi untuk navbar/layout
+        // 6. Data Notifikasi Unread / Terbaru untuk Header Navbar
         $notifications = notifications::where('user_id', auth()->id())
             ->latest()
-            ->paginate(10);
+            ->take(5)
+            ->get();
 
         return view('frontoffice.appointment', compact(
             'visits',
@@ -435,15 +471,37 @@ class FrontOfficeController extends Controller
 
     public function guest(Request $request)
     {
+        // 1. Ambil nilai per_page dinamis (Mendukung 'perpage' atau 'per_page', default 10)
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('perpage', $request->input('per_page', 10));
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        // 2. Query dasar dengan menghitung total kunjungan tamu
         $query = guests::withCount('visits');
 
-        if ($request->filled('vip')) {
+        // 3. Filter berdasarkan Status VIP (Hanya VIP / Reguler / Semua)
+        // Menggunakan checks !== null agar nilai '0' (Reguler) tidak terlewat
+        if ($request->has('vip') && $request->vip !== null && $request->vip !== '') {
             $query->where('is_vip', $request->vip);
         }
 
+        // 4. Filter Pencarian Keyword (Nama / Instansi / Jabatan / No. HP)
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%")
+                    ->orWhere('position', 'like', "%{$keyword}%")
+                    ->orWhere('phone', 'like', "%{$keyword}%");
+            });
+        }
+
+        // 5. Eksekusi Pagination dengan Mempertahankan Query String
         $guests = $query->latest()
-            ->paginate(10)
-            ->appends($request->query());
+            ->paginate($perPage)
+            ->withQueryString(); // 👈 KUNCI: Menjaga parameter ?vip=1&keyword=...&perpage=10 tetap terbawa di Page 2, 3, dst.
 
         return view('frontoffice.listGuests', compact('guests'));
     }

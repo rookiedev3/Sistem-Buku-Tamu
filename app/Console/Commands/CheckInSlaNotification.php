@@ -32,47 +32,84 @@ class CheckInSlaNotification extends Command
         $delayedVisits = visits::with(['guest', 'purpose', 'branch'])
             ->whereNotNull('check_in_at')
             ->where('check_in_at', '<=', $tenMinutesAgo)
-            ->whereIn('status', ['Terjadwal', 'Menunggu', 'waiting', 'pending'])
+            ->whereIn('status', ['Terjadwal', 'Menunggu', 'waiting', 'pending', 'Check-in'])
             ->get();
 
-        $adminUsers = users::where('role', 'admin')->get();
+        if ($delayedVisits->isEmpty()) {
+            $this->info('Tidak ada tamu yang melewati batas SLA 10 menit.');
+            return 0;
+        }
+
+        $adminUsers = users::whereIn('role', ['admin', 'manager'])->pluck('id')->toArray();
+        $processedCount = 0;
 
         foreach ($delayedVisits as $visit) {
             $guest = $visit->guest;
+            $visitIdentifier = $visit->visit_code ?? $guest->name ?? '';
 
-            // 🟢 CHEK: Apakah notifikasi SLA tamu ini SUDAH PERNAH dikirim dalam 5 menit terakhir?
+            // Cek apakah notifikasi SLA tamu ini SUDAH PERNAH dikirim dalam 5 menit terakhir
             $recentlyNotified = notifications::where('type', 'sla_warning')
-                ->where('body', 'like', '%' . ($guest->name ?? '') . '%')
-                ->where('created_at', '>=', $fiveMinutesAgo) // 👈 Kunci jeda 5 menit
+                ->where('body', 'like', '%' . $visitIdentifier . '%')
+                ->where('created_at', '>=', $fiveMinutesAgo)
                 ->exists();
 
-            // Jika sudah pernah dikirim dalam 5 menit terakhir, lewati ke tamu berikutnya
             if ($recentlyNotified) {
                 continue;
             }
 
-            $purposeType = $visit->purpose;
-            $branch = $visit->branch;
+            // Hitung total menit keterlambatan
+            $totalMinutes = (int) Carbon::parse($visit->check_in_at)->diffInMinutes(now());
 
-            // Hitung total menit keterlambatan (dibulatkan ke bawah)
-            $waitingMinutes = (int) floor(Carbon::parse($visit->check_in_at)->diffInSeconds(now()) / 60);
+            // 🟢 UBAH DURASI MENJADI FORMAT JAM & MENIT
+            $formattedDuration = $this->formatDuration($totalMinutes);
 
-            // Kirim Notifikasi ke Seluruh Admin
-            foreach ($adminUsers as $admin) {
+            // Gabungkan ID Admin, Manager, dan PIC Pegawai
+            $recipientIds = $adminUsers;
+            if (!empty($visit->assigned_to)) {
+                $recipientIds[] = $visit->assigned_to;
+            }
+            $recipientIds = array_unique($recipientIds);
+
+            $purposeName = $visit->purpose->name ?? '-';
+            $branchName  = $visit->branch->name ?? '-';
+
+            // Kirim Notifikasi ke Seluruh Penerima
+            foreach ($recipientIds as $userId) {
                 notifications::send(
-                    $admin->id,
+                    $userId,
                     'sla_warning',
                     '⚠️ Peringatan SLA Pelayanan!',
-                    'Tamu telah menunggu selama ' . $waitingMinutes . ' menit.' .
+                    'Tamu telah menunggu selama ' . $formattedDuration . '.' .
+                        "\n" . 'Kode: ' . ($visit->visit_code ?? '-') .
                         "\n" . 'Nama: ' . ($guest->name ?? '-') .
                         "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                        "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
-                        "\n" . 'Cabang: ' . ($branch->name ?? '-') .
+                        "\n" . 'Tujuan: ' . $purposeName .
+                        "\n" . 'Cabang: ' . $branchName .
                         "\n" . 'Waktu Check-in: ' . Carbon::parse($visit->check_in_at)->format('H:i') . ' WIB'
                 );
             }
+
+            $processedCount++;
         }
 
+        $this->info("Berhasil mengirim notifikasi SLA untuk {$processedCount} kunjungan.");
         return 0;
+    }
+
+    /**
+     * 🟢 Helper untuk memformat total menit menjadi string Jam & Menit
+     */
+    private function formatDuration(int $totalMinutes): string
+    {
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+
+        if ($hours > 0 && $minutes > 0) {
+            return "{$hours} jam {$minutes} menit";
+        } elseif ($hours > 0) {
+            return "{$hours} jam";
+        } else {
+            return "{$minutes} menit";
+        }
     }
 }

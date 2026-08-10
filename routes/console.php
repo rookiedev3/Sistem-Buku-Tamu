@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 // Jalankan pengecekan SLA setiap menit
 Schedule::command('notify:checkin-sla')->everyMinute();
+Schedule::command('notify:followup-due')->dailyAt('08:00');

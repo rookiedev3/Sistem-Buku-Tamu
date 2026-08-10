@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\leads;
 use Illuminate\Http\Request;
 use App\Models\visits;
+use App\Models\notifications;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema; // <-- TAMBAHKAN INI
 use App\Exports\KunjunganLaporanExport;
@@ -31,7 +32,11 @@ class ManagerController extends Controller
             ->where('status', 'deal')
             ->count();
 
-        return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate'));
+        $notifications = notifications::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(10);
+
+        return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate', 'notifications'));
     }
 
 public function kunjungan(Request $request)

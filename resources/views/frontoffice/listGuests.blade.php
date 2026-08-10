@@ -5,7 +5,6 @@ use App\Helpers\DateHelper;
 @endphp
 
 @section('content')
-
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
@@ -148,6 +147,7 @@ use App\Helpers\DateHelper;
 </div>
 @endif
 
+{{-- MODAL DETAIL TAMU --}}
 <div id="guestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box;">
 
@@ -191,6 +191,7 @@ use App\Helpers\DateHelper;
     </div>
 </div>
 
+{{-- MODAL TAMBAH TAMU BARU --}}
 <div id="createGuestModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 500px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; max-height: 90vh; display: flex; flex-direction: column;">
 

@@ -2,6 +2,7 @@
 
 @section('content')
 
+<!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
@@ -22,19 +23,50 @@
     .custom-scroll::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
     }
+
+    /* Style Fokus Input Flatpickr & Form */
+    .flatpickr-custom-input[readonly] {
+        background-color: #ffffff !important;
+        cursor: pointer !important;
+    }
+
+    .flatpickr-custom-input:focus,
+    .flatpickr-custom-input.active {
+        border-color: #006B3F !important;
+        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
+    }
+
+    /* Calendar Popup Custom Color */
+    .flatpickr-calendar {
+        border-radius: 16px !important;
+        box-shadow: 0 12px 32px rgba(31, 53, 97, 0.15) !important;
+        border: 1px solid #e8edf5 !important;
+        font-family: inherit !important;
+        padding: 10px !important;
+    }
+
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background: #006B3F !important;
+        border-color: #006B3F !important;
+    }
 </style>
 
+{{-- Flash Messages --}}
 @if(session('success'))
-<div style="background: #dcfce7; border: 1px solid #10b981; color: #15803d; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+<div style="background: #dcfce7; border: 1px solid #86efac; color: #166534; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
     {{ session('success') }}
 </div>
 @endif
+
 @if(session('error'))
-<div style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
+<div style="background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 12px 20px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; font-weight: 600;">
     {{ session('error') }}
 </div>
 @endif
 
+{{-- Header Halaman --}}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: #006B3F; color: #fff; padding: 6px 14px; border-radius: 20px;">
@@ -53,149 +85,137 @@
     </button>
 </div>
 
-<div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
+{{-- Container Utama Tabel (Style Dashboard PIC) --}}
+<div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
 
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
-        <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Daftar Jadwal Tamu Terjadwal</h3>
+    {{-- Filter & Header Tabel --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Jadwal Tamu Terjadwal</h3>
 
-        <div style="width: 100%; sm:width: auto;">
+        <div style="width: 100%; max-width: 280px;">
             <input type="text" id="searchApp" placeholder="Cari nama tamu / PIC..." onkeyup="filterAppTable()"
-                style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 100%; sm:width: 240px; transition: all 0.2s ease; box-sizing: border-box;">
+                style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 600; color: #172033; outline: none; background: #ffffff; width: 100%; transition: all 0.2s ease; box-sizing: border-box;"
+                onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
         </div>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table id="guestTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 900px;">
-            <thead>
-                <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
-                    <th style="padding: 14px 20px; font-weight: 700;">No</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Token / Waktu</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Tujuan PIC</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Status</th>
-                    <th style="padding: 14px 20px; font-weight: 700; text-align: center;">Aksi</th>
+    {{-- Table Responsive Wrapper --}}
+    <div class="table-responsive">
+        <table id="guestTable" class="table align-middle" style="font-size: 13px; color: #172033; margin: 0; width: 100%; border-collapse: collapse;">
+            <thead style="background: #f8fafc; color: #5c6678; font-weight: 700;">
+                <tr>
+                    <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
+                    <th style="padding: 14px;">Token / Waktu</th>
+                    <th style="padding: 14px;">Tamu & Jabatan</th>
+                    <th style="padding: 14px;">Jenis Kunjungan</th>
+                    <th style="padding: 14px;">Tujuan PIC</th>
+                    <th style="padding: 14px;">Status</th>
+                    <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody style="color: #172033;">
                 @forelse($visits as $index => $visit)
-                <tr style="border-bottom: 1px solid #e8edf5;">
-                    {{-- PENOMORAN AMAN (SUPPORT PAGINATION / COLLECTION) --}}
-                    <td style="padding: 16px 20px; font-weight: 600;">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td class="row-number" style="padding: 14px; font-weight: 600;">
                         {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() + $index : $index + 1 }}
                     </td>
 
-                    <td style="padding: 16px 20px;">
+                    <td style="padding: 14px;">
                         <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
-                        <span style="font-size: 11px; color: #778195;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
+                        <span style="font-size: 11px; color: #778195; font-weight: 600;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
                     </td>
-                    <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700;">{{ $visit->guest->name ?? '-' }}</div>
-                        <div style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</div>
+
+                    <td style="padding: 14px;">
+                        <strong style="display: block; color: #172033; font-weight: 800;">
+                            {{ $visit->guest->name ?? '-' }}
+                            @if(isset($visit->guest) && $visit->guest->is_vip)
+                            <span title="VIP" style="color: #d97706;">⭐</span>
+                            @endif
+                        </strong>
+                        <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</span>
                     </td>
-                    <td style="padding: 16px 20px;">{{ $visit->purpose->name ?? '-' }}</td>
-                    <td style="padding: 16px 20px;">
-                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;">
+
+                    <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? '-' }}</td>
+
+                    <td style="padding: 14px;">
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">
                             {{ $visit->assignedUser->name ?? '-' }}
                         </span>
                     </td>
 
-                    {{-- TABEL STATUS --}}
-                    <td style="padding: 16px 20px;">
-                        @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
-                        <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Terjadwal
-                        </span>
+                    {{-- TABEL STATUS BADGES (Style Dashboard PIC) --}}
+                    <td style="padding: 14px;">
+                        @php $statusLower = strtolower($visit->status ?? ''); @endphp
 
-                        @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
-                        <span style="background: #fef3c7; color: #d97706; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Menunggu
-                        </span>
-
-                        @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed']))
-                        <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Sedang Bertemu
-                        </span>
-
-                        @elseif(in_array(strtolower($visit->status), ['selesai', 'completed']))
-                        <span style="background: #e6f7ee; color: #137a48; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Selesai
-                        </span>
-
-                        @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
-                        <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            Dibatalkan
-                        </span>
-
+                        @if(in_array($statusLower, ['terjadwal', 'scheduled']))
+                        <span style="background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Terjadwal</span>
+                        @elseif(in_array($statusLower, ['menunggu', 'waiting']))
+                        <span style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Menunggu</span>
+                        @elseif(in_array($statusLower, ['sedang bertemu', 'confirmed', 'dikonfirmasi']))
+                        <span style="background: #f1eaff; color: #6741b5; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Sedang Bertemu</span>
+                        @elseif(in_array($statusLower, ['selesai', 'completed']))
+                        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Selesai</span>
+                        @elseif(in_array($statusLower, ['dibatalkan', 'cancelled']))
+                        <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">Dibatalkan ✕</span>
                         @else
-                        <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;">
-                            {{ $visit->status }}
-                        </span>
-
+                        <span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">{{ $visit->status }}</span>
                         @endif
                     </td>
 
                     {{-- TABEL AKSI --}}
-                    <td style="padding: 16px 20px; text-align: center;">
+                    <td style="padding: 14px; text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                            @if(in_array(strtolower($visit->status), ['terjadwal', 'scheduled']))
+                            @if(in_array($statusLower, ['terjadwal', 'scheduled']))
                             <form action="{{ route('frontoffice.checkin', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
-                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                <button type="submit" style="background: #006B3F; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                                     Check-in
                                 </button>
                             </form>
 
                             <form id="cancel-form-{{ $visit->id }}" action="{{ route('frontoffice.cancel', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
-                                <button type="button" onclick="confirmCancel('{{ $visit->id }}', '{{ addslashes($visit->guest->name ?? 'Tamu') }}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                <button type="button" onclick="confirmCancel('{{ $visit->id }}', '{{ addslashes($visit->guest->name ?? 'Tamu') }}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                                     Batalkan
                                 </button>
                             </form>
 
-                            @elseif(in_array(strtolower($visit->status), ['menunggu', 'waiting']))
-                            <span style="font-size: 11px; color: #d97706; font-weight: 600;">Menunggu</span>
+                            @elseif(in_array($statusLower, ['menunggu', 'waiting']))
+                            <span style="font-size: 11px; color: #b45309; font-weight: 700;">Menunggu</span>
 
-                            @elseif(in_array(strtolower($visit->status), ['sedang bertemu', 'confirmed', 'meeting selesai', 'meeting_selesai', 'dikonfirmasi']))
+                            @elseif(in_array($statusLower, ['sedang bertemu', 'confirmed', 'meeting selesai', 'meeting_selesai', 'dikonfirmasi']))
                             <form action="{{ route('frontoffice.checkout', $visit->id) }}" method="POST" style="margin: 0;">
                                 @csrf
-                                <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                <button type="submit" style="background: #dc2626; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                                     Check-out
                                 </button>
                             </form>
 
-                            @elseif(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
-                            <span style="font-size: 11px; color: #dc2626; font-weight: 600;">Dibatalkan</span>
+                            @elseif(in_array($statusLower, ['dibatalkan', 'cancelled']))
+                            <span style="font-size: 11px; color: #dc2626; font-weight: 700;">Dibatalkan</span>
 
                             @else
-                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selesai</span>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 700;">Selesai</span>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="padding: 30px; text-align: center; color: #64748b;">Belum ada antrian kunjungan hari ini.</td>
+                    <td colspan="7" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">Belum ada antrian kunjungan hari ini.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px;">
-        <span>Menampilkan data kunjungan hari ini</span>
-        <span>Total: {{ $totalToday ?? (method_exists($visits, 'total') ? $visits->total() : count($visits)) }}</span>
-    </div>
-
-</div>
-
-{{-- 🟢 PAGINATION (MUNCUL JIKA DATA LEBIH DARI 1 HALAMAN) --}}
-@if(method_exists($visits, 'hasPages') && $visits->hasPages())
+    {{-- Pagination --}}
     <div style="margin-top: 20px;">
         @include('partials.pagination', ['paginator' => $visits])
     </div>
-@endif
+</div>
 
+{{-- MODAL MULTI-STEP INPUT MANUAL JANJI TEMU --}}
 <div id="manualModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999; padding: 16px; box-sizing: border-box;">
 
     <div style="background: #ffffff; width: 100%; max-width: 520px; max-height: 90vh; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;">
@@ -217,6 +237,7 @@
             <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
                 @csrf
 
+                {{-- STEP 1: PROFIL TAMU --}}
                 <div id="step-1-content">
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
@@ -303,6 +324,7 @@
                     </div>
                 </div>
 
+                {{-- STEP 2: TUJUAN KUNJUNGAN --}}
                 <div id="step-2-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         2. Tujuan & Keperluan Kunjungan
@@ -352,7 +374,7 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Tanggal & Jam Kunjungan *</label>
-                        <input type="text" id="input_scheduled_at" name="scheduled_at" readonly required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none; cursor: pointer;" onchange="updateSummary()">
+                        <input type="text" id="input_scheduled_at" name="scheduled_at" class="flatpickr-custom-input" readonly required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; outline: none;" onchange="updateSummary()">
                     </div>
 
                     <div style="margin-bottom: 12px;">
@@ -373,6 +395,7 @@
                     </div>
                 </div>
 
+                {{-- STEP 3: RINGKASAN & KONFIRMASI --}}
                 <div id="step-3-content" style="display: none;">
                     <h4 style="font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0;">
                         3. Konfirmasi Data Check-In
@@ -463,8 +486,9 @@
     </div>
 </div>
 
+{{-- MODAL KONFIRMASI PEMBATALAN --}}
 <div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
-    <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
         <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
             ⚠️
@@ -486,7 +510,7 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{{-- CDN JS FLATPICKR --}}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
@@ -500,6 +524,9 @@
             enableTime: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "j F Y, H:i",
+            altInputClass: "flatpickr-custom-input",
             minDate: "today",
             minTime: "08:00",
             maxTime: "17:00",
@@ -528,13 +555,11 @@
             if (file.size > maxSizeBytes) {
                 errorElement.textContent = 'Ukuran file terlalu besar! Maksimal 2 MB.';
                 errorElement.style.display = 'block';
-                input.value = ''; // Reset input file
+                input.value = '';
                 if (previewImg) previewImg.src = '';
                 if (previewContainer) previewContainer.style.display = 'none';
             } else {
                 errorElement.style.display = 'none';
-
-                // FileReader untuk memuat pratinjau gambar di Step 3
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     if (previewImg) previewImg.src = e.target.result;
@@ -586,16 +611,33 @@
         const table = document.getElementById('guestTable');
         const tr = table.getElementsByTagName('tr');
 
+        // Ambil offset nomor awal jika menggunakan pagination (misal halaman 2, mulai dari No 11)
+        // Jika tidak ada pagination, default mulai dari 1
+        let visibleIndex = 1;
+
         for (let i = 1; i < tr.length; i++) {
-            let tdName = tr[i].getElementsByTagName('td')[2]; // Index 2: Kolom Tamu & Jabatan
-            let tdPic = tr[i].getElementsByTagName('td')[4];  // Index 4: Kolom Tujuan PIC
+            // Abaikan baris "Belum ada antrian..." jika ada
+            if (tr[i].getElementsByTagName('td').length <= 1) continue;
+
+            let tdName = tr[i].getElementsByTagName('td')[2]; // Kolom Tamu & Jabatan
+            let tdPic = tr[i].getElementsByTagName('td')[4]; // Kolom Tujuan PIC
+            let tdNum = tr[i].querySelector('.row-number'); // Kolom Nomor
+
             if (tdName || tdPic) {
                 let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
                 let txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
+
+                // Cek apakah teks cocok dengan kata kunci pencarian
                 if (txtName.toLowerCase().indexOf(filter) > -1 || txtPic.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
+                    tr[i].style.display = ""; // Tampilkan baris
+
+                    // Ubah nomor urut sesuai urutan yang tampil saja
+                    if (tdNum) {
+                        tdNum.textContent = visibleIndex;
+                        visibleIndex++;
+                    }
                 } else {
-                    tr[i].style.display = "none";
+                    tr[i].style.display = "none"; // Sembunyikan baris
                 }
             }
         }
@@ -621,7 +663,7 @@
         for (let input of inputs) {
             if (!input.value.trim()) {
                 input.focus();
-                input.style.borderColor = '#ef4444'; // Border merah jika kosong
+                input.style.borderColor = '#ef4444';
                 return false;
             } else {
                 input.style.borderColor = '#e8edf5';
