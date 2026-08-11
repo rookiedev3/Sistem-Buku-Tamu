@@ -99,19 +99,40 @@
     const panel = document.getElementById('dashboardPanel');
     const dashboardUrl = new URL('{{ route('pic.dashboard') }}', window.location.origin);
 
-    // Nyalain ulang flatpickr utk input follow_up_at di baris-baris yang baru di-load
-    function initRowWidgets() {
-        panel.querySelectorAll('[id^="follow_up_at-"]').forEach(function (inputEl) {
-            if (inputEl._flatpickr) return; // sudah pernah di-init
-            flatpickr(inputEl, {
-                locale: "id",
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                disableMobile: "true"
-            });
-        });
-    }
+function toggleFollowUpRequirement(selectEl) {
+    const visitId = selectEl.id.replace('potential_level-', '');
+    const dateInput = document.getElementById('follow_up_at-' + visitId);
+    if (!dateInput) return;
 
+    const isOptional = ['warm', 'cold', 'non_lead'].includes(selectEl.value);
+    const form = selectEl.closest('form');
+    const mark = form ? form.querySelector('.js-followup-required-mark') : null;
+    const errorEl = form ? form.querySelector('.js-followup-date-error') : null;
+
+    dateInput.placeholder = isOptional ? 'Pilih tanggal follow-up... (opsional)' : 'Pilih tanggal follow-up...';
+    if (mark) mark.style.display = isOptional ? 'none' : 'inline';
+
+    if (isOptional && errorEl) {
+        errorEl.style.display = 'none';
+        dateInput.style.borderColor = '#e8edf5';
+    }
+}
+
+    // Nyalain ulang flatpickr utk input follow_up_at di baris-baris yang baru di-load
+function initRowWidgets() {
+    panel.querySelectorAll('[id^="follow_up_at-"]').forEach(function (inputEl) {
+        if (inputEl._flatpickr) return;
+        flatpickr(inputEl, {
+            locale: "id",
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            disableMobile: "true"
+        });
+    });
+
+    // Set wajib/opsional sesuai Potensi Klien yang sedang terpilih (termasuk saat edit catatan lama)
+    panel.querySelectorAll('select[id^="potential_level-"]').forEach(toggleFollowUpRequirement);
+}
     function loadDashboard(params, pushState = true) {
         const url = dashboardUrl.pathname + '?' + params.toString();
 
@@ -126,17 +147,17 @@
             });
     }
 
-    // Klik tombol filter (Semua / Hari Ini / Terjadwal Mendatang) & tautan pagination -> AJAX, bukan reload
-    panel.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href]');
-        if (!link) return;
+panel.addEventListener('change', function (e) {
+    if (e.target.matches('select[id^="potential_level-"]')) {
+        toggleFollowUpRequirement(e.target);
+        return;
+    }
 
-        const url = new URL(link.href, window.location.origin);
-        if (url.pathname !== dashboardUrl.pathname) return; // biarkan tautan lain jalan normal
+    if (!e.target.matches('select[data-role="vip-status"]')) return;
 
-        e.preventDefault();
-        loadDashboard(new URLSearchParams(url.search));
-    });
+    const url = new URL(e.target.value, window.location.origin);
+    loadDashboard(new URLSearchParams(url.search));
+});
 
     // Ganti dropdown Status VIP/Reguler -> AJAX, bukan reload
     panel.addEventListener('change', function (e) {

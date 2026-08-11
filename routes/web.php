@@ -44,14 +44,7 @@ Route::middleware('guest')->group(function () {
 
 // Route untuk user yang sudah login (auth)
 Route::middleware('auth')->group(function () {
-    // Route::get('/', [DashboardController::class, 'index'])->name('home');
-
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    // Route::resource('/pengguna', UserController::class)->names('user');
-
-    // Route::get('/pic/dashboard', [VisitsController::class, 'dashboardPic'])->name('pic.dashboard');
-    // Route::patch('/pic/visit/{id}/status', [VisitsController::class, 'updateStatus'])->name('pic.updateStatus');
-    // Route::post('/pic/visit/{id}/complete', [VisitsController::class, 'completeMeeting'])->name('pic.completeMeeting');
 
     Route::middleware('auth')->prefix('pic')->group(function () {
         // 👈 Tambahkan baris ini agar /pic langsung mengarah ke /pic/dashboard
@@ -73,6 +66,44 @@ Route::middleware('auth')->group(function () {
         Route::post('/pic/leads/{leadId}/follow-up', [PicController::class, 'updateFollowUp'])->name('pic.leads.updateFollowUp');
     });
 
+    Route::middleware('auth')->prefix('security')->group(function () {
+        Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+        Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
+        Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
+    });
+
+    Route::prefix('manager')->middleware('auth')->group(function () {
+        // 1. Dashboard Monitoring Manager
+        Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('manager.dashboard');
+
+        // 2. Semua Kunjungan
+        Route::get('/kunjungan', [ManagerController::class, 'kunjungan'])->name('manager.kunjungan');
+
+        // 3. Pipeline Lead Tim
+        Route::get('/leads', [ManagerController::class, 'leadsPipeline'])->name('manager.leads');
+
+        // 4. Laporan & Export Data
+        Route::get('/laporan', [ManagerController::class, 'laporan'])->name('manager.laporan');
+        Route::get('/laporan/export-excel', [ManagerController::class, 'exportExcel'])->name('manager.laporan.exportExcel');
+        Route::get('/laporan/export-pdf', [ManagerController::class, 'exportPdf'])->name('manager.laporan.exportPdf');
+    });
+
+    Route::middleware('auth')->prefix('owner')->group(function () {
+        Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
+
+        Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
+        Route::resource('/products', ProductsController::class);
+
+        Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
+        Route::resource('/guest-categories', GuestCategoriesController::class);
+        Route::get('/aktivitas', [OwnerController::class, 'activityLog'])
+        ->name('owner.activity-log');
+        Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
+        Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
+    });
+
+
+
     // 1. chek in route sementara front end
     Route::get('/check-in', function () {
         return view('check-in.index'); // sesuaikan dengan nama file view Blade Anda
@@ -91,25 +122,12 @@ Route::middleware('auth')->group(function () {
 
     // Route detail (tambahkan '/' sebelum {id})
     Route::get('/database-tamu/{id}', [OwnerController::class, 'databaseOwnerDetail'])->name('owner.databaseTamuDetail');
-    // // route lead dan follow up
-    // Route::get('/leads', function () {
-    //     return view('leads.index');
-    // });
 
-    // route laporan
-    // Route::get('/laporan.index', function () {
-    //     return view('laporan.index');
-    // });
 
     // route master data
     Route::get('/master-data', function () {
         return view('master.index');
     });
-
-    // //route pengguna
-    // Route::get('/pengguna', function () {
-    //     return view('pengguna.index');
-    // });
 
 });
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -123,23 +141,6 @@ Route::resource('/guest-categories', GuestCategoriesController::class);
 Route::resource('/pengguna', UserController::class)->names('user');
 // });
 
-Route::middleware('auth')->prefix('security')->group(function () {
-    Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
-    Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
-    Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
-});
-
-// Route::get('/', function () {
-//     return view('auth.login');
-// });
-
-// Route::get('/login', function () {
-//     return view('auth.login');
-// })->name('login');
-
-// Route::get('/dashboard', function () {
-//     return view('dashboard.index');
-// })->name('dashboard');
 
 // / --- RUTE TES TAMPILAN FRONTEND (MULTI-STEP) ---
 // Route Tahap 1
@@ -224,78 +225,9 @@ Route::post('/frontoffice/notifications/{id}/read', [FrontOfficeController::clas
 //     Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
 // });
 
-Route::middleware('auth')->prefix('security')->group(function () {
-    Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
-    Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
-    Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
-});
-
-Route::middleware('auth')->prefix('owner')->group(function () {
-    Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
-
-    Route::get('/products/laporan/data', [ProductsController::class, 'laporan'])->name('products.laporan');
-    Route::resource('/products', ProductsController::class);
-
-    Route::get('/guest-categories/laporan/data', [GuestCategoriesController::class, 'laporan'])->name('guest-categories.laporan');
-    Route::resource('/guest-categories', GuestCategoriesController::class);
-Route::get('/aktivitas', [OwnerController::class, 'activityLog'])
-    ->name('owner.activity-log');
-    Route::get('/kunjungan', [OwnerController::class, 'kunjungan'])->name('owner.kunjungan');
-    Route::get('/leads', [OwnerController::class, 'leads'])->name('owner.leads');
-});
-
-// Route::prefix('pic')->group(function () {
-
-//     // // Halaman Dashboard PIC
-//     // Route::get('/dashboard', function () {
-//     //     return view('pic.dashboard');
-//     // })->name('pic.dashboard');
-
-//     // Halaman Riwayat Kunjungan PIC
-//     Route::get('/riwayat', function () {
-//         return view('pic.riwayat');
-//     })->name('pic.riwayat');
-
-//     // Lead & Follow Up PIC
-//     Route::get('/leads', function () {
-//         return view('pic.leads');
-//     })->name('pic.leads');
-
+// Route::middleware('auth')->prefix('security')->group(function () {
+//     Route::get('/dashboard-security', [SecurityController::class, 'dashboard'])->name('security.dashboard');
+//     Route::post('/visit/{id}/checkin', [SecurityController::class, 'checkIn'])->name('security.checkin');
+//     Route::post('/visit/{id}/checkout', [SecurityController::class, 'checkOut'])->name('security.checkout');
 // });
 
-// Group Route untuk Role Manager Operasional
-// Route::prefix('manager')->group(function () {
-
-//     // 1. Dashboard Monitoring Manager
-//     Route::get('/dashboard', function () {
-//         return view('manager.dashboard');
-//     })->name('manager.dashboard');
-
-//     // 2. Semua Kunjungan
-//     Route::get('/kunjungan', function () {
-//         return view('manager.kunjungan');
-//     })->name('manager.kunjungan');
-
-//     // 3. Pipeline Lead Tim
-//     Route::get('/leads', function () {
-//         return view('manager.leads');
-//     })->name('manager.leads');
-
-//     // 4. Laporan & Export Data
-//     Route::get('/laporan', function () {
-//         return view('manager.laporan');
-//     })->name('manager.laporan');
-
-// });
-// // 4. Laporan & Export Data
-// Route::get('/laporan', function () {
-//     return view('manager.laporan');
-// })->name('manager.laporan');
-// // });
-
-// // Group Route untuk Role Security
-// Route::prefix('security')->group(function () {
-//     Route::get('/dashboard', function () {
-//         return view('security.dashboard');
-//     })->name('security.dashboard');
-// });

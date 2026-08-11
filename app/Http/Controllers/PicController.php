@@ -262,14 +262,14 @@ class PicController extends Controller
      */
     public function completeMeeting(Request $request, $id)
     {
-        $request->validate([
-            'meeting_result' => 'required|string',
-            'potential_level' => 'required|string',
-            'follow_up_at' => 'required|date',
-            'estimated_value' => 'nullable|numeric',
-        ], [
-            'follow_up_at.required' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
-        ]);
+$request->validate([
+    'meeting_result' => 'required|string',
+    'potential_level' => 'required|in:hot,warm,cold,non_lead',
+    'follow_up_at' => 'nullable|date|required_unless:potential_level,warm,cold,non_lead',
+    'estimated_value' => 'nullable|numeric',
+], [
+    'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
+]);
 
         $visit = visits::with('guest')
             ->where('id', $id)
