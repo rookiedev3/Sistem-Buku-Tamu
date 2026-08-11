@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\user;
 use App\Models\branches;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -65,7 +65,7 @@ class UserController extends Controller
 
         $isActive = $request->has('is_active') ? 1 : 0;
 
-        User::create([
+        user::create([
             'name'         => $request->name,
             'email'        => $request->email,
             'phone'        => $this->normalizePhone($request->phone),
@@ -74,7 +74,6 @@ class UserController extends Controller
             'branch_id'    => $request->branch_id,
             'is_active'    => $isActive,
             // Kalau admin langsung mencentang aktif saat membuat user, catat waktu aktivasinya.
-            'activated_at' => $isActive ? now() : null,
         ]);
 
         return redirect()->route('user.index')->with('success', 'Pengguna berhasil ditambahkan.');

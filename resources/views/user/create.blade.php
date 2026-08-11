@@ -37,7 +37,7 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Nomor Telepon/HP</label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" placeholder="Contoh: 08123456789" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" required placeholder="Contoh: 08123456789" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
                 </div>
 
                 <div class="mb-3">
@@ -61,7 +61,7 @@
 
                     <div class="col-md-6 mb-3" style="padding-left: 8px; padding-right: 8px;">
                         <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Cabang (Branch)</label>
-                        <select name="branch_id" class="form-select" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
+                        <select name="branch_id" class="form-select" required style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
                             <option value="">-- Pilih Cabang (Opsional) --</option>
                             @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
