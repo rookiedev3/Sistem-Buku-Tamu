@@ -264,56 +264,67 @@
                                     </div>
 
                                     <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST" class="js-complete-meeting-form" onsubmit="return validateFollowUpDate(this);">
-                                        @csrf
+    @csrf
+    <input type="hidden" name="_visit_id" value="{{ $visit->id }}">
 
-                                        <div style="margin-bottom: 16px;">
-                                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
-                                            <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ $visit->meeting_result }}</textarea>
-                                        </div>
+    <div style="margin-bottom: 16px;">
+        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
+        <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ old('_visit_id') == $visit->id ? old('meeting_result') : $visit->meeting_result }}</textarea>
+    </div>
 
-                                        <div style="margin-bottom: 16px;">
-                                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Potensi Klien</label>
-                                            <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-                                                <option value="hot" {{ $visit->potential_level == 'hot' ? 'selected' : '' }}>Hot Lead</option>
-                                                <option value="warm" {{ $visit->potential_level == 'warm' ? 'selected' : '' }}>Warm Lead</option>
-                                                <option value="cold" {{ $visit->potential_level == 'cold' ? 'selected' : '' }}>Cold</option>
-                                                <option value="non_lead" {{ $visit->potential_level == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
-                                            </select>
-                                        </div>
+    <div style="margin-bottom: 16px;">
+        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Potensi Klien</label>
+        @php
+            $selectedPotential = old('_visit_id') == $visit->id ? old('potential_level') : $visit->potential_level;
+        @endphp
+        <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+            <option value="hot" {{ $selectedPotential == 'hot' ? 'selected' : '' }}>Hot Lead</option>
+            <option value="warm" {{ $selectedPotential == 'warm' ? 'selected' : '' }}>Warm Lead</option>
+            <option value="cold" {{ $selectedPotential == 'cold' ? 'selected' : '' }}>Cold</option>
+            <option value="non_lead" {{ $selectedPotential == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
+        </select>
+    </div>
 
-                                        <div style="margin-bottom: 20px;">
-                                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
-                                                Jadwal Follow-Up Berikutnya
-                                                <span style="color: #dc2626;">*</span>
-                                            </label>
+    <div style="margin-bottom: 20px;">
+        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
+            Jadwal Follow-Up Berikutnya
+            <span class="js-followup-required-mark" style="color: #dc2626;">*</span>
+        </label>
 
-                                            <div style="position: relative; display: flex; align-items: center; width: 100%;">
-                                                <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                                                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                                                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                                                    </svg>
-                                                </div>
+        <div style="position: relative; display: flex; align-items: center; width: 100%;">
+            <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
 
-                                                <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at" required
-                                                    value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
-                                                    placeholder="Pilih tanggal follow-up..." readonly
-                                                    style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit;">
-                                            </div>
-                                            <small class="js-followup-date-error" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;">Tanggal follow-up wajib dipilih.</small>
-                                        </div>
+            @php
+                $followUpValue = old('_visit_id') == $visit->id
+                    ? old('follow_up_at')
+                    : ($visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '');
+            @endphp
+            <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
+                value="{{ $followUpValue }}"
+                placeholder="Pilih tanggal follow-up..." readonly
+                style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit;">
+        </div>
+        <small class="js-followup-date-error" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;">
+            {{ $errors->first('follow_up_at') ?: 'Tanggal follow-up wajib dipilih.' }}
+        </small>
+    </div>
 
-                                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                                            <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                                                Batal
-                                            </button>
-                                            <button type="submit" style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                                                Simpan & Selesaikan
-                                            </button>
-                                        </div>
-                                    </form>
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" data-bs-dismiss="modal" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            Batal
+        </button>
+        <button type="submit" style="background: #006B3F; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            Simpan & Selesaikan
+        </button>
+    </div>
+</form>
                                 </div>
 
                             </div>
@@ -341,23 +352,58 @@
     // Cegah submit "Catat Hasil Pertemuan & Lead" tanpa tanggal follow-up.
     // Dipasang lewat window supaya tetap ada walau panel ini di-swap ulang via AJAX
     // (lihat script initRowWidgets di dashboard.blade.php).
-    function validateFollowUpDate(form) {
-        const dateInput = form.querySelector('input[name="follow_up_at"]');
-        const errorEl = form.querySelector('.js-followup-date-error');
+function validateFollowUpDate(form) {
+    const dateInput = form.querySelector('input[name="follow_up_at"]');
+    const potentialSelect = form.querySelector('select[name="potential_level"]');
+    const errorEl = form.querySelector('.js-followup-date-error');
 
-        if (!dateInput.value) {
-            if (errorEl) errorEl.style.display = 'block';
-            dateInput.style.borderColor = '#dc2626';
-            dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return false;
-        }
+    // Hanya Hot Lead yang wajib isi tanggal follow-up
+    const isDateOptional = potentialSelect && ['warm', 'cold', 'non_lead'].includes(potentialSelect.value);
 
-        if (errorEl) errorEl.style.display = 'none';
-        dateInput.style.borderColor = '#e8edf5';
-
-        const btn = form.querySelector('button[type="submit"]');
-        btn.disabled = true;
-        btn.innerHTML = 'Menyimpan...';
-        return true;
+    if (!isDateOptional && !dateInput.value) {
+        if (errorEl) errorEl.style.display = 'block';
+        dateInput.style.borderColor = '#dc2626';
+        dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
     }
+
+    if (errorEl) errorEl.style.display = 'none';
+    dateInput.style.borderColor = '#e8edf5';
+
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = 'Menyimpan...';
+    return true;
+}
 </script>
+@if ($errors->any() && old('_visit_id'))
+<script>
+(function () {
+    var visitId = "{{ old('_visit_id') }}";
+    var modalEl = document.getElementById('modalCatatPertemuan-' + visitId);
+    if (!modalEl) return;
+
+    function openErrorModal() {
+        var errorSmall = modalEl.querySelector('.js-followup-date-error');
+        var dateInput = modalEl.querySelector('input[name="follow_up_at"]');
+
+        @if ($errors->has('follow_up_at'))
+            if (errorSmall) errorSmall.style.display = 'block';
+            if (dateInput) dateInput.style.borderColor = '#dc2626';
+        @endif
+
+        if (window.bootstrap && window.bootstrap.Modal) {
+            var modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+
+    // Modal butuh Bootstrap JS sudah kebaca & flatpickr sudah nyala di panel ini
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openErrorModal);
+    } else {
+        openErrorModal();
+    }
+})();
+</script>
+@endif
