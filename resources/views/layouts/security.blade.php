@@ -25,6 +25,19 @@
             overflow-x: hidden; /* Mencegah halaman bisa digeser ke kanan/kiri */
         }
 
+        /* --- MENYEMBUNYIKAN GARIS SCROLLBAR DI SIDEBAR --- */
+        .sidebar::-webkit-scrollbar,
+        .sidebar-menu::-webkit-scrollbar {
+            display: none !important; /* Untuk Chrome, Safari, dan Edge */
+            width: 0 !important;
+        }
+
+        .sidebar,
+        .sidebar-menu {
+            -ms-overflow-style: none !important; /* Untuk Internet Explorer dan Edge lama */
+            scrollbar-width: none !important; /* Untuk Firefox */
+        }
+
         /* --- SIDEBAR STYLE (ANTI JEDAG-JEDUG & MULUS) --- */
         .sidebar {
             width: 260px;
@@ -37,7 +50,7 @@
             height: 100vh;
             z-index: 100;
             will-change: width;
-            transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* --- SIDEBAR BRAND & LOGO --- */
@@ -111,7 +124,6 @@
         .sidebar.collapsed .sidebar-footer {
             padding: 16px 10px !important;
         }
-        
 
         /* --- MAIN CONTENT & NAVBAR WRAPPER --- */
         .main-wrapper {
@@ -122,7 +134,7 @@
             min-height: 100vh;
             width: calc(100% - 260px);
             will-change: margin-left, width;
-            transition: margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .main-wrapper.expanded {
@@ -156,7 +168,7 @@
             .sidebar {
                 width: 260px !important;
                 transform: translateX(-100%); /* Tertutup rapi di luar layar sebelah kiri */
-                transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             /* Saat sidebar dibuka di HP, masukkan ke layar */
             .sidebar.mobile-show {
@@ -214,9 +226,9 @@
                 <div class="menu-category" style="font-size: 10px; font-weight: 700; color: #8fa394; text-transform: uppercase; letter-spacing: 1px; padding: 6px 12px 2px;">Utama</div>
                 
                 <a href="#" class="menu-item {{ request()->is('security/dashboard*') ? 'active' : '' }}" title="Daftar Tamu Hari Ini" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('security/dashboard*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('security/dashboard*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('security/dashboard*') ? '#C7AB6B' : 'transparent' }}; pointer-events: none; cursor: not-allowed;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-    <span>Daftar Tamu Hari Ini</span>
-</a>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Daftar Tamu Hari Ini</span>
+                </a>
             </div>
         </div>
 
@@ -270,12 +282,6 @@
         const toggleBtn = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('sidebar');
         const mainWrapper = document.getElementById('mainWrapper');
-
-        // Sinkronisasi class jika di localStorage tersimpan true
-        if (window.innerWidth > 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
-            sidebar.classList.add('collapsed');
-            mainWrapper.classList.add('expanded');
-        }
 
         if (toggleBtn) {
             toggleBtn.addEventListener('click', function() {

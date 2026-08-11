@@ -1,7 +1,7 @@
-<header class="navbar" style="height: 70px; background: #ffffff; border-bottom: 1px solid #e8edf5; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 90; box-sizing: border-box;">
+<header class="navbar" style="height: 70px; background: #ffffff; border-bottom: 1px solid #e8edf5; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 1000 !important; box-sizing: border-box;">
     
     <div style="display: flex; align-items: center; gap: 16px;">
-        <button type="button" id="sidebarToggle" style="background: #f8fafc; border: 1px solid #e8edf5; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: #172033; font-size: 18px; cursor: pointer;">
+        <button type="button" id="sidebarToggle" style="background: #f8fafc; border: 1px solid #e8edf5; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: #172033; font-size: 18px; cursor: pointer; position: relative; z-index: 99999 !important; pointer-events: auto !important;">
             <i class="bi bi-list"></i>
         </button>
 

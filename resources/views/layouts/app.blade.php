@@ -64,7 +64,7 @@
             flex-direction: column;
             min-height: 100vh;
             width: calc(100% - 260px);
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .main-wrapper.expanded {
@@ -224,8 +224,19 @@
             justify-content: space-between;
             position: fixed;
             height: 100vh;
-            z-index: 900; /* Di bawah navbar tapi di atas konten */
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 900;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Menghilangkan garis scroll putih di sidebar */
+        .sidebar::-webkit-scrollbar,
+        .sidebar-menu::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+        }
+        .sidebar, .sidebar-menu {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
         }
 
         /* Saat Sidebar Dikecilkan (Collapsed) di Laptop */
@@ -266,6 +277,7 @@
             .sidebar {
                 width: 260px !important;
                 transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .sidebar.mobile-show {
                 transform: translateX(0) !important;
@@ -283,13 +295,6 @@
             }
         }
     </style>
-
-    {{-- Script pencegah kedip instan saat halaman dimuat --}}
-    <script>
-        if (window.innerWidth > 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
-            document.write('<style>.sidebar{width:80px !important;}.main-wrapper{margin-left:80px !important;width:calc(100% - 80px) !important;}.sidebar .sidebar-brand{justify-content:center !important;padding:20px 0 !important;}.sidebar .sidebar-brand-icon{margin:0 auto;}.sidebar .sidebar-brand-text,.sidebar .menu-category,.sidebar .menu-item span,.sidebar form button span{display:none !important;opacity:0 !important;}.sidebar .sidebar-menu{padding:16px 10px !important;align-items:center !important;}.sidebar .menu-item{justify-content:center !important;padding:12px !important;width:60px !important;height:48px !important;margin:0 auto 4px auto !important;}.sidebar .sidebar-footer{padding:16px 10px !important;}</style>');
-        }
-    </script>
 </head>
 
 <body>
@@ -307,23 +312,15 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const mainWrapper = document.getElementById('mainWrapper');
 
-        // 1. Pulihkan state dari memori browser saat halaman dimuat
-        if (window.innerWidth > 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
-            if (sidebar) sidebar.classList.add('collapsed');
-            if (mainWrapper) mainWrapper.classList.add('expanded');
-        }
-
-        // 2. MENGGUNAKAN EVENT DELEGATION GLOBAL 
-        // Ini membuat tombol garis 3 di navbar Anda KEBAL MACET meskipun Anda pindah menu berkali-kali.
+        // Tombol garis 3 / toggle sidebar handler (Event Delegation)
         document.addEventListener('click', function(e) {
             const toggleBtn = e.target.closest('#sidebarToggle');
-            if (!toggleBtn) return; // Jika yang diklik bukan tombol garis 3, abaikan
+            if (!toggleBtn) return; 
 
             e.preventDefault();
             e.stopPropagation();
@@ -333,15 +330,9 @@
                 if (sidebar) sidebar.classList.toggle('mobile-show');
                 if (mainWrapper) mainWrapper.classList.toggle('mobile-shifted');
             } else {
-                // Mode Laptop: Toggle membesar dan mengecil
+                // Mode Laptop: Toggle membesar dan mengecil secara dinamis
                 if (sidebar) sidebar.classList.toggle('collapsed');
-                if (mainWrapper) mainWrapper.classList.toggle('expanded');
-
-                // Simpan status terbaru ke memori browser
-                if (sidebar) {
-                    const isCollapsed = sidebar.classList.contains('collapsed');
-                    localStorage.setItem('sidebar_collapsed', isCollapsed);
-                }
+                if (mainWrapper) mainWrapper.classList.expanded ? mainWrapper.classList.remove('expanded') : mainWrapper.classList.add('expanded');
             }
         });
     });
