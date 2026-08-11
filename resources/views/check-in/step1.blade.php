@@ -22,6 +22,46 @@
             padding: 30px 20px !important;
         }
     }
+
+    /* Lingkaran / Bola-Bola Besar Transparan di Sidebar Kiri */
+    .checkin-sidebar {
+        background: linear-gradient(145deg, #01281b 0%, #013220 40%, #006B3F 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkin-sidebar::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 350px;
+        height: 350px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .checkin-sidebar::after {
+        content: '';
+        position: absolute;
+        bottom: -100px;
+        left: -100px;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Ukuran Gambar Logo Diperkecil & Transparan Putih */
+    .logo-box-img {
+        max-height: 15px;
+        width: auto;
+        margin-bottom: 16px;
+        display: block;
+        filter: brightness(0) invert(1);
+    }
 </style>
 
 <div style="width: 100vw; min-height: 100vh; display: flex; box-sizing: border-box; margin: -24px; background-color: #f7faf8; position: relative; overflow-x: hidden;">
@@ -29,39 +69,43 @@
     <div class="checkin-container" style="width: 100%; max-width: 100%; background: #ffffff; border-radius: 0; box-shadow: none; border: none; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; box-sizing: border-box;">
 
         <!-- Sidebar Kiri -->
-        <div class="checkin-sidebar" style="background: linear-gradient(135deg, #013220, #159A5C); padding: 60px 50px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
-            <div>
-                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(255,255,255,0.2); padding: 6px 16px; border-radius: 20px;">
-                    Guest Check-In
-                </span>
-                <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 24px 0 12px 0;">
+        <div class="checkin-sidebar" style="padding: 60px 50px; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="position: relative; z-index: 2;">
+                <!-- Logo Perusahaan Berukuran Kecil -->
+                <img src="{{ asset('images/foto-perusahaan.jpg') }}" alt="Logo Perusahaan" class="logo-box-img">
+
+                
+                
+                <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 20px 0 12px 0;">
                     Selamat Datang! 
                 </h1>
-                <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 40px 0;">
+                <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 35px 0;">
                     Silakan isi data identitas Anda untuk memulai proses check-in kunjungan agar tim kami dapat menyambut dan melayani Anda dengan lebih cepat
                 </p>
 
+                <!-- Step Navigasi -->
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="width: 32px; height: 32px; background: #ffffff; color: #006B3F; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">1</div>
                         <span style="font-size: 14px; font-weight: 700;">Mengisi Identitas (Aktif)</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 14px; opacity: 0.7;">
-                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.3); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">2</div>
+                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">2</div>
                         <span style="font-size: 14px; font-weight: 500;">Keperluan Kunjungan</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 14px; opacity: 0.7;">
-                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.3); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">3</div>
+                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">3</div>
                         <span style="font-size: 14px; font-weight: 500;">Konfirmasi Data</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 14px; opacity: 0.7;">
-                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.3); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">4</div>
+                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">4</div>
                         <span style="font-size: 14px; font-weight: 500;">Selesai & Token Antrian</span>
                     </div>
                 </div>
             </div>
 
-            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 40px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Informasi Alamat & Jam Kerja -->
+            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 40px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 2;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                         <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -165,11 +209,11 @@
 
                 <!-- Navigasi Tombol (Kembali & Selanjutnya) -->
                 <div style="display: flex; gap: 12px; margin-top: 10px;">
-                    <a href="{{ route('halamaanUtama') }}" style="flex: 1; background: #1463ff; color: #ffffff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <a href="{{ route('halamaanUtama') }}" style="flex: 1; background: #006B3F; color: #ffffff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span style="font-size: 15px; line-height: 1; color: #ffffff;">&#8592;</span> Kembali
                     </a>
                     <button type="submit"
-                        style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(20,99,255,0.25);">
+                        style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.15);">
                         Selanjutnya: Keperluan Kunjungan 
                     </button>
                 </div>
