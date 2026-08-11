@@ -43,7 +43,7 @@
         {{-- Tombol Aksi (Responsif & Fleksibel) --}}
         <div style="display: flex; gap: 10px; padding-top: 8px; flex-wrap: wrap;">
             <button type="submit"
-                style="background:#013220; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2); flex: 1; min-width: 120px;">
+                style="background:#0284c7 ; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2); flex: 1; min-width: 120px;">
                 Simpan Data
             </button>
             <a href="{{ route('lead-sources.index') }}"

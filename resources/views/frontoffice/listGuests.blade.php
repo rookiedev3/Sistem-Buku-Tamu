@@ -120,7 +120,7 @@ use App\Helpers\DateHelper;
                             '{{ $guest->is_vip ? '1' : '0' }}',
                             '{{ $guest->visits_count ?? 0 }}'
                         )"
-                            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                            style="background: #0284c7 ; color: #ffffff; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             Detail
                         </button>
                     </td>

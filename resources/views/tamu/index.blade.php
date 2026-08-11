@@ -24,7 +24,7 @@
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, instansi, atau nomor WA..."
                 style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
 
-            <button type="submit" style="background: #006B3F; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+            <button type="submit" style="background: #013220; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
                 Cari
             </button>
 

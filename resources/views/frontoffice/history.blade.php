@@ -201,8 +201,8 @@
                             '{{ $visit->guest->photo_path ? asset('storage/' . $visit->guest->photo_path) : '' }}',
                             '{{ $visit->status }}'
                         )"
-                            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                            onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                            style="background: #0284c7; color: #ffffff; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
                             Detail
                         </button>
                     </td>

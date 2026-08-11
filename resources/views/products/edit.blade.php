@@ -65,7 +65,7 @@
         <div style="margin-bottom: 28px; display: flex; align-items: center; gap: 10px; background: #fbfcfe; padding: 12px 16px; border-radius: 10px; border: 1px solid #e8edf5;">
             <input type="checkbox" name="is_active" id="is_active" value="1"
                 {{ old('is_active', $product->is_active) ? 'checked' : '' }}
-                style="width: 16px; height: 16px; accent-color: #006B3F; cursor: pointer;">
+                style="width: 16px; height: 16px; accent-color: #1463ff; cursor: pointer;">
             <label for="is_active" style="font-size: 13px; font-weight: 700; color: #172033; cursor: pointer;">
                 Aktif
             </label>
@@ -74,7 +74,7 @@
         {{-- Tombol Aksi (Responsif & Fleksibel) --}}
         <div style="display: flex; gap: 10px; padding-top: 8px; flex-wrap: wrap;">
             <button type="submit"
-                style="background:#013220; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2); flex: 1; min-width: 120px;">
+                style="background:#0284c7; color: #fff; padding: 11px 22px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,107,63,.2); flex: 1; min-width: 120px;">
                 Update Data
             </button>
             <a href="{{ route('products.index') }}"
