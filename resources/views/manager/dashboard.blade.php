@@ -28,20 +28,19 @@
         </div>
 
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center;">
-    <span style="font-size: 10px; color: #778195; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Filter Data</span>
-    <form action="{{ route('manager.dashboard') }}" method="GET" style="margin: 0; display: flex; gap: 6px;">
-        <select name="vip_status" onchange="this.form.submit()" style="height: 32px; border: 1px solid #e8edf5; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer; flex: 0 0 40%; box-sizing: border-box;">
-            @php
-                $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
-                $activeVipFilter = $vipFilter ?? 'all';
-            @endphp
-            @foreach($vipOptions as $key => $label)
-                <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
-            @endforeach
-        </select>
-        <input type="text" id="selected_date" name="date" value="{{ $selectedDate }}" placeholder="Pilih tanggal..." readonly style="flex: 0 0 60%;">
-    </form>
-</div>
+            <span style="font-size: 10px; color: #778195; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">Filter Data</span>
+            <form action="{{ route('manager.dashboard') }}" method="GET" style="margin: 0;">
+                <select name="vip_status" onchange="this.form.submit()" style="height: 32px; width: 100%; border: 1px solid #e8edf5; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer; box-sizing: border-box;">
+                    @php
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $activeVipFilter = $vipFilter ?? 'all';
+                    @endphp
+                    @foreach($vipOptions as $key => $label)
+                        <option value="{{ $key }}" {{ $activeVipFilter === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
 
     </div>
 
@@ -49,6 +48,7 @@
 
         <div style="padding: 14px 16px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe;">
             <h3 style="font-size: 14px; font-weight: 800; color: #172033; margin: 0;">Monitoring Kunjungan & Status PIC</h3>
+            <span style="font-size: 11px; color: #778195; font-weight: 600;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
         </div>
 
         <div class="table-responsive">
@@ -148,112 +148,5 @@
     </div>
 
 </div>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-<style>
-    /* Kalender diperkecil - disamakan dengan pic/riwayat & manager/kunjungan supaya rapi & tidak kebesaran */
-    .flatpickr-calendar {
-        width: 230px !important;
-        padding: 6px !important;
-        border-radius: 10px !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
-        border: 1px solid #e8edf5 !important;
-        font-family: inherit !important;
-    }
-    .flatpickr-months {
-        height: 28px !important;
-    }
-    .flatpickr-current-month {
-        font-size: 12px !important;
-        padding-top: 2px !important;
-    }
-    .flatpickr-current-month .flatpickr-monthDropdown-months {
-        font-weight: 700 !important;
-        padding: 0 2px !important;
-    }
-    .flatpickr-months .flatpickr-prev-month,
-    .flatpickr-months .flatpickr-next-month {
-        height: 28px !important;
-        padding: 4px !important;
-    }
-    .flatpickr-months .flatpickr-prev-month svg,
-    .flatpickr-months .flatpickr-next-month svg {
-        width: 10px !important;
-        height: 10px !important;
-    }
-    span.flatpickr-weekday {
-        color: #778195 !important;
-        font-weight: 600 !important;
-        font-size: 10px !important;
-    }
-    .flatpickr-day {
-        max-width: 28px !important;
-        height: 28px !important;
-        line-height: 28px !important;
-        font-size: 11px !important;
-        border-radius: 6px !important;
-    }
-    .flatpickr-day.selected,
-    .flatpickr-day.selected:focus,
-    .flatpickr-day.selected:hover {
-        background: #006B3F !important;
-        border-color: #006B3F !important;
-        font-weight: 700;
-    }
-.flatpickr-custom-input[readonly] {
-    height: 32px !important;
-    width: 100% !important;
-    padding: 4px 10px !important;
-    border: 1px solid #e8edf5 !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    color: #172033 !important;
-    background-color: #fbfcfe !important;
-    outline: none !important;
-    cursor: pointer !important;
-    box-sizing: border-box !important;
-    transition: all 0.2s ease !important;
-}
-
-.flatpickr-custom-input:focus,
-.flatpickr-custom-input.active {
-    border-color: #006B3F !important;
-    background-color: #ffffff !important;
-    box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
-}
-    #selected_date:focus {
-        border-color: #006B3F !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
-    }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    flatpickr("#selected_date", {
-        locale: "id",
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        altInputClass: "flatpickr-custom-input",
-        disableMobile: "true",
-        defaultDate: "{{ $selectedDate }}",
-        onChange: function(selectedDates, dateStr, instance) {
-            instance.element.form.submit();
-        }
-    });
-
-    // pastikan wrapper alt-input ikut flex-basis 60% seperti select di sebelahnya
-    const altInput = document.querySelector('#selected_date').nextElementSibling;
-    if (altInput && altInput.classList.contains('flatpickr-custom-input')) {
-        altInput.style.flex = '0 0 60%';
-    }
-});
-</script>
 
 @endsection
