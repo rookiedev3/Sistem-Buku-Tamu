@@ -31,7 +31,6 @@
         color: #172033 !important;
         font-weight: 600 !important;
         border: 1px solid #e8edf5 !important;
-        /* Border tipis netral */
         border-radius: 10px !important;
     }
 
@@ -44,18 +43,15 @@
     .flatpickr-custom-input.active {
         border-color: #006B3F !important;
         box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.08) !important;
-        /* Shadow fokus ditipiskan */
     }
 
-    /* 2. Popup Kalender - Border & Shadow Diperhalus */
+    /* Popup Kalender - Border & Shadow Diperhalus */
     .flatpickr-calendar {
         z-index: 99999 !important;
         width: 215px !important;
         border-radius: 12px !important;
         border: 1px solid #f1f5f9 !important;
-        /* Border kalender lebih samar */
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
-        /* Shadow dibuat lembut */
         font-family: inherit !important;
         padding: 6px !important;
         background: #ffffff !important;
@@ -72,7 +68,7 @@
         max-width: 196px !important;
     }
 
-    /* 3. Header Bulan & Tahun */
+    /* Header Bulan & Tahun */
     .flatpickr-months .flatpickr-month {
         height: 26px !important;
     }
@@ -90,14 +86,14 @@
         width: 22px !important;
     }
 
-    /* 4. Header Nama Hari (Sen, Sel, Rab...) */
+    /* Header Nama Hari */
     span.flatpickr-weekday {
         color: #006B3F !important;
         font-weight: 700 !important;
         font-size: 9.5px !important;
     }
 
-    /* 5. Angka Tanggal */
+    /* Angka Tanggal */
     .flatpickr-day {
         border-radius: 6px !important;
         color: #172033 !important;
@@ -108,27 +104,21 @@
         line-height: 24px !important;
         margin-top: 1px !important;
         border: none !important;
-        /* Menghapus border tebal default */
     }
 
-    /* Hover Tanggal */
     .flatpickr-day:hover,
     .flatpickr-day:focus {
         background: #f0fdf4 !important;
-        /* Warna hijau sangat muda saat di-hover */
         color: #006B3F !important;
         border: none !important;
     }
 
-    /* Indikator Hari Ini (Today) - Garis Ditipiskan */
     .flatpickr-day.today {
         border: 1px solid #86efac !important;
-        /* Garis hijau tipis soft */
         color: #006B3F !important;
         font-weight: 700 !important;
     }
 
-    /* Tanggal Terpilih (Selected) - Tanpa Shadow Tebal */
     .flatpickr-day.selected,
     .flatpickr-day.selected:hover,
     .flatpickr-day.selected:focus {
@@ -137,13 +127,10 @@
         color: #ffffff !important;
         font-weight: 700 !important;
         box-shadow: none !important;
-        /* Dihapus agar tidak berkesan tebal */
     }
 
-    /* 6. Pembatas Time Picker (Jam & Menit) */
     .flatpickr-time {
         border-top: 1px solid #f8fafc !important;
-        /* Garis pemisah paling tipis & samar */
         margin-top: 4px !important;
         padding-top: 2px !important;
         height: 28px !important;
@@ -431,23 +418,22 @@
                         2. Tujuan & Keperluan Kunjungan
                     </h4>
 
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
-                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
-                            <option value="" disabled selected>-- Pilih PIC --</option>
-                            @foreach($pics as $pic)
-                            <option value="{{ $pic->id }}">{{ $pic->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
+                    {{-- 1. PILIH CABANG TERLEBIH DAHULU --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Cabang *</label>
-                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="loadPicsForModal(this.value); updateSummary();">
                             <option value="" disabled selected>-- Pilih Cabang --</option>
                             @foreach($branches as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    {{-- 2. PILIH PIC TUJUAN (DINAMIS DIBUAT BERDASARKAN CABANG) --}}
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
+                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                            <option value="" disabled selected>-- Pilih Cabang Terlebih Dahulu --</option>
                         </select>
                     </div>
 
@@ -521,12 +507,12 @@
                                 <strong id="sum_company" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
-                                <strong id="sum_pic" style="color: #006B3F; text-align: right; max-width: 60%;"> -</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Cabang:</span>
                                 <strong id="sum_branch" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
+                                <strong id="sum_pic" style="color: #006B3F; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Jenis Kunjungan:</span>
@@ -652,6 +638,43 @@
             }
         });
     });
+
+    // 🟢 DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
+    function loadPicsForModal(branchId, selectedPicId = null) {
+        const picSelect = document.getElementById('select_pic');
+        if (!branchId) return;
+
+        picSelect.innerHTML = '<option value="" disabled selected>Memuat data PIC...</option>';
+
+        fetch(`/get-pics-by-branch/${branchId}`)
+            .then(response => response.json())
+            .then(data => {
+                picSelect.innerHTML = '';
+
+                if (data.length === 0) {
+                    picSelect.innerHTML = '<option value="" disabled selected>Tidak ada PIC di cabang ini</option>';
+                } else {
+                    picSelect.innerHTML = '<option value="" disabled selected>-- Pilih PIC --</option>';
+                    data.forEach(pic => {
+                        const option = document.createElement('option');
+                        option.value = pic.id;
+                        option.textContent = pic.name;
+
+                        if (selectedPicId && selectedPicId == pic.id) {
+                            option.selected = true;
+                        }
+
+                        picSelect.appendChild(option);
+                    });
+                }
+                updateSummary();
+            })
+            .catch(error => {
+                console.error('Error fetching PICs:', error);
+                picSelect.innerHTML = '<option value="" disabled selected>Gagal memuat data PIC</option>';
+                updateSummary();
+            });
+    }
 
     function validateFileSize(input) {
         const file = input.files[0];
@@ -780,26 +803,26 @@
     }
 
     function updateSummary() {
-        document.getElementById('sum_name').innerText = document.getElementById('input_name').value || '-';
-        document.getElementById('sum_company').innerText = document.getElementById('input_company').value || '-';
-
-        const picSelect = document.getElementById('select_pic');
-        document.getElementById('sum_pic').innerText = (picSelect.selectedIndex > 0 && picSelect.options[picSelect.selectedIndex]) ? picSelect.options[picSelect.selectedIndex].text : '-';
+        document.getElementById('sum_name').innerText = document.getElementById('input_name').value.trim() || '-';
+        document.getElementById('sum_company').innerText = document.getElementById('input_company').value.trim() || '-';
 
         const branchSelect = document.getElementById('select_branch');
-        document.getElementById('sum_branch').innerText = (branchSelect.selectedIndex > 0 && branchSelect.options[branchSelect.selectedIndex]) ? branchSelect.options[branchSelect.selectedIndex].text : '-';
+        document.getElementById('sum_branch').innerText = (branchSelect.selectedIndex >= 0 && branchSelect.options[branchSelect.selectedIndex] && branchSelect.value) ? branchSelect.options[branchSelect.selectedIndex].text : '-';
+
+        const picSelect = document.getElementById('select_pic');
+        document.getElementById('sum_pic').innerText = (picSelect.selectedIndex >= 0 && picSelect.options[picSelect.selectedIndex] && picSelect.value) ? picSelect.options[picSelect.selectedIndex].text : '-';
 
         const purposeSelect = document.getElementById('select_purpose');
-        document.getElementById('sum_purpose').innerText = (purposeSelect.selectedIndex > 0 && purposeSelect.options[purposeSelect.selectedIndex]) ? purposeSelect.options[purposeSelect.selectedIndex].text : '-';
+        document.getElementById('sum_purpose').innerText = (purposeSelect.selectedIndex >= 0 && purposeSelect.options[purposeSelect.selectedIndex] && purposeSelect.value) ? purposeSelect.options[purposeSelect.selectedIndex].text : '-';
 
         const productSelect = document.getElementById('select_product');
-        document.getElementById('sum_product').innerText = (productSelect.selectedIndex > 0 && productSelect.options[productSelect.selectedIndex]) ? productSelect.options[productSelect.selectedIndex].text : '-';
+        document.getElementById('sum_product').innerText = (productSelect.selectedIndex >= 0 && productSelect.options[productSelect.selectedIndex] && productSelect.value) ? productSelect.options[productSelect.selectedIndex].text : '-';
 
         const sourceSelect = document.getElementById('select_source');
-        document.getElementById('sum_source').innerText = (sourceSelect.selectedIndex > 0 && sourceSelect.options[sourceSelect.selectedIndex]) ? sourceSelect.options[sourceSelect.selectedIndex].text : '-';
+        document.getElementById('sum_source').innerText = (sourceSelect.selectedIndex >= 0 && sourceSelect.options[sourceSelect.selectedIndex] && sourceSelect.value) ? sourceSelect.options[sourceSelect.selectedIndex].text : '-';
 
         document.getElementById('sum_schedule').innerText = document.getElementById('input_scheduled_at').value || '-';
-        document.getElementById('sum_notes').innerText = document.getElementById('input_notes').value || '-';
+        document.getElementById('sum_notes').innerText = document.getElementById('input_notes').value.trim() || '-';
     }
 
     function submitMultiStepForm() {

@@ -166,6 +166,7 @@ class FrontOfficeController extends Controller
             'photo_path' => 'nullable|image|max:2048',
         ]);
 
+        
         if ($validator->fails()) {
             return redirect()->back()->with('error', 'Cek Isian Anda: ' . implode(', ', $validator->errors()->all()));
         }
@@ -203,6 +204,7 @@ class FrontOfficeController extends Controller
                     'address' => $validated['address'], // 🟢 TAMBAHAN: Update address
                     'email' => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
+                    'created_by' => $currentUserId,
                 ];
                 if ($photoPath) {
                     $updateData['photo_path'] = $photoPath;

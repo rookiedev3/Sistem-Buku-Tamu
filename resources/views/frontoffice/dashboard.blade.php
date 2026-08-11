@@ -504,23 +504,22 @@
                         2. Tujuan & Keperluan Kunjungan
                     </h4>
 
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
-                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
-                            <option value="" disabled selected>-- Pilih PIC --</option>
-                            @foreach($pics as $pic)
-                            <option value="{{ $pic->id }}">{{ $pic->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
+                    {{-- 1. PILIH CABANG TERLEBIH DAHULU --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Cabang *</label>
-                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="loadPicsForModal(this.value); updateSummary();">
                             <option value="" disabled selected>-- Pilih Cabang --</option>
                             @foreach($branches as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    {{-- 2. PILIH PIC TUJUAN (DINAMIS DIBUAT BERDASARKAN CABANG) --}}
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
+                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                            <option value="" disabled selected>-- Pilih Cabang Terlebih Dahulu --</option>
                         </select>
                     </div>
 
@@ -595,12 +594,12 @@
                                 <strong id="sum_company" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
-                                <strong id="sum_pic" style="color: #006B3F; text-align: right; max-width: 60%;"> -</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Cabang:</span>
                                 <strong id="sum_branch" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Tujuan PIC:</span>
+                                <strong id="sum_pic" style="color: #006B3F; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Jenis Kunjungan:</span>
@@ -717,10 +716,10 @@
             minuteIncrement: 15,
             disableMobile: "true",
             defaultDate: new Date(),
-            static: true, // Nempel presisi di dalam modal tanpa merusak overflow
+            static: true,
             disable: [
                 function(date) {
-                    return (date.getDay() === 0); // Sembunyikan hari Minggu
+                    return (date.getDay() === 0);
                 }
             ],
             onChange: function() {
@@ -728,6 +727,43 @@
             }
         });
     });
+
+    // 🟢 DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
+    function loadPicsForModal(branchId, selectedPicId = null) {
+        const picSelect = document.getElementById('select_pic');
+        if (!branchId) return;
+
+        picSelect.innerHTML = '<option value="" disabled selected>Memuat data PIC...</option>';
+
+        fetch(`/get-pics-by-branch/${branchId}`)
+            .then(response => response.json())
+            .then(data => {
+                picSelect.innerHTML = '';
+
+                if (data.length === 0) {
+                    picSelect.innerHTML = '<option value="" disabled selected>Tidak ada PIC di cabang ini</option>';
+                } else {
+                    picSelect.innerHTML = '<option value="" disabled selected>-- Pilih PIC --</option>';
+                    data.forEach(pic => {
+                        const option = document.createElement('option');
+                        option.value = pic.id;
+                        option.textContent = pic.name;
+
+                        if (selectedPicId && selectedPicId == pic.id) {
+                            option.selected = true;
+                        }
+
+                        picSelect.appendChild(option);
+                    });
+                }
+                updateSummary();
+            })
+            .catch(error => {
+                console.error('Error fetching PICs:', error);
+                picSelect.innerHTML = '<option value="" disabled selected>Gagal memuat data PIC</option>';
+                updateSummary();
+            });
+    }
 
     function setDateFilter(filterType) {
         document.getElementById('dateFilterInput').value = filterType;
@@ -864,11 +900,11 @@
         document.getElementById('sum_name').innerText = document.getElementById('input_name').value.trim() || '-';
         document.getElementById('sum_company').innerText = document.getElementById('input_company').value.trim() || '-';
 
-        const picSelect = document.getElementById('select_pic');
-        document.getElementById('sum_pic').innerText = picSelect.value ? picSelect.options[picSelect.selectedIndex].text : '-';
-
         const branchSelect = document.getElementById('select_branch');
         document.getElementById('sum_branch').innerText = branchSelect.value ? branchSelect.options[branchSelect.selectedIndex].text : '-';
+
+        const picSelect = document.getElementById('select_pic');
+        document.getElementById('sum_pic').innerText = picSelect.value ? picSelect.options[picSelect.selectedIndex].text : '-';
 
         const purposeSelect = document.getElementById('select_purpose');
         document.getElementById('sum_purpose').innerText = purposeSelect.value ? purposeSelect.options[purposeSelect.selectedIndex].text : '-';
