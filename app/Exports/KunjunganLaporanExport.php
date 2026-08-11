@@ -89,7 +89,7 @@ class KunjunganLaporanExport implements FromCollection, WithHeadings, WithMappin
             'No', 'Tanggal', 'Jam Masuk', 'Jam Keluar', 'Durasi (Menit)',
             'Nama Tamu', 'Status VIP', 'Instansi', 'Telepon', 'Cabang', 'PIC',
             'Keperluan', 'Produk Diminati', 'Sumber Lead', 'Potential Level',
-            'Catatan Hasil', 'Status Akhir',
+            'Catatan', 'Status Akhir',
         ];
     }
 

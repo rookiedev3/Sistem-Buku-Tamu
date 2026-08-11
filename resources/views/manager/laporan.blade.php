@@ -161,7 +161,7 @@
                         <th style="padding: 14px;">Cabang & PIC</th>
                         <th style="padding: 14px;">Tujuan & Produk</th>
                         <th style="padding: 14px;">Sumber & Potensi</th>
-                        <th style="padding: 14px;">Catatan Hasil</th>
+                        <th style="padding: 14px;">Catatan</th>
                         <th style="padding: 14px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; text-align: center;">Status</th>
                     </tr>
                 </thead>

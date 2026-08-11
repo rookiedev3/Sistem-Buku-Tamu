@@ -73,16 +73,18 @@ class ManagerController extends Controller
         $visits = $query->orderBy('scheduled_at')->get();
 
         $totalToday = $visits->count();
-
-        $leadDealsCount = visits::whereMonth('scheduled_at', Carbon::now()->month)
-            ->where('status', 'deal')
+        $leadDealsCount = leads::where('status', 'deal')
+            ->whereHas('visit', function ($q) {
+                $q->whereMonth('scheduled_at', Carbon::now()->month)
+                ->whereYear('scheduled_at', Carbon::now()->year);
+            })
             ->count();
 
         $notifications = notifications::where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
 
-        return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate', 'notifications'));
+        return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate', 'notifications', 'vipFilter'));
     }
 
     public function kunjungan(Request $request)

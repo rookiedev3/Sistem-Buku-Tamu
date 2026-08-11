@@ -164,7 +164,7 @@
                 <th>Produk Diminati</th>
                 <th>Sumber Lead</th>
                 <th>Potential Level</th>
-                <th>Catatan Hasil</th>
+                <th>Catatan</th>
                 <th class="center">Status Akhir</th>
             </tr>
         </thead>
