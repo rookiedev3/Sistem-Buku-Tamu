@@ -145,6 +145,7 @@
         background-color: #ffffff !important;
         box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important;
     }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -158,6 +159,7 @@
             altInput: true,
             altFormat: "j F Y",
             disableMobile: "true",
+            maxDate: "today",
             defaultDate: "{{ $selectedDate }}",
             onChange: function(selectedDates, dateStr, instance) {
                 instance.element.form.submit();
