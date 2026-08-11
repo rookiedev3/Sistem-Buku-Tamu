@@ -232,11 +232,6 @@
                 <p class="text-white-50 mb-0" style="font-size: 13.5px; line-height: 1.6;">Sistem Buku Tamu & Registrasi Kunjungan Digital Perusahaan.</p>
             </div>
 
-            <!-- Gambar Ilustrasi Vektor Keamanan -->
-            <div class="brand-illustration">
-                <img src="https://illustrations.popsy.co/white/secure-data.svg" alt="Keamanan Sistem">
-            </div>
-
             <div style="position: relative; z-index: 2;">
                 <p class="text-white-50 mb-0" style="font-size: 12px;">&copy; {{ date('Y') }} IT Solution Corp. All rights reserved.</p>
             </div>
@@ -287,17 +282,7 @@
                 </button>
             </form>
 
-            <div class="mb-3">
-                <a href="{{ route('login') }}" class="btn-back-home shadow-sm">
-                    <i class="bi bi-arrow-left"></i> Kembali ke Halaman Login
-                </a>
-            </div>
-
-            <div>
-                <a href="{{ url('/') }}" class="btn-back-home shadow-sm" style="background: transparent; border-color: transparent;">
-                    <span style="font-size: 16px; line-height: 1; color: #475569;">&#8592;</span> Kembali ke Beranda
-                </a>
-            </div>
+        
 
         </div>
 
