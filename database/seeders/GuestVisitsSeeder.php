@@ -97,11 +97,17 @@ class GuestVisitsSeeder extends Seeder
         $uniformStatus = 'Terjadwal';
         $uniformIsVip  = 1;
 
-        // Tanggal kunjungan dimulai dari 11 Agustus 2026, lalu maju 1 hari untuk setiap tamu berikutnya.
-        $startDate = Carbon::create(2026, 8, 11, 8, 0, 0);
+        // 7 tamu pertama semuanya bertanggal HARI INI (11 Agustus 2026),
+        // sisanya (mulai tamu ke-8) maju 1 hari per tamu mulai 12 Agustus 2026.
+        $today          = Carbon::create(2026, 8, 11, 8, 0, 0);
+        $todayCount     = 7;
 
         foreach ($guestsData as $i => $g) {
-            $date       = $startDate->copy()->addDays($i);
+            if ($i < $todayCount) {
+                $date = $today->copy();
+            } else {
+                $date = $today->copy()->addDays(($i - $todayCount) + 1);
+            }
             $guestCode  = 'GST-' . $date->format('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
             $visitCode  = 'VST-' . $date->format('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
 
