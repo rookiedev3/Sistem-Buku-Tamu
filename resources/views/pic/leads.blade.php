@@ -6,7 +6,7 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 4px;">Lead & Follow-Up Penjualan 📈</h2>
-            <p style="font-size: 11px; color: #778195; margin: 0; line-height: 1.5;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis dipindah ke Riwayat Kunjungan.</p>
+            <p style="font-size: 11px; color: #778195; margin: 0; line-height: 1.5;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis disembunyikan dari halaman ini dan hanya bisa dilihat di Riwayat Kunjungan.</p>
         </div>
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <span style="font-size: 10px; font-weight: 700; color: #778195; text-transform: uppercase;">Berhasil (Deal)</span>
@@ -31,6 +31,7 @@
                     $filterOptions = [
                         'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
                         'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
+                        'deal'     => 'Deal 🎉' . ($countDeal > 0 ? " ({$countDeal})" : ''),
                         'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
                         'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
                         'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
@@ -44,9 +45,14 @@
                         $color = $isActive ? '#ffffff' : '#475569';
                         if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
                             $bg = '#fef2f2'; $color = '#dc2626';
+                        } elseif (!$isActive && $key === 'deal' && $countDeal > 0) {
+                            $bg = '#dcfce7'; $color = '#15803d';
                         }
                     @endphp
-                    <a href="{{ route('pic.leads', array_merge(request()->query(), ['filter' => $key])) }}"
+                    {{-- 'page' dibuang dulu sebelum di-merge, sama seperti dashboard, supaya tiap ganti tab
+                         filter selalu mulai dari halaman 1 (kalau tidak, page lama misal page=2 ikut kebawa
+                         dan bisa kosong karena tab baru datanya lebih sedikit). --}}
+                    <a href="{{ route('pic.leads', array_merge(request()->except('page'), ['filter' => $key])) }}"
                        style="background: {{ $bg }}; color: {{ $color }}; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
                         {{ $label }}
                     </a>
@@ -61,8 +67,10 @@
                         $activeVipFilter = $vipFilter ?? 'all';
                     @endphp
                     @foreach($vipOptions as $key => $label)
+                        {{-- Sama seperti tab filter di atas: 'page' dibuang dulu supaya ganti Status VIP/Reguler
+                             juga selalu balik ke halaman 1. --}}
                         <option
-                            value="{{ route('pic.leads', array_merge(request()->query(), ['vip_status' => $key])) }}"
+                            value="{{ route('pic.leads', array_merge(request()->except('page'), ['vip_status' => $key])) }}"
                             {{ $activeVipFilter === $key ? 'selected' : '' }}>
                             {{ $label }}
                         </option>
@@ -266,7 +274,7 @@
                         <div style="color: #475569; font-size: 12px; margin-top: 2px;">WhatsApp: {{ $lead->guest->phone ?? '-' }}</div>
                     </div>
 
-                    <form action="{{ route('pic.leads.updateFollowUp', $lead->id) }}" method="POST">
+                    <form action="{{ route('pic.leads.updateFollowUp', $lead->id) }}" method="POST" class="js-followup-form">
                         @csrf
                         <div style="margin-bottom: 16px;">
                             <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Tahap Pipeline Terbaru</label>
@@ -286,7 +294,10 @@
                         </div>
 
                         <div style="margin-bottom: 16px;">
-                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Estimasi Nilai Deal (Rp)</label>
+                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
+                                Estimasi Nilai Deal (Rp)
+                                <span class="js-deal-required-mark" style="color: #dc2626; display: none;">*wajib diisi untuk status Deal</span>
+                            </label>
                             <div style="position: relative; display: flex; align-items: center; width: 100%;">
                                 <div style="position: absolute; left: 14px; color: #006B3F; font-weight: 700; font-size: 13px; pointer-events: none;">Rp</div>
                                 <input type="text"
@@ -294,6 +305,7 @@
                                     autocomplete="off"
                                     class="rupiah-input"
                                     data-hidden-target="estimatedValueRaw{{ $lead->id }}"
+                                    data-has-existing="{{ ($lead->estimated_value && (float) $lead->estimated_value > 0) ? '1' : '0' }}"
                                     id="estimatedValueDisplay{{ $lead->id }}"
                                     value=""
                                     placeholder="Contoh: 5.000.000"
@@ -343,6 +355,7 @@
     .flatpickr-day:hover { border-radius: 10px !important; }
     input[id^="dateInput"]:focus { border-color: #006B3F !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
     input.rupiah-input:focus { border-color: #006B3F !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
+    input.rupiah-input.is-invalid { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
@@ -383,6 +396,36 @@
                 const raw = this.value.replace(/\D/g, "");
                 this.value = raw ? new Intl.NumberFormat("id-ID").format(raw) : "";
                 if (hidden) hidden.value = raw;
+                this.classList.remove("is-invalid");
+            });
+        });
+
+        // 🚫 Cegah submit "Deal" tanpa Estimasi Nilai (baru maupun lama)
+        document.querySelectorAll(".js-followup-form").forEach(function (form) {
+            const statusSelect = form.querySelector(".status-dropdown");
+            const rupiahInput = form.querySelector(".rupiah-input");
+            const hiddenInput = form.querySelector("input[name='estimated_value']");
+            const requiredMark = form.querySelector(".js-deal-required-mark");
+
+            function toggleRequiredMark() {
+                if (requiredMark) {
+                    requiredMark.style.display = statusSelect.value === "deal" ? "inline" : "none";
+                }
+            }
+            toggleRequiredMark();
+            statusSelect.addEventListener("change", toggleRequiredMark);
+
+            form.addEventListener("submit", function (e) {
+                const hasExisting = rupiahInput.dataset.hasExisting === "1";
+                const hasNewValue = !!hiddenInput.value;
+
+                if (statusSelect.value === "deal" && !hasNewValue && !hasExisting) {
+                    e.preventDefault();
+                    rupiahInput.classList.add("is-invalid");
+                    rupiahInput.focus();
+                    rupiahInput.scrollIntoView({ behavior: "smooth", block: "center" });
+                    alert("Estimasi Nilai Deal wajib diisi sebelum lead bisa ditandai Deal.");
+                }
             });
         });
     });

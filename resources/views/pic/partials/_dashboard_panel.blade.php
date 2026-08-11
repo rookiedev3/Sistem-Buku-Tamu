@@ -40,7 +40,10 @@
                 @php
                     $isActive = $activeFilter === $key;
                 @endphp
-                <a href="{{ route('pic.dashboard', array_merge(request()->query(), ['filter' => $key])) }}"
+                {{-- 'page' SENGAJA dibuang dari query lama sebelum di-merge, supaya tiap ganti tab filter
+                     selalu mulai dari halaman 1. Kalau tidak, page lama (misal page=2) ikut kebawa dan
+                     bisa jadi kosong karena tab baru datanya lebih sedikit. --}}
+                <a href="{{ route('pic.dashboard', array_merge(request()->except('page'), ['filter' => $key])) }}"
                    style="background: {{ $isActive ? '#013220' : '#f1f5f9' }}; color: {{ $isActive ? '#ffffff' : '#475569' }}; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
                     {{ $label }}
                 </a>
@@ -59,8 +62,10 @@
                     ];
                 @endphp
                 @foreach($vipOptions as $key => $label)
+                    {{-- Sama seperti tab filter di atas: 'page' dibuang dulu supaya ganti Status VIP/Reguler
+                         juga selalu balik ke halaman 1. --}}
                     <option
-                        value="{{ route('pic.dashboard', array_merge(request()->query(), ['vip_status' => $key])) }}"
+                        value="{{ route('pic.dashboard', array_merge(request()->except('page'), ['vip_status' => $key])) }}"
                         {{ $activeVipFilter === $key ? 'selected' : '' }}>
                         {{ $label }}
                     </option>
@@ -258,7 +263,7 @@
                                         <strong style="color: #172033; font-size: 14px;">{{ $visit->guest->name ?? '-' }} ({{ $visit->guest->company_name ?? '-' }})</strong>
                                     </div>
 
-                                    <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST" onsubmit="let btn = this.querySelector('button[type=\'submit\']'); btn.disabled = true; btn.innerHTML = 'Menyimpan...';">
+                                    <form action="{{ route('pic.completeMeeting', $visit->id) }}" method="POST" class="js-complete-meeting-form" onsubmit="return validateFollowUpDate(this);">
                                         @csrf
 
                                         <div style="margin-bottom: 16px;">
@@ -277,7 +282,10 @@
                                         </div>
 
                                         <div style="margin-bottom: 20px;">
-                                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Jadwal Follow-Up Berikutnya</label>
+                                            <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
+                                                Jadwal Follow-Up Berikutnya
+                                                <span style="color: #dc2626;">*</span>
+                                            </label>
 
                                             <div style="position: relative; display: flex; align-items: center; width: 100%;">
                                                 <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
@@ -289,11 +297,12 @@
                                                     </svg>
                                                 </div>
 
-                                                <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at"
+                                                <input type="text" id="follow_up_at-{{ $visit->id }}" name="follow_up_at" required
                                                     value="{{ $visit->follow_up_at ? \Carbon\Carbon::parse($visit->follow_up_at)->format('Y-m-d') : '' }}"
                                                     placeholder="Pilih tanggal follow-up..." readonly
                                                     style="width: 100%; padding: 10px 14px 10px 44px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fbfcfe; cursor: pointer; box-sizing: border-box; font-family: inherit;">
                                             </div>
+                                            <small class="js-followup-date-error" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;">Tanggal follow-up wajib dipilih.</small>
                                         </div>
 
                                         <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -327,3 +336,28 @@
     </div>
 
 </div>
+
+<script>
+    // Cegah submit "Catat Hasil Pertemuan & Lead" tanpa tanggal follow-up.
+    // Dipasang lewat window supaya tetap ada walau panel ini di-swap ulang via AJAX
+    // (lihat script initRowWidgets di dashboard.blade.php).
+    function validateFollowUpDate(form) {
+        const dateInput = form.querySelector('input[name="follow_up_at"]');
+        const errorEl = form.querySelector('.js-followup-date-error');
+
+        if (!dateInput.value) {
+            if (errorEl) errorEl.style.display = 'block';
+            dateInput.style.borderColor = '#dc2626';
+            dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        if (errorEl) errorEl.style.display = 'none';
+        dateInput.style.borderColor = '#e8edf5';
+
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = 'Menyimpan...';
+        return true;
+    }
+</script>

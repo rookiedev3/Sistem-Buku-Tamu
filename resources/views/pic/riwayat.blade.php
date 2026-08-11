@@ -103,7 +103,10 @@
                     @forelse($visits as $index => $v)
                     @php
                         $statusLower = strtolower(trim($v->status ?? ''));
-                        $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                        // "cancelled" / "ditolak" / "dibatalkan" semuanya dianggap kunjungan yang DIBATALKAN.
+                        $isCancelled = in_array($statusLower, ['cancelled', 'ditolak', 'dibatalkan']);
+                        // Selain dibatalkan, dan statusnya termasuk status final -> dianggap SELESAI (boleh ada catatan pertemuan).
+                        $isCompleted = !$isCancelled && in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
                         $leadStatus = optional($v->lead)->status; // null kalau visit ini cold/non_lead (tidak dikonversi)
                     @endphp
                     <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -130,8 +133,13 @@
                         </td>
 
                         <td style="padding: 8px 10px; color: #778195; font-weight: 600;">
-                            {{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->translatedFormat('d F Y') : '-' }}<br>
-                            <span style="font-size: 10px;">{{ $v->check_in_at ? \Carbon\Carbon::parse($v->check_in_at)->format('H:i') . ' WIB' : '' }}</span>
+                            @php
+                                // Kunjungan yang dibatalkan seringkali tidak sempat check-in,
+                                // jadi tanggal fallback ke scheduled_at supaya tetap tampil (bukan '-').
+                                $displayDate = $v->check_in_at ?? $v->scheduled_at;
+                            @endphp
+                            {{ $displayDate ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d F Y') : '-' }}<br>
+                            <span style="font-size: 10px;">{{ $displayDate ? \Carbon\Carbon::parse($displayDate)->format('H:i') . ' WIB' : '' }}</span>
                         </td>
 
                         <td style="padding: 8px 10px; color: #475569;">
@@ -151,7 +159,7 @@
 
                         <!-- Kolom Status Akhir -->
                         <td style="padding: 8px 10px; text-align: center;">
-                            @if(in_array($statusLower, ['cancelled', 'dibatalkan']))
+                            @if($isCancelled)
                                 <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 800;">Dibatalkan</span>
                             @elseif($isCompleted && $leadStatus)
                                 @php $b = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
@@ -159,7 +167,7 @@
                             @elseif($isCompleted)
                                 <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 800;">(Non-Lead)</span>
                             @else
-                                <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 800;">Dibatalkan</span>
+                                <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 800;">{{ $v->status }}</span>
                             @endif
                         </td>
                     </tr>
@@ -188,7 +196,8 @@
 @foreach($visits as $v)
     @php
         $statusLowerModal = strtolower(trim($v->status ?? ''));
-        $isCompletedModal = in_array($statusLowerModal, ['completed', 'selesai', 'meeting selesai', 'sedang bertemu']);
+        $isCancelledModal = in_array($statusLowerModal, ['cancelled', 'ditolak', 'dibatalkan']);
+        $isCompletedModal = !$isCancelledModal && in_array($statusLowerModal, ['completed', 'selesai', 'meeting selesai', 'sedang bertemu']);
 
         $leadModal = $v->lead; // bisa null kalau visit tidak dikonversi jadi lead
         $scheduleTextMap = [

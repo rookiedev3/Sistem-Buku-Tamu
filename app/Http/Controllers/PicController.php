@@ -25,7 +25,7 @@ class PicController extends Controller
 
         $query = visits::with(['guest.category', 'purpose', 'branch'])
             ->where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak']);
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan']);
 
         if ($filter === 'today') {
             $query->where(function ($q) use ($today) {
@@ -59,28 +59,32 @@ class PicController extends Controller
                 $q->where('is_vip', false)->orWhereNull('is_vip');
             })->count();
 
+            // Urutan diprioritaskan berdasarkan TANGGAL KUNJUNGAN dulu (yang paling dekat di atas),
+            // baru kalau tanggalnya sama, tamu VIP ditampilkan lebih dulu daripada Reguler.
             $query->leftJoin('guests', 'visits.guest_id', '=', 'guests.id')
                 ->select('visits.*')
+                ->orderByRaw('COALESCE(visits.check_in_at, visits.scheduled_at) ASC')
                 ->orderByRaw('CASE WHEN guests.is_vip = 1 THEN 0 ELSE 1 END ASC')
                 ->orderBy('visits.created_at', 'asc');
         } else {
             $vipCount = 0;
             $regularCount = (clone $query)->count();
 
-            $query->orderBy('created_at', 'asc');
+            $query->orderByRaw('COALESCE(check_in_at, scheduled_at) ASC')
+                ->orderBy('created_at', 'asc');
         }
 
         $visits = $query->paginate($perPage)->appends($request->query());
 
         $countToday = visits::where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan'])
             ->where(function ($q) use ($today) {
                 $q->whereDate('check_in_at', $today)
                     ->orWhereDate('scheduled_at', $today);
             })->count();
 
         $countUpcoming = visits::where('assigned_to', auth()->id())
-            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak'])
+            ->whereNotIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan'])
             ->whereDate('scheduled_at', '>', $today)
             ->count();
 
@@ -176,7 +180,7 @@ class PicController extends Controller
 
         $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('assigned_to', auth()->id())
-            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai']);
+            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai', 'Dibatalkan', 'dibatalkan']);
 
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
@@ -259,8 +263,12 @@ class PicController extends Controller
     public function completeMeeting(Request $request, $id)
     {
         $request->validate([
+            'meeting_result' => 'required|string',
             'potential_level' => 'required|string',
+            'follow_up_at' => 'required|date',
             'estimated_value' => 'nullable|numeric',
+        ], [
+            'follow_up_at.required' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
         ]);
 
         $visit = visits::with('guest')
@@ -283,9 +291,9 @@ class PicController extends Controller
 
         $visit->update([
             'status' => $newStatus,
-            'meeting_result' => $request->notes ?? $request->meeting_result,
+            'meeting_result' => $request->meeting_result,
             'potential_level' => $request->potential_level,
-            'follow_up_at' => $request->followup_date ?? $request->follow_up_at,
+            'follow_up_at' => $request->follow_up_at,
             'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot']),
             'updated_by' => auth()->id(),
         ]);
@@ -301,7 +309,7 @@ class PicController extends Controller
                     'owner_id' => auth()->id(),
                     'status' => 'new',
                     'estimated_value' => $estValue,
-                    'follow_up_at' => $request->followup_date ?? $request->follow_up_at,
+                    'follow_up_at' => $request->follow_up_at,
                 ]
             );
 
@@ -356,11 +364,24 @@ class PicController extends Controller
             return redirect()->back()->with('error', 'Lead ini sudah Deal dan tidak bisa diubah lagi.');
         }
 
-        $lead->status = $request->status;
-        $lead->follow_up_at = in_array($request->status, ['deal', 'lost']) ? null : $request->due_at;
-        $lead->estimated_value = $request->filled('estimated_value')
+        // Nilai final = input baru (kalau diisi) atau nilai lama yang tersimpan di lead
+        $finalEstimatedValue = $request->filled('estimated_value')
             ? $request->estimated_value
             : $lead->estimated_value;
+
+        // 🚫 Cegah Deal tanpa estimasi nilai yang valid (> 0).
+        // PENTING: pakai perbandingan numerik, BUKAN empty()/truthy check —
+        // kalau kolomnya di-cast 'decimal' di model, nilai 0 akan berbentuk
+        // string "0.00" yang truthy di PHP dan lolos dari empty().
+        if ($request->status === 'deal' && (float) $finalEstimatedValue <= 0) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Estimasi Nilai Deal wajib diisi (lebih dari Rp 0) sebelum lead bisa ditandai Deal.');
+        }
+
+        $lead->status = $request->status;
+        $lead->follow_up_at = in_array($request->status, ['deal', 'lost']) ? null : $request->due_at;
+        $lead->estimated_value = $finalEstimatedValue;
         $lead->save();
 
         follow_ups::create([
@@ -433,7 +454,25 @@ class PicController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
 
-        $baseCount = fn() => leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+        $baseCount = function () use ($ownerId, $vipFilter) {
+            $q = leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+
+            // Samakan filter VIP dengan $query di atas, supaya angka di badge tab
+            // (Semua/Aktif/Deal/dst) selalu sesuai dengan isi tabel yang sedang
+            // ditampilkan — sebelumnya count ini abai terhadap vip_status, jadi
+            // badge bisa menunjukkan angka > 0 padahal tabel kosong.
+            if (Schema::hasColumn('guests', 'is_vip')) {
+                if ($vipFilter === 'vip') {
+                    $q->whereHas('guest', fn($gq) => $gq->where('is_vip', true));
+                } elseif ($vipFilter === 'reguler') {
+                    $q->whereHas('guest', function ($gq) {
+                        $gq->where('is_vip', false)->orWhereNull('is_vip');
+                    });
+                }
+            }
+
+            return $q;
+        };
 
         $countAll      = $baseCount()->count();
         $countActive   = $baseCount()->whereNotIn('status', ['deal', 'lost'])->count();
