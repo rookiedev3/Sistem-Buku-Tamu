@@ -206,6 +206,17 @@ use App\Helpers\DateHelper;
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">No. WhatsApp / Telepon <span style="color:red;">*</span></label>
+                    <input type="text" name="phone" required placeholder="08xxxxxxxxxx" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                </div>
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Email (Opsional)</label>
+                    <input type="email" name="email" placeholder="email@contoh.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Instansi / Perusahaan</label>
                     <input type="text" name="company_name" placeholder="Nama instansi" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                 </div>
@@ -216,8 +227,8 @@ use App\Helpers\DateHelper;
             </div>
 
             <div>
-                <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">No. WhatsApp / Telepon</label>
-                <input type="text" name="phone" placeholder="08xxxxxxxxxx" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Alamat (Opsional)</label>
+                <textarea name="address" rows="2" placeholder="Alamat lengkap" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
 
             <div>
@@ -257,6 +268,7 @@ use App\Helpers\DateHelper;
     });
 
     let searchTimeout;
+
     function handleSearchInput(inputElem) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {

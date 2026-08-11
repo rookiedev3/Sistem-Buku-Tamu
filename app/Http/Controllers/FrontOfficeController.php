@@ -14,6 +14,7 @@ use App\Models\visit_purposes;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -118,7 +119,7 @@ class FrontOfficeController extends Controller
                 $pic->id,
                 'guest_arrived',
                 'Tamu Anda Sudah Datang 🔔',
-                'Tamu '.($guest->name ?? 'Tamu').' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
             );
         }
 
@@ -166,7 +167,7 @@ class FrontOfficeController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('error', 'Cek Isian Anda: '.implode(', ', $validator->errors()->all()));
+            return redirect()->back()->with('error', 'Cek Isian Anda: ' . implode(', ', $validator->errors()->all()));
         }
 
         $validated = $validator->validated();
@@ -174,10 +175,10 @@ class FrontOfficeController extends Controller
         // Sanitasi Format Nomor Telepon (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+            $phone = '+' . $phone;
         }
 
         // Ambil ID user yang sedang login untuk created_by
@@ -211,12 +212,12 @@ class FrontOfficeController extends Controller
                 $guest->update($updateData);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefixGuest = 'GST-'.$todayDate.'-';
+                $prefixGuest = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequenceGuest = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code' => $prefixGuest.$sequenceGuest,
+                    'guest_code' => $prefixGuest . $sequenceGuest,
                     'name' => $validated['name'],
                     'company_name' => $validated['company_name'],
                     'position' => $validated['position'],
@@ -238,10 +239,10 @@ class FrontOfficeController extends Controller
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-'.$todayDate.'-';
+            $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit.$sequenceVisit;
+            $visitCode = $prefixVisit . $sequenceVisit;
 
             // 5. Simpan Data Kunjungan (Visit)
             $visit = visits::create([
@@ -284,7 +285,7 @@ class FrontOfficeController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
@@ -419,10 +420,10 @@ class FrontOfficeController extends Controller
         // Sanitasi nomor telepon/WA
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
+            $phone = '+' . $phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
@@ -430,12 +431,12 @@ class FrontOfficeController extends Controller
             $guest = guests::where('phone', $phone)->first();
             if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-'.$todayDate.'-';
+                $prefix = 'GST-' . $todayDate . '-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code' => $prefix.$sequence,
+                    'guest_code' => $prefix . $sequence,
                     'name' => $request->name,
                     'phone' => $phone,
                     'company_name' => $request->company_name,
@@ -449,10 +450,10 @@ class FrontOfficeController extends Controller
 
             // Generate visit code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-'.$todayDate.'-';
+            $prefixVisit = 'VST-' . $todayDate . '-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit.$sequenceVisit;
+            $visitCode = $prefixVisit . $sequenceVisit;
 
             // Hitung nomor antrean
             $todayVisitCount = visits::whereDate('scheduled_at', Carbon::today())->count();
@@ -563,27 +564,37 @@ class FrontOfficeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'company_name' => 'nullable|string|max:255',
-            'position' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'is_vip' => 'required|boolean',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'name'         => 'required|string|max:150',
+            'phone'        => 'required|string|max:25',
+            'email'        => 'nullable|email|max:150',
+            'company_name' => 'nullable|string|max:180',
+            'position'     => 'nullable|string|max:100',
+            'address'      => 'nullable|string',
+            'is_vip'       => 'required|boolean',
+            'photo'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        // 1. Generate Kode Tamu Unik (Contoh: GST-20260811-A8B9)
+        $guestCode = 'GST-' . date('Ymd') . '-' . strtoupper(Str::random(4));
+
+        // 2. Upload Foto Profil jika ada
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('guests', 'public');
         }
 
+        // 3. Simpan ke Database
         guests::create([
-            'name' => $request->name,
+            'guest_code'   => $guestCode,
+            'name'         => $request->name,
+            'phone'        => $request->phone,
+            'email'        => $request->email,
             'company_name' => $request->company_name,
-            'position' => $request->position,
-            'phone' => $request->phone,
-            'is_vip' => $request->is_vip,
-            'photo_path' => $photoPath,
-            'visits_count' => 0,
+            'position'     => $request->position,
+            'address'      => $request->address,
+            'is_vip'       => $request->is_vip,
+            'photo_path'   => $photoPath,
+            'created_by'   => auth()->id(), // Mencatat ID pembuat data
         ]);
 
         return redirect()->back()->with('success', 'Data tamu berhasil ditambahkan!');
