@@ -22,7 +22,8 @@ use App\Helpers\DateHelper;
             + Tambah Tamu Baru
         </button>
 
-        <form action="{{ route('frontoffice.guest') }}" method="GET" id="vipFilterForm" style="display: flex; gap: 8px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03);">
+        <form action="{{ route('frontoffice.guest') }}" method="GET" id="vipFilterForm" style="display: flex; gap: 8px; align-items: center; background: #ffffff; padding: 8px 14px; border-radius: 12px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); margin: 0;">
+            <input type="hidden" name="keyword" value="{{ request('keyword') }}">
             <span style="font-size: 12px; font-weight: 600; color: #64748b; white-space: nowrap;">Kategori VIP:</span>
             <select name="vip" onchange="document.getElementById('vipFilterForm').submit()" style="padding: 6px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; outline: none; color: #172033; background: #fff;">
                 <option value="">Semua Tamu</option>
@@ -30,7 +31,7 @@ use App\Helpers\DateHelper;
                 <option value="0" {{ request('vip') === '0' ? 'selected' : '' }}>Reguler</option>
             </select>
             @if(request()->has('vip') && request('vip') !== null && request('vip') !== '')
-            <a href="{{ route('frontoffice.guest') }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 2px; white-space: nowrap;">Reset</a>
+            <a href="{{ route('frontoffice.guest', ['keyword' => request('keyword')]) }}" style="font-size: 11px; color: #dc2626; text-decoration: none; font-weight: 600; margin-left: 2px; white-space: nowrap;">Reset</a>
             @endif
         </form>
     </div>
@@ -41,11 +42,11 @@ use App\Helpers\DateHelper;
     <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 12px;">
         <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Direktori Data Tamu</h3>
 
-        <div>
-            {{-- Updated Placeholder --}}
-            <input type="text" id="searchGuests" placeholder="Cari nama / instansi..." onkeyup="filterGuestTable()"
+        <form method="GET" action="{{ route('frontoffice.guest') }}" style="margin: 0;">
+            <input type="hidden" name="vip" value="{{ request('vip') }}">
+            <input type="text" id="searchGuests" name="keyword" value="{{ request('keyword') }}" placeholder="Cari nama / instansi..." oninput="handleSearchInput(this)"
                 style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; width: 260px;">
-        </div>
+        </form>
     </div>
 
     <div style="overflow-x: auto;">
@@ -245,43 +246,22 @@ use App\Helpers\DateHelper;
 </div>
 
 <script>
-    function filterGuestTable() {
-        const input = document.getElementById('searchGuests');
-        const filter = input.value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.guest-row');
-        let visibleIndex = 1;
-
-        // Hide pagination if searching
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (paginationContainer) {
-            if (filter !== '') {
-                paginationContainer.style.display = 'none';
-            } else {
-                paginationContainer.style.display = '';
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchGuests');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = val;
         }
+    });
 
-        rows.forEach(row => {
-            const cells = row.getElementsByTagName('td');
-            
-            // Mengambil hanya teks Profil Tamu (Nama) & Instansi/Jabatan
-            // cells[1] = Profil Tamu, cells[2] = Instansi & Jabatan
-            const guestProfile = cells[1] ? (cells[1].textContent || cells[1].innerText) : '';
-            const companyPosition = cells[2] ? (cells[2].textContent || cells[2].innerText) : '';
-            
-            const targetText = (guestProfile + ' ' + companyPosition).toLowerCase();
-            const tdNum = row.querySelector('.row-number');
-
-            if (targetText.indexOf(filter) > -1) {
-                row.style.display = "";
-                if (tdNum) {
-                    tdNum.textContent = visibleIndex;
-                    visibleIndex++;
-                }
-            } else {
-                row.style.display = "none";
-            }
-        });
+    let searchTimeout;
+    function handleSearchInput(inputElem) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            inputElem.form.submit();
+        }, 600);
     }
 
     function updateVipStatus(guestId, selectElem) {

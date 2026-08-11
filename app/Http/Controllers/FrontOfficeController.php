@@ -14,9 +14,9 @@ use App\Models\visit_purposes;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FrontOfficeController extends Controller
 {
@@ -38,22 +38,39 @@ class FrontOfficeController extends Controller
         // 3. Eksekusi Pagination Data Visits
         $allowedPerPage = [10, 25, 50, 100];
         $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
+        if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
 
-        $visits = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->orderBy('scheduled_at', 'asc')
+        $query = visits::with(['guest', 'purpose', 'assignedUser']);
+
+        if ($request->input('date_filter') === 'today') {
+            $query->whereDate('scheduled_at', $today);
+        }
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('guest', function ($g) use ($keyword) {
+                    $g->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('company_name', 'like', "%{$keyword}%");
+                })->orWhereHas('assignedUser', function ($u) use ($keyword) {
+                    $u->where('name', 'like', "%{$keyword}%");
+                })->orWhere('visit_code', 'like', "%{$keyword}%");
+            });
+        }
+
+        $visits = $query->orderBy('scheduled_at', 'asc')
             ->paginate($perPage)
             ->appends($request->query());
 
         // 4. Data Pendukung Modal
-        $pics            = User::where('role', 'pic')->select('id', 'name')->get();
-        $branches        = branches::select('id', 'name')->get();
-        $purposes        = visit_purposes::select('id', 'name')->get();
+        $pics = User::where('role', 'pic')->select('id', 'name')->get();
+        $branches = branches::select('id', 'name')->get();
+        $purposes = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products        = products::select('id', 'name')->get();
-        $leadSources     = lead_sources::select('id', 'name')->get();
+        $products = products::select('id', 'name')->get();
+        $leadSources = lead_sources::select('id', 'name')->get();
 
         // 5. Data Notifikasi
         $notifications = notifications::where('user_id', auth()->id())
@@ -101,7 +118,7 @@ class FrontOfficeController extends Controller
                 $pic->id,
                 'guest_arrived',
                 'Tamu Anda Sudah Datang 🔔',
-                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+                'Tamu '.($guest->name ?? 'Tamu').' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
             );
         }
 
@@ -132,24 +149,24 @@ class FrontOfficeController extends Controller
     {
         // 1. Validasi Input
         $validator = Validator::make($request->all(), [
-            'name'              => 'required|string|max:255',
-            'company_name'      => 'required|string|max:255',
-            'position'          => 'required|string|max:255',
-            'address'           => 'required|string|max:255',
-            'phone'             => 'required|string',
-            'email'             => 'required|email|max:150',
+            'name' => 'required|string|max:255',
+            'company_name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string',
+            'email' => 'required|email|max:150',
             'guest_category_id' => 'required|exists:guest_categories,id',
-            'assigned_to'       => 'required|exists:users,id',
-            'branch_id'         => 'required|exists:branches,id',
-            'purpose_id'        => 'required|exists:visit_purposes,id',
-            'product_id'        => 'nullable|exists:products,id',
-            'scheduled_at'      => 'required|date',
-            'notes'             => 'required|string',
-            'photo_path'        => 'nullable|image|max:2048',
+            'assigned_to' => 'required|exists:users,id',
+            'branch_id' => 'required|exists:branches,id',
+            'purpose_id' => 'required|exists:visit_purposes,id',
+            'product_id' => 'nullable|exists:products,id',
+            'scheduled_at' => 'required|date',
+            'notes' => 'required|string',
+            'photo_path' => 'nullable|image|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('error', 'Cek Isian Anda: ' . implode(', ', $validator->errors()->all()));
+            return redirect()->back()->with('error', 'Cek Isian Anda: '.implode(', ', $validator->errors()->all()));
         }
 
         $validated = $validator->validated();
@@ -157,10 +174,10 @@ class FrontOfficeController extends Controller
         // Sanitasi Format Nomor Telepon (+62...)
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
 
         // Ambil ID user yang sedang login untuk created_by
@@ -179,11 +196,11 @@ class FrontOfficeController extends Controller
 
             if ($guest) {
                 $updateData = [
-                    'name'              => $validated['name'],
-                    'company_name'      => $validated['company_name'],
-                    'position'          => $validated['position'],
-                    'address'           => $validated['address'], // 🟢 TAMBAHAN: Update address
-                    'email'             => $validated['email'],
+                    'name' => $validated['name'],
+                    'company_name' => $validated['company_name'],
+                    'position' => $validated['position'],
+                    'address' => $validated['address'], // 🟢 TAMBAHAN: Update address
+                    'email' => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                 ];
                 if ($photoPath) {
@@ -194,22 +211,22 @@ class FrontOfficeController extends Controller
                 $guest->update($updateData);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefixGuest = 'GST-' . $todayDate . '-';
+                $prefixGuest = 'GST-'.$todayDate.'-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequenceGuest = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code'        => $prefixGuest . $sequenceGuest,
-                    'name'              => $validated['name'],
-                    'company_name'      => $validated['company_name'],
-                    'position'          => $validated['position'],
-                    'address'           => $validated['address'], // 🟢 TAMBAHAN: Simpan address
-                    'phone'             => $phone,
-                    'email'             => $validated['email'],
+                    'guest_code' => $prefixGuest.$sequenceGuest,
+                    'name' => $validated['name'],
+                    'company_name' => $validated['company_name'],
+                    'position' => $validated['position'],
+                    'address' => $validated['address'], // 🟢 TAMBAHAN: Simpan address
+                    'phone' => $phone,
+                    'email' => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
-                    'photo_path'        => $photoPath,
-                    'is_vip'            => 0,
-                    'created_by'        => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel guests
+                    'photo_path' => $photoPath,
+                    'is_vip' => 0,
+                    'created_by' => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel guests
                 ]);
             }
 
@@ -221,31 +238,31 @@ class FrontOfficeController extends Controller
             $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-' . $todayDate . '-';
+            $prefixVisit = 'VST-'.$todayDate.'-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit . $sequenceVisit;
+            $visitCode = $prefixVisit.$sequenceVisit;
 
             // 5. Simpan Data Kunjungan (Visit)
             $visit = visits::create([
-                'visit_code'   => $visitCode,
-                'guest_id'     => $guest->id,
-                'assigned_to'  => $validated['assigned_to'],
-                'branch_id'    => $validated['branch_id'],
-                'purpose_id'   => $validated['purpose_id'],
+                'visit_code' => $visitCode,
+                'guest_id' => $guest->id,
+                'assigned_to' => $validated['assigned_to'],
+                'branch_id' => $validated['branch_id'],
+                'purpose_id' => $validated['purpose_id'],
                 'scheduled_at' => $checkInDateTime,
-                'source_id'    => $request->input('source_id'),
-                'notes'        => $validated['notes'],
-                'status'       => 'Terjadwal',
+                'source_id' => $request->input('source_id'),
+                'notes' => $validated['notes'],
+                'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
-                'check_in_at'  => now(),
-                'created_by'   => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel visits
+                'check_in_at' => now(),
+                'created_by' => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel visits
             ]);
 
             // 6. Simpan ke Tabel visit_products
             if ($request->filled('product_id')) {
                 DB::table('visit_products')->insert([
-                    'visit_id'   => $visit->id,
+                    'visit_id' => $visit->id,
                     'product_id' => (int) $request->input('product_id'),
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -254,7 +271,7 @@ class FrontOfficeController extends Controller
 
             // 7. Simpan Log Status Awal
             visit_status_logs::create([
-                'visit_id'   => $visit->id,
+                'visit_id' => $visit->id,
                 'old_status' => null,
                 'new_status' => 'Terjadwal',
                 'changed_by' => $currentUserId,
@@ -266,15 +283,17 @@ class FrontOfficeController extends Controller
             return redirect()->back()->with('success', 'Berhasil membuat antrian janji temu!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
         }
     }
+
     public function history(Request $request)
     {
         // 1. Ambil nilai per_page dinamis (Default 10)
         $allowedPerPage = [10, 25, 50, 100];
         $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
+        if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
 
@@ -325,7 +344,7 @@ class FrontOfficeController extends Controller
         // 1. Ambil nilai per_page dinamis (Default 10)
         $allowedPerPage = [10, 25, 50, 100];
         $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
+        if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
 
@@ -358,12 +377,12 @@ class FrontOfficeController extends Controller
             ->count();
 
         // 5. Data Pendukung Modal Input 3-Step
-        $pics            = users::where('role', 'pic')->select('id', 'name')->get();
-        $branches        = branches::select('id', 'name')->get();
-        $purposes        = visit_purposes::select('id', 'name')->get();
+        $pics = users::where('role', 'pic')->select('id', 'name')->get();
+        $branches = branches::select('id', 'name')->get();
+        $purposes = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products        = products::select('id', 'name')->get(); // 🟢 PERBAIKAN: Sertakan 'id'
-        $leadSources     = lead_sources::select('id', 'name')->get();
+        $products = products::select('id', 'name')->get(); // 🟢 PERBAIKAN: Sertakan 'id'
+        $leadSources = lead_sources::select('id', 'name')->get();
 
         // 6. Data Notifikasi Unread / Terbaru untuk Header Navbar
         $notifications = notifications::where('user_id', auth()->id())
@@ -400,10 +419,10 @@ class FrontOfficeController extends Controller
         // Sanitasi nomor telepon/WA
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
         if (! str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
 
         DB::transaction(function () use ($request, $phone) {
@@ -411,12 +430,12 @@ class FrontOfficeController extends Controller
             $guest = guests::where('phone', $phone)->first();
             if (! $guest) {
                 $todayDate = Carbon::now()->format('Ymd');
-                $prefix = 'GST-' . $todayDate . '-';
+                $prefix = 'GST-'.$todayDate.'-';
                 $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $guest = guests::create([
-                    'guest_code' => $prefix . $sequence,
+                    'guest_code' => $prefix.$sequence,
                     'name' => $request->name,
                     'phone' => $phone,
                     'company_name' => $request->company_name,
@@ -430,10 +449,10 @@ class FrontOfficeController extends Controller
 
             // Generate visit code
             $todayDate = Carbon::now()->format('Ymd');
-            $prefixVisit = 'VST-' . $todayDate . '-';
+            $prefixVisit = 'VST-'.$todayDate.'-';
             $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
             $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-            $visitCode = $prefixVisit . $sequenceVisit;
+            $visitCode = $prefixVisit.$sequenceVisit;
 
             // Hitung nomor antrean
             $todayVisitCount = visits::whereDate('scheduled_at', Carbon::today())->count();
@@ -503,12 +522,13 @@ class FrontOfficeController extends Controller
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
+
     public function guest(Request $request)
     {
         // 1. Ambil nilai per_page dinamis (Default 10)
         $allowedPerPage = [10, 25, 50, 100];
         $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
+        if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 10;
         }
 

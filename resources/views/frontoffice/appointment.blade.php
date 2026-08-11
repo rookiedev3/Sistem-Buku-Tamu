@@ -190,15 +190,15 @@
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 16px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
 
     {{-- Filter & Header Tabel --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+    <form id="appointmentFilterForm" method="GET" action="{{ route('frontoffice.appointment') }}" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 20px 0;">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Daftar Jadwal Tamu Terjadwal</h3>
 
         <div style="width: 100%; max-width: 280px;">
-            <input type="text" id="searchApp" placeholder="Cari nama tamu / PIC..." onkeyup="filterAppTable()"
+            <input type="text" id="searchApp" name="keyword" value="{{ request('keyword') }}" placeholder="Cari nama tamu / PIC..." oninput="handleSearchInput(this)"
                 style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 600; color: #172033; outline: none; background: #ffffff; width: 100%; transition: all 0.2s ease; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
         </div>
-    </div>
+    </form>
 
     {{-- Table Responsive Wrapper --}}
     <div class="table-responsive">
@@ -620,6 +620,14 @@
     let currentStep = 1;
 
     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchApp');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = val;
+        }
+
         flatpickr("#input_scheduled_at", {
             locale: "id",
             enableTime: true,
@@ -706,47 +714,12 @@
         document.getElementById('manualModal').style.display = 'none';
     }
 
-    function filterAppTable() {
-        const input = document.getElementById('searchApp');
-        const filter = input.value.toLowerCase();
-        const table = document.getElementById('guestTable');
-        const tr = table.getElementsByTagName('tr');
-
-        // Hide pagination if searching
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (paginationContainer) {
-            if (filter.trim() !== '') {
-                paginationContainer.style.display = 'none';
-            } else {
-                paginationContainer.style.display = '';
-            }
-        }
-
-        let visibleIndex = 1;
-
-        for (let i = 1; i < tr.length; i++) {
-            if (tr[i].getElementsByTagName('td').length <= 1) continue;
-
-            let tdName = tr[i].getElementsByTagName('td')[2];
-            let tdPic = tr[i].getElementsByTagName('td')[4];
-            let tdNum = tr[i].querySelector('.row-number');
-
-            if (tdName || tdPic) {
-                let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
-                let txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
-
-                if (txtName.toLowerCase().indexOf(filter) > -1 || txtPic.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-
-                    if (tdNum) {
-                        tdNum.textContent = visibleIndex;
-                        visibleIndex++;
-                    }
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
+    let searchTimeout;
+    function handleSearchInput(inputElem) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            inputElem.form.submit();
+        }, 600);
     }
 
     function changeStep(direction) {

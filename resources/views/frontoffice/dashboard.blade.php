@@ -232,32 +232,33 @@
 <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e8edf5; box-shadow: 0 10px 30px rgba(31,53,97,0.03); overflow: hidden;">
 
     {{-- Filter & Header Tabel --}}
-    <div style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 14px;">
+    <form id="dashboardFilterForm" method="GET" action="{{ route('frontoffice.dashboard') }}" style="padding: 20px 24px; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; background: #fbfcfe; flex-wrap: wrap; gap: 14px; margin: 0;">
+        <input type="hidden" name="date_filter" id="dateFilterInput" value="{{ request('date_filter', 'all') }}">
         
         <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
             <h3 style="font-size: 15px; font-weight: 700; color: #172033; margin: 0;">Daftar Reservasi & Janji Temu</h3>
 
             {{-- TOMBOL FILTER SEMUA & HARI INI --}}
             <div style="display: flex; gap: 6px; align-items: center;">
-                <button type="button" id="btnFilterAll" onclick="setDateFilter('all')" class="btn-filter-tab active">
+                <button type="button" id="btnFilterAll" onclick="setDateFilter('all')" class="btn-filter-tab {{ request('date_filter', 'all') === 'all' ? 'active' : '' }}">
                     Semua
                 </button>
-                <button type="button" id="btnFilterToday" onclick="setDateFilter('today')" class="btn-filter-tab">
+                <button type="button" id="btnFilterToday" onclick="setDateFilter('today')" class="btn-filter-tab {{ request('date_filter') === 'today' ? 'active' : '' }}">
                     Hari Ini
                 </button>
             </div>
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <input type="text" id="searchApp" placeholder="Cari nama tamu / PIC..." onkeyup="filterAppTable()"
+            <input type="text" id="searchApp" name="keyword" value="{{ request('keyword') }}" placeholder="Cari nama tamu / PIC..." oninput="handleSearchInput(this)"
                 style="padding: 9px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #ffffff; width: 240px; transition: all 0.2s ease;"
                 onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
 
-            <button onclick="openAppointmentModal()" style="background: #013220; color: #fff; border: none; padding: 9px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.15); white-space: nowrap;">
+            <button type="button" onclick="openAppointmentModal()" style="background: #013220; color: #fff; border: none; padding: 9px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,107,63,0.15); white-space: nowrap;">
                 + Buat Janji Temu
             </button>
         </div>
-    </div>
+    </form>
 
     {{-- Table Responsive Wrapper --}}
     <div style="overflow-x: auto;">
@@ -691,9 +692,17 @@
 <script>
     let activeCancelVisitId = null;
     let currentStep = 1;
-    let activeDateFilter = 'all';
+    let activeDateFilter = '{{ request('date_filter', 'all') }}';
 
     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchApp');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = val;
+        }
+
         flatpickr("#input_scheduled_at", {
             locale: "id",
             enableTime: true,
@@ -721,69 +730,16 @@
     });
 
     function setDateFilter(filterType) {
-        activeDateFilter = filterType;
-
-        const btnAll = document.getElementById('btnFilterAll');
-        const btnToday = document.getElementById('btnFilterToday');
-
-        if (filterType === 'all') {
-            btnAll.classList.add('active');
-            btnToday.classList.remove('active');
-        } else {
-            btnToday.classList.add('active');
-            btnAll.classList.remove('active');
-        }
-
-        filterAppTable();
+        document.getElementById('dateFilterInput').value = filterType;
+        document.getElementById('dashboardFilterForm').submit();
     }
 
-    function filterAppTable() {
-        const input = document.getElementById('searchApp');
-        const filterText = input.value.toLowerCase();
-        const table = document.getElementById('guestTable');
-        const tr = table.querySelectorAll('.visit-row-item');
-
-        // Hide pagination if searching
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (paginationContainer) {
-            if (filterText.trim() !== '') {
-                paginationContainer.style.display = 'none';
-            } else {
-                paginationContainer.style.display = '';
-            }
-        }
-
-        const startNumber = {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() : 1 }};
-        let visibleCount = 0;
-
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
-
-        tr.forEach(row => {
-            const tdName = row.getElementsByTagName('td')[2];
-            const tdPic = row.getElementsByTagName('td')[4];
-            const tdNum = row.querySelector('.row-number');
-            const rowDate = row.dataset.date || '';
-
-            const txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
-            const txtPic = tdPic ? (tdPic.textContent || tdPic.innerText) : '';
-
-            const matchesText = txtName.toLowerCase().indexOf(filterText) > -1 || txtPic.toLowerCase().indexOf(filterText) > -1;
-            const matchesDate = (activeDateFilter === 'all') || (activeDateFilter === 'today' && rowDate === todayStr);
-
-            if (matchesText && matchesDate) {
-                row.style.display = "";
-                if (tdNum) {
-                    tdNum.textContent = startNumber + visibleCount;
-                    visibleCount++;
-                }
-            } else {
-                row.style.display = "none";
-            }
-        });
+    let searchTimeout;
+    function handleSearchInput(inputElem) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            inputElem.form.submit();
+        }, 600);
     }
 
     function validateFileSize(input) {

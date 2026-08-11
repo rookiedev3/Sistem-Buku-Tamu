@@ -100,11 +100,11 @@
     {{-- Filter Tanggal --}}
     <form action="{{ route('frontoffice.history') }}" method="GET" id="dateFilterForm" style="display: flex; gap: 6px; align-items: center; background: #ffffff; padding: 5px 10px; border-radius: 10px; border: 1px solid #e8edf5; box-shadow: 0 2px 8px rgba(31,53,97,0.03); flex-wrap: nowrap;">
         <span style="font-size: 11px; font-weight: 600; color: #64748b; white-space: nowrap;">Filter Tanggal:</span>
-
+        <input type="hidden" name="keyword" value="{{ request('keyword') }}">
         <input type="text" id="filter_date" name="date" value="{{ $filterDate }}" placeholder="Pilih tanggal..." readonly>
 
         @if(!empty($filterDate))
-        <a href="{{ route('frontoffice.history') }}" style="font-size: 10px; color: #dc2626; text-decoration: none; font-weight: 700; margin-left: 2px;">Clear</a>
+        <a href="{{ route('frontoffice.history', ['keyword' => request('keyword')]) }}" style="font-size: 10px; color: #dc2626; text-decoration: none; font-weight: 700; margin-left: 2px;">Clear</a>
         @endif
     </form>
 </div>
@@ -116,11 +116,12 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
         <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Arsip Data Kunjungan</h3>
 
-        <div style="width: 100%; max-width: 280px;">
-            <input type="text" id="searchHistory" placeholder="Cari nama tamu / instansi / PIC..." onkeyup="filterHistoryTable()"
+        <form method="GET" action="{{ route('frontoffice.history') }}" style="width: 100%; max-width: 280px; margin: 0;">
+            <input type="hidden" name="date" value="{{ $filterDate }}">
+            <input type="text" id="searchHistory" name="keyword" value="{{ request('keyword') }}" placeholder="Cari nama tamu / instansi / PIC..." oninput="handleSearchInput(this)"
                 style="padding: 8px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 12px; font-weight: 600; color: #172033; outline: none; background: #ffffff; width: 100%; transition: all 0.2s ease; box-sizing: border-box;"
                 onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
-        </div>
+        </form>
     </div>
 
     {{-- Table Responsive Wrapper --}}
@@ -303,6 +304,14 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchHistory');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = val;
+        }
+
         flatpickr("#filter_date", {
             locale: "id",
             dateFormat: "Y-m-d",
@@ -318,42 +327,12 @@
         });
     });
 
-    function filterHistoryTable() {
-        const input = document.getElementById('searchHistory');
-        const filter = input.value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.history-row');
-        const noMatchRow = document.getElementById('noSearchMatchRow');
-        let visibleIndex = 1;
-
-        // Hide pagination if searching
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (paginationContainer) {
-            if (filter !== '') {
-                paginationContainer.style.display = 'none';
-            } else {
-                paginationContainer.style.display = '';
-            }
-        }
-
-        rows.forEach(row => {
-            const guestText = row.querySelector('.col-guest')?.textContent || '';
-            const picText = row.querySelector('.col-pic')?.textContent || '';
-            const tdNum = row.querySelector('.row-number');
-
-            if (guestText.toLowerCase().includes(filter) || picText.toLowerCase().includes(filter)) {
-                row.style.display = "";
-                if (tdNum) {
-                    tdNum.textContent = visibleIndex;
-                    visibleIndex++;
-                }
-            } else {
-                row.style.display = "none";
-            }
-        });
-
-        if (noMatchRow) {
-            noMatchRow.style.display = (visibleIndex === 1 && rows.length > 0) ? "" : "none";
-        }
+    let searchTimeout;
+    function handleSearchInput(inputElem) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            inputElem.form.submit();
+        }, 600);
     }
 
     function openDetailModal(token, name, instansi, jabatan, phone, keperluan, pic, checkin, checkout, photoUrl, status) {
