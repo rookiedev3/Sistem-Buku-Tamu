@@ -10,9 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-
     
-       <style>
+    <style>
         * {
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -25,10 +24,10 @@
             display: flex;
             min-height: 100vh;
             color: #172033;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Mencegah halaman bisa digeser ke kanan/kiri */
         }
 
-        /* --- SIDEBAR STYLE (SUPER MULUS TANPA JEDAG-JEDUG) --- */
+        /* --- SIDEBAR STYLE (DISAMAKAN DENGAN MANAGER) --- */
         .sidebar {
             width: 260px;
             background: #013220;
@@ -39,88 +38,31 @@
             position: fixed;
             height: 100vh;
             z-index: 100;
-            /* Menyamakan durasi dan kurva animasi untuk semua elemen di dalam sidebar */
-            transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- SIDEBAR BRAND & LOGO FIX --- */
-        .sidebar-brand {
-            padding: 20px;
-            height: 80px; /* Dikunci tinggi pastinya agar tidak berubah-ubah */
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid #04472d;
-            flex-shrink: 0;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .sidebar-brand-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            border: 1px solid #04472d;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            /* Mencegah logo ikut gepeng atau memantul */
-            transition: margin 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .sidebar-brand-text {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            opacity: 1;
-            visibility: visible;
-            /* Transisi fade out yang sangat cepat dan bersih untuk teks */
-            transition: opacity 0.15s ease, visibility 0.15s ease;
-        }
-
-        /* --- KONDISI SAAT SIDEBAR DIKECILKAN (COLLAPSED) --- */
+        /* Kondisi saat Sidebar Dikecilkan di Laptop (Menyusut jadi Ikon Saja) */
         .sidebar.collapsed {
             width: 80px !important;
         }
-
-        .sidebar.collapsed .sidebar-brand {
-            justify-content: center !important;
-            padding: 20px 0 !important;
-        }
-
-        .sidebar.collapsed .sidebar-brand-icon {
-            margin: 0 auto; /* Memastikan logo pas di tengah-tengah saat mode kecil */
-        }
-
-        .sidebar.collapsed .sidebar-brand-text {
-            opacity: 0 !important;
-            visibility: hidden !important;
-            width: 0 !important;
-            display: none !important;
-        }
-
+        .sidebar.collapsed .sidebar-brand-text,
         .sidebar.collapsed .menu-category,
         .sidebar.collapsed .menu-item span,
         .sidebar.collapsed form button span {
             display: none !important;
-            opacity: 0 !important;
         }
-
+        .sidebar.collapsed .sidebar-brand {
+            justify-content: center !important;
+            padding: 20px 10px !important;
+        }
         .sidebar.collapsed .sidebar-menu {
             padding: 16px 10px !important;
             align-items: center !important;
         }
-
         .sidebar.collapsed .menu-item {
             justify-content: center !important;
             padding: 12px !important;
-            width: 60px;
         }
-
         .sidebar.collapsed .sidebar-footer {
             padding: 16px 10px !important;
         }
@@ -133,7 +75,7 @@
             flex-direction: column;
             min-height: 100vh;
             width: calc(100% - 260px);
-            transition: margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .main-wrapper.expanded {
@@ -302,7 +244,7 @@
         @media(max-width: 992px) {
             .sidebar {
                 width: 260px !important;
-                transform: translateX(-100%);
+                transform: translateX(-100%); /* Tertutup rapi di luar layar sebelah kiri */
             }
             .sidebar.mobile-show {
                 transform: translateX(0) !important;
@@ -323,16 +265,6 @@
             }
         }
     </style>
-
-    {{-- Script untuk menerapkan state kecil sejak awal sebelum render agar instan --}}
-    <script>
-        if (window.innerWidth > 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('sidebar').classList.add('collapsed');
-                document.getElementById('mainWrapper').classList.add('expanded');
-            });
-        }
-    </script>
 </head>
 
 <body>
@@ -341,13 +273,13 @@
     <aside class="sidebar" id="sidebar">
         <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
             
-            <div class="sidebar-brand">
-                <div class="sidebar-brand-icon">
+            <div class="sidebar-brand" style="padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #04472d; flex-shrink: 0;">
+                <div class="sidebar-brand-icon" style="width: 40px; height: 40px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #04472d; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;">
                     <img src="{{ asset('images/logo-perusahaan.jpg') }}" alt="Logo Perusahaan" style="width: 100%; height: 100%; object-fit: contain;">
                 </div> 
 
-                <div class="sidebar-brand-text">
-                    <span style="font-size: 14px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div class="sidebar-brand-text" style="display: flex; flex-direction: column; overflow: hidden;">
+                    <span style="font-size: 14px; font-weight: 800; color: #ffffff; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         {{ Auth::user()->name ?? 'Portal Front Office' }}
                     </span>
                     <span style="font-size: 11px; font-weight: 600; color: #C7AB6B; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -415,7 +347,6 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span>Master Data</span>
                 </a>
-
             </div>
         </div>
 
@@ -506,7 +437,7 @@
                                 </form>
                             </div>
                             @empty
-                            <div class="notif-item-empty">
+                            <div style="padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
                                 Tidak ada notifikasi baru.
                             </div>
                             @endforelse
@@ -516,7 +447,6 @@
                 @endauth
 
                 <div style="width: 1px; height: 24px; background: #e8edf5; margin: 0 4px;"></div>
-
                 <div style="display: flex; align-items: center;">
                     <img src="{{ asset('images/foto-perusahaan.jpg') }}" alt="Logo Perusahaan" style="width: 110px; height: 34px; object-fit: contain; display: block;">
                 </div>
@@ -539,18 +469,14 @@
 
         if (toggleBtn) {
             toggleBtn.addEventListener('click', function() {
+                // Jika dibuka di Layar HP / Tablet (lebar <= 992px)
                 if (window.innerWidth <= 992) {
-                    // Mode Mobile (HP)
                     sidebar.classList.toggle('mobile-show');
                     mainWrapper.classList.toggle('mobile-shifted');
                 } else {
-                    // Mode Laptop / Desktop (Toggle Collapse)
+                    // Jika di Laptop / Komputer, sidebar menyusut menjadi ikon saja (Gaya Manager)
                     sidebar.classList.toggle('collapsed');
                     mainWrapper.classList.toggle('expanded');
-
-                    // Simpan status terbaru ke localStorage
-                    const isCollapsed = sidebar.classList.contains('collapsed');
-                    localStorage.setItem('sidebar_collapsed', isCollapsed);
                 }
             });
         }
