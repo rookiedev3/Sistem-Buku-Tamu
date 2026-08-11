@@ -24,36 +24,88 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #ffffff;
-            position: relative;
+            background-color: #f8fafc;
             overflow-x: hidden;
-            margin: 0;
-            padding: 0;
         }
 
-        /* Container Card Full Layar */
+        /* Container Card Full Layar dengan Layout Grid */
         .login-wrapper {
             width: 100vw;
             min-height: 100vh;
             background: #ffffff;
-            box-shadow: none;
-            border-radius: 0;
-            overflow: hidden;
             display: grid;
-            grid-template-columns: 1fr 1.4fr;
+            grid-template-columns: 1.1fr 1.3fr;
             box-sizing: border-box;
-            border: none;
         }
 
-        /* Sisi Kiri: Branding / Ilustrasi Hijau Korporat (#006B3F) */
+        /* Sisi Kiri: Branding Perusahaan */
         .login-brand-side {
-            background: linear-gradient(135deg, #013220, #159A5C);
+            background: linear-gradient(145deg, #01281b 0%, #013220 40%, #006B3F 100%);
             color: white;
-            padding: 60px 50px;
+            padding: 70px 50px 50px 50px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Lingkaran / Bola-Bola Besar Transparan di Latar Belakang */
+        .login-brand-side::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-brand-side::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Header Branding */
+        .brand-header {
+            margin-top: 15px; 
+        }
+
+        /* Ukuran Gambar Logo Diperkecil & Transparan Putih */
+        .logo-box-img {
+            max-height: 28px;
+            width: auto;
+            margin-bottom: 16px;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
+        /* Container Visual Ilustrasi di Tengah */
+        .brand-illustration {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .brand-illustration img {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.25));
         }
 
         /* Sisi Kanan: Form Lupa Password */
@@ -66,32 +118,34 @@
             background: #ffffff;
         }
 
-        .logo-box {
-            width: 52px;
-            height: 52px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 14px;
+        /* Input Custom dengan Ikon */
+        .input-group-custom {
+            position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 22px;
-            color: #fff;
-            margin-bottom: 24px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            color: #94a3b8;
+            font-size: 17px;
+            z-index: 10;
         }
 
         .form-control {
             border-radius: 12px;
-            padding: 13px 18px;
+            padding: 13px 18px 13px 50px;
             font-size: 14.5px;
             border: 1px solid #d1d9e2;
             background-color: #fbfcfe;
             color: #172033;
+            transition: all 0.2s ease;
         }
 
         .form-control:focus {
             border-color: #006B3F;
-            box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1);
+            box-shadow: 0 0 0 4px rgba(0, 107, 63, 0.1);
             background-color: #fff;
         }
 
@@ -110,16 +164,38 @@
             padding: 14px;
             font-weight: 700;
             font-size: 15px;
-            transition: 0.2s ease;
+            transition: all 0.2s ease;
             box-shadow: 0 4px 15px rgba(0, 107, 63, 0.25);
         }
 
         .btn-custom-login:hover {
-            background-color: #004d2e;
+            background-color: #005431;
             color: #fff;
+            transform: translateY(-1px);
         }
 
-        /* Responsif untuk layar HP & Tablet */
+        .btn-back-home {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-back-home:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
         @media (max-width: 991px) {
             .login-wrapper {
                 grid-template-columns: 1fr !important;
@@ -127,16 +203,11 @@
             .login-brand-side {
                 padding: 40px 30px !important;
             }
+            .brand-illustration {
+                display: none;
+            }
             .login-form-side {
                 padding: 40px 30px !important;
-            }
-        }
-        @media (max-width: 480px) {
-            .login-brand-side {
-                padding: 30px 20px !important;
-            }
-            .login-form-side {
-                padding: 30px 20px !important;
             }
         }
     </style>
@@ -146,20 +217,25 @@
 
     <div class="login-wrapper">
         
+        <!-- Sisi Kiri: Branding -->
         <div class="login-brand-side">
-            <div>
-                <div class="logo-box">IT</div>
-                <h2 class="fw-bold mb-2" style="font-size: 32px; line-height: 1.3;">IT Solution</h2>
-                <p class="text-white-50" style="font-size: 14px; line-height: 1.6;">Sistem Buku Tamu & Registrasi Kunjungan Digital Perusahaan.</p>
+            <div class="brand-header" style="position: relative; z-index: 2;">
+                <!-- Logo Perusahaan -->
+                <img src="{{ asset('images/foto-perusahaan.jpg') }}" alt="Logo Perusahaan" class="logo-box-img">
+                
+                <p class="text-white-50 mb-0" style="font-size: 13.5px; line-height: 1.6;">Sistem Buku Tamu & Registrasi Kunjungan Digital Perusahaan.</p>
             </div>
-            <div>
+
+
+            <div style="position: relative; z-index: 2;">
                 <p class="text-white-50 mb-0" style="font-size: 12px;">&copy; {{ date('Y') }} IT Solution Corp. All rights reserved.</p>
             </div>
         </div>
 
+        <!-- Sisi Kanan: Form Lupa Password -->
         <div class="login-form-side">
             
-            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 24px;">Lupa Password? 🔑</h3>
+            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Lupa Password? 🔑</h3>
             <p class="text-secondary mb-4" style="font-size: 14px; line-height: 1.5;">Masukkan email terdaftar Anda, kami akan mengirimkan tautan untuk mereset password akun Anda.</p>
 
             @if (session('status'))
@@ -179,7 +255,10 @@
 
                 <div class="mb-4">
                     <label class="form-label">Alamat Email</label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="nama@perusahaan.com" autocomplete="email">
+                    <div class="input-group-custom">
+                        <i class="bi bi-envelope input-icon"></i>
+                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="Masukkan alamat email" autocomplete="email">
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-custom-login w-100 shadow-sm mb-3">
@@ -187,9 +266,15 @@
                 </button>
             </form>
 
-            <div class="text-center" style="font-size: 14px;">
-                <a href="{{ route('login') }}" style="color: #006B3F; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <div class="mb-3">
+                <a href="{{ route('login') }}" class="btn-back-home shadow-sm">
                     <i class="bi bi-arrow-left"></i> Kembali ke Halaman Login
+                </a>
+            </div>
+
+            <div>
+                <a href="{{ url('/') }}" class="btn-back-home shadow-sm" style="background: transparent; border-color: transparent;">
+                    <span style="font-size: 16px; line-height: 1; color: #475569;">&#8592;</span> Kembali ke Beranda
                 </a>
             </div>
 
