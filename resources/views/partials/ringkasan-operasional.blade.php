@@ -131,28 +131,28 @@
             <div class="card border-0 rounded-4 p-4 shadow-sm h-100" style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 10px 30px rgba(31,53,97,0.05); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru ⚡</h3>
-                        <a href="{{ route('owner.activity-log') }}" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
-                    </div>
+    <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru ⚡</h3>
+    <a href="{{ route('owner.activity-log') }}" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
+</div>
 
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        @forelse($recentActivities as $activity)
-                            <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
-                                <div style="width: 38px; height: 38px; background: #e8f8f1; color: #21a86b; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">
-                                    {{ strtoupper(substr($activity->guest_name, 0, 2)) }}
-                                </div>
-                                <div class="flex-grow-1" style="overflow: hidden;">
-                                    <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {{ $activity->guest_name }}@if($activity->company_name) ({{ $activity->company_name }})@endif
-                                    </h6>
-                                    <span class="text-muted" style="font-size: 11px;">Status diubah: {{ $activity->new_status }}</span>
-                                </div>
-                                <span class="text-muted" style="font-size: 10px; white-space: nowrap;">{{ \Carbon\Carbon::parse($activity->changed_at)->format('H:i') }}</span>
-                            </div>
-                        @empty
-                            <p class="text-muted mb-0" style="font-size: 12px;">Belum ada aktivitas terbaru.</p>
-                        @endforelse
-                    </div>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+    @forelse($recentActivities as $activity)
+        <div class="d-flex align-items-center gap-3 p-2.5 rounded-3" style="background: #f8fafc;">
+            <div style="width: 38px; height: 38px; background: #e8f8f1; color: #21a86b; border-radius: 10px; display: grid; place-items: center; font-weight: bold; flex-shrink: 0; font-size: 12px;">
+                {{ strtoupper(substr($activity->guest_name ?? '-', 0, 2)) }}
+            </div>
+            <div class="flex-grow-1" style="overflow: hidden;">
+                <h6 class="m-0 text-dark fw-bold" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ $activity->guest_name ?? 'Tanpa nama' }}@if($activity->company_name) ({{ $activity->company_name }})@endif
+                </h6>
+                <span class="text-muted" style="font-size: 11px;">Status diubah: {{ $activity->new_status }}</span>
+            </div>
+            <span class="text-muted" style="font-size: 10px; white-space: nowrap;">{{ \Carbon\Carbon::parse($activity->changed_at)->format('H:i') }}</span>
+        </div>
+    @empty
+        <p class="text-muted mb-0" style="font-size: 12px;">Belum ada aktivitas terbaru.</p>
+    @endforelse
+</div>
                 </div>
             </div>
         </div>
@@ -218,14 +218,14 @@
 
         <div id="kunjunganInfoBar">
             @if($statusFilter || $picFilter || $keyword || $leadOnly)
-            <div style="background-color:#d4edda; color:#155724; padding:10px; border-radius:8px; font-size:12px; margin-top:16px; border:1px solid #c3e6cb;">
-                Menampilkan hasil filter
-                @if($keyword) untuk "<strong>{{ $keyword }}</strong>" @endif
-                @if($statusFilter) status <strong>{{ $statusFilter }}</strong> @endif
-                @if($picFilter) PIC tertentu @endif
-                @if($leadOnly) khusus kunjungan yang <strong>menjadi lead</strong> (hot/warm) @endif
-                — {{ $visits->total() }} data ditemukan.
-            </div>
+<div style="background-color:#d4edda; color:#155724; padding:10px; border-radius:8px; font-size:12px; margin-top:16px; border:1px solid #c3e6cb;">
+    Menampilkan hasil filter
+    @if($keyword) untuk "<strong>{{ $keyword }}</strong>" @endif
+    @if($statusFilter) status <strong>{{ $statusFilter }}</strong> @endif
+    @if($picFilter) PIC tertentu @endif
+    @if($leadOnly) khusus kunjungan yang <strong>menjadi lead</strong> (hot/warm) @endif
+    — {{ $visits->count() }} data ditemukan.
+</div>
             @endif
         </div>
 

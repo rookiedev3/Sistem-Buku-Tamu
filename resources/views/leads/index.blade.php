@@ -259,10 +259,10 @@
         </div>
     </div>
 
-    <div style="padding: 10px 16px; border-top: 1px solid #e8edf5; background: #fbfcfe; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 11px; flex-wrap: wrap; gap: 8px;">
+    {{-- <div style="padding: 10px 16px; border-top: 1px solid #e8edf5; background: #fbfcfe; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 11px; flex-wrap: wrap; gap: 8px;">
         <span>Menampilkan data monitoring real-time</span>
         <span>Total Data: {{ $leads->count() }}</span>
-    </div>
+    </div> --}}
 
 </div>
 @endsection

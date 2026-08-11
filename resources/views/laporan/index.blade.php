@@ -232,7 +232,7 @@
                             @elseif($isCompleted && $leadStatus)
                                 @php $b = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
                                 <span style="background: {{ $b['bg'] }}; color: {{ $b['color'] }}; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; display: block; margin-bottom: 4px;">{{ $b['label'] }}</span>
-                                <span style="font-size: 10px; color: #15803d; font-weight: 600;">Selesai</span>
+                                {{-- <span style="font-size: 10px; color: #15803d; font-weight: 600;">Selesai</span> --}}
                             @elseif($isCompleted)
                                 <span style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">Non-Lead</span>
                             @else

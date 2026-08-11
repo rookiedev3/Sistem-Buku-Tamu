@@ -56,32 +56,42 @@ class KunjunganLaporanExport implements FromCollection, WithHeadings, WithMappin
         $this->picName    = $picName;
     }
 
-    public function collection()
-    {
-        $query = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-            ->whereMonth('check_in_at', $this->month)
-            ->whereYear('check_in_at', $this->year)
-            ->whereIn('status', self::COMPLETED_STATUSES);
+public function collection()
+{
+    $query = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->where(function ($q) {
+            $q->where(function ($q2) {
+                $q2->whereMonth('check_in_at', $this->month)->whereYear('check_in_at', $this->year);
+            })->orWhere(function ($q2) {
+                $q2->whereNull('check_in_at')
+                    ->whereMonth('scheduled_at', $this->month)
+                    ->whereYear('scheduled_at', $this->year);
+            });
+        })
+        ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
+            'completed', 'selesai', 'meeting selesai',
+            'cancelled', 'dibatalkan', 'ditolak',
+        ]);
 
-        if (Schema::hasColumn('guests', 'is_vip')) {
-            if ($this->category === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($this->category === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($this->category === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($this->category === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
         }
-
-        if ($this->branchId !== '') {
-            $query->where('branch_id', $this->branchId);
-        }
-        if ($this->picId !== '') {
-            $query->where('assigned_to', $this->picId);
-        }
-
-        return $query->orderBy('check_in_at', 'asc')->get();
     }
+
+    if ($this->branchId !== '') {
+        $query->where('branch_id', $this->branchId);
+    }
+    if ($this->picId !== '') {
+        $query->where('assigned_to', $this->picId);
+    }
+
+    return $query->orderBy('check_in_at', 'asc')->get();
+}
 
     public function headings(): array
     {

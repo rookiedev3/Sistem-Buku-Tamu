@@ -181,179 +181,192 @@ class OwnerController extends Controller
         ));
     }
 
-    public function activityLog(Request $request)
-    {
-        $keyword = trim((string) $request->input('keyword', ''));
+public function activityLog(Request $request)
+{
+    $keyword = trim((string) $request->input('keyword', ''));
 
-        $query = DB::table('visit_status_logs')
-            ->join('visits', 'visits.id', '=', 'visit_status_logs.visit_id')
-            ->join('guests', 'guests.id', '=', 'visits.guest_id')
-            ->select(
-                'guests.name as guest_name',
-                'guests.company_name',
-                'visit_status_logs.new_status',
-                'visit_status_logs.changed_at'
-            );
-
-        if ($keyword !== '') {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('guests.name', 'like', "%{$keyword}%")
-                    ->orWhere('guests.company_name', 'like', "%{$keyword}%");
-            });
-        }
-
-        $activities = $query->orderByDesc('visit_status_logs.changed_at')
-            ->paginate(20)
-            ->appends($request->query());
-
-        return view('owner.aktivitas', compact('activities', 'keyword'));
+    $allowedPerPage = [10, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 10); // <-- default disamain jadi 10
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 10;
     }
 
-    public function kunjungan(Request $request)
-    {
-        $request->validate([
-            'start_date' => 'nullable|date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
-        ], [
-            'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
-        ]);
+    $query = DB::table('visit_status_logs')
+        ->join('visits', 'visits.id', '=', 'visit_status_logs.visit_id')
+        ->join('guests', 'guests.id', '=', 'visits.guest_id')
+        ->select(
+            'guests.name as guest_name',
+            'guests.company_name',
+            'visit_status_logs.new_status',
+            'visit_status_logs.changed_at'
+        );
 
-        $vipFilter = $request->input('vip_status', 'all');
+    if ($keyword !== '') {
+        $query->where(function ($q) use ($keyword) {
+            $q->where('guests.name', 'like', "%{$keyword}%")
+                ->orWhere('guests.company_name', 'like', "%{$keyword}%");
+        });
+    }
 
-        // Sama seperti manager/kunjungan: halaman ini hanya menampilkan kunjungan
-        // yang statusnya sudah final (selesai ATAU dibatalkan) - artinya tamu itu
-        // sudah "masuk" ke tabel leads (jadi prospek/deal/dst) ATAU tercatat sebagai
-        // Non-Lead (selesai biasa, tidak dikonversi). Kunjungan yang masih berjalan
-        // (terjadwal, menunggu, dikonfirmasi, sedang bertemu) tidak ditampilkan di
-        // sini karena sudah difasilitasi oleh Ringkasan Operasional / Dashboard.
-        $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-            ->whereIn('status', self::FINAL_STATUSES);
+    $activities = $query->orderByDesc('visit_status_logs.changed_at')
+        ->paginate($perPage)
+        ->appends($request->query());
 
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->whereHas('guest', function ($q2) use ($keyword) {
-                    $q2->where('name', 'like', "%{$keyword}%")
-                        ->orWhere('company_name', 'like', "%{$keyword}%");
-                })->orWhereHas('assignedUser', function ($q3) use ($keyword) {
-                    $q3->where('name', 'like', "%{$keyword}%");
-                });
+    return view('owner.aktivitas', compact('activities', 'keyword'));
+}
+public function kunjungan(Request $request)
+{
+    $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date'   => 'nullable|date|after_or_equal:start_date',
+    ], [
+        'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+    ]);
+
+    $vipFilter = $request->input('vip_status', 'all');
+
+    // Validasi per_page, konsisten sama activityLog() dan databaseOwner()
+    $allowedPerPage = [10, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 10);
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 10;
+    }
+
+    $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
+        ->whereIn('status', self::FINAL_STATUSES);
+
+    if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('assignedUser', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('check_in_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('check_in_at', '<=', $request->end_date);
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
             });
         }
-
-        if ($request->filled('start_date')) {
-            $query->whereDate('check_in_at', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('check_in_at', '<=', $request->end_date);
-        }
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
-            if ($vipFilter === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($vipFilter === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
-        }
-
-        $visits = $query->orderBy('check_in_at', 'desc')
-            ->paginate(10)
-            ->appends($request->query());
-
-        return view('kunjungan.index', compact('visits', 'vipFilter'));
     }
+
+    $visits = $query->orderBy('check_in_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    return view('kunjungan.index', compact('visits', 'vipFilter'));
+}
 
     public function leads(Request $request)
-    {
-        $today  = Carbon::today();
-        $filter = $request->input('filter', 'active');
-        $vipFilter = $request->input('vip_status', 'all');
+{
+    $today  = Carbon::today();
+    $filter = $request->input('filter', 'active');
+    $vipFilter = $request->input('vip_status', 'all');
 
-        $query = leads::with([
-            'guest',
-            'visit',
-            'owner',
-            'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
-        ]);
+    // Validasi per_page, konsisten sama kunjungan()/activityLog()/databaseOwner()
+    $allowedPerPage = [10, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 10);
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 10;
+    }
 
-        switch ($filter) {
-            case 'active':
-                $query->whereNotIn('status', ['deal', 'lost']);
-                break;
-            case 'overdue':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', '<', $today);
-                break;
-            case 'today':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', $today);
-                break;
-            case 'upcoming':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', '>', $today);
-                break;
-            case 'deal':
-                $query->where('status', 'deal');
-                break;
-            case 'lost':
-                $query->where('status', 'lost');
-                break;
-                // 'all' => tanpa filter tambahan
-        }
+    $query = leads::with([
+        'guest',
+        'visit',
+        'owner',
+        'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
+    ]);
 
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->whereHas('guest', function ($q2) use ($keyword) {
-                    $q2->where('name', 'like', "%{$keyword}%")
-                        ->orWhere('company_name', 'like', "%{$keyword}%");
-                })->orWhereHas('owner', function ($q3) use ($keyword) {
-                    $q3->where('name', 'like', "%{$keyword}%");
-                });
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        case 'lost':
+            $query->where('status', 'lost');
+            break;
+            // 'all' => tanpa filter tambahan
+    }
+
+    if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('owner', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
             });
         }
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
-            if ($vipFilter === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($vipFilter === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
-        }
-
-        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-            ->paginate(10)
-            ->appends($request->query());
-
-        $countAll      = leads::count();
-        $countActive   = leads::whereNotIn('status', ['deal', 'lost'])->count();
-        $countOverdue  = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
-        $countToday    = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
-        $countUpcoming = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
-        $countDeal     = leads::where('status', 'deal')->count();
-        $countLost     = leads::where('status', 'lost')->count();
-
-        return view('leads.index', compact(
-            'leads',
-            'filter',
-            'countAll',
-            'countActive',
-            'countOverdue',
-            'countToday',
-            'countUpcoming',
-            'countDeal',
-            'countLost',
-            'vipFilter'
-        ));
     }
+
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    $countAll      = leads::count();
+    $countActive   = leads::whereNotIn('status', ['deal', 'lost'])->count();
+    $countOverdue  = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count();
+    $countToday    = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count();
+    $countUpcoming = leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count();
+    $countDeal     = leads::where('status', 'deal')->count();
+    $countLost     = leads::where('status', 'lost')->count();
+
+    return view('leads.index', compact(
+        'leads',
+        'filter',
+        'countAll',
+        'countActive',
+        'countOverdue',
+        'countToday',
+        'countUpcoming',
+        'countDeal',
+        'countLost',
+        'vipFilter'
+    ));
+}
 
     private const COMPLETED_STATUSES = ['completed', 'Selesai', 'Meeting Selesai'];
 
-    public function laporan(Request $request)
+ public function laporan(Request $request)
 {
     $month    = (int) $request->input('month', now()->month);
     $year     = (int) $request->input('year', now()->year);
@@ -361,17 +374,26 @@ class OwnerController extends Controller
     $branchId = (string) $request->input('branch_id', '');
     $picId    = (string) $request->input('pic_id', '');
 
-    // Sama seperti manager/laporan: hanya menampilkan kunjungan yang sudah
-    // // selesai (ada hasil), bukan yang masih terjadwal/menunggu/dibatalkan.
-    // $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-    //     ->whereMonth('check_in_at', $month)
-    //     ->whereYear('check_in_at', $year)
-    //     ->whereIn('status', self::COMPLETED_STATUSES);
+    $allowedPerPage = [10, 15, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 15);
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 15;
+    }
 
-$baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-    ->whereMonth('check_in_at', $month)
-    ->whereYear('check_in_at', $year)
-    ->whereIn(DB::raw('LOWER(TRIM(status))'), ['completed', 'selesai', 'meeting selesai']); // ganti exact whereIn jadi case-insensitive
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->where(function ($q) use ($month, $year) {
+            $q->where(function ($q2) use ($month, $year) {
+                $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year);
+            })->orWhere(function ($q2) use ($month, $year) {
+                $q2->whereNull('check_in_at')
+                    ->whereMonth('scheduled_at', $month)
+                    ->whereYear('scheduled_at', $year);
+            });
+        })
+        ->whereIn(DB::raw('LOWER(TRIM(status))'), [
+            'completed', 'selesai', 'meeting selesai',
+            'cancelled', 'dibatalkan', 'ditolak',
+        ]);
 
     if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
         if ($category === 'vip') {
@@ -382,16 +404,6 @@ $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 
             });
         }
     }
-
-            if (Schema::hasColumn('guests', 'is_vip')) {
-            if ($category === 'vip') {
-                $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($category === 'reguler') {
-                $baseQuery->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
-        }
 
     if ($branchId !== '') {
         $baseQuery->where('branch_id', $branchId);
@@ -407,10 +419,8 @@ $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 
         ? (clone $baseQuery)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count()
         : 0;
 
-    // Conversion Rate = persentase kunjungan yang berhasil dikonversi jadi deal
     $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
 
-    // Rata-rata Durasi = rata-rata lama pertemuan (check_in_at -> check_out_at) dalam menit
     $avgDuration = (clone $baseQuery)
         ->whereNotNull('check_in_at')
         ->whereNotNull('check_out_at')
@@ -419,7 +429,7 @@ $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 
     $avgDuration = $avgDuration ?? 0;
 
     $visits = $baseQuery->orderBy('check_in_at', 'desc')
-        ->paginate(15)
+        ->paginate($perPage)
         ->appends($request->query());
 
     $branches = \App\Models\branches::orderBy('name')->get();
@@ -489,111 +499,119 @@ $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 
     }
 
     public function exportPdf(Request $request)
-    {
-        $month    = (int) $request->input('month', now()->month);
-        $year     = (int) $request->input('year', now()->year);
-        $category = (string) $request->input('category', '');
-        $branchId = (string) $request->input('branch_id', '');
-        $picId    = (string) $request->input('pic_id', '');
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
 
-        $months = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ];
+    $months = [
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember',
+    ];
 
     $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-        ->whereMonth('check_in_at', $month)
-        ->whereYear('check_in_at', $year)
-        // TAMBAHKAN BARIS INI, samakan dengan laporan():
-        ->whereIn(DB::raw('LOWER(TRIM(status))'), ['completed', 'selesai', 'meeting selesai']);
+        ->where(function ($q) use ($month, $year) {
+            $q->where(function ($q2) use ($month, $year) {
+                $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year);
+            })->orWhere(function ($q2) use ($month, $year) {
+                $q2->whereNull('check_in_at')
+                    ->whereMonth('scheduled_at', $month)
+                    ->whereYear('scheduled_at', $year);
+            });
+        })
+        ->whereIn(DB::raw('LOWER(TRIM(status))'), [
+            'completed', 'selesai', 'meeting selesai',
+            'cancelled', 'dibatalkan', 'ditolak',
+        ]);
 
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
-            if ($category === 'vip') {
-                $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($category === 'reguler') {
-                $baseQuery->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($category === 'vip') {
+            $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($category === 'reguler') {
+            $baseQuery->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
         }
-
-        if ($branchId !== '') {
-            $baseQuery->where('branch_id', $branchId);
-        }
-        if ($picId !== '') {
-            $baseQuery->where('assigned_to', $picId);
-        }
-
-        $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
-
-        $totalKunjungan = $visits->count();
-        $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
-        $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
-        $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
-
-        $topSource = $visits->filter(fn($v) => $v->source)
-            ->groupBy(fn($v) => $v->source->name)
-            ->map->count()
-            ->sortDesc();
-        $topSourceName = $topSource->keys()->first();
-        $topSourceCount = $topSource->first();
-
-        $topPic = $visits->filter(fn($v) => $v->assignedUser)
-            ->groupBy(fn($v) => $v->assignedUser->name)
-            ->map->count()
-            ->sortDesc();
-        $topPicName = $topPic->keys()->first();
-        $topPicCount = $topPic->first();
-
-                // Rata-rata Durasi = check_in_at -> check_out_at, disamakan dengan
-        // logic "Durasi" yang ditampilkan di preview halaman Laporan.
-        $durations = $visits->filter(fn($v) => $v->check_in_at && $v->check_out_at)
-            ->map(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at)));
-        $avgDuration = $durations->count() > 0 ? round($durations->avg()) : null;
-
-        $waitTimes = $visits->filter(fn($v) => $v->check_in_at && $v->meeting_start_at)
-            ->map(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->meeting_start_at)));
-        $avgWaitMinutes = $waitTimes->count() > 0 ? round($waitTimes->avg()) : null;
-
-        $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
-        $picName = $picId !== '' ? optional(users::find($picId))->name : null;
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('manager.laporan_pdf', [
-            'visits'          => $visits,
-            'monthLabel'      => $months[$month] ?? $month,
-            'year'            => $year,
-            'category'        => $category,
-            'branchName'      => $branchName,
-            'picName'         => $picName,
-            'totalKunjungan'  => $totalKunjungan,
-            'totalDeal'       => $totalDeal,
-            'totalVip'        => $totalVip,
-            'conversionRate'  => $conversionRate,
-            'topSourceName'   => $topSourceName,
-            'topSourceCount'  => $topSourceCount,
-            'topPicName'      => $topPicName,
-            'topPicCount'     => $topPicCount,
-            'avgWaitMinutes'  => $avgWaitMinutes,
-            'generatedBy'     => auth()->user()->name ?? '-',
-            'generatedAt'     => now(),
-            'avgDuration' => $avgDuration,
-        ])->setPaper('a4', 'landscape');
-
-        $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.pdf';
-
-        return $pdf->download($fileName);
     }
+
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
+    $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
+
+    $totalKunjungan = $visits->count();
+    $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
+    $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
+    $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
+
+    $topSource = $visits->filter(fn($v) => $v->source)
+        ->groupBy(fn($v) => $v->source->name)
+        ->map->count()
+        ->sortDesc();
+    $topSourceName = $topSource->keys()->first();
+    $topSourceCount = $topSource->first();
+
+    $topPic = $visits->filter(fn($v) => $v->assignedUser)
+        ->groupBy(fn($v) => $v->assignedUser->name)
+        ->map->count()
+        ->sortDesc();
+    $topPicName = $topPic->keys()->first();
+    $topPicCount = $topPic->first();
+
+    // Rata-rata Durasi = check_in_at -> check_out_at, disamakan dengan
+    // logic "Durasi" yang ditampilkan di preview halaman Laporan.
+    $durations = $visits->filter(fn($v) => $v->check_in_at && $v->check_out_at)
+        ->map(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at)));
+    $avgDuration = $durations->count() > 0 ? round($durations->avg()) : null;
+
+    $waitTimes = $visits->filter(fn($v) => $v->check_in_at && $v->meeting_start_at)
+        ->map(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->meeting_start_at)));
+    $avgWaitMinutes = $waitTimes->count() > 0 ? round($waitTimes->avg()) : null;
+
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName = $picId !== '' ? optional(users::find($picId))->name : null;
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('manager.laporan_pdf', [
+        'visits'          => $visits,
+        'monthLabel'      => $months[$month] ?? $month,
+        'year'            => $year,
+        'category'        => $category,
+        'branchName'      => $branchName,
+        'picName'         => $picName,
+        'totalKunjungan'  => $totalKunjungan,
+        'totalDeal'       => $totalDeal,
+        'totalVip'        => $totalVip,
+        'conversionRate'  => $conversionRate,
+        'topSourceName'   => $topSourceName,
+        'topSourceCount'  => $topSourceCount,
+        'topPicName'      => $topPicName,
+        'topPicCount'     => $topPicCount,
+        'avgWaitMinutes'  => $avgWaitMinutes,
+        'generatedBy'     => auth()->user()->name ?? '-',
+        'generatedAt'     => now(),
+        'avgDuration'     => $avgDuration,
+    ])->setPaper('a4', 'landscape');
+
+    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.pdf';
+
+    return $pdf->download($fileName);
+}
 
     /**
      * Halaman Daftar Database Tamu

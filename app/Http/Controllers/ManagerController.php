@@ -224,75 +224,84 @@ class ManagerController extends Controller
     }
 
     public function laporan(Request $request)
-    {
-        $month    = (int) $request->input('month', now()->month);
-        $year     = (int) $request->input('year', now()->year);
-        $category = (string) $request->input('category', '');
-        $branchId = (string) $request->input('branch_id', '');
-        $picId    = (string) $request->input('pic_id', '');
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
 
-        // Laporan Kunjungan hanya menampilkan data yang sudah "jadi" - yaitu
-        // kunjungan yang meeting-nya sudah selesai (sudah ada hasil/catatan).
-        // Kunjungan yang masih terjadwal/menunggu/dibatalkan tidak relevan
-        // untuk direkap sebagai laporan hasil kunjungan.
-        $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-            ->whereMonth('check_in_at', $month)
-            ->whereYear('check_in_at', $year)
-            ->whereIn('status', self::COMPLETED_STATUSES);
+    // Laporan Kunjungan menampilkan kunjungan yang sudah "final" - baik yang
+    // selesai dengan hasil, maupun yang dibatalkan/ditolak - supaya laporan
+    // merekap seluruh kunjungan yang statusnya sudah tuntas. Kunjungan yang
+    // masih terjadwal/menunggu (belum final) tidak relevan untuk direkap.
+    // Kunjungan yang dibatalkan sebelum sempat check-in (check_in_at NULL)
+    // tetap ikut lewat fallback ke scheduled_at.
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->where(function ($q) use ($month, $year) {
+            $q->where(function ($q2) use ($month, $year) {
+                $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year);
+            })->orWhere(function ($q2) use ($month, $year) {
+                $q2->whereNull('check_in_at')
+                    ->whereMonth('scheduled_at', $month)
+                    ->whereYear('scheduled_at', $year);
+            });
+        })
+        ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
+            'completed', 'selesai', 'meeting selesai',
+            'cancelled', 'dibatalkan', 'ditolak',
+        ]);
 
-        if (Schema::hasColumn('guests', 'is_vip')) {
-            if ($category === 'vip') {
-                $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($category === 'reguler') {
-                $baseQuery->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($category === 'vip') {
+            $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($category === 'reguler') {
+            $baseQuery->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
         }
-
-        if ($branchId !== '') {
-            $baseQuery->where('branch_id', $branchId);
-        }
-
-        if ($picId !== '') {
-            $baseQuery->where('assigned_to', $picId);
-        }
-
-        $totalKunjungan = (clone $baseQuery)->count();
-        $totalDeal = (clone $baseQuery)->whereHas('lead', fn($q) => $q->where('status', 'deal'))->count();
-        $totalVip = Schema::hasColumn('guests', 'is_vip')
-            ? (clone $baseQuery)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count()
-            : 0;
-
-        // Conversion Rate = persentase kunjungan yang berhasil dikonversi jadi deal
-        $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
-
-        // Rata-rata Durasi = rata-rata lama pertemuan (check_in_at -> check_out_at) dalam menit.
-        // Hanya menghitung kunjungan yang punya kedua data waktu tersebut.
-        $avgDuration = (clone $baseQuery)
-            ->whereNotNull('check_in_at')
-            ->whereNotNull('check_out_at')
-            ->get(['check_in_at', 'check_out_at'])
-            ->avg(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at)));
-        $avgDuration = $avgDuration ?? 0;
-
-        $perPage = (int) $request->input('per_page', 15);
-
-        $visits = $baseQuery->orderBy('check_in_at', 'desc')
-            ->paginate($perPage)
-            ->appends($request->query());
-
-        $branches = \App\Models\branches::orderBy('name')->get();
-        $picUsers = \App\Models\users::whereIn(
-            'id',
-            visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
-        )->orderBy('name')->get();
-
-        return view('manager.laporan', compact(
-            'visits', 'month', 'year', 'category', 'branchId', 'picId', 'branches', 'picUsers',
-            'totalKunjungan', 'totalDeal', 'totalVip', 'conversionRate', 'avgDuration'
-        ));
     }
+
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
+    $totalKunjungan = (clone $baseQuery)->count();
+    $totalDeal = (clone $baseQuery)->whereHas('lead', fn($q) => $q->where('status', 'deal'))->count();
+    $totalVip = Schema::hasColumn('guests', 'is_vip')
+        ? (clone $baseQuery)->whereHas('guest', fn($q) => $q->where('is_vip', true))->count()
+        : 0;
+
+    $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
+
+    $avgDuration = (clone $baseQuery)
+        ->whereNotNull('check_in_at')
+        ->whereNotNull('check_out_at')
+        ->get(['check_in_at', 'check_out_at'])
+        ->avg(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at)));
+    $avgDuration = $avgDuration ?? 0;
+
+    $perPage = (int) $request->input('per_page', 15);
+
+    $visits = $baseQuery->orderBy('check_in_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    $branches = \App\Models\branches::orderBy('name')->get();
+    $picUsers = \App\Models\users::whereIn(
+        'id',
+        visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
+    )->orderBy('name')->get();
+
+    return view('manager.laporan', compact(
+        'visits', 'month', 'year', 'category', 'branchId', 'picId', 'branches', 'picUsers',
+        'totalKunjungan', 'totalDeal', 'totalVip', 'conversionRate', 'avgDuration'
+    ));
+}
 
     public function exportExcel(Request $request)
     {
@@ -325,95 +334,103 @@ class ManagerController extends Controller
     }
 
     public function exportPdf(Request $request)
-    {
-        $month    = (int) $request->input('month', now()->month);
-        $year     = (int) $request->input('year', now()->year);
-        $category = (string) $request->input('category', '');
-        $branchId = (string) $request->input('branch_id', '');
-        $picId    = (string) $request->input('pic_id', '');
+{
+    $month    = (int) $request->input('month', now()->month);
+    $year     = (int) $request->input('year', now()->year);
+    $category = (string) $request->input('category', '');
+    $branchId = (string) $request->input('branch_id', '');
+    $picId    = (string) $request->input('pic_id', '');
 
-        $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-        ];
+    $months = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
 
-        // Sama seperti laporan(): PDF cuma menampilkan kunjungan yang sudah selesai,
-        // supaya isinya konsisten dengan preview di halaman Laporan & Export.
-        $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-            ->whereMonth('check_in_at', $month)
-            ->whereYear('check_in_at', $year)
-            ->whereIn('status', self::COMPLETED_STATUSES);
+    // Sama seperti laporan(): PDF menampilkan kunjungan final (selesai ATAU
+    // dibatalkan/ditolak), supaya isinya konsisten dengan preview & Excel.
+    $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
+        ->where(function ($q) use ($month, $year) {
+            $q->where(function ($q2) use ($month, $year) {
+                $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year);
+            })->orWhere(function ($q2) use ($month, $year) {
+                $q2->whereNull('check_in_at')
+                    ->whereMonth('scheduled_at', $month)
+                    ->whereYear('scheduled_at', $year);
+            });
+        })
+        ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
+            'completed', 'selesai', 'meeting selesai',
+            'cancelled', 'dibatalkan', 'ditolak',
+        ]);
 
-        if (Schema::hasColumn('guests', 'is_vip')) {
-            if ($category === 'vip') {
-                $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($category === 'reguler') {
-                $baseQuery->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($category === 'vip') {
+            $baseQuery->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($category === 'reguler') {
+            $baseQuery->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
         }
-
-        if ($branchId !== '') {
-            $baseQuery->where('branch_id', $branchId);
-        }
-        if ($picId !== '') {
-            $baseQuery->where('assigned_to', $picId);
-        }
-
-        $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
-
-        $totalKunjungan = $visits->count();
-        $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
-        $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
-        $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
-
-        $topSource = $visits->filter(fn($v) => $v->source)
-            ->groupBy(fn($v) => $v->source->name)
-            ->map->count()
-            ->sortDesc();
-        $topSourceName = $topSource->keys()->first();
-        $topSourceCount = $topSource->first();
-
-        $topPic = $visits->filter(fn($v) => $v->assignedUser)
-            ->groupBy(fn($v) => $v->assignedUser->name)
-            ->map->count()
-            ->sortDesc();
-        $topPicName = $topPic->keys()->first();
-        $topPicCount = $topPic->first();
-
-        // Rata-rata Durasi = check_in_at -> check_out_at, disamakan dengan
-        // logic "Durasi" yang ditampilkan di preview halaman Laporan.
-        $durations = $visits->filter(fn($v) => $v->check_in_at && $v->check_out_at)
-            ->map(fn($v) => \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at)));
-        $avgDuration = $durations->count() > 0 ? round($durations->avg()) : null;
-
-        $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
-        $picName = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
-
-        $pdf = Pdf::loadView('manager.laporan_pdf', [
-            'visits'          => $visits,
-            'monthLabel'      => $months[$month] ?? $month,
-            'year'            => $year,
-            'category'        => $category,
-            'branchName'      => $branchName,
-            'picName'         => $picName,
-            'totalKunjungan'  => $totalKunjungan,
-            'totalDeal'       => $totalDeal,
-            'totalVip'        => $totalVip,
-            'conversionRate'  => $conversionRate,
-            'topSourceName'   => $topSourceName,
-            'topSourceCount'  => $topSourceCount,
-            'topPicName'      => $topPicName,
-            'topPicCount'     => $topPicCount,
-            'avgDuration'     => $avgDuration,
-            'generatedBy'     => auth()->user()->name ?? '-',
-            'generatedAt'     => now(),
-        ])->setPaper('a4', 'landscape');
-
-        $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.pdf';
-
-        return $pdf->download($fileName);
     }
+
+    if ($branchId !== '') {
+        $baseQuery->where('branch_id', $branchId);
+    }
+    if ($picId !== '') {
+        $baseQuery->where('assigned_to', $picId);
+    }
+
+    $visits = $baseQuery->orderBy('check_in_at', 'asc')->get();
+
+    $totalKunjungan = $visits->count();
+    $totalDeal = $visits->filter(fn($v) => optional($v->lead)->status === 'deal')->count();
+    $totalVip = $visits->filter(fn($v) => isset($v->guest) && $v->guest->is_vip)->count();
+    $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
+
+    $topSource = $visits->filter(fn($v) => $v->source)
+        ->groupBy(fn($v) => $v->source->name)
+        ->map->count()
+        ->sortDesc();
+    $topSourceName = $topSource->keys()->first();
+    $topSourceCount = $topSource->first();
+
+    $topPic = $visits->filter(fn($v) => $v->assignedUser)
+        ->groupBy(fn($v) => $v->assignedUser->name)
+        ->map->count()
+        ->sortDesc();
+    $topPicName = $topPic->keys()->first();
+    $topPicCount = $topPic->first();
+
+    $durations = $visits->filter(fn($v) => $v->check_in_at && $v->check_out_at)
+        ->map(fn($v) => \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at)));
+    $avgDuration = $durations->count() > 0 ? round($durations->avg()) : null;
+
+    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
+    $picName = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
+
+    $pdf = Pdf::loadView('manager.laporan_pdf', [
+        'visits'          => $visits,
+        'monthLabel'      => $months[$month] ?? $month,
+        'year'            => $year,
+        'category'        => $category,
+        'branchName'      => $branchName,
+        'picName'         => $picName,
+        'totalKunjungan'  => $totalKunjungan,
+        'totalDeal'       => $totalDeal,
+        'totalVip'        => $totalVip,
+        'conversionRate'  => $conversionRate,
+        'topSourceName'   => $topSourceName,
+        'topSourceCount'  => $topSourceCount,
+        'topPicName'      => $topPicName,
+        'topPicCount'     => $topPicCount,
+        'avgDuration'     => $avgDuration,
+        'generatedBy'     => auth()->user()->name ?? '-',
+        'generatedAt'     => now(),
+    ])->setPaper('a4', 'landscape');
+
+    $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.pdf';
+
+    return $pdf->download($fileName);
+}
 }
