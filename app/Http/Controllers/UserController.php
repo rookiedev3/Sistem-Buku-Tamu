@@ -115,7 +115,7 @@ class UserController extends Controller
         // Kalau admin menonaktifkan lagi setelah ini, activated_at TIDAK dihapus/direset,
         // supaya sistem tetap tahu bahwa user ini "pernah aktif" (bukan pending baru daftar).
         if ($isActive && is_null($user->activated_at)) {
-            $data['activated_at'] = now();
+            ;
         }
 
         if ($request->filled('password')) {
