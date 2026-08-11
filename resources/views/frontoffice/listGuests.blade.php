@@ -134,7 +134,7 @@ use App\Helpers\DateHelper;
         </table>
 
         {{-- Footer Pagination --}}
-        <div style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px; margin-top: 0px;">
+        <div id="paginationContainer" style="padding: 14px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe; display: flex; justify-content: space-between; align-items: center; color: #778195; font-size: 12px; flex-wrap: wrap; gap: 8px; margin-top: 0px;">
             <div style="margin-top: 0px; width: 100%;">
                 @include('partials.pagination', ['paginator' => $guests])
             </div>
@@ -250,6 +250,16 @@ use App\Helpers\DateHelper;
         const filter = input.value.toLowerCase().trim();
         const rows = document.querySelectorAll('.guest-row');
         let visibleIndex = 1;
+
+        // Hide pagination if searching
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (paginationContainer) {
+            if (filter !== '') {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = '';
+            }
+        }
 
         rows.forEach(row => {
             const cells = row.getElementsByTagName('td');

@@ -311,7 +311,7 @@
     </div>
 
     {{-- Pagination --}}
-    <div style="margin-top: 20px;">
+    <div id="paginationContainer" style="margin-top: 20px;">
         @include('partials.pagination', ['paginator' => $visits])
     </div>
 </div>
@@ -711,6 +711,16 @@
         const filter = input.value.toLowerCase();
         const table = document.getElementById('guestTable');
         const tr = table.getElementsByTagName('tr');
+
+        // Hide pagination if searching
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (paginationContainer) {
+            if (filter.trim() !== '') {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = '';
+            }
+        }
 
         let visibleIndex = 1;
 

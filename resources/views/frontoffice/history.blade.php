@@ -225,7 +225,7 @@
     </div>
 
     {{-- Pagination Component --}}
-    <div style="margin-top: 20px;">
+    <div id="paginationContainer" style="margin-top: 20px;">
         @include('partials.pagination', ['paginator' => $visits])
     </div>
 </div>
@@ -324,6 +324,16 @@
         const rows = document.querySelectorAll('.history-row');
         const noMatchRow = document.getElementById('noSearchMatchRow');
         let visibleIndex = 1;
+
+        // Hide pagination if searching
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (paginationContainer) {
+            if (filter !== '') {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = '';
+            }
+        }
 
         rows.forEach(row => {
             const guestText = row.querySelector('.col-guest')?.textContent || '';

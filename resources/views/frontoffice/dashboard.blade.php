@@ -383,7 +383,7 @@
     </div>
 
     {{-- Footer Pagination --}}
-    <div style="padding: 16px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe;">
+    <div id="paginationContainer" style="padding: 16px 24px; border-top: 1px solid #e8edf5; background: #fbfcfe;">
         @include('partials.pagination', ['paginator' => $visits])
     </div>
 </div>
@@ -742,6 +742,16 @@
         const filterText = input.value.toLowerCase();
         const table = document.getElementById('guestTable');
         const tr = table.querySelectorAll('.visit-row-item');
+
+        // Hide pagination if searching
+        const paginationContainer = document.getElementById('paginationContainer');
+        if (paginationContainer) {
+            if (filterText.trim() !== '') {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = '';
+            }
+        }
 
         const startNumber = {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() : 1 }};
         let visibleCount = 0;
