@@ -23,7 +23,7 @@
         background: #94a3b8;
     }
 
-    /* Styling Input Visual Flatpickr (Dibuat Lebih Kecil & Ringkas) */
+    /* Styling Input Visual Flatpickr */
     .flatpickr-custom-input[readonly] {
         background-color: #fbfcfe !important;
         cursor: pointer !important;
@@ -93,11 +93,11 @@
             Riwayat Kunjungan Tamu
         </h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">
-            Arsip lengkap data tamu yang telah selesai melakukan kunjungan dan check-out dari sistem.
+            Arsip lengkap data tamu yang telah selesai melakukan kunjungan maupun dibatalkan.
         </p>
     </div>
 
-    {{-- Filter Tanggal Ukuran Lebih Kecil --}}
+    {{-- Filter Tanggal --}}
     <form action="{{ route('frontoffice.history') }}" method="GET" id="dateFilterForm" style="display: flex; gap: 6px; align-items: center; background: #ffffff; padding: 5px 10px; border-radius: 10px; border: 1px solid #e8edf5; box-shadow: 0 2px 8px rgba(31,53,97,0.03); flex-wrap: nowrap;">
         <span style="font-size: 11px; font-weight: 600; color: #64748b; white-space: nowrap;">Filter Tanggal:</span>
 
@@ -114,7 +114,7 @@
 
     {{-- Header Tabel & Search --}}
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
-        <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Arsip Data Kunjungan Selesai</h3>
+        <h3 style="font-size: 15px; font-weight: 800; color: #172033; margin: 0;">Arsip Data Kunjungan</h3>
 
         <div style="width: 100%; max-width: 280px;">
             <input type="text" id="searchHistory" placeholder="Cari nama tamu / instansi / PIC..." onkeyup="filterHistoryTable()"
@@ -129,7 +129,7 @@
             <thead>
                 <tr style="background: #f8fafc; color: #5c6678; font-weight: 700;">
                     <th style="padding: 14px; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">No</th>
-                    <th style="padding: 14px;">Token & Waktu Check-out</th>
+                    <th style="padding: 14px;">Token & Waktu</th>
                     <th style="padding: 14px;">Tamu & Jabatan</th>
                     <th style="padding: 14px;">Jenis Kunjungan</th>
                     <th style="padding: 14px;">Tujuan PIC</th>
@@ -140,12 +140,11 @@
             <tbody style="color: #172033;">
                 @forelse($visits as $index => $visit)
                 <tr class="history-row" style="border-bottom: 1px solid #f1f5f9;">
-                    {{-- Penomoran Dinamis Konsisten --}}
                     <td class="row-number" style="padding: 14px; font-weight: 600;">
                         {{ method_exists($visits, 'firstItem') && $visits->firstItem() ? $visits->firstItem() + $index : $index + 1 }}
                     </td>
 
-                    {{-- Kode Token & Tanggal Check-out (Teks Tanggal Diperkecil Ke 10px) --}}
+                    {{-- Kode Token & Tanggal --}}
                     <td style="padding: 14px;">
                         <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
                         <span style="font-size: 10px; color: #778195; font-weight: 600; display: inline-block; margin-top: 2px;">
@@ -164,7 +163,7 @@
                         <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</span>
                     </td>
 
-                    {{-- Jenis / Keperluan Kunjungan --}}
+                    {{-- Keperluan Kunjungan --}}
                     <td style="padding: 14px; color: #475569;">{{ $visit->purpose->name ?? '-' }}</td>
 
                     {{-- PIC Tujuan --}}
@@ -174,11 +173,17 @@
                         </span>
                     </td>
 
-                    {{-- Status Akhir --}}
+                    {{-- STATUS AKHIR DINAMIS (Dibatalkan / Selesai) --}}
                     <td style="padding: 14px;">
-                        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">
-                            Selesai (Check-out)
+                        @if(in_array(strtolower($visit->status), ['dibatalkan', 'cancelled']))
+                        <span style="background: #fef2f2; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid #fecaca;">
+                            Dibatalkan
                         </span>
+                        @else
+                        <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                            Selesai
+                        </span>
+                        @endif
                     </td>
 
                     {{-- Aksi --}}
@@ -193,7 +198,8 @@
                             '{{ addslashes($visit->assignedUser->name ?? '-') }}', 
                             '{{ $visit->check_in_at ? \Carbon\Carbon::parse($visit->check_in_at)->translatedFormat('d M Y, H:i') : '-' }}', 
                             '{{ $visit->check_out_at ? \Carbon\Carbon::parse($visit->check_out_at)->translatedFormat('d M Y, H:i') : '-' }}',
-                            '{{ $visit->guest->photo_path ? asset('storage/' . $visit->guest->photo_path) : '' }}'
+                            '{{ $visit->guest->photo_path ? asset('storage/' . $visit->guest->photo_path) : '' }}',
+                            '{{ $visit->status }}'
                         )"
                             style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
                             onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
@@ -204,7 +210,7 @@
                 @empty
                 <tr id="emptyRow">
                     <td colspan="7" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
-                        Tidak ada data riwayat kunjungan selesai.
+                        Tidak ada data riwayat kunjungan.
                     </td>
                 </tr>
                 @endforelse
@@ -249,6 +255,10 @@
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Nomor Token:</span>
                 <span id="modalToken" style="font-weight: 800; color: #006B3F;">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
+                <span style="color: #778195;">Status Kunjungan:</span>
+                <span id="modalStatus" style="font-weight: 800;">-</span>
             </div>
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #e8edf5; padding-bottom: 10px;">
                 <span style="color: #778195;">Nama Lengkap:</span>
@@ -336,7 +346,7 @@
         }
     }
 
-    function openDetailModal(token, name, instansi, jabatan, phone, keperluan, pic, checkin, checkout, photoUrl) {
+    function openDetailModal(token, name, instansi, jabatan, phone, keperluan, pic, checkin, checkout, photoUrl, status) {
         document.getElementById('modalToken').innerText = token;
         document.getElementById('modalName').innerText = name;
         document.getElementById('modalInstansi').innerText = instansi + ' (' + jabatan + ')';
@@ -345,6 +355,15 @@
         document.getElementById('modalPic').innerText = pic;
         document.getElementById('modalCheckin').innerText = checkin;
         document.getElementById('modalCheckout').innerText = checkout;
+
+        const statusEl = document.getElementById('modalStatus');
+        if (status && (status.toLowerCase() === 'dibatalkan' || status.toLowerCase() === 'cancelled')) {
+            statusEl.innerText = 'Dibatalkan';
+            statusEl.style.color = '#dc2626';
+        } else {
+            statusEl.innerText = 'Selesai (Check-out)';
+            statusEl.style.color = '#006B3F';
+        }
 
         const photoContainer = document.getElementById('photoContainer');
         const photoStatus = document.getElementById('photoStatus');

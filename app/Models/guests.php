@@ -17,6 +17,7 @@ class guests extends Model
         'email',
         'company_name',
         'position',
+        'is_vip',
         'address',
         'guest_category_id',
         'photo_path',

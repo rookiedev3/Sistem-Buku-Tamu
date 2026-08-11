@@ -216,9 +216,9 @@
 
     <div style="background: #ffffff; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <span style="font-size: 11px; color: #778195; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">Perlu Check-In</span>
+            <span style="font-size: 11px; color: #778195; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">Belum Selesai Hari Ini</span>
             <span style="font-size: 22px; font-weight: 800; color: #0284c7;">
-                {{ $waitingCount ?? $visits->whereIn('status', ['Terjadwal', 'scheduled', 'Menunggu', 'waiting'])->count() }} 
+                {{ $unfinishedTodayCount }} 
                 <span style="font-size: 13px; font-weight: 600; color: #778195;">Tamu</span>
             </span>
         </div>

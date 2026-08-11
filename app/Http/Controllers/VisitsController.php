@@ -45,6 +45,8 @@ class VisitsController extends Controller
             'photo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
+        $validatedData['is_vip'] = 0;
+
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
         if (str_starts_with($phone, '0')) {
             $phone = '62' . substr($phone, 1);
@@ -201,6 +203,7 @@ class VisitsController extends Controller
                 if (empty($step1['photo_path'])) {
                     unset($step1['photo_path']);
                 }
+                unset($step1['is_vip']);
                 $guest->update($step1);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
@@ -209,6 +212,7 @@ class VisitsController extends Controller
                 $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
 
                 $step1['guest_code'] = $prefix . $sequence;
+                $step1['is_vip'] = 0;
                 $guest = guests::create($step1);
             }
 
@@ -399,6 +403,4 @@ class VisitsController extends Controller
 
         return back()->with('success', 'Hasil pertemuan berhasil disimpan!');
     }
-
-    
 }

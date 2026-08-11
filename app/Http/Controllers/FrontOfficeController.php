@@ -24,17 +24,18 @@ class FrontOfficeController extends Controller
     {
         $today = Carbon::today();
 
-        // 1. Buat Query Dasar untuk Visits
-        $visitQuery = visits::with(['guest', 'purpose', 'assignedUser']);
+        // 1. Buat Query Dasar untuk Visits (Khusus Hari Ini)
+        $todayVisitsQuery = visits::whereDate('scheduled_at', $today);
 
-        // Opsional: Jika ingin membatasi antrian HANYA untuk hari ini saja, buka komentar baris di bawah:
-        // $visitQuery->whereDate('scheduled_at', $today);
+        // 2. Hitung Total Tamu Hari Ini & Tamu Belum Selesai Hari Ini
+        $totalToday = (clone $todayVisitsQuery)->count();
 
-        // 2. Hitung Total Statistik SEBELUM di-paginate (agar jumlah statistik tidak berubah saat pindah halaman)
-        $totalToday   = (clone $visitQuery)->count();
-        $waitingToday = (clone $visitQuery)->whereIn('status', ['Menunggu', 'waiting', 'Terjadwal', 'scheduled'])->count();
+        // Perhitungan Tamu Belum Selesai Hari Ini (Mengabaikan Selesai & Dibatalkan)
+        $unfinishedTodayCount = (clone $todayVisitsQuery)
+            ->whereNotIn('status', ['Selesai', 'completed', 'Dibatalkan', 'cancelled'])
+            ->count();
 
-        // 3. Eksekusi Pagination (10 data per halaman)
+        // 3. Eksekusi Pagination Data Visits
         $allowedPerPage = [10, 25, 50, 100];
         $perPage = (int) $request->input('per_page', 10);
         if (!in_array($perPage, $allowedPerPage)) {
@@ -51,7 +52,7 @@ class FrontOfficeController extends Controller
         $branches        = branches::select('id', 'name')->get();
         $purposes        = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products        = products::select('id', 'name')->get(); // ⚠️ Diubah ke 'id' agar sesuai dengan value select di Blade
+        $products        = products::select('id', 'name')->get();
         $leadSources     = lead_sources::select('id', 'name')->get();
 
         // 5. Data Notifikasi
@@ -62,7 +63,7 @@ class FrontOfficeController extends Controller
         return view('frontoffice.dashboard', compact(
             'visits',
             'totalToday',
-            'waitingToday',
+            'unfinishedTodayCount', // 🟢 Variabel statistik baru yang dikirim ke Blade
             'pics',
             'branches',
             'purposes',
@@ -140,7 +141,7 @@ class FrontOfficeController extends Controller
             'assigned_to'       => 'required|exists:users,id',
             'branch_id'         => 'required|exists:branches,id',
             'purpose_id'        => 'required|exists:visit_purposes,id',
-            'product_id'        => 'nullable|exists:products,id', // Diperketat ke tabel products
+            'product_id'        => 'nullable|exists:products,id',
             'scheduled_at'      => 'required|date',
             'notes'             => 'required|string',
             'photo_path'        => 'nullable|image|max:2048',
@@ -183,6 +184,8 @@ class FrontOfficeController extends Controller
                 if ($photoPath) {
                     $updateData['photo_path'] = $photoPath;
                 }
+                // Hapus 'is_vip' jika ada agar tidak menimpa status VIP di DB
+                unset($updateData['is_vip']);
                 $guest->update($updateData);
             } else {
                 $todayDate = Carbon::now()->format('Ymd');
@@ -199,6 +202,7 @@ class FrontOfficeController extends Controller
                     'email'             => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                     'photo_path'        => $photoPath,
+                    'is_vip'            => 0, // 🟢 PERBAIKAN: Default set 0 (false) untuk tamu baru
                 ]);
             }
 
@@ -230,7 +234,7 @@ class FrontOfficeController extends Controller
                 'check_in_at'  => now(),
             ]);
 
-            // 6. Simpan ke Tabel visit_products (DIPERBAIKI)
+            // 6. Simpan ke Tabel visit_products
             if ($request->filled('product_id')) {
                 DB::table('visit_products')->insert([
                     'visit_id'   => $visit->id,
@@ -267,13 +271,16 @@ class FrontOfficeController extends Controller
             $perPage = 10;
         }
 
-        // 2. Query Data Kunjungan yang Sudah Selesai
+        // 2. Query Data Kunjungan yang Selesai ATAU Dibatalkan (Termasuk variasi 'cancelled')
         $query = visits::with(['guest', 'purpose', 'assignedUser'])
-            ->whereIn('status', ['Selesai', 'completed', 'checkout']);
+            ->whereIn('status', ['Selesai', 'completed', 'Dibatalkan', 'cancelled']);
 
         // Filter Berdasarkan Tanggal Check-out / Scheduled
         if ($request->filled('date')) {
-            $query->whereDate('check_out_at', $request->date);
+            $query->where(function ($q) use ($request) {
+                $q->whereDate('check_out_at', $request->date)
+                    ->orWhereDate('scheduled_at', $request->date);
+            });
         }
 
         // Filter Pencarian Keyword (Nama Tamu / Instansi / PIC / Token)
@@ -289,14 +296,13 @@ class FrontOfficeController extends Controller
             });
         }
 
-        // 3. Eksekusi Pagination dengan Mempertahankan Query String
-        $visits = $query->latest('check_out_at')
+        // 3. Eksekusi Pagination
+        $visits = $query->latest('updated_at')
             ->paginate($perPage)
             ->withQueryString();
 
         $filterDate = $request->query('date', '');
 
-        // 4. Data Notifikasi untuk Header Navbar (opsional jika dibutuhkan)
         $notifications = notifications::where('user_id', auth()->id())
             ->latest()
             ->take(5)
