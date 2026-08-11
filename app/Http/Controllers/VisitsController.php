@@ -403,4 +403,15 @@ class VisitsController extends Controller
 
         return back()->with('success', 'Hasil pertemuan berhasil disimpan!');
     }
+
+    public function getPicsByBranch($branchId)
+    {
+        // Mengambil user dengan role 'pic' yang terikat dengan branch_id terpilih
+        $pics = users::where('role', 'pic')
+            ->where('branch_id', $branchId)
+            ->select('id', 'name')
+            ->get();
+
+        return response()->json($pics);
+    }
 }

@@ -154,6 +154,7 @@ Route::get('/check-in/step-3', [VisitsController::class, 'step3'])->name('check-
 Route::post('/check-in/step-3', [VisitsController::class, 'storeFinal'])->name('check-in.store-step3');
 
 Route::get('/check-in/step-4/{id}', [VisitsController::class, 'step4'])->name('check-in.step4');
+Route::get('/get-pics-by-branch/{branchId}', [VisitsController::class, 'getPicsByBranch'])->name('get-pics-by-branch');
 
 // --- RUTE FRONT OFFICE ---
 Route::get('/frontoffice/dashboard', [FrontOfficeController::class, 'dashboard'])->name('frontoffice.dashboard');
@@ -171,6 +172,7 @@ Route::get('/frontoffice/history', [FrontOfficeController::class, 'history'])->n
 Route::get('/frontoffice/appointment', [FrontOfficeController::class, 'appointment'])->name('frontoffice.appointment');
 Route::post('/frontoffice/appointment/store', [FrontOfficeController::class, 'storeAppointment'])->name('frontoffice.appointment.store');
 Route::post('/frontoffice/appointment/{id}/status', [FrontOfficeController::class, 'updateAppointmentStatus'])->name('frontoffice.appointment.status');
+
 
 // // Group Route untuk Role Manager Operasional
 // Route::prefix('manager')->middleware('auth')->group(function () {

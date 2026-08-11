@@ -7,17 +7,21 @@
         .checkin-container {
             grid-template-columns: 1fr !important;
         }
+
         .checkin-sidebar {
             padding: 40px 30px !important;
         }
+
         .checkin-form-area {
             padding: 40px 30px !important;
         }
     }
+
     @media (max-width: 480px) {
         .checkin-sidebar {
             padding: 30px 20px !important;
         }
+
         .checkin-form-area {
             padding: 30px 20px !important;
         }
@@ -119,7 +123,7 @@
                     <span>Senin-Sabtu, 08.00-16.00 WIB</span>
                 </div>
             </div>
-        </div> 
+        </div>
 
         <!-- Area Form Kanan -->
         <div class="checkin-form-area" style="padding: 60px 80px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
@@ -132,39 +136,26 @@
             <form action="{{ route('check-in.store-step2') }}" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
                 @csrf
 
-                {{-- Tujuan Bertemu --}}
-                <div>
-                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Tujuan Bertemu (Staff / PIC) <span style="color: #e5484d;">*</span></label>
-                    <select name="assigned_to" required
-                        style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
-                        <option value="" disabled {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Staff / PIC Tujuan --</option>
-                        @if($pic->isEmpty())
-                        <option value="" disabled>Data tidak ditemukan.</option>
-                        @else
-                        @foreach($pic as $sales)
-                        <option value="{{ $sales->id }}" {{ old('assigned_to', $step2Data['assigned_to'] ?? '') == $sales->id ? 'selected' : '' }}>
-                            {{ $sales->name }}
-                        </option>
-                        @endforeach
-                        @endif
-                    </select>
-                </div>
-
-                {{-- Cabang Tujuan --}}
+                {{-- Cabang Tujuan (Diletakkan di Atas PIC agar alur pengisian logis) --}}
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Cabang / Kantor Tujuan <span style="color: #e5484d;">*</span></label>
-                    <select name="branch_id" required
+                    <select name="branch_id" id="branch_select" required
                         style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
                         <option value="" disabled {{ old('branch_id', $step2Data['branch_id'] ?? '') == '' ? 'selected' : '' }}>-- Pilih Cabang / Kantor Tujuan --</option>
-                        @if($branches->isEmpty())
-                        <option value="" disabled>Data tidak ditemukan.</option>
-                        @else
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ old('branch_id', $step2Data['branch_id'] ?? '') == $branch->id ? 'selected' : '' }}>
                             {{ $branch->name }}
                         </option>
                         @endforeach
-                        @endif
+                    </select>
+                </div>
+
+                {{-- Tujuan Bertemu (Staff / PIC) --}}
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Tujuan Bertemu (Staff / PIC) <span style="color: #e5484d;">*</span></label>
+                    <select name="assigned_to" id="pic_select" required
+                        style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box;">
+                        <option value="" disabled selected>-- Pilih Cabang Terlebih Dahulu --</option>
                     </select>
                 </div>
 
@@ -344,6 +335,60 @@
                 }
             ]
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const branchSelect = document.getElementById('branch_select');
+        const picSelect = document.getElementById('pic_select');
+
+        // Simpan ID PIC lama jika ada (untuk penanganan validasi gagal / tombol kembali)
+        const selectedPicId = "{{ old('assigned_to', $step2Data['assigned_to'] ?? '') }}";
+
+        function loadPics(branchId, selectedPic = null) {
+            if (!branchId) return;
+
+            // Reset dropdown PIC ke status loading
+            picSelect.innerHTML = '<option value="" disabled selected>Memuat data PIC...</option>';
+
+            fetch(`/get-pics-by-branch/${branchId}`)
+                .then(response => response.json())
+                .then(data => {
+                    picSelect.innerHTML = '';
+
+                    if (data.length === 0) {
+                        picSelect.innerHTML = '<option value="" disabled selected>Tidak ada PIC di cabang ini</option>';
+                        return;
+                    }
+
+                    picSelect.innerHTML = '<option value="" disabled selected>-- Pilih Staff / PIC Tujuan --</option>';
+
+                    data.forEach(pic => {
+                        const option = document.createElement('option');
+                        option.value = pic.id;
+                        option.textContent = pic.name;
+
+                        if (selectedPic && selectedPic == pic.id) {
+                            option.selected = true;
+                        }
+
+                        picSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching PICs:', error);
+                    picSelect.innerHTML = '<option value="" disabled selected>Gagal memuat data PIC</option>';
+                });
+        }
+
+        // Trigger otomatis saat cabang dipilih
+        branchSelect.addEventListener('change', function() {
+            loadPics(this.value);
+        });
+
+        // Otomatis load data PIC saat halaman dibuka pertama kali jika cabang sudah terpilih sebelumnya
+        if (branchSelect.value) {
+            loadPics(branchSelect.value, selectedPicId);
+        }
     });
 </script>
 @endsection
