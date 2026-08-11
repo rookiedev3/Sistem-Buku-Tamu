@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\follow_ups;
 use App\Models\leads;
-use App\Models\notifications; // 🟢 TAMBAHAN: Import Model Notifications
-use App\Models\User;          // 🟢 TAMBAHAN: Import Model User
+use App\Models\notifications; 
+use App\Models\User;          
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;

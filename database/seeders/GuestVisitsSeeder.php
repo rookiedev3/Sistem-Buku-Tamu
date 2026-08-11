@@ -10,11 +10,11 @@ use Carbon\Carbon;
 class GuestVisitsSeeder extends Seeder
 {
     /**
-     * Jalankan: php artisan db:seed --class=GuestVisitSeeder
+     * Jalankan: php artisan db:seed --class=GuestVisitsSeeder
      */
     public function run(): void
     {
-        // 1. Pastikan tabel referensi (branches, visit_purposes, lead_sources, products, users)
+        // 1. Pastikan tabel referensi (branches, visit_purposes, lead_sources, users)
         // punya minimal 1 data. Kalau kosong, buat data dummy sederhana.
         $branchId = DB::table('branches')->first()->id
             ?? DB::table('branches')->insertGetId([
@@ -37,6 +37,7 @@ class GuestVisitsSeeder extends Seeder
                 'updated_at' => now(),
             ]);
 
+        // User umum, dipakai untuk created_by / updated_by (siapa yang menginput data).
         $userId = DB::table('users')->first()->id
             ?? DB::table('users')->insertGetId([
                 'name'       => 'Admin SBT',
@@ -45,6 +46,11 @@ class GuestVisitsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+        // User "Bapak PIC" (pic@gmail.com), dipakai khusus untuk assigned_to di setiap visit.
+        // Kalau belum ada, fallback ke $userId supaya seeder tetap jalan tanpa error.
+        $picUserId = DB::table('users')->where('email', 'pic@gmail.com')->value('id')
+            ?? $userId;
 
         $categoryId = DB::table('guest_categories')->first()->id
             ?? DB::table('guest_categories')->insertGetId([
@@ -84,29 +90,18 @@ class GuestVisitsSeeder extends Seeder
             ['name' => 'Olivia Putri Anggraini','phone' => '+628123456714',   'email' => 'olivia.putri@gmail.com',      'company_name' => 'CV Sumber Rezeki', 'position' => 'Owner'],
         ];
 
-        // Variasi status kunjungan, dirotasi supaya datanya beragam untuk testing filter/badge
-        $statuses = [
-            'Terjadwal',
-            'Menunggu',
-            'Selesai',
-            'Dikonfirmasi',
-            'Sedang Bertemu',
-            'Selesai',
-            'Terjadwal',
-            'Dibatalkan',
-            'Menunggu',
-            'Selesai',
-            'Dikonfirmasi',
-            'Terjadwal',
-            'Sedang Bertemu',
-            'Menunggu',
-            'Selesai',
-        ];
-
         $totalGuests = count($guestsData);
 
+        // Semua data status & VIP disamakan seperti data Zahwa Ayu Ramadhani (data pertama):
+        // status kunjungan = "Terjadwal", dan semua tamu ditandai VIP.
+        $uniformStatus = 'Terjadwal';
+        $uniformIsVip  = 1;
+
+        // Tanggal kunjungan dimulai dari 11 Agustus 2026, lalu maju 1 hari untuk setiap tamu berikutnya.
+        $startDate = Carbon::create(2026, 8, 11, 8, 0, 0);
+
         foreach ($guestsData as $i => $g) {
-            $date       = Carbon::now()->subDays(($totalGuests - 1) - $i);
+            $date       = $startDate->copy()->addDays($i);
             $guestCode  = 'GST-' . $date->format('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
             $visitCode  = 'VST-' . $date->format('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
 
@@ -117,7 +112,7 @@ class GuestVisitsSeeder extends Seeder
                 'email'             => $g['email'],
                 'company_name'      => $g['company_name'],
                 'position'          => $g['position'],
-                'is_vip'            => $i % 4 === 0 ? 1 : 0,
+                'is_vip'            => $uniformIsVip,
                 'address'           => 'Jl. Contoh No. ' . ($i + 1) . ', Yogyakarta',
                 'guest_category_id' => $categoryId,
                 'photo_path'        => null,
@@ -132,13 +127,13 @@ class GuestVisitsSeeder extends Seeder
                 'branch_id'            => $branchId,
                 'purpose_id'           => $purposeId,
                 'source_id'            => $sourceId,
-                'assigned_to'          => $userId,
+                'assigned_to'          => $picUserId,
                 'scheduled_at'         => $date->copy()->setTime(8, 0, 0),
                 'notes'                => 'Kunjungan seeder ke-' . ($i + 1),
                 'check_in_at'          => $date,
                 'meeting_start_at'     => null,
                 'check_out_at'         => null,
-                'status'               => $statuses[$i],
+                'status'               => $uniformStatus,
                 'queue_number'         => $i + 1,
                 'meeting_result'       => null,
                 'potential_level'      => null,
