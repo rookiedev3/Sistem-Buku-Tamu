@@ -6,11 +6,11 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #4b5563;
+        color: #ffff;
         text-decoration: none;
         font-weight: 600;
         font-size: 14px;
-        background: #ffffff;
+        background: #0284c7;
         padding: 8px 16px;
         border-radius: 8px;
         border: 1px solid #e5e7eb;
@@ -18,11 +18,11 @@
         transition: all 0.2s ease;
         margin-bottom: 20px;
     }
-    .back-btn:hover {
+    /* .back-btn:hover {
         background: #f9fafb;
         color: #111827;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
+    } */
     .filter-bar {
         display: flex;
         gap: 10px;
