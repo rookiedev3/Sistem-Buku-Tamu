@@ -135,6 +135,7 @@ class FrontOfficeController extends Controller
             'name'              => 'required|string|max:255',
             'company_name'      => 'required|string|max:255',
             'position'          => 'required|string|max:255',
+            'address'           => 'required|string|max:255',
             'phone'             => 'required|string',
             'email'             => 'required|email|max:150',
             'guest_category_id' => 'required|exists:guest_categories,id',
@@ -162,6 +163,9 @@ class FrontOfficeController extends Controller
             $phone = '+' . $phone;
         }
 
+        // Ambil ID user yang sedang login untuk created_by
+        $currentUserId = auth()->check() ? auth()->id() : null;
+
         DB::beginTransaction();
         try {
             // 2. Handle Upload Foto Tamu
@@ -178,6 +182,7 @@ class FrontOfficeController extends Controller
                     'name'              => $validated['name'],
                     'company_name'      => $validated['company_name'],
                     'position'          => $validated['position'],
+                    'address'           => $validated['address'], // 🟢 TAMBAHAN: Update address
                     'email'             => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                 ];
@@ -198,11 +203,13 @@ class FrontOfficeController extends Controller
                     'name'              => $validated['name'],
                     'company_name'      => $validated['company_name'],
                     'position'          => $validated['position'],
+                    'address'           => $validated['address'], // 🟢 TAMBAHAN: Simpan address
                     'phone'             => $phone,
                     'email'             => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                     'photo_path'        => $photoPath,
-                    'is_vip'            => 0, // 🟢 PERBAIKAN: Default set 0 (false) untuk tamu baru
+                    'is_vip'            => 0,
+                    'created_by'        => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel guests
                 ]);
             }
 
@@ -232,6 +239,7 @@ class FrontOfficeController extends Controller
                 'status'       => 'Terjadwal',
                 'queue_number' => $queueNumber,
                 'check_in_at'  => now(),
+                'created_by'   => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel visits
             ]);
 
             // 6. Simpan ke Tabel visit_products
@@ -249,7 +257,7 @@ class FrontOfficeController extends Controller
                 'visit_id'   => $visit->id,
                 'old_status' => null,
                 'new_status' => 'Terjadwal',
-                'changed_by' => auth()->check() ? auth()->id() : null,
+                'changed_by' => $currentUserId,
                 'changed_at' => now(),
             ]);
 
@@ -261,7 +269,6 @@ class FrontOfficeController extends Controller
             return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
-
     public function history(Request $request)
     {
         // 1. Ambil nilai per_page dinamis (Default 10)

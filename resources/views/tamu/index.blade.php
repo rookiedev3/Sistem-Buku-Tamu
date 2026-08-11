@@ -18,10 +18,10 @@
         <form action="{{ url()->current() }}" method="GET" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0;">
             {{-- Pertahankan per_page jika ada --}}
             @if(request()->has('per_page'))
-                <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+            <input type="hidden" name="per_page" value="{{ request('per_page') }}">
             @endif
 
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, instansi, atau nomor WA..." 
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, instansi, atau nomor WA..."
                 style="padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; width: 300px; outline: none; background: #fff; color: #172033;">
 
             <button type="submit" style="background: #006B3F; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
@@ -29,7 +29,12 @@
             </button>
 
             @if(request()->filled('search'))
-                <a href="{{ url()->current() }}" style="font-size: 12px; color: #dc2626; text-decoration: none; font-weight: 700; margin-left: 4px;">Reset</a>
+            <a href="{{ url()->current() }}"
+                style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; transition: all 0.2s ease;"
+                onmouseover="this.style.background='#fee2e2'"
+                onmouseout="this.style.background='#fef2f2'">
+                Reset
+            </a>
             @endif
         </form>
 
