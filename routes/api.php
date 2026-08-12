@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BranchesApiController;
 use App\Http\Controllers\Api\GuestCategoriesApiController;
 use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
+use App\Http\Controllers\Api\CheckInApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 
 // apkah 
@@ -63,4 +64,18 @@ Route::apiResource('guest-categories', GuestCategoriesApiController::class)->nam
     'update'  => 'api.guest-categories.update',
     'destroy' => 'api.guest-categories.destroy',
 ]);
+});
+
+Route::prefix('check-in')->group(function () {
+    // 1. Ambil data dropdown/master data untuk frontend
+    Route::get('/form-data', [CheckInApiController::class, 'getFormData']);
+
+    // 2. Endpoint opsional jika butuh validasi Step 1 secara terpisah
+    Route::post('/validate-step1', [CheckInApiController::class, 'validateStep1']);
+
+    // 3. Submit utama check-in (dikirim dari frontend saat final step)
+    Route::post('/', [CheckInApiController::class, 'store']);
+
+    // 4. Detail Kunjungan (Halaman Sukses / Bukti Check-In)
+    Route::get('/{id}', [CheckInApiController::class, 'show']);
 });
