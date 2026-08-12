@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+// use Illuminate\Support\Facades\Hash;
 
 class AuthApiController extends BaseApiController
 {
@@ -41,6 +42,34 @@ class AuthApiController extends BaseApiController
             ],
         ]);
     }
+
+    public function register(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name'      => 'required|string|max:150',
+        'email'     => 'required|email|unique:users,email',
+        'phone'     => 'required|string|max:25',
+        'branch_id' => 'required|exists:branches,id',
+        'password'  => 'required|min:6|confirmed',
+    ]);
+
+    if ($validator->fails()) {
+        return $this->responseHasil(422, false, $validator->errors());
+    }
+
+    $user = User::create([
+        'name'         => $request->name,
+        'email'        => $request->email,
+        'phone'        => $request->phone,
+        'branch_id'    => $request->branch_id,
+        'password'     => Hash::make($request->password),
+        'role'         => null,
+        'is_active'    => false,
+        'activated_at' => null,
+    ]);
+
+    return $this->responseHasil(200, true, "Pendaftaran berhasil! Tunggu persetujuan admin untuk dapat login.");
+}
 
     public function logout(Request $request)
     {

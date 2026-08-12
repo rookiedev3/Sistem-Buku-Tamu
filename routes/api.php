@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BranchesApiController;
 use App\Http\Controllers\Api\GuestCategoriesApiController;
 use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
+use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 
 // apkah 
@@ -16,6 +17,7 @@ Route::get('/user', function (Request $request) {
 
 // login route untuk autentikasi pengguna dan mendapatkan token API
 Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/register', [AuthApiController::class, 'register']);
 
 // Memasukan semua rute API yang membutuhkan autentikasi di dalam group middleware 
 // 'auth:sanctum' agar semua route di dalamnya memerlukan token untuk diakses
@@ -23,6 +25,11 @@ Route::post('/login', [AuthApiController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthApiController::class, 'logout']);
     Route::get('/me', [AuthApiController::class, 'me']);
+
+    Route::get('/users', [UserApiController::class, 'index']);
+    Route::post('/users/{id}/approve', [UserApiController::class, 'approve']);
+    Route::post('/users/{id}/deactivate', [UserApiController::class, 'deactivate']);
+    Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
 
 Route::apiResource('branches', BranchesApiController::class)->names([
     'index'   => 'api.branches.index',
