@@ -9,44 +9,47 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthApiController extends BaseApiController
 {
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
+public function login(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'email'    => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if ($validator->fails()) {
-            return $this->responseHasil(422, false, $validator->errors());
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return $this->responseHasil(401, false, "Email atau password salah");
-        }
-
-        if (!$user->is_active) {
-            if (is_null($user->role)) {
-                return $this->responseHasil(403, false, "Akun masih menunggu persetujuan admin");
-            }
-            return $this->responseHasil(403, false, "Akun Anda telah dinonaktifkan. Hubungi admin.");
-        }
-
-        $token = $user->createToken('mobile-app')->plainTextToken;
-
-        return $this->responseHasil(200, true, [
-            'token' => $token,
-            'user'  => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'role'  => $user->role,
-            ],
-        ]);
+    if ($validator->fails()) {
+        return $this->responseHasil(422, false, $validator->errors());
     }
 
-    public function register(Request $request)
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return $this->responseHasil(401, false, "Email atau password salah");
+    }
+
+    // Belum pernah di-approve sama sekali (role kosong)
+    if (is_null($user->role)) {
+        return $this->responseHasil(403, false, "Akun masih menunggu persetujuan admin");
+    }
+
+    // Sudah punya role, tapi dinonaktifkan
+    if (!$user->is_active) {
+        return $this->responseHasil(403, false, "Akun Anda telah dinonaktifkan. Hubungi admin.");
+    }
+
+    $token = $user->createToken('mobile-app')->plainTextToken;
+
+    return $this->responseHasil(200, true, [
+        'token' => $token,
+        'user'  => [
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+            'role'  => $user->role,
+        ],
+    ]);
+}
+
+public function register(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'name'      => 'required|string|max:150',
@@ -63,7 +66,7 @@ class AuthApiController extends BaseApiController
     $user = User::create([
         'name'         => $request->name,
         'email'        => $request->email,
-        'phone'        => $request->phone,
+        'phone'        => $this->normalizePhone($request->phone), // ← DIGANTI
         'branch_id'    => $request->branch_id,
         'password'     => Hash::make($request->password),
         'role'         => null,
@@ -72,6 +75,19 @@ class AuthApiController extends BaseApiController
     ]);
 
     return $this->responseHasil(200, true, "Pendaftaran berhasil! Tunggu persetujuan admin untuk dapat login.");
+}
+
+// ← TAMBAHAN: method baru, sama persis logic-nya kayak yang dipakai UserController di web
+private function normalizePhone($phone)
+{
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    if (str_starts_with($phone, '0')) {
+        $phone = '62' . substr($phone, 1);
+    }
+    if (!str_starts_with($phone, '+')) {
+        $phone = '+' . $phone;
+    }
+    return $phone;
 }
 
     public function logout(Request $request)
