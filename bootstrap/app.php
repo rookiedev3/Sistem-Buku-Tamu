@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         'level' => App\Http\Middleware\CheckUserLogin::class,
         ]);
     })
+    ->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'role' => \App\Http\Middleware\CheckApiRole::class,
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
