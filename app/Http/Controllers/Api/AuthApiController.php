@@ -27,7 +27,10 @@ class AuthApiController extends BaseApiController
         }
 
         if (!$user->is_active) {
-            return $this->responseHasil(403, false, "Akun belum aktif / dinonaktifkan");
+            if (is_null($user->role)) {
+                return $this->responseHasil(403, false, "Akun masih menunggu persetujuan admin");
+            }
+            return $this->responseHasil(403, false, "Akun Anda telah dinonaktifkan. Hubungi admin.");
         }
 
         $token = $user->createToken('mobile-app')->plainTextToken;
