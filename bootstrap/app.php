@@ -13,17 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
-        'level' => App\Http\Middleware\CheckUserLogin::class,
+            'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+            'level' => App\Http\Middleware\CheckUserLogin::class,
+            'role' => \App\Http\Middleware\CheckApiRole::class,   // ← digabung di sini
         ]);
     })
-    ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        'role' => \App\Http\Middleware\CheckApiRole::class,
-    ]);
-})
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
-    
