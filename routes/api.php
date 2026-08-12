@@ -17,18 +17,16 @@ Route::post('/register', [AuthApiController::class, 'register']);
 // ================= SEMUA ROUTE DI BAWAH INI WAJIB BAWA TOKEN =================
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
+    Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthApiController::class, 'logout']);
     Route::get('/me', [AuthApiController::class, 'me']);
 
-    // ---------- User Management (admin/owner only) ----------
-    Route::get('/users', [UserApiController::class, 'index']);
-    Route::post('/users/{id}/approve', [UserApiController::class, 'approve']);
-    Route::post('/users/{id}/deactivate', [UserApiController::class, 'deactivate']);
-    Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
+    // ---------- User Management: cuma admin & owner ----------
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users', [UserApiController::class, 'index']);
+        Route::post('/users/{id}/approve', [UserApiController::class, 'approve']);
+        Route::post('/users/{id}/deactivate', [UserApiController::class, 'deactivate']);
+        Route::delete('/users/{id}', [UserApiController::class, 'destroy']);
 
     // ---------- Master Data ----------
     Route::apiResource('branches', BranchesApiController::class)->names([
@@ -70,4 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'update'  => 'api.guest-categories.update',
         'destroy' => 'api.guest-categories.destroy',
     ]);
+    });
+
 });
