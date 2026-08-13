@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\GuestCategoriesApiController;
 use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
 use App\Http\Controllers\Api\CheckInApiController;
+use App\Http\Controllers\Api\ManagerApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 use App\Http\Controllers\Api\SecurityApiController;
 
@@ -74,6 +75,13 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
+});
+
+    Route::middleware('auth:sanctum')->prefix('manager')->group(function () {
+    Route::get('/dashboard', [ManagerApiController::class, 'dashboard']);
+    Route::get('/kunjungan', [ManagerApiController::class, 'kunjungan']);
+    Route::get('/leads', [ManagerApiController::class, 'leadsPipeline']);
+    Route::get('/laporan', [ManagerApiController::class, 'laporan']);
 });
 
 Route::prefix('check-in')->group(function () {
