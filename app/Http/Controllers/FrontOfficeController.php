@@ -45,8 +45,13 @@ class FrontOfficeController extends Controller
 
         $query = visits::with(['guest', 'purpose', 'assignedUser']);
 
+        // 🟢 PERUBAHAN DI SINI:
+        // Jika filter 'today', ambil khusus hari ini.
+        // Jika pilih 'semua' / default, hanya ambil hari ini dan tanggal-tanggal setelahnya (>= $today)
         if ($request->input('date_filter') === 'today') {
             $query->whereDate('scheduled_at', $today);
+        } else {
+            $query->whereDate('scheduled_at', '>=', $today);
         }
 
         if ($request->filled('keyword')) {
@@ -81,7 +86,7 @@ class FrontOfficeController extends Controller
         return view('frontoffice.dashboard', compact(
             'visits',
             'totalToday',
-            'unfinishedTodayCount', // 🟢 Variabel statistik baru yang dikirim ke Blade
+            'unfinishedTodayCount',
             'pics',
             'branches',
             'purposes',
@@ -166,7 +171,7 @@ class FrontOfficeController extends Controller
             'photo_path' => 'nullable|image|max:2048',
         ]);
 
-        
+
         if ($validator->fails()) {
             return redirect()->back()->with('error', 'Cek Isian Anda: ' . implode(', ', $validator->errors()->all()));
         }
