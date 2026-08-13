@@ -89,7 +89,6 @@ Route::prefix('check-in')->group(function () {
     // 4. Detail Kunjungan (Halaman Sukses / Bukti Check-In)
     Route::get('/{id}', [CheckInApiController::class, 'show']);
 });
-});
 
     // ---------- Security ----------
 // ---------- Security ----------
