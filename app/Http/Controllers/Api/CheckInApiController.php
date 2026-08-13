@@ -16,13 +16,13 @@ use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 
 class CheckInApiController extends Controller
 {
     /**
-     * Get Master Data untuk Form Step 1 & Step 2
+     * Get Master Data untuk Form Step 1 & Step 2 (Flutter)
      */
     public function getFormData()
     {
@@ -41,7 +41,7 @@ class CheckInApiController extends Controller
     }
 
     /**
-     * Validasi Step 1 (Opsional - Jika Frontend butuh validasi per step)
+     * Validasi Step 1 (Opsional)
      */
     public function validateStep1(Request $request)
     {
@@ -50,7 +50,7 @@ class CheckInApiController extends Controller
             'company_name'      => 'required|string|max:255',
             'address'           => 'nullable|string|max:500',
             'email'             => 'required|email|max:150',
-            'guest_category_id' => 'required|string|max:20',
+            'guest_category_id' => 'required|exists:guest_categories,id',
             'position'          => 'required|string|max:255',
             'phone'             => 'required|string|max:20',
             'photo_path'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -68,19 +68,16 @@ class CheckInApiController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Gabungan Step 1 & Step 2
+        // 1. Validasi Input
         $validated = $request->validate([
-            // Step 1 Fields
             'name'              => 'required|string|max:255',
             'company_name'      => 'required|string|max:255',
             'address'           => 'nullable|string|max:500',
             'email'             => 'required|email|max:150',
-            'guest_category_id' => 'required|string|max:20',
+            'guest_category_id' => 'required|exists:guest_categories,id',
             'position'          => 'required|string|max:255',
             'phone'             => 'required|string|max:20',
             'photo_path'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-
-            // Step 2 Fields
             'assigned_to'       => 'required|exists:users,id',
             'branch_id'         => 'required|exists:branches,id',
             'purpose_id'        => 'required|exists:visit_purposes,id',
@@ -106,9 +103,12 @@ class CheckInApiController extends Controller
             $photoPath = $request->file('photo_path')->store('photos', 'public');
         }
 
+        // Set ID User pembuat (fallback ke assigned_to jika auth null)
+        $systemUserId = auth()->id() ?? $validated['assigned_to'];
+
         // 4. Eksekusi Database Transaction
         try {
-            $visit = DB::transaction(function () use ($request, $validated, $phone, $photoPath) {
+            $visit = DB::transaction(function () use ($request, $validated, $phone, $photoPath, $systemUserId) {
 
                 // A. Simpan / Update Data Guest
                 $existingGuest = guests::where('phone', $phone)->first();
@@ -121,10 +121,10 @@ class CheckInApiController extends Controller
                     'guest_category_id' => $validated['guest_category_id'],
                     'position'          => $validated['position'],
                     'phone'             => $phone,
+                    'created_by'        => $existingGuest ? ($existingGuest->created_by ?? $systemUserId) : $systemUserId,
                 ];
 
                 if ($photoPath) {
-                    // Hapus foto lama jika ada
                     if ($existingGuest && ! empty($existingGuest->photo_path) && Storage::disk('public')->exists($existingGuest->photo_path)) {
                         Storage::disk('public')->delete($existingGuest->photo_path);
                     }
@@ -135,29 +135,52 @@ class CheckInApiController extends Controller
                     $existingGuest->update($guestData);
                     $guest = $existingGuest;
                 } else {
+                    // Generate Guest Code dengan Pengurutan String + Loop Guard
                     $todayDate = Carbon::now()->format('Ymd');
-                    $prefix = 'GST-' . $todayDate . '-';
-                    $todayGuestsCount = guests::whereDate('created_at', Carbon::today())->count();
-                    $sequence = str_pad($todayGuestsCount + 1, 4, '0', STR_PAD_LEFT);
+                    $prefixGuest = 'GST-' . $todayDate . '-';
 
-                    $guestData['guest_code'] = $prefix . $sequence;
+                    $latestGuest = guests::where('guest_code', 'like', $prefixGuest . '%')
+                        ->orderBy('guest_code', 'desc') // 🟢 Urutkan berdasarkan string guest_code
+                        ->first();
+
+                    $nextGuestSeq = $latestGuest ? ((int) substr($latestGuest->guest_code, -4)) + 1 : 1;
+                    $guestCode = $prefixGuest . str_pad($nextGuestSeq, 4, '0', STR_PAD_LEFT);
+
+                    // Safety Guard: Pastikan tidak ada bentrokan kode guest
+                    while (guests::where('guest_code', $guestCode)->exists()) {
+                        $nextGuestSeq++;
+                        $guestCode = $prefixGuest . str_pad($nextGuestSeq, 4, '0', STR_PAD_LEFT);
+                    }
+
+                    $guestData['guest_code'] = $guestCode;
                     $guestData['is_vip'] = 0;
                     $guest = guests::create($guestData);
                 }
 
-                // B. Generate Kode Kunjungan & Nomor Antrean
+                // B. Generate Visit Code dengan Pengurutan String + Loop Guard
                 $rawCheckInDate = $validated['scheduled_at'] ?? now();
                 $checkInDateTime = Carbon::parse($rawCheckInDate)->format('Y-m-d H:i:s');
                 $checkInDateOnly = Carbon::parse($rawCheckInDate)->format('Y-m-d');
 
-                $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
-                $queueNumber = sprintf('%03d', $todayVisitCount + 1);
-
                 $todayDate = Carbon::now()->format('Ymd');
                 $prefixVisit = 'VST-' . $todayDate . '-';
-                $todayVisitsCount = visits::whereDate('created_at', Carbon::today())->count();
-                $sequenceVisit = str_pad($todayVisitsCount + 1, 4, '0', STR_PAD_LEFT);
-                $visitCode = $prefixVisit . $sequenceVisit;
+
+                $latestVisit = visits::where('visit_code', 'like', $prefixVisit . '%')
+                    ->orderBy('visit_code', 'desc') // 🟢 Urutkan berdasarkan string visit_code
+                    ->first();
+
+                $nextVisitSeq = $latestVisit ? ((int) substr($latestVisit->visit_code, -4)) + 1 : 1;
+                $visitCode = $prefixVisit . str_pad($nextVisitSeq, 4, '0', STR_PAD_LEFT);
+
+                // 🟢 Safety Guard: Otomatis mencari nomor berikutnya jika visit_code sudah terpakai
+                while (visits::where('visit_code', $visitCode)->exists()) {
+                    $nextVisitSeq++;
+                    $visitCode = $prefixVisit . str_pad($nextVisitSeq, 4, '0', STR_PAD_LEFT);
+                }
+
+                // Hitung Nomor Antrean Hari Ini
+                $todayVisitCount = visits::whereDate('scheduled_at', $checkInDateOnly)->count();
+                $queueNumber = sprintf('%03d', $todayVisitCount + 1);
 
                 // C. Simpan Visit Baru
                 $newVisit = visits::create([
@@ -172,6 +195,7 @@ class CheckInApiController extends Controller
                     'status'       => 'Terjadwal',
                     'queue_number' => $queueNumber,
                     'check_in_at'  => now(),
+                    'created_by'   => $systemUserId,
                 ]);
 
                 // D. Simpan Relasi Produk (visit_products)
@@ -198,26 +222,30 @@ class CheckInApiController extends Controller
                     'visit_id'   => $newVisit->id,
                     'old_status' => null,
                     'new_status' => 'Terjadwal',
-                    'changed_by' => null,
+                    'changed_by' => $systemUserId,
                     'changed_at' => now(),
                 ]);
 
                 // F. Kirim Notifikasi Admin
-                $purposeType = visit_purposes::find($validated['purpose_id']);
-                $branch = branches::find($validated['branch_id']);
-                $adminUsers = users::where('role', 'admin')->get();
+                try {
+                    $purposeType = visit_purposes::find($validated['purpose_id']);
+                    $branch = branches::find($validated['branch_id']);
+                    $adminUsers = users::where('role', 'admin')->get();
 
-                foreach ($adminUsers as $admin) {
-                    notifications::send(
-                        $admin->id,
-                        'guest_arrived',
-                        'Notifikasi Admin 🔔',
-                        'Tamu baru membuat jadwal pertemuan.' .
-                            "\n" . 'Nama: ' . ($guest->name ?? '-') .
-                            "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                            "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
-                            "\n" . 'Cabang: ' . ($branch->name ?? '-')
-                    );
+                    foreach ($adminUsers as $admin) {
+                        notifications::send(
+                            $admin->id,
+                            'guest_arrived',
+                            'Notifikasi Admin 🔔',
+                            "Tamu baru membuat jadwal pertemuan.\n" .
+                                "Nama: " . ($guest->name ?? '-') . "\n" .
+                                "Instansi: " . ($guest->company_name ?? '-') . "\n" .
+                                "Tujuan: " . ($purposeType->name ?? '-') . "\n" .
+                                "Cabang: " . ($branch->name ?? '-')
+                        );
+                    }
+                } catch (\Throwable $th) {
+                    Log::warning('Gagal kirim notifikasi admin: ' . $th->getMessage());
                 }
 
                 return $newVisit;
@@ -234,8 +262,9 @@ class CheckInApiController extends Controller
                     'status'       => $visit->status,
                 ],
             ], 201);
-
         } catch (\Exception $e) {
+            Log::error('CheckIn Store Error: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses check-in.',
@@ -245,7 +274,7 @@ class CheckInApiController extends Controller
     }
 
     /**
-     * Get Detail Kunjungan / Tiket Bukti Check-In (Pengganti Step 4)
+     * Get Detail Kunjungan
      */
     public function show($id)
     {

@@ -113,5 +113,9 @@ class visits extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    
+    public function visits()
+    {
+        // 🟢 PERBAIKAN: Menggunakan visits::class (huruf kecil sesuai nama class)
+        return $this->hasMany(visits::class, 'guest_id'); 
+    }
 }

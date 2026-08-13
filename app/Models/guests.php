@@ -31,6 +31,6 @@ class guests extends Model
 
     public function visits()
     {
-        return $this->hasMany(Visits::class, 'guest_id'); // 👈 Pastikan nama Model Visits sesuai
+        return $this->hasMany(visits::class, 'guest_id'); // 🟢 Disesuaikan dengan nama class 'visits'
     }
 }
