@@ -72,7 +72,7 @@ class FrontOfficeController extends Controller
 
         // 4. Data Pendukung Modal
         $pics = User::where('role', 'pic')->select('id', 'name')->get();
-        $branches = branches::select('id', 'name')->get();
+        $branches = branches::where('is_active', 1)->select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
         $products = products::select('id', 'name')->get();
@@ -386,7 +386,7 @@ class FrontOfficeController extends Controller
 
         // 5. Data Pendukung Modal Input 3-Step
         $pics = users::where('role', 'pic')->select('id', 'name')->get();
-        $branches = branches::select('id', 'name')->get();
+        $branches = branches::where('is_active', 1)->select('id', 'name')->get();
         $purposes = visit_purposes::select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
         $products = products::select('id', 'name')->get(); // 🟢 PERBAIKAN: Sertakan 'id'

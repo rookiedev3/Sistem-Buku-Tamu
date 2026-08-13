@@ -31,7 +31,10 @@ class CheckInApiController extends Controller
             'message' => 'Data formulir check-in berhasil dimuat.',
             'data'    => [
                 'guest_categories' => guest_categories::select('id', 'name')->get(),
-                'pics'             => users::select('id', 'name')->where('role', 'pic')->get(),
+                'pics' => users::select('id', 'name', 'branch_id') // 🟢 Tambahkan 'branch_id'
+                    ->whereIn(DB::raw('LOWER(role)'), ['pic', 'admin', 'staff'])
+                    ->orderBy('name', 'asc')
+                    ->get(),
                 'branches'         => branches::select('id', 'name', 'code')->get(),
                 'visit_purposes'   => visit_purposes::select('id', 'name')->get(),
                 'products'         => products::select('id', 'name')->get(),

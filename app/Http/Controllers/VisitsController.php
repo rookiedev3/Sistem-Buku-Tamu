@@ -88,7 +88,7 @@ class VisitsController extends Controller
         $step2Data = session('step2_data', []);
 
         $pic = users::select('id', 'name')->where('role', 'pic')->get();
-        $branches = branches::select('id', 'name', 'code')->get();
+        $branches = branches::where('is_active', 1)->select('id', 'name')->get();
         $visitPurposes = visit_purposes::select('id', 'name')->get();
         $products = products::select('id', 'name')->get();
         $leadSources = lead_sources::select('id', 'name')->get();
