@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
 use App\Http\Controllers\Api\CheckInApiController;
 use App\Http\Controllers\Api\ManagerApiController;
+use App\Http\Controllers\Api\OwnerApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 use App\Http\Controllers\Api\SecurityApiController;
 
@@ -116,4 +117,12 @@ Route::prefix('check-in')->group(function () {
 
     // 4. Detail Kunjungan (Halaman Sukses / Bukti Check-In)
     Route::get('/{id}', [CheckInApiController::class, 'show']);
+});
+
+Route::middleware('auth:sanctum')->prefix('owner')->group(function () {
+    Route::get('/dashboard', [OwnerApiController::class, 'dashboard']);
+    Route::get('/produk-diminati', [OwnerApiController::class, 'produkDiminati']);
+    Route::get('/kategori-tamu', [OwnerApiController::class, 'kategoriTamu']);
+    Route::get('/activity-log', [OwnerApiController::class, 'activityLog']);
+    // Route::get('/owner/activities', [OwnerController::class, 'activities']);
 });
