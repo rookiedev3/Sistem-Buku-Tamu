@@ -6,6 +6,7 @@ use App\Models\follow_ups; // Sesuaikan dengan model follow_ups Anda
 use App\Models\notifications;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class FollowUpDueNotification extends Command
 {
@@ -78,6 +79,22 @@ class FollowUpDueNotification extends Command
                 "Kebutuhan: {$kebutuhan}\n" .
                 "Tindakan Berikutnya: {$tindakan}"
             );
+
+            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+
+            $message = "*📌 Pengingat Follow-Up Jatuh Tempo!*\n\n"
+            . "Jadwal follow-up telah jatuh tempo (*{$dueDateFormatted}*).\n\n"
+            . "Nama Tamu: *{$guestName}*\n"
+            . "Kebutuhan: {$kebutuhan}\n"
+            . "Tindakan Berikutnya: {$tindakan}";
+
+            Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => $token,
+                ])->post('https://api.fonnte.com/send', [
+                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+                    'message' => $message,
+                ]);
 
             $processedCount++;
         }

@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\notifications;
-use App\Models\users;
 use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class CheckInSlaNotification extends Command
 {
@@ -18,7 +18,7 @@ class CheckInSlaNotification extends Command
     /**
      * Deskripsi command
      */
-    protected $description = 'Kirim notifikasi peringatan SLA jika tamu sudah check-in lebih dari 10 menit dan belum dilayani';
+    protected $description = 'Kirim notifikasi peringatan SLA ke PIC jika tamu sudah check-in lebih dari 10 menit dan belum dilayani';
 
     public function handle()
     {
@@ -28,19 +28,19 @@ class CheckInSlaNotification extends Command
         // Batas waktu jeda pengiriman ulang notifikasi (5 menit lalu)
         $fiveMinutesAgo = Carbon::now()->subMinutes(5);
 
-        // 1. Cari kunjungan yang sudah check-in >= 10 menit dan statusnya masih menunggu
-        $delayedVisits = visits::with(['guest', 'purpose', 'branch'])
+        // 1. Cari kunjungan yang sudah check-in >= 10 menit, status masih menunggu, dan MEMILIKI PIC (assigned_to)
+        $delayedVisits = visits::with(['guest', 'purpose', 'branch', 'assignedUser'])
             ->whereNotNull('check_in_at')
+            ->whereNotNull('assigned_to') // 🟢 Hanya ambil yang sudah ada PIC
             ->where('check_in_at', '<=', $tenMinutesAgo)
             ->whereIn('status', ['Terjadwal', 'Menunggu', 'waiting', 'pending', 'Check-in'])
             ->get();
 
         if ($delayedVisits->isEmpty()) {
-            $this->info('Tidak ada tamu yang melewati batas SLA 10 menit.');
+            $this->info('Tidak ada tamu dengan PIC yang melewati batas SLA 10 menit.');
             return 0;
         }
 
-        $adminUsers = users::whereIn('role', ['admin', 'manager'])->pluck('id')->toArray();
         $processedCount = 0;
 
         foreach ($delayedVisits as $visit) {
@@ -60,44 +60,54 @@ class CheckInSlaNotification extends Command
             // Hitung total menit keterlambatan
             $totalMinutes = (int) Carbon::parse($visit->check_in_at)->diffInMinutes(now());
 
-            // 🟢 UBAH DURASI MENJADI FORMAT JAM & MENIT
+            // Ubah durasi menjadi format Jam & Menit
             $formattedDuration = $this->formatDuration($totalMinutes);
-
-            // Gabungkan ID Admin, Manager, dan PIC Pegawai
-            $recipientIds = $adminUsers;
-            if (!empty($visit->assigned_to)) {
-                $recipientIds[] = $visit->assigned_to;
-            }
-            $recipientIds = array_unique($recipientIds);
 
             $purposeName = $visit->purpose->name ?? '-';
             $branchName  = $visit->branch->name ?? '-';
 
-            // Kirim Notifikasi ke Seluruh Penerima
-            foreach ($recipientIds as $userId) {
-                notifications::send(
-                    $userId,
-                    'sla_warning',
-                    '⚠️ Peringatan SLA Pelayanan!',
-                    'Tamu telah menunggu selama ' . $formattedDuration . '.' .
-                        "\n" . 'Kode: ' . ($visit->visit_code ?? '-') .
-                        "\n" . 'Nama: ' . ($guest->name ?? '-') .
-                        "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                        "\n" . 'Tujuan: ' . $purposeName .
-                        "\n" . 'Cabang: ' . $branchName .
-                        "\n" . 'Waktu Check-in: ' . Carbon::parse($visit->check_in_at)->format('H:i') . ' WIB'
-                );
-            }
+            // 🟢 Kirim Notifikasi HANYA ke PIC Terpilih (assigned_to)
+            notifications::send(
+                $visit->assigned_to,
+                'sla_warning',
+                '⚠️ Peringatan SLA Pelayanan!',
+                'Tamu telah menunggu Anda selama ' . $formattedDuration . '.' .
+                    "\n" . 'Kode: ' . ($visit->visit_code ?? '-') .
+                    "\n" . 'Nama: ' . ($guest->name ?? '-') .
+                    "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
+                    "\n" . 'Tujuan: ' . $purposeName .
+                    "\n" . 'Cabang: ' . $branchName .
+                    "\n" . 'Waktu Check-in: ' . Carbon::parse($visit->check_in_at)->format('H:i') . ' WIB'
+            );
+
+            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+
+            $message = "*⚠️ Peringatan SLA Pelayanan!*\n\n"
+            . "Tamu telah menunggu Anda selama *" . $formattedDuration . "*.\n\n"
+            . "Kode: " . ($visit->visit_code ?? '-') . "\n"
+            . "Nama: " . ($guest->name ?? '-') . "\n"
+            . "Instansi: " . ($guest->company_name ?? '-') . "\n"
+            . "Tujuan: " . $purposeName . "\n"
+            . "Cabang: " . $branchName . "\n"
+            . "Waktu Check-in: " . Carbon::parse($visit->check_in_at)->format('H:i') . " WIB";
+
+            Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => $token,
+                ])->post('https://api.fonnte.com/send', [
+                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+                    'message' => $message,
+                ]);
 
             $processedCount++;
         }
 
-        $this->info("Berhasil mengirim notifikasi SLA untuk {$processedCount} kunjungan.");
+        $this->info("Berhasil mengirim notifikasi SLA kepada PIC untuk {$processedCount} kunjungan.");
         return 0;
     }
 
     /**
-     * 🟢 Helper untuk memformat total menit menjadi string Jam & Menit
+     * Helper untuk memformat total menit menjadi string Jam & Menit
      */
     private function formatDuration(int $totalMinutes): string
     {

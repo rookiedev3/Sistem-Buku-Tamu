@@ -14,6 +14,7 @@ use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -290,6 +291,24 @@ class VisitsController extends Controller
                         "\n" . 'Cabang: ' . ($branch->name ?? '-')
                 );
             }
+
+            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+
+            // Isi pesan notifikasi ke WhatsApp
+            $message = "*Notifikasi Admin 🔔*\n\n"
+                . "Tamu baru membuat jadwal pertemuan.\n"
+                . "Nama: " . ($guest->name ?? '-') . "\n"
+                . "Instansi: " . ($guest->company_name ?? '-') . "\n"
+                . "Tujuan: " . ($purposeType->name ?? '-') . "\n"
+                . "Cabang: " . ($branch->name ?? '-');
+
+            Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => $token,
+                ])->post('https://api.fonnte.com/send', [
+                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+                    'message' => $message,
+                ]);
 
             return $newVisit;
         });

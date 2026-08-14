@@ -14,6 +14,7 @@ use App\Models\visit_purposes;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,19 +116,33 @@ class FrontOfficeController extends Controller
             'meeting_start_at' => now(),
         ]);
 
-        // 1. Ambil semua user yang memiliki role 'admin'
-        $picUsers = users::where('role', 'pic')->get();
+        $guestName   = $visit->guest->name ?? 'Tamu';
+        $assignedPic = $visit->assignedUser;
 
         // 2. Looping untuk kirim notifikasi creke masing-masing admin
-        foreach ($picUsers as $pic) {
-            notifications::send(
-                $pic->id,
-                'guest_arrived',
-                'Tamu Anda Sudah Datang 🔔',
-                'Tamu ' . ($guest->name ?? 'Tamu') . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
-            );
-        }
+       if ($assignedPic) {
+        
+        // A. Notifikasi Sistem (Database)
+        notifications::send(
+            $assignedPic->id,
+            'guest_arrived',
+            'Tamu Anda Sudah Datang 🔔',
+            'Tamu ' . $guestName . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+        );
 
+        $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+
+        // Isi pesan notifikasi ke WhatsApp
+        $message = "*Tamu Anda Sudah Datang 🔔*\n\n"
+            . "Tamu *" . ($guest->name ?? 'Tamu') . "* telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
+        Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => $token,
+            ])->post('https://api.fonnte.com/send', [
+                'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+                'message' => $message,
+            ]);
+       }
         return redirect()->back()->with('success', 'Tamu berhasil Check-in!');
     }
 
