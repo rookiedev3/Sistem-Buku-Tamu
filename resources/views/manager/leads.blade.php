@@ -219,32 +219,53 @@
                                 </div>
                             </div>
 
-                            <div style="margin-bottom: 16px;">
+                            {{-- <div style="margin-bottom: 16px;">
                                 <label style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Catatan Pertemuan Awal:</label>
                                 <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; color: #1e293b;">
                                     {{ optional($lead->visit)->meeting_result ?? 'Tidak ada catatan awal.' }}
                                 </div>
-                            </div>
+                            </div> --}}
 
-                            <div>
-                                <label style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">🔄 Riwayat Update Pipeline:</label>
-                                @forelse($lead->followUps as $fu)
-                                    <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
-                                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 10px; color: #64748b; flex-wrap: wrap; gap: 4px;">
-                                            <span>📅 {{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</span>
-                                            <span>Tahap: <strong style="color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
-                                        </div>
-                                        <div style="color: #334155; font-size: 12px; white-space: pre-line;">{{ $fu->result ?? '-' }}</div>
-                                        @if($fu->due_at)
-                                            <div style="font-size: 10px; color: #475569; margin-top: 6px;">Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
-                                        @endif
-                                    </div>
-                                @empty
-                                    <div style="font-style: italic; color: #94a3b8; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px;">
-                                        Belum ada catatan update follow-up.
-                                    </div>
-                                @endforelse
-                            </div>
+                            {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
+     dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+    <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+        {{ optional($lead->visit)->notes ?? 'Tidak ada catatan awal.' }}
+    </div>
+</div>
+
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+    <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+        {{ optional($lead->visit)->meeting_result ?? 'Tidak ada hasil meeting.' }}
+    </div>
+</div>
+
+<div>
+    <label style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">🔄 Riwayat Update Pipeline:</label>
+    @forelse($lead->followUps as $fu)
+        <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 10px; color: #64748b; flex-wrap: wrap; gap: 4px;">
+                <span>📅 {{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</span>
+                <span>Tahap: <strong style="color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
+            </div>
+            <div style="color: #334155; font-size: 12px; white-space: pre-line;">{{ $fu->result ?? '-' }}</div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                <div style="font-size: 10px; color: #006B3F; font-weight: 700;">
+                    💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+                </div>
+                @if($fu->due_at)
+                    <div style="font-size: 10px; color: #475569;">Tanggal Follow Up: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
+                @endif
+            </div>
+        </div>
+    @empty
+        <div style="font-style: italic; color: #94a3b8; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; font-size: 11px;">
+            Belum ada catatan update follow-up.
+        </div>
+    @endempty
+</div>
                         </div>
                         <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>

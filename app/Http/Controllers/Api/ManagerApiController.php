@@ -295,33 +295,7 @@ class ManagerApiController extends BaseApiController
         ];
     }
 
-    private function mapVisit($v): array
-    {
-        return [
-            'id'             => $v->id,
-            'visit_code'     => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
-            'guest_name'     => optional($v->guest)->name,
-            'guest_position' => optional($v->guest)->position,
-            'company_name'   => optional($v->guest)->company_name,
-            'is_vip'         => (bool) optional($v->guest)->is_vip,
-            'category_name'  => optional(optional($v->guest)->category)->name,
-            'category_color' => optional(optional($v->guest)->category)->color ?? '#006B3F',
-            'assigned_user'  => optional($v->assignedUser)->name,
-            'purpose'        => optional($v->purpose)->name,
-            'source'         => optional($v->source ?? null)->name,
-            'branch_name'    => optional($v->branch ?? null)->name,
-            'scheduled_at'   => $v->scheduled_at,
-            'check_in_at'    => $v->check_in_at,
-            'check_out_at'   => $v->check_out_at,
-            'status'         => $v->status,
-            'lead_status'    => optional($v->lead)->status,
-            'follow_ups'     => optional($v->lead)?->followUps?->map(fn ($f) => [
-                'id'         => $f->id,
-                'note'       => $f->note ?? null,
-                'created_at' => $f->created_at,
-            ]),
-        ];
-    }
+    
 
 private function mapLead($l): array
 {
@@ -339,14 +313,52 @@ private function mapLead($l): array
         'potential_level' => $l->potential_level ?? null,
         'estimated_value' => $l->estimated_value ?? null,
         'follow_up_at'    => $l->follow_up_at,
+        'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
         'meeting_result'  => optional($l->visit)->meeting_result,
         'follow_ups'      => $l->followUps->map(fn ($f) => [
-            'id'         => $f->id,
-            'result'     => $f->result ?? null,
-            'status'     => $f->status ?? null,
-            'due_at'     => $f->due_at ?? null,
-            'created_at' => $f->created_at,
+            'id'              => $f->id,
+            'result'          => $f->result ?? null,
+            'status'          => $f->status ?? null,
+            'due_at'          => $f->due_at ?? null,
+            'estimated_value' => $f->estimated_value ?? null,   // ⬅️ BARU: nilai estimasi per update
+            'created_at'      => $f->created_at,
         ]),
+    ];
+}
+
+private function mapVisit($v): array
+{
+    return [
+        'id'             => $v->id,
+        'visit_code'     => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
+        'guest_name'     => optional($v->guest)->name,
+        'guest_position' => optional($v->guest)->position,
+        'company_name'   => optional($v->guest)->company_name,
+        'is_vip'         => (bool) optional($v->guest)->is_vip,
+        'category_name'  => optional(optional($v->guest)->category)->name,
+        'assigned_to'    => optional($v->assignedUser)->id,
+        'assigned_name'  => optional($v->assignedUser)->name,
+        'purpose_name'   => optional($v->purpose)->name,
+        'source_name'    => optional($v->source)->name,
+        'branch_id'      => $v->branch_id,
+        'branch_name'    => optional($v->branch)->name,
+        'products'       => $v->relationLoaded('products')
+            ? $v->products->pluck('name')
+            : [],
+        'status'         => $v->status,
+        'scheduled_at'   => $v->scheduled_at,
+        'check_in_at'    => $v->check_in_at,
+        'check_out_at'   => $v->check_out_at,
+        'lead_status'    => optional($v->lead)->status,
+        'follow_ups'     => optional($v->lead)->relationLoaded('followUps')
+            ? $v->lead->followUps->map(fn ($f) => [
+                'id'         => $f->id,
+                'result'     => $f->result ?? null,
+                'status'     => $f->status ?? null,
+                'due_at'     => $f->due_at ?? null,
+                'created_at' => $f->created_at,
+            ])
+            : [],
     ];
 }
 }

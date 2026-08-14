@@ -226,14 +226,30 @@
                                 </div>
                             </div>
 
-                            <div style="margin-bottom: 20px;">
+                            {{-- <div style="margin-bottom: 20px;">
                                 <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">
                                     📌 Catatan Pertemuan Awal:
                                 </label>
                                 <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                                     {{ $v->meeting_result ?? 'Tidak ada catatan awal yang ditinggalkan.' }}
                                 </div>
-                            </div>
+                            </div> --}}
+
+    {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
+     dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+    <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+        {{ $v->notes ?? 'Tidak ada catatan awal.' }}
+    </div>
+</div>
+
+<div style="margin-bottom: 20px;">
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+    <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+        {{ $v->meeting_result ?? 'Tidak ada hasil meeting.' }}
+    </div>
+</div>
 
                             <div>
                                 <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">
@@ -246,14 +262,27 @@
                                             <span>📅 Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
                                             <span>Tahap: <strong style="text-transform: uppercase; color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
                                         </div>
-                                        <div style="color: #334155; font-size: 13px; white-space: pre-line;">
+                                        {{-- <div style="color: #334155; font-size: 13px; white-space: pre-line;">
                                             {{ $fu->result ?? 'Tidak ada detail catatan pada pembaruan ini.' }}
                                         </div>
                                         @if($fu->due_at)
                                             <div style="font-size: 11px; color: #475569; margin-top: 6px;">
                                                 Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}
                                             </div>
-                                        @endif
+                                        @endif --}}
+<div style="color: #334155; font-size: 13px; white-space: pre-line;">
+    {{ $fu->result ?? 'Tidak ada detail catatan pada pembaruan ini.' }}
+</div>
+<div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px;">
+    <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
+        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+    </div>
+    @if($fu->due_at)
+        <div style="font-size: 11px; color: #475569;">
+            Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}
+        </div>
+    @endif
+</div>
                                     </div>
                                 @empty
                                     <div style="font-style: italic; color: #94a3b8; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; text-align: center; font-size: 12px;">
@@ -263,6 +292,7 @@
                             </div>
 
                         </div>
+                        
                         <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 24px;">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">Tutup</button>
                         </div>
