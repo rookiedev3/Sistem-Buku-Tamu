@@ -262,7 +262,7 @@
     </div>
     @if($fu->due_at)
         <div style="font-size: 11px; color: #475569;">
-            Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}
+            Tanggal Follow Up: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}
         </div>
     @endif
 </div>
