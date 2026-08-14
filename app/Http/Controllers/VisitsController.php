@@ -302,13 +302,13 @@ class VisitsController extends Controller
                 . "Tujuan: " . ($purposeType->name ?? '-') . "\n"
                 . "Cabang: " . ($branch->name ?? '-');
 
-            Http::withoutVerifying()
-                ->withHeaders([
-                    'Authorization' => $token,
-                ])->post('https://api.fonnte.com/send', [
-                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-                    'message' => $message,
-                ]);
+            //Http::withoutVerifying()
+            //    ->withHeaders([
+            //        'Authorization' => $token,
+            //    ])->post('https://api.fonnte.com/send', [
+            //        'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+            //        'message' => $message,
+            //    ]);
 
             return $newVisit;
         });

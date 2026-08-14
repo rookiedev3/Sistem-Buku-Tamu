@@ -135,13 +135,13 @@ class FrontOfficeController extends Controller
         // Isi pesan notifikasi ke WhatsApp
         $message = "*Tamu Anda Sudah Datang 🔔*\n\n"
             . "Tamu *" . ($guest->name ?? 'Tamu') . "* telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
-        Http::withoutVerifying()
-            ->withHeaders([
-                'Authorization' => $token,
-            ])->post('https://api.fonnte.com/send', [
-                'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-                'message' => $message,
-            ]);
+        //Http::withoutVerifying()
+        //    ->withHeaders([
+        //       'Authorization' => $token,
+        //    ])->post('https://api.fonnte.com/send', [
+        //       'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+        //       'message' => $message,
+        //    ]);
        }
         return redirect()->back()->with('success', 'Tamu berhasil Check-in!');
     }
