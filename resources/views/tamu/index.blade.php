@@ -79,9 +79,20 @@
 
                     {{-- Minat Produk --}}
                     <td style="padding: 16px 20px;">
-                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">
-                            {{ $guest->category->name ?? $guest->product_interest ?? '-' }}
+                        @php
+                        // Ambil semua nama produk unik dari seluruh riwayat kunjungan tamu ini
+                        $productNames = $guest->visits
+                        ? $guest->visits->pluck('products')->flatten()->pluck('name')->unique()->filter()
+                        : collect();
+                        @endphp
+
+                        @forelse ($productNames as $productName)
+                        <span style="background: #e6f4ed; color: #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block; margin-bottom: 4px;">
+                            {{ $productName }}
                         </span>
+                        @empty
+                        <span style="color: #778195; font-size: 12px;">-</span>
+                        @endforelse
                     </td>
 
                     {{-- Total Kunjungan --}}

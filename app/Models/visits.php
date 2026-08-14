@@ -118,4 +118,5 @@ class visits extends Model
         // 🟢 PERBAIKAN: Menggunakan visits::class (huruf kecil sesuai nama class)
         return $this->hasMany(visits::class, 'guest_id'); 
     }
+    
 }
