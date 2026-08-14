@@ -169,13 +169,13 @@ class ManagerApiController extends BaseApiController
         $branchId = (string) $request->input('branch_id', '');
         $picId    = (string) $request->input('pic_id', '');
 
-        $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
-            ->where(function (Builder $q) use ($month, $year) {
-                $q->where(fn (Builder $q2) => $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year))
-                  ->orWhere(fn (Builder $q2) => $q2->whereNull('check_in_at')
-                      ->whereMonth('scheduled_at', $month)->whereYear('scheduled_at', $year));
-            })
-            ->whereIn(DB::raw('LOWER(TRIM(status))'), self::FINAL_STATUSES_LOWER);
+$baseQuery = visits::with(['guest.category', 'assignedUser', 'lead.followUps', 'purpose', 'source', 'products', 'branch'])
+    ->where(function (Builder $q) use ($month, $year) {
+        $q->where(fn (Builder $q2) => $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year))
+          ->orWhere(fn (Builder $q2) => $q2->whereNull('check_in_at')
+              ->whereMonth('scheduled_at', $month)->whereYear('scheduled_at', $year));
+    })
+    ->whereIn(DB::raw('LOWER(TRIM(status))'), self::FINAL_STATUSES_LOWER);
 
         if (Schema::hasColumn('guests', 'is_vip')) {
             if ($category === 'vip') {
@@ -295,33 +295,7 @@ class ManagerApiController extends BaseApiController
         ];
     }
 
-    private function mapVisit($v): array
-    {
-        return [
-            'id'             => $v->id,
-            'visit_code'     => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
-            'guest_name'     => optional($v->guest)->name,
-            'guest_position' => optional($v->guest)->position,
-            'company_name'   => optional($v->guest)->company_name,
-            'is_vip'         => (bool) optional($v->guest)->is_vip,
-            'category_name'  => optional(optional($v->guest)->category)->name,
-            'category_color' => optional(optional($v->guest)->category)->color ?? '#006B3F',
-            'assigned_user'  => optional($v->assignedUser)->name,
-            'purpose'        => optional($v->purpose)->name,
-            'source'         => optional($v->source ?? null)->name,
-            'branch_name'    => optional($v->branch ?? null)->name,
-            'scheduled_at'   => $v->scheduled_at,
-            'check_in_at'    => $v->check_in_at,
-            'check_out_at'   => $v->check_out_at,
-            'status'         => $v->status,
-            'lead_status'    => optional($v->lead)->status,
-            'follow_ups'     => optional($v->lead)?->followUps?->map(fn ($f) => [
-                'id'         => $f->id,
-                'note'       => $f->note ?? null,
-                'created_at' => $f->created_at,
-            ]),
-        ];
-    }
+    
 
 private function mapLead($l): array
 {
@@ -339,14 +313,66 @@ private function mapLead($l): array
         'potential_level' => $l->potential_level ?? null,
         'estimated_value' => $l->estimated_value ?? null,
         'follow_up_at'    => $l->follow_up_at,
+        'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
         'meeting_result'  => optional($l->visit)->meeting_result,
         'follow_ups'      => $l->followUps->map(fn ($f) => [
-            'id'         => $f->id,
-            'result'     => $f->result ?? null,
-            'status'     => $f->status ?? null,
-            'due_at'     => $f->due_at ?? null,
-            'created_at' => $f->created_at,
+            'id'              => $f->id,
+            'result'          => $f->result ?? null,
+            'status'          => $f->status ?? null,
+            'due_at'          => $f->due_at ?? null,
+            'estimated_value' => $f->estimated_value ?? null,   // ⬅️ BARU: nilai estimasi per update
+            'created_at'      => $f->created_at,
         ]),
+    ];
+}
+
+private function mapVisit($v): array
+{
+    return [
+        'id'              => $v->id,
+        'visit_code'      => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
+        'guest_name'      => optional($v->guest)->name,
+        'guest_position'  => optional($v->guest)->position,
+        'company_name'    => optional($v->guest)->company_name,
+        'is_vip'          => (bool) optional($v->guest)->is_vip,
+        'category_name'   => optional(optional($v->guest)->category)->name,
+        'category_color'  => optional(optional($v->guest)->category)->color,
+
+        // PIC/Sales — dua-duanya dikirim biar kompatibel ke semua layar
+        'assigned_to'     => optional($v->assignedUser)->id,
+        'assigned_name'   => optional($v->assignedUser)->name,
+        'assigned_user'   => optional($v->assignedUser)->name,   // alias untuk kunjungan.dart
+
+        // Jenis kunjungan — dua-duanya dikirim
+        'purpose_name'    => optional($v->purpose)->name,
+        'purpose'         => optional($v->purpose)->name,        // alias untuk kunjungan.dart
+
+        'source_name'     => optional($v->source)->name,
+        'branch_id'       => $v->branch_id,
+        'branch_name'     => optional($v->branch)->name,
+        'products'        => $v->relationLoaded('products')
+            ? $v->products->pluck('name')
+            : [],
+        'status'          => $v->status,
+        'scheduled_at'    => $v->scheduled_at,
+        'check_in_at'     => $v->check_in_at,
+        'check_out_at'    => $v->check_out_at,
+        'notes'           => $v->notes,
+        'meeting_result'  => $v->meeting_result,
+        'lead_status'     => optional($v->lead)->status,
+        'estimated_value' => optional($v->lead)->estimated_value,
+        'follow_up_at'    => optional($v->lead)->follow_up_at,
+'follow_ups' => $v->lead
+    ? $v->lead->followUps->sortByDesc('created_at')->values()->map(fn ($f) => [
+        'id'              => $f->id,
+        'result'          => $f->result ?? null,
+        'note'            => $f->result ?? null,
+        'status'          => $f->status ?? null,
+        'due_at'          => $f->due_at ?? null,
+        'estimated_value' => $f->estimated_value ?? null,
+        'created_at'      => $f->created_at,
+    ])
+    : [],
     ];
 }
 }

@@ -16,4 +16,5 @@ class leads extends Model
     public function visit()   { return $this->belongsTo(visits::class, 'visit_id'); }
     public function followUps() { return $this->hasMany(follow_ups::class, 'lead_id')->orderBy('created_at', 'desc'); }
     public function owner() { return $this->belongsTo(users::class, 'owner_id');}
+    
 }

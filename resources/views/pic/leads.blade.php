@@ -217,10 +217,19 @@
                         </div>
                     </div>
 
+                    {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
+                         dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Catatan Pertemuan Awal:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
-                            {{ optional($lead->visit)->meeting_result ?? 'Tidak ada catatan awal.' }}
+                            {{ optional($lead->visit)->notes ?? 'Tidak ada catatan awal.' }}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+                        <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
+                            {{ optional($lead->visit)->meeting_result ?? 'Tidak ada hasil meeting.' }}
                         </div>
                     </div>
 
@@ -238,7 +247,7 @@
                                         💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
                                     </div>
                                     @if($fu->due_at)
-                                        <div style="font-size: 11px; color: #475569;">Target Due Date: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
+                                        <div style="font-size: 11px; color: #475569;">Tanggal Follow Up: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
                                     @endif
                                 </div>
                             </div>
