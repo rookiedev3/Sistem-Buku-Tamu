@@ -137,3 +137,4 @@ Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'dow
 Route::get('/owner/laporan/download/{filename}', [OwnerApiController::class, 'downloadLaporan'])
     ->name('laporan.download')   // 👈 INI namanya "laporan.download"
     ->middleware('signed');
+
