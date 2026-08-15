@@ -153,14 +153,14 @@
                         </span>
                     </td>
 
-                    {{-- Identitas Tamu --}}
+                    {{-- Identitas Tamu dengan Lencana VIP Profesional --}}
                     <td style="padding: 14px;" class="col-guest">
-                        <strong style="display: block; color: #172033; font-weight: 800;">
-                            {{ $visit->guest->name ?? '-' }}
+                        <div style="font-weight: 800; color: #172033; display: flex; align-items: center; gap: 6px;">
+                            <span>{{ $visit->guest->name ?? '-' }}</span>
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                            <span title="VIP" style="color: #d97706;">⭐</span>
+                            <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
                             @endif
-                        </strong>
+                        </div>
                         <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</span>
                     </td>
 
@@ -218,7 +218,7 @@
 
                 <tr id="noSearchMatchRow" style="display: none;">
                     <td colspan="7" style="padding: 30px; text-align: center; color: #778195; font-weight: 600;">
-                        🔍 Tidak ditemukan data kunjungan yang cocok dengan kata kunci pencarian.
+                        Tidak ditemukan data kunjungan yang cocok dengan kata kunci pencarian.
                     </td>
                 </tr>
             </tbody>

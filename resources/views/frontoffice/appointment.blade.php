@@ -217,8 +217,8 @@
                         <strong style="display: block; color: #172033; font-weight: 800;">
                             {{ $visit->guest->name ?? '-' }}
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                            <span title="VIP" style="color: #d97706;">⭐</span>
-                            @endif
+    <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+@endif
                         </strong>
                         <span style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</span>
                     </td>
@@ -578,7 +578,7 @@
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
         <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
-            ⚠️
+            
         </div>
 
         <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Batalkan Kunjungan?</h3>

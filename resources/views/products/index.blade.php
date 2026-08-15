@@ -99,18 +99,19 @@
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            {{-- Tombol Edit dengan Desain Button Pill --}}
-                            <a href="{{ route('products.edit', $product->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
-                            </a>
+                           {{-- Tombol Edit (Tanpa Ikon) --}}
+<a href="{{ route('products.edit', $product->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center;">
+    Edit
+</a>
 
-                            {{-- Tombol Hapus dengan Desain Button Pill --}}
-                            <form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus product ini?')" style="margin: 0; display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
-                                    <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
-                                </button>
+{{-- Tombol Hapus (Tanpa Ikon) --}}
+<form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus product ini?')" style="margin: 0; display: inline;">
+    @csrf
+    @method('DELETE')
+    <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center;">
+        Hapus
+    </button>
+</form>
                             </form>
                         </div>
                     </td>

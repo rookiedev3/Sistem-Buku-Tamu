@@ -2,8 +2,8 @@
     $leadBadges = [
         'new'         => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
         'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
-        'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
-        'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
+        'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi '],
+        'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal '],
         'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
     ];
 
@@ -61,7 +61,7 @@
                         <strong style="display:block; color:#172033; font-weight:800;">
                             {{ $visit->guest->name ?? '-' }}
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                                <span title="VIP" style="color:#d97706;">⭐</span>
+                                <span title="VIP" style="color:#d97706;"></span>
                             @endif
                         </strong>
                         <span style="font-size:11px; color:#778195;">
@@ -85,7 +85,7 @@
 
                     <td style="padding:14px; text-align:center;">
                         <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $visit->id }}" style="background:transparent; color:#006B3F; border:1px solid #006B3F; padding:6px 12px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">
-                            📝 Lihat Catatan
+                             Lihat Catatan
                         </button>
                     </td>
 
@@ -125,7 +125,7 @@
 @foreach($visits as $visit)
     @php
         $leadModal = $visit->lead ?? null;
-        $scheduleTextMap = ['deal' => 'Sudah Deal 🎉', 'lost' => 'Lead Hilang / Lost'];
+        $scheduleTextMap = ['deal' => 'Sudah Deal ', 'lost' => 'Lead Hilang / Lost'];
         $scheduleText = $leadModal
             ? ($scheduleTextMap[$leadModal->status] ?? ($leadModal->follow_up_at ? \Carbon\Carbon::parse($leadModal->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan'))
             : 'Kunjungan biasa, tidak dikonversi jadi lead';
@@ -160,14 +160,14 @@
                     </div>
 
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Catatan Pertemuan Awal:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Catatan Pertemuan Awal:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                             {{ $visit->meeting_result ?? 'Tidak ada catatan awal yang ditinggalkan.' }}
                         </div>
                     </div>
 
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">🔄 Riwayat Update Pipeline:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;"> Riwayat Update Pipeline:</label>
                         @forelse(optional($leadModal)->followUps ?? [] as $fu)
                             <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b;">

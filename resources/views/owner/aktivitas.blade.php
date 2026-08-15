@@ -38,7 +38,7 @@
     </a>
 
     <div>
-        <h2 style="font-size:20px; font-weight:800; color:#172033; margin-bottom:4px;">Aktivitas Terbaru ⚡</h2>
+        <h2 style="font-size:20px; font-weight:800; color:#172033; margin-bottom:4px;">Aktivitas Terbaru</h2>
         <p style="font-size:13px; color:#778195; margin:0;">Seluruh riwayat perubahan status kunjungan.</p>
     </div>
 

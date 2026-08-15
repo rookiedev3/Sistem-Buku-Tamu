@@ -93,7 +93,7 @@
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
                             {{-- Tombol Edit --}}
                             <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
+                                 Edit
                             </a>
 
                             {{-- Tombol Hapus --}}
@@ -101,7 +101,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
-                                    <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
+                                     Hapus
                                 </button>
                             </form>
                         </div>

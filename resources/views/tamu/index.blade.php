@@ -107,10 +107,11 @@
 
                     {{-- Aksi --}}
                     <td style="padding: 16px 20px; text-align: center;">
-                        <a href="{{ route('owner.databaseTamuDetail', $guest->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
-                            Lihat Riwayat
-                        </a>
-                    </td>
+    <a href="{{ route('owner.databaseTamuDetail', $guest->id) }}" 
+       style="display: inline-block; background-color: #e6f4ed; color: #006B3F; text-decoration: none; font-weight: 700; font-size: 11px; padding: 6px 14px; border-radius: 8px; border: 1px solid #c2e6d1; transition: all 0.2s ease;">
+        Lihat Riwayat
+    </a>
+</td>
                 </tr>
                 @empty
                 <tr>
