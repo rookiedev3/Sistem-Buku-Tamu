@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\SecurityApiController;
 // ================= AUTH (tidak butuh token) =================
 Route::post('/login', [AuthApiController::class, 'login']);
 Route::post('/register', [AuthApiController::class, 'register']);
+Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
 
 // ================= SEMUA ROUTE DI BAWAH INI WAJIB BAWA TOKEN =================
 Route::middleware('auth:sanctum')->group(function () {

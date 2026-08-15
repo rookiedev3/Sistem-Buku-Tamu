@@ -23,7 +23,6 @@ Route::get('/laporan/export-excel', [OwnerController::class, 'exportExcel'])->na
 Route::get('/laporan/export-pdf', [OwnerController::class, 'exportPdf'])->name('laporan.exportPdf');
 // route('password.reset', ['token' => $token, 'email' => $user->email]);
 
-
 // Route untuk user belum login (guest)
 Route::middleware('guest')->group(function () {
     Route::controller(AuthController::class)->group(function () {
@@ -37,9 +36,10 @@ Route::middleware('guest')->group(function () {
         Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
         Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 
-        Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+        Route::get('/reset-password/success', function () { return view('auth.reset-password-succes');})->name('password.reset.success');});
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-    });
+        Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+
 });
 
 // Route untuk user yang sudah login (auth)

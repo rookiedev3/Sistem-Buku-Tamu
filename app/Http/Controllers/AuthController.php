@@ -142,6 +142,35 @@ public function showResetForm(Request $request, $token)
     ]);
 }
 
+// public function resetPassword(Request $request)
+// {
+//     $request->validate([
+//         'token'    => 'required',
+//         'email'    => 'required|email',
+//         'password' => 'required|min:6|confirmed',
+//     ], [
+//         'password.required'  => 'Password tidak boleh kosong',
+//         'password.min'       => 'Password minimal 6 karakter',
+//         'password.confirmed' => 'Konfirmasi password tidak cocok',
+//     ]);
+
+//     $status = Password::reset(
+//         $request->only('email', 'password', 'password_confirmation', 'token'),
+//         function ($user, $password) {
+//             $user->forceFill([
+//                 'password' => Hash::make($password),
+//             ])->setRememberToken(Str::random(60));
+
+//             $user->save();
+
+//             event(new PasswordReset($user));
+//         }
+//     );
+
+//     return $status === Password::PASSWORD_RESET
+//         ? redirect()->route('login')->with('success', 'Password berhasil diubah, silakan login.')
+//         : back()->withErrors(['email' => __($status)]);
+// }
 public function resetPassword(Request $request)
 {
     $request->validate([
@@ -168,10 +197,9 @@ public function resetPassword(Request $request)
     );
 
     return $status === Password::PASSWORD_RESET
-        ? redirect()->route('login')->with('success', 'Password berhasil diubah, silakan login.')
+        ? redirect()->route('password.reset.success') // ganti dari route('login')
         : back()->withErrors(['email' => __($status)]);
 }
-
 
 
 }

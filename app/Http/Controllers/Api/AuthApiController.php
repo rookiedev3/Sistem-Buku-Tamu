@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 // use Illuminate\Support\Facades\Hash;
 
@@ -100,4 +101,23 @@ private function normalizePhone($phone)
     {
         return $this->responseHasil(200, true, $request->user());
     }
+
+    public function forgotPassword(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email',
+    ]);
+
+    if ($validator->fails()) {
+        return $this->responseHasil(422, false, $validator->errors());
+    }
+
+    $status = Password::sendResetLink(
+        $request->only('email')
+    );
+
+    return $status === Password::RESET_LINK_SENT
+        ? $this->responseHasil(200, true, "Link reset password telah dikirim ke email Anda.")
+        : $this->responseHasil(422, false, __($status));
+}
 }
