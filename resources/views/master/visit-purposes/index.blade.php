@@ -89,19 +89,22 @@
                         @endif
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                            <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
-                                Edit
-                            </a>
-                            <form action="{{ route('visit-purposes.destroy', $vst_purposes->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus Visit Purposes ini?')" style="margin: 0; display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="background: none; border: none; color: #e5484d; text-decoration: none; font-weight: 800; cursor: pointer; padding: 0; font-size: 13px; font-family: inherit;">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
+        {{-- Tombol Edit --}}
+        <a href="{{ route('visit-purposes.edit', $vst_purposes->id) }}" style="color: #006B3F; text-decoration: none; font-weight: 800;">
+            <i style="display: none !important;"></i>Edit
+        </a>
+        
+        {{-- Tombol Hapus --}}
+        <form action="{{ route('visit-purposes.destroy', $vst_purposes->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus Visit Purposes ini?')" style="margin: 0; display: inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" style="background: none; border: none; color: #e5484d; text-decoration: none; font-weight: 800; cursor: pointer; padding: 0; font-size: 13px; font-family: inherit;">
+                <i style="display: none !important;"></i>Hapus
+            </button>
+        </form>
+    </div>
+</td>
                 </tr>
                 @empty
                 <tr>

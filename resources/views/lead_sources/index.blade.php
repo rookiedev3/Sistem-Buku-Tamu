@@ -86,19 +86,17 @@
 
                             {{-- Tombol Hapus memicu Modal --}}
                             <button type="button" onclick="confirmDelete('{{ $lead_src->id }}', '{{ addslashes($lead_src->name) }}')" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
+                                Hapus
                             </button>
 
                             {{-- Form Tersembunyi Hapus --}}
                             <form id="delete-form-{{ $lead_src->id }}" action="{{ route('lead-sources.destroy', $lead_src->id) }}" method="POST" style="display: none;">
                                 @csrf
                                 @method('DELETE')
-<<<<<<< HEAD
-=======
+
                                 <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
                                      Hapus
                                 </button>
->>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
                             </form>
                         </div>
                     </td>
