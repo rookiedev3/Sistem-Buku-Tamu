@@ -203,8 +203,13 @@
 
     <div class="d-flex justify-content-between align-items-center pe-4">
         <div>
+<<<<<<< HEAD
+            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} </h4>
+            <p class="mb-0 text-white-50 fs-6">Berikut adalah ringkasan aktivitas buku tamu dan kunjungan kantor hari ini.</p>
+=======
             <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Frontoffice' }}</h4>
             <p class="mb-0 text-white-50 fs-6">Kelola data reservasi dan buat janji temu tamu secara cepat dan terstruktur.</p>
+>>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
 </div>
@@ -220,8 +225,18 @@
                 <span style="font-size: 12px; font-weight: 700; color: #778195;">Agenda</span>
             </h3>
         </div>
+<<<<<<< HEAD
+        <div style="width: 42px; height: 42px; background: #e6f4ed; color: #006B3F; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+=======
         <div class="stat-icon-fo" style="background: #e8f8f1; color: #21a86b;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+>>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
 
@@ -233,8 +248,18 @@
                 <span style="font-size: 12px; font-weight: 700; color: #778195;">Tamu</span>
             </h3>
         </div>
+<<<<<<< HEAD
+        <div style="width: 42px; height: 42px; background: #e0f2fe; color: #0284c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 22h14" />
+                <path d="M5 2h14" />
+                <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+            </svg>
+=======
         <div class="stat-icon-fo" style="background: #e0f2fe; color: #0284c7;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+>>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
 
@@ -297,7 +322,7 @@
                     </td>
 
                     <td style="padding: 16px 20px;">
-                        <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->visit_code ?? ('ANT-' . sprintf('%03d', $visit->queue_number)) }}</span>
+                        <span style="font-weight: 800; color: #006B3F; display: block;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->translatedFormat('d M Y') : ($visit->check_in_at ? \Carbon\Carbon::parse($visit->check_in_at)->translatedFormat('d M Y') : '-') }}</span>
                         <span style="font-size: 11px; color: #778195; font-weight: 600;">{{ $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('H:i') . ' WIB' : '-' }}</span>
                     </td>
 

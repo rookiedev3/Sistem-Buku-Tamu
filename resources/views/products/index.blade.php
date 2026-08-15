@@ -78,7 +78,7 @@
             <tbody style="color: #172033;">
                 @forelse ($products as $index => $product)
                 <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
+                    <td class="row-number" style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px;">
                         <span style="background: #eef4ff; color: #1463ff; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; display: inline-block;">
                             {{ $product->code }}
@@ -99,6 +99,22 @@
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
+<<<<<<< HEAD
+                            {{-- Tombol Edit --}}
+                            <a href="{{ route('products.edit', $product->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
+                            </a>
+
+                            {{-- Tombol Hapus memicu Modal --}}
+                            <button type="button" onclick="confirmDelete('{{ $product->id }}', '{{ addslashes($product->name) }}')" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
+                            </button>
+
+                            {{-- Form Tersembunyi Hapus --}}
+                            <form id="delete-form-{{ $product->id }}" action="{{ route('products.destroy', $product->id) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('DELETE')
+=======
                            {{-- Tombol Edit (Tanpa Ikon) --}}
 <a href="{{ route('products.edit', $product->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center;">
     Edit
@@ -112,6 +128,7 @@
         Hapus
     </button>
 </form>
+>>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
                             </form>
                         </div>
                     </td>
@@ -133,22 +150,71 @@
 
 </div>
 
-{{-- Script JavaScript untuk Pencarian Real-Time Produk --}}
+{{-- MODAL KONFIRMASI HAPUS --}}
+<div id="deleteConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
+
+        <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Hapus Product?</h3>
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
+            Apakah Anda yakin ingin menghapus produk <strong id="deleteProductName" style="color: #172033;">-</strong>? Tindakan ini tidak dapat dibatalkan.
+        </p>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="button" onclick="closeDeleteModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                Batal
+            </button>
+            <button type="button" id="confirmDeleteSubmitBtn" style="flex: 1; background: #dc2626; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Script JavaScript untuk Modal dan Pencarian Real-Time --}}
 <script>
+    let activeDeleteProductId = null;
+
+    function confirmDelete(productId, productName) {
+        activeDeleteProductId = productId;
+        document.getElementById('deleteProductName').innerText = productName;
+        document.getElementById('deleteConfirmModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        activeDeleteProductId = null;
+        document.getElementById('deleteConfirmModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmDeleteSubmitBtn').addEventListener('click', function() {
+        if (activeDeleteProductId) {
+            document.getElementById('delete-form-' + activeDeleteProductId).submit();
+        }
+    });
+
     function filterProductTable() {
         const input = document.getElementById('searchProduct');
-        const filter = input.value.toLowerCase();
+        const filter = input.value.toLowerCase().trim();
         const table = document.getElementById('productTable');
         const tr = table.getElementsByTagName('tr');
+        let visibleIndex = 1;
 
         for (let i = 1; i < tr.length; i++) {
+            if (tr[i].getElementsByTagName('td').length <= 1) continue;
+
             let tdCode = tr[i].getElementsByTagName('td')[1];
             let tdName = tr[i].getElementsByTagName('td')[2];
+            let tdNum = tr[i].querySelector('.row-number');
+
             if (tdCode || tdName) {
                 let txtCode = tdCode ? (tdCode.textContent || tdCode.innerText) : '';
                 let txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
+
                 if (txtCode.toLowerCase().indexOf(filter) > -1 || txtName.toLowerCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
+                    if (tdNum) {
+                        tdNum.textContent = visibleIndex;
+                        visibleIndex++;
+                    }
                 } else {
                     tr[i].style.display = "none";
                 }

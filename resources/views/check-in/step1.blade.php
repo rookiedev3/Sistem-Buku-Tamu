@@ -7,17 +7,21 @@
         .checkin-container {
             grid-template-columns: 1fr !important;
         }
+
         .checkin-sidebar {
             padding: 40px 30px !important;
         }
+
         .checkin-form-area {
             padding: 40px 30px !important;
         }
     }
+
     @media (max-width: 480px) {
         .checkin-sidebar {
             padding: 30px 20px !important;
         }
+
         .checkin-form-area {
             padding: 30px 20px !important;
         }
@@ -74,10 +78,10 @@
                 <!-- Logo Perusahaan Berukuran Kecil -->
                 <img src="{{ asset('images/foto-perusahaan.jpg') }}" alt="Logo Perusahaan" class="logo-box-img">
 
-                
-                
+
+
                 <h1 style="font-size: 32px; font-weight: 800; line-height: 1.3; margin: 20px 0 12px 0;">
-                    Selamat Datang! 
+                    Selamat Datang!
                 </h1>
                 <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; margin: 0 0 35px 0;">
                     Silakan isi data identitas Anda untuk memulai proses check-in kunjungan agar tim kami dapat menyambut dan melayani Anda dengan lebih cepat
@@ -121,7 +125,7 @@
                     <span>Senin-Sabtu, 08.00-16.00 WIB</span>
                 </div>
             </div>
-        </div> 
+        </div>
 
         <!-- Area Form Kanan -->
         <div class="checkin-form-area" style="padding: 60px 80px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; background: #ffffff;">
@@ -189,22 +193,23 @@
 
                 <div>
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">Foto Tamu <span style="font-weight: 400; color: #778195;">(Opsional)</span></label>
-                    @if(!empty($step1Data['photo']))
+
+                    {{-- Gunakan 'photo_path' jika di session disimpan dengan nama key tersebut --}}
+                    @if(!empty($step1Data['photo_path']))
                     <div style="margin-bottom: 12px;">
-                        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">Foto Terunggah:</p>
-                        <img src="{{ asset('storage/' . $step1Data['photo']) }}" alt="Preview" style="width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e8edf5;">
+                        <p style="font-size: 12px; color: #172033; font-weight: 600; margin-bottom: 5px;">Foto Terunggah Saat Ini:</p>
+                        <img src="{{ Storage::url($step1Data['photo_path']) }}" alt="Preview" style="width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e8edf5;">
+                        <span style="display: block; font-size: 11px; color: #006B3F; margin-top: 4px;">
+                            ✓ Foto sudah tersimpan. Biarkan kolom di bawah kosong jika tidak ingin mengganti foto.
+                        </span>
                     </div>
                     @endif
-                    
+
                     <input type="file" id="photoInput" name="photo_path" accept="image/*" onchange="validateFileSize(this)"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; outline: none; background: #fbfcfe; color: #172033; box-sizing: border-box; cursor: pointer;">
-                    
+
                     <span style="font-size: 11px; color: #778195; display: block; margin-top: 4px;">Format: JPG, JPEG, PNG (Maks. 2MB)</span>
                     <small id="fileError" style="color: #dc2626; display: none; margin-top: 4px; font-size: 12px;"></small>
-                    
-                    @error('photo_path')
-                        <span style="font-size: 12px; color: #dc2626;">{{ $message }}</span>
-                    @enderror
                 </div>
 
                 <!-- Navigasi Tombol (Kembali & Selanjutnya) -->
@@ -214,7 +219,7 @@
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.15);">
-                        Selanjutnya: Keperluan Kunjungan 
+                        Selanjutnya: Keperluan Kunjungan
                     </button>
                 </div>
 

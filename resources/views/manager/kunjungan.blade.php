@@ -32,7 +32,7 @@
         <div style="position: relative; width: 100%;">
             <select name="vip_status" style="width: 100%; height: 38px; padding: 8px 30px 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; font-weight: 700; color: #172033; background-color: #fff; outline: none; cursor: pointer; box-sizing: border-box; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
                 @php
-                    $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                    $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
                     $activeVipFilter = $vipFilter ?? 'all';
                 @endphp
                 @foreach($vipOptions as $key => $label)
@@ -120,8 +120,7 @@
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $v->guest->name ?? '-' }}
                                 @if(isset($v->guest) && $v->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
-                                @endif
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>                                @endif
                             </strong>
                             <span style="font-size: 10px; color: #778195;">
                                 {{ $v->guest->company_name ?? '-' }} ({{ $v->guest->position ?? '-' }})
@@ -229,14 +228,14 @@
     {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
      dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Catatan Awal Kunjungan:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->notes ?? 'Tidak ada catatan awal.' }}
     </div>
 </div>
 
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Hasil Meeting Pertama:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->meeting_result ?? 'Tidak ada hasil meeting.' }}
     </div>
@@ -244,13 +243,13 @@
 
                             <div>
                                 <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">
-                                    🔄 Riwayat Update Pipeline:
+                                     Riwayat Update Pipeline:
                                 </label>
 
                                 @forelse(optional($leadModal)->followUps ?? [] as $fu)
                                     <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
-                                            <span>📅 Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
+                                            <span> Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
                                             <span>Tahap: <strong style="text-transform: uppercase; color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
                                         </div>
                                         {{-- <div style="color: #334155; font-size: 13px; white-space: pre-line;">
@@ -266,7 +265,7 @@
 </div>
 <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px;">
     <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
-        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+         Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
     </div>
     @if($fu->due_at)
         <div style="font-size: 11px; color: #475569;">

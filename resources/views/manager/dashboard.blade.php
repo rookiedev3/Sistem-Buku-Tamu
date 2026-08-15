@@ -9,7 +9,7 @@
 
         <div class="d-flex justify-content-between align-items-center pe-4">
             <div>
-                <h4 class="fw-bold mb-1 text-white" style="font-size: 16px;">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} 👋</h4>
+                <h4 class="fw-bold mb-1 text-white" style="font-size: 16px;">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} </h4>
                 <p class="mb-0 text-white-50" style="font-size: 12px;">Pantau seluruh aktivitas kunjungan tamu secara real-time, kinerja PIC, dan progres konversi lead tim.</p>
             </div>
         </div>
@@ -32,7 +32,7 @@
             <form action="{{ route('manager.dashboard') }}" method="GET" style="margin: 0;">
                 <select name="vip_status" onchange="this.form.submit()" style="height: 32px; width: 100%; border: 1px solid #e8edf5; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer; box-sizing: border-box;">
                     @php
-                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
                         $activeVipFilter = $vipFilter ?? 'all';
                     @endphp
                     @foreach($vipOptions as $key => $label)
@@ -80,8 +80,7 @@
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $v->guest->name ?? '-' }}
                                 @if(isset($v->guest) && $v->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
-                                @endif
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>                                @endif
                             </strong>
                             <span style="font-size: 10px; color: #778195;">
                                 {{ $v->guest->company_name ?? '-' }} ({{ $v->guest->position ?? '-' }})

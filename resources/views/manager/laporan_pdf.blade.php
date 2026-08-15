@@ -76,7 +76,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 6px; }
         th, td { border: 1px solid #e2e8f0; padding: 4px 5px; text-align: left; word-wrap: break-word; }
         th { background: #f8fafc; font-weight: 700; }
-        td.center, th.center { text-align: center; }
+        th.center, td.center { text-align: center; }
 
         .footer-note {
             margin-top: 18px;
@@ -92,7 +92,7 @@
     <div class="letterhead">
         <div class="company">
             <h1>IT Solution Yogyakarta</h1>
-            <p>Sistem Buku Tamu Digital — Laporan Internal</p>
+            <p>Sistem Buku Tamu Digital - Laporan Internal</p>
         </div>
         <div class="meta">
             Dicetak oleh: {{ $generatedBy }}<br>
@@ -101,12 +101,13 @@
     </div>
 
     <h2>Laporan Kunjungan Tamu</h2>
-<p class="subtitle">
-    Periode: {{ $monthLabel }} {{ $year }}
-    @if($category) — Kategori: {{ ucfirst($category) }} @endif
-    @if($branchName) — Cabang: {{ $branchName }} @endif
-    @if($picName) — PIC: {{ $picName }} @endif
-</p>
+    <p class="subtitle">
+        Periode: {{ $monthLabel }} {{ $year }}
+        @if($category) - Kategori: {{ ucfirst($category) }} @endif
+        @if($branchName) - Cabang: {{ $branchName }} @endif
+        @if($picName) - PIC: {{ $picName }} @endif
+    </p>
+
     <div class="narrative">
         Selama periode <strong>{{ $monthLabel }} {{ $year }}</strong>, IT Solution Yogyakarta menerima
         <strong>{{ $totalKunjungan }} kunjungan tamu</strong>@if($totalVip > 0), dengan <strong>{{ $totalVip }} di antaranya berkategori VIP</strong>@endif.
