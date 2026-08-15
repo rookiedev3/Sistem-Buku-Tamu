@@ -90,6 +90,9 @@ Route::middleware('auth:sanctum')->prefix('pic')->group(function () {
     Route::post('/visits/{id}/start-meeting', [PicApiController::class, 'startMeeting']);
     Route::post('/visits/{id}/complete-meeting', [PicApiController::class, 'completeMeeting']);
     // Route::post('/leads/{leadId}/follow-up', [PicApiController::class, 'updateFollowUp']);
+    // Route::get('/pic/riwayat', [\App\Http\Controllers\PicController::class, 'riwayat'])
+    //    ->name('pic.riwayat')
+    //    ->middleware('auth');
 });
  
 });

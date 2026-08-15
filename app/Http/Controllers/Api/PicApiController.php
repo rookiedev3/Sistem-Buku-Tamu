@@ -167,46 +167,104 @@ class PicApiController extends BaseApiController
      *
      * Riwayat kunjungan PIC yang sudah final.
      */
-    public function riwayat(Request $request)
-    {
-        $request->validate([
-            'start_date' => 'nullable|date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
-        ], [
-            'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
-        ]);
 
-        $perPage   = (int) $request->input('per_page', 10);
-        $vipFilter = $request->input('vip_status', 'all');
-
-        $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
-            ->where('assigned_to', auth()->id())
-            ->whereIn('status', self::FINAL_STATUSES);
-
-        $this->applyKeywordFilter($query, $request->input('keyword'));
-
-        if ($request->filled('start_date')) {
-            $query->whereDate('check_in_at', '>=', $request->start_date);
+    /**
+     * GET /pic/riwayat  (route name: pic.riwayat)
+     *
+     * Halaman web (Blade) — beda dari PicApiController::riwayat() yang
+     * dipakai app Flutter. Blade ini mengharapkan $visits berisi model
+     * Eloquent asli (relasi langsung: guest, purpose, branch, lead,
+     * lead.followUps), BUKAN hasil mapVisit() yang sudah diserialisasi.
+     */
+public function riwayat(Request $request)
+{
+    $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date'   => 'nullable|date|after_or_equal:start_date',
+    ], [
+        'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+    ]);
+ 
+    $perPage   = (int) $request->input('per_page', 10);
+    $vipFilter = $request->input('vip_status', 'all');
+    $keyword   = $request->input('keyword');
+ 
+    $query = Visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
+        ->where('assigned_to', auth()->id())
+        ->whereIn('status', self::FINAL_STATUSES);
+ 
+    if ($keyword) {
+        $query->whereHas('guest', function (Builder $q) use ($keyword) {
+            $q->where('name', 'like', "%{$keyword}%")
+                ->orWhere('company_name', 'like', "%{$keyword}%");
+        });
+    }
+ 
+    if ($request->filled('start_date')) {
+        $query->whereDate('check_in_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('check_in_at', '<=', $request->end_date);
+    }
+ 
+    if (Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn ($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', fn ($q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
         }
-        if ($request->filled('end_date')) {
-            $query->whereDate('check_in_at', '<=', $request->end_date);
-        }
-
-        $this->applyVipFilter($query, $vipFilter);
-
-        $paginated = $query->orderBy('check_in_at', 'desc')
-            ->paginate($perPage)
-            ->appends($request->query());
-
-        return $this->responseHasil(200, true, [
-            'data'         => collect($paginated->items())->map(fn ($v) => $this->mapVisit($v)),
-            'current_page' => $paginated->currentPage(),
-            'last_page'    => $paginated->lastPage(),
-            'total'        => $paginated->total(),
-            'vip_status'   => $vipFilter,
+    }
+ 
+    $visits = $query->orderBy('check_in_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+ 
+    // ==== Kalau request minta JSON (dipanggil dari Flutter) ====
+    if ($request->wantsJson() || $request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'data'    => $visits->getCollection()->map(function ($visit) {
+                $lastStage = optional($visit->lead?->followUps?->last());
+ 
+                return [
+                    'id'                => $visit->id,
+                    'token'             => $visit->token ?? ('TRX-' . str_pad($visit->id, 4, '0', STR_PAD_LEFT)),
+                    'nama'              => $visit->guest->name ?? '-',
+                    'jabatan'           => $visit->guest->position ?? '-',
+                    'instansi'          => $visit->guest->company_name ?? '-',
+                    'kategori'          => ($visit->guest->is_vip ?? false) ? 'VIP' : 'Reguler',
+                    'waktu'             => optional($visit->check_in_at)->translatedFormat('d M Y, H:i \W\I\B'),
+                    'tanggal'           => optional($visit->check_in_at)->format('Y-m-d'),
+                    'keperluan'         => $visit->purpose->name ?? '-',
+                    'tahapPipeline'     => $lastStage->stage ?? ($visit->lead->pipeline_stage ?? '-'),
+                    'keteranganStatus'  => $visit->status_label ?? $visit->status,
+                    'catatanAwal'       => $visit->lead->notes ?? $visit->notes ?? '-',
+                    'riwayatPipeline'   => $visit->lead?->followUps->map(function ($f) {
+                        return [
+                            'tanggal' => optional($f->created_at)->format('Y-m-d'),
+                            'tahap'   => $f->stage,
+                            'catatan' => $f->notes,
+                        ];
+                    })->values() ?? [],
+                    'statusAkhir'       => $visit->status,
+                ];
+            })->values(),
+            'meta' => [
+                'current_page' => $visits->currentPage(),
+                'last_page'    => $visits->lastPage(),
+                'per_page'     => $visits->perPage(),
+                'total'        => $visits->total(),
+            ],
         ]);
     }
-
+ 
+    // ==== Fallback: request biasa dari browser tetap dapat view Blade ====
+    return view('pic.riwayat', [
+        'visits'    => $visits,
+        'vipFilter' => $vipFilter,
+    ]);
+}
+ 
     /**
      * PUT/POST /api/v1/pic/visits/{id}/status
      *
