@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CheckInApiController;
 use App\Http\Controllers\api\LaporanController;
 use App\Http\Controllers\Api\ManagerApiController;
 use App\Http\Controllers\Api\OwnerApiController;
+use App\Http\Controllers\Api\PicApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 use App\Http\Controllers\Api\SecurityApiController;
 
@@ -135,7 +136,21 @@ Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'dow
 
 });
 
+Route::middleware('auth:sanctum')->prefix('pic')->group(function () {
+    Route::get('/dashboard', [PicApiController::class, 'dashboardPic']);
+    Route::get('/followups', [PicApiController::class, 'followupIndex']);
+    Route::get('/riwayat', [PicApiController::class, 'riwayatPic']);
+    Route::get('/leads', [PicApiController::class, 'leadsIndex']);
+ 
+    Route::patch('/visits/{id}/status', [PicApiController::class, 'updateStatus']);
+    Route::post('/visits/{id}/start-meeting', [PicApiController::class, 'startMeeting']);
+    Route::post('/visits/{id}/complete-meeting', [PicApiController::class, 'completeMeeting']);
+ 
+    Route::post('/leads/{leadId}/follow-up', [PicApiController::class, 'updateFollowUp']);
+});
+
 Route::get('/owner/laporan/download/{filename}', [OwnerApiController::class, 'downloadLaporan'])
     ->name('laporan.download')   // 👈 INI namanya "laporan.download"
     ->middleware('signed');
+
 
