@@ -577,10 +577,6 @@
 <div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
-        <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
-            ⚠️
-        </div>
-
         <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Batalkan Kunjungan?</h3>
         <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
             Apakah Anda yakin ingin membatalkan jadwal kunjungan untuk <strong id="cancelGuestName" style="color: #172033;">-</strong>? Tindakan ini tidak dapat dibatalkan.
@@ -639,7 +635,7 @@
         });
     });
 
-    // 🟢 DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
+    // DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
     function loadPicsForModal(branchId, selectedPicId = null) {
         const picSelect = document.getElementById('select_pic');
         if (!branchId) return;

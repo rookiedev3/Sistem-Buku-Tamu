@@ -73,7 +73,7 @@ class FollowUpDueNotification extends Command
             notifications::send(
                 $picId,
                 'followup_reminder',
-                '📌 Pengingat Follow-Up Jatuh Tempo!',
+                'Pengingat Follow-Up Jatuh Tempo!',
                 "Jadwal follow-up telah jatuh tempo ({$dueDateFormatted}).\n" .
                 "Nama Tamu: {$guestName}\n" .
                 "Kebutuhan: {$kebutuhan}\n" .
@@ -82,7 +82,7 @@ class FollowUpDueNotification extends Command
 
             $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
 
-            $message = "*📌 Pengingat Follow-Up Jatuh Tempo!*\n\n"
+            $message = "*Pengingat Follow-Up Jatuh Tempo!*\n\n"
             . "Jadwal follow-up telah jatuh tempo (*{$dueDateFormatted}*).\n\n"
             . "Nama Tamu: *{$guestName}*\n"
             . "Kebutuhan: {$kebutuhan}\n"

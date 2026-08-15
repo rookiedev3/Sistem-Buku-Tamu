@@ -46,7 +46,7 @@ class FrontOfficeController extends Controller
 
         $query = visits::with(['guest', 'purpose', 'assignedUser']);
 
-        // 🟢 PERUBAHAN DI SINI:
+        // PERUBAHAN DI SINI:
         // Jika filter 'today', ambil khusus hari ini.
         // Jika pilih 'semua' / default, hanya ambil hari ini dan tanggal-tanggal setelahnya (>= $today)
         if ($request->input('date_filter') === 'today') {
@@ -99,52 +99,63 @@ class FrontOfficeController extends Controller
     }
 
     public function checkIn($id)
-    {
-        $visit = visits::findOrFail($id);
+{
+    return DB::transaction(function () use ($id) {
+        // 1. Lock data di tingkat database (mencegah 2 request bersamaan membaca data yang sama)
+        $visit = visits::where('id', $id)->lockForUpdate()->firstOrFail();
 
+        // BENTENG PERTAMA: Cek jika status sudah Menunggu/Check-in, hentikan proses seketika
+        if (in_array(strtolower($visit->status), ['menunggu', 'waiting', 'check-in', 'proses'])) {
+            return redirect()->back()->with('info', 'Tamu sudah melakukan Check-in.');
+        }
+
+        // 2. Buat Log Perubahan Status
         visit_status_logs::create([
-            'visit_id' => $visit->id,
+            'visit_id'   => $visit->id,
             'old_status' => $visit->status,
             'new_status' => 'Menunggu',
             'changed_by' => auth()->check() ? auth()->id() : null,
             'changed_at' => now(),
         ]);
 
+        // 3. Update Status Visit
         $visit->update([
-            'status' => 'Menunggu',
+            'status'      => 'Menunggu',
             'check_in_at' => now(),
-            'meeting_start_at' => now(),
         ]);
 
         $guestName   = $visit->guest->name ?? 'Tamu';
         $assignedPic = $visit->assignedUser;
 
-        // 2. Looping untuk kirim notifikasi creke masing-masing admin
-       if ($assignedPic) {
-        
-        // A. Notifikasi Sistem (Database)
-        notifications::send(
-            $assignedPic->id,
-            'guest_arrived',
-            'Tamu Anda Sudah Datang 🔔',
-            'Tamu ' . $guestName . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
-        );
+        // 4. Kirim Notifikasi (Hanya berjalan 1 kali)
+        if ($assignedPic) {
+            // A. Notifikasi Sistem (Database)
+            notifications::send(
+                $assignedPic->id,
+                'guest_arrived',
+                'Tamu Anda Sudah Datang',
+                'Tamu ' . $guestName . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+            );
 
-        $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+            // B. Notifikasi WhatsApp Fonnte
+            $token = config('services.fonnte.token', env('FONNTE_TOKEN'));
+            
+            // PERBAIKAN: Menggunakan $guestName (sebelumnya $guest->name yang menyebabkan error)
+            $message = "*Tamu Anda Sudah Datang*\n\n"
+                . "Tamu *" . $guestName . "* telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
 
-        // Isi pesan notifikasi ke WhatsApp
-        $message = "*Tamu Anda Sudah Datang 🔔*\n\n"
-            . "Tamu *" . ($guest->name ?? 'Tamu') . "* telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
-        //Http::withoutVerifying()
-        //    ->withHeaders([
-        //       'Authorization' => $token,
-        //    ])->post('https://api.fonnte.com/send', [
-        //       'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-        //       'message' => $message,
-        //    ]);
-       }
+            //Http::withoutVerifying()
+            //    ->withHeaders([
+            //        'Authorization' => $token,
+            //    ])->post('https://api.fonnte.com/send', [
+            //        'target'  => '085926276649',
+            //        'message' => $message,
+            //    ]);
+        }
+
         return redirect()->back()->with('success', 'Tamu berhasil Check-in!');
-    }
+    });
+}
 
     public function checkOut($id)
     {
@@ -221,7 +232,7 @@ class FrontOfficeController extends Controller
                     'name' => $validated['name'],
                     'company_name' => $validated['company_name'],
                     'position' => $validated['position'],
-                    'address' => $validated['address'], // 🟢 TAMBAHAN: Update address
+                    'address' => $validated['address'], // TAMBAHAN: Update address
                     'email' => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                     'created_by' => $currentUserId,
@@ -243,13 +254,13 @@ class FrontOfficeController extends Controller
                     'name' => $validated['name'],
                     'company_name' => $validated['company_name'],
                     'position' => $validated['position'],
-                    'address' => $validated['address'], // 🟢 TAMBAHAN: Simpan address
+                    'address' => $validated['address'], // TAMBAHAN: Simpan address
                     'phone' => $phone,
                     'email' => $validated['email'],
                     'guest_category_id' => $validated['guest_category_id'],
                     'photo_path' => $photoPath,
                     'is_vip' => 0,
-                    'created_by' => $currentUserId, // 🟢 TAMBAHAN: Simpan user pembuat di tabel guests
+                    'created_by' => $currentUserId, // TAMBAHAN: Simpan user pembuat di tabel guests
                 ]);
             }
 

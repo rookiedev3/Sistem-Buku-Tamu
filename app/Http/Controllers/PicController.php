@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\follow_ups;
 use App\Models\leads;
-use App\Models\notifications; 
-use App\Models\User;          
+use App\Models\notifications;
+use App\Models\User;
 use App\Models\visit_status_logs;
 use App\Models\visits;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -262,14 +263,14 @@ class PicController extends Controller
      */
     public function completeMeeting(Request $request, $id)
     {
-$request->validate([
-    'meeting_result' => 'required|string',
-    'potential_level' => 'required|in:hot,warm,cold,non_lead',
-    'follow_up_at' => 'nullable|date|required_unless:potential_level,warm,cold,non_lead',
-    'estimated_value' => 'nullable|numeric',
-], [
-    'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
-]);
+        $request->validate([
+            'meeting_result'  => 'required|string',
+            'potential_level' => 'required|in:hot,warm,cold,non_lead',
+            'follow_up_at'    => 'nullable|date|required_unless:potential_level,warm,cold,non_lead',
+            'estimated_value' => 'nullable|numeric',
+        ], [
+            'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
+        ]);
 
         $visit = visits::with('guest')
             ->where('id', $id)
@@ -279,7 +280,11 @@ $request->validate([
         $oldStatus = trim($visit->status ?? '');
         $newStatus = 'Meeting Selesai';
 
-        if (strtolower($oldStatus) !== strtolower($newStatus)) {
+        // Cek apakah ini pertama kali status diubah ke 'Meeting Selesai'
+        $isFirstTime = (strtolower($oldStatus) !== strtolower($newStatus));
+
+        // 1. Catat log perubahan status HANYA saat pertama kali diselesaikan
+        if ($isFirstTime) {
             visit_status_logs::create([
                 'visit_id'   => $visit->id,
                 'old_status' => $oldStatus,
@@ -289,59 +294,75 @@ $request->validate([
             ]);
         }
 
+        // 2. Update data kunjungan (Selalu bisa diedit kapan saja)
         $visit->update([
-            'status' => $newStatus,
-            'meeting_result' => $request->meeting_result,
-            'potential_level' => $request->potential_level,
-            'follow_up_at' => $request->follow_up_at,
+            'status'               => $newStatus,
+            'meeting_result'       => $request->meeting_result,
+            'potential_level'      => $request->potential_level,
+            'follow_up_at'         => $request->follow_up_at,
             'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot']),
-            'updated_by' => auth()->id(),
+            'updated_by'           => auth()->id(),
         ]);
 
-        // 🟢 PROSES LEAD DAN PENGIRIMAN NOTIFIKASI
+        // 3. PROSES LEAD (Berjalan jika potensi Warm/Hot, baik saat pertama kali maupun saat edit)
         if (in_array($request->potential_level, ['warm', 'hot'])) {
             $estValue = $request->estimated_value ?? 0;
 
+            // updateOrCreate otomatis membuat baru jika belum ada, atau mengupdate jika sudah ada
             $lead = leads::updateOrCreate(
                 ['visit_id' => $visit->id],
                 [
-                    'guest_id' => $visit->guest_id,
-                    'owner_id' => auth()->id(),
-                    'status' => 'new',
+                    'guest_id'        => $visit->guest_id,
+                    'owner_id'        => auth()->id(),
+                    'status'          => 'new',
                     'estimated_value' => $estValue,
-                    'follow_up_at' => $request->follow_up_at,
+                    'follow_up_at'    => $request->follow_up_at,
                 ]
             );
 
-            // 🔔 KIRIM NOTIFIKASI LEAD BARU KE MANAGER / OWNER
-            $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
+            // NOTIFIKASI WA & DB HANYA DIKIRIM JIKA LEAD BARU DIBUAT (Mencegah Notif Ganda Saat Edit)
+            if ($lead->wasRecentlyCreated) {
+                $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
 
-            $guestName = $visit->guest->name ?? 'Tamu';
-            $companyName = $visit->guest->company_name ?? 'Instansi';
-            $formattedValue = 'Rp ' . number_format($estValue, 0, ',', '.');
-            $picName = auth()->user()->name ?? 'PIC';
-            $potensiText = strtoupper($request->potential_level);
+                $guestName      = $visit->guest->name ?? 'Tamu';
+                $companyName    = $visit->guest->company_name ?? 'Instansi';
+                $formattedValue = 'Rp ' . number_format($estValue, 0, ',', '.');
+                $picName        = auth()->user()->name ?? 'PIC';
+                $potensiText    = strtoupper($request->potential_level);
 
-            $title = "🚀 Lead Baru Masuk: {$guestName}";
+                $title   = "Lead Baru Masuk: {$guestName}";
+                $message = implode("\n", [
+                    "Terdapat Lead baru dari {$guestName} ({$companyName})",
+                    "• Potensi: {$potensiText}",
+                    "• Est. Nilai: {$formattedValue}",
+                    "• PIC: {$picName}",
+                ]);
 
-            $message = implode("\n", [
-                "Terdapat Lead baru dari {$guestName} ({$companyName})",
-                "• Potensi: {$potensiText}",
-                "• Est. Nilai: {$formattedValue}",
-                "• PIC: {$picName}",
-            ]);
+                // Notifikasi Database
+                foreach ($managers as $manager) {
+                    notifications::send($manager->id, 'new_lead', $title, $message);
+                }
 
-            foreach ($managers as $manager) {
-                notifications::send(
-                    $manager->id,
-                    'new_lead',
-                    $title,
-                    $message
-                );
+                // Notifikasi WhatsApp Fonnte (Mengirim ke nomor HP unik milik Manager/Owner/Admin)
+                $token        = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage    = "*{$title}*\n\n" . $message;
+
+                //try {
+                //    Http::withoutVerifying()
+                //        ->withHeaders([
+                //            'Authorization' => $token,
+                //        ])->post('https://api.fonnte.com/send', [
+                //            'target'  => '085926276649',
+                //            'message' => $waMessage,
+                //        ]);
+                //} catch (\Exception $e) {
+                //    \Log::error("Gagal kirim WA ke 085926276649: " . $e->getMessage());
+                //}
             }
         }
 
-        return redirect()->back()->with('success', 'Catatan hasil pertemuan dan data lead berhasil disimpan!');
+        $msg = $isFirstTime ? 'Catatan hasil pertemuan berhasil disimpan!' : 'Catatan hasil pertemuan berhasil diperbarui!';
+        return redirect()->back()->with('success', $msg);
     }
 
     /**

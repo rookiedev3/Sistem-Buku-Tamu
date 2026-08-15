@@ -271,7 +271,6 @@ class VisitsController extends Controller
             ]);
 
             $newVisit->status = 'Terjadwal';
-            $newVisit->check_in_at = now();
             $newVisit->save();
 
             $purposeType = visit_purposes::find($step2['purpose_id']);
@@ -283,7 +282,7 @@ class VisitsController extends Controller
                 notifications::send(
                     $admin->id,
                     'guest_arrived',
-                    'Notifikasi Admin 🔔',
+                    'Notifikasi Admin',
                     'Tamu baru membuat jadwal pertemuan.' .
                         "\n" . 'Nama: ' . ($guest->name ?? '-') .
                         "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
@@ -295,7 +294,7 @@ class VisitsController extends Controller
             $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
 
             // Isi pesan notifikasi ke WhatsApp
-            $message = "*Notifikasi Admin 🔔*\n\n"
+            $message = "*Notifikasi Admin*\n\n"
                 . "Tamu baru membuat jadwal pertemuan.\n"
                 . "Nama: " . ($guest->name ?? '-') . "\n"
                 . "Instansi: " . ($guest->company_name ?? '-') . "\n"
@@ -303,10 +302,10 @@ class VisitsController extends Controller
                 . "Cabang: " . ($branch->name ?? '-');
 
             //Http::withoutVerifying()
-            //    ->withHeaders([
+            //   ->withHeaders([
             //        'Authorization' => $token,
             //    ])->post('https://api.fonnte.com/send', [
-            //        'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+            //        'target'  => '085926276649',
             //        'message' => $message,
             //    ]);
 

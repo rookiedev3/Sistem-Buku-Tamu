@@ -31,7 +31,7 @@ class CheckInSlaNotification extends Command
         // 1. Cari kunjungan yang sudah check-in >= 10 menit, status masih menunggu, dan MEMILIKI PIC (assigned_to)
         $delayedVisits = visits::with(['guest', 'purpose', 'branch', 'assignedUser'])
             ->whereNotNull('check_in_at')
-            ->whereNotNull('assigned_to') // 🟢 Hanya ambil yang sudah ada PIC
+            ->whereNotNull('assigned_to') // Hanya ambil yang sudah ada PIC
             ->where('check_in_at', '<=', $tenMinutesAgo)
             ->whereIn('status', ['Terjadwal', 'Menunggu', 'waiting', 'pending', 'Check-in'])
             ->get();
@@ -66,11 +66,11 @@ class CheckInSlaNotification extends Command
             $purposeName = $visit->purpose->name ?? '-';
             $branchName  = $visit->branch->name ?? '-';
 
-            // 🟢 Kirim Notifikasi HANYA ke PIC Terpilih (assigned_to)
+            // Kirim Notifikasi HANYA ke PIC Terpilih (assigned_to)
             notifications::send(
                 $visit->assigned_to,
                 'sla_warning',
-                '⚠️ Peringatan SLA Pelayanan!',
+                'Peringatan SLA Pelayanan!',
                 'Tamu telah menunggu Anda selama ' . $formattedDuration . '.' .
                     "\n" . 'Kode: ' . ($visit->visit_code ?? '-') .
                     "\n" . 'Nama: ' . ($guest->name ?? '-') .
@@ -82,7 +82,7 @@ class CheckInSlaNotification extends Command
 
             $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
 
-            $message = "*⚠️ Peringatan SLA Pelayanan!*\n\n"
+            $message = "*Peringatan SLA Pelayanan!*\n\n"
             . "Tamu telah menunggu Anda selama *" . $formattedDuration . "*.\n\n"
             . "Kode: " . ($visit->visit_code ?? '-') . "\n"
             . "Nama: " . ($guest->name ?? '-') . "\n"
@@ -91,13 +91,13 @@ class CheckInSlaNotification extends Command
             . "Cabang: " . $branchName . "\n"
             . "Waktu Check-in: " . Carbon::parse($visit->check_in_at)->format('H:i') . " WIB";
 
-            //Http::withoutVerifying()
-            //    ->withHeaders([
-            //        'Authorization' => $token,
-            //    ])->post('https://api.fonnte.com/send', [
-            //        'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-            //        'message' => $message,
-            //   ]);
+            Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => $token,
+                ])->post('https://api.fonnte.com/send', [
+                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
+                    'message' => $message,
+               ]);
 
             $processedCount++;
         }
