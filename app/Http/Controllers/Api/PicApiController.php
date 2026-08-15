@@ -175,7 +175,16 @@ class PicApiController extends BaseApiController
      * dipakai app Flutter. Blade ini mengharapkan $visits berisi model
      * Eloquent asli (relasi langsung: guest, purpose, branch, lead,
      * lead.followUps), BUKAN hasil mapVisit() yang sudah diserialisasi.
+
+ 
+     * PUT/POST /api/v1/pic/visits/{id}/status
+     *
+     * 
+     * 
+     * Update status kehadiran/kunjungan (konfirmasi / batalkan).
      */
+
+    
 public function riwayat(Request $request)
 {
     $request->validate([
@@ -219,34 +228,84 @@ public function riwayat(Request $request)
         ->paginate($perPage)
         ->appends($request->query());
  
-    // ==== Kalau request minta JSON (dipanggil dari Flutter) ====
     if ($request->wantsJson() || $request->expectsJson()) {
+        // Sama persis dengan $leadBadges di Blade, supaya label konsisten web <-> mobile
+        $leadBadges = [
+            'new'         => 'Baru',
+            'contacted'   => 'Dihubungi',
+            'negotiation' => 'Negosiasi',
+            'deal'        => 'Deal',
+            'lost'        => 'Lost',
+        ];
+ 
         return response()->json([
             'success' => true,
-            'data'    => $visits->getCollection()->map(function ($visit) {
-                $lastStage = optional($visit->lead?->followUps?->last());
+            'data'    => $visits->getCollection()->map(function ($v) use ($leadBadges) {
+                $statusLower  = strtolower(trim($v->status ?? ''));
+                $isCancelled  = in_array($statusLower, ['cancelled', 'ditolak', 'dibatalkan']);
+                $isCompleted  = !$isCancelled && in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                $lead         = $v->lead;
+                $displayDate  = $v->check_in_at ?? $v->scheduled_at;
+ 
+                // Sama seperti $scheduleText di Blade
+                if ($lead) {
+                    if ($lead->status === 'deal') {
+                        $scheduleText = 'Sudah Deal';
+                    } elseif ($lead->status === 'lost') {
+                        $scheduleText = 'Lead Hilang / Lost';
+                    } elseif ($lead->follow_up_at) {
+                        $scheduleText = \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y');
+                    } else {
+                        $scheduleText = 'Tidak ada jadwal lanjutan';
+                    }
+                } else {
+                    $scheduleText = 'Kunjungan biasa, tidak dikonversi jadi lead';
+                }
+ 
+                // Status akhir badge, samakan logika dengan kolom "Status Akhir" di Blade
+                if ($isCancelled) {
+                    $statusAkhir = 'Dibatalkan';
+                    $statusAkhirKey = 'cancelled';
+                } elseif ($isCompleted && $lead) {
+                    $statusAkhir = $leadBadges[$lead->status] ?? $lead->status;
+                    $statusAkhirKey = $lead->status;
+                } elseif ($isCompleted) {
+                    $statusAkhir = '(Non-Lead)';
+                    $statusAkhirKey = 'non_lead';
+                } else {
+                    $statusAkhir = $v->status;
+                    $statusAkhirKey = $statusLower;
+                }
  
                 return [
-                    'id'                => $visit->id,
-                    'token'             => $visit->token ?? ('TRX-' . str_pad($visit->id, 4, '0', STR_PAD_LEFT)),
-                    'nama'              => $visit->guest->name ?? '-',
-                    'jabatan'           => $visit->guest->position ?? '-',
-                    'instansi'          => $visit->guest->company_name ?? '-',
-                    'kategori'          => ($visit->guest->is_vip ?? false) ? 'VIP' : 'Reguler',
-                    'waktu'             => optional($visit->check_in_at)->translatedFormat('d M Y, H:i \W\I\B'),
-                    'tanggal'           => optional($visit->check_in_at)->format('Y-m-d'),
-                    'keperluan'         => $visit->purpose->name ?? '-',
-                    'tahapPipeline'     => $lastStage->stage ?? ($visit->lead->pipeline_stage ?? '-'),
-                    'keteranganStatus'  => $visit->status_label ?? $visit->status,
-                    'catatanAwal'       => $visit->lead->notes ?? $visit->notes ?? '-',
-                    'riwayatPipeline'   => $visit->lead?->followUps->map(function ($f) {
+                    'id'               => $v->id,
+                    'token'            => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
+                    'nama'             => $v->guest->name ?? '-',
+                    'jabatan'          => $v->guest->position ?? '-',
+                    'instansi'         => $v->guest->company_name ?? '-',
+                    'isVip'            => (bool) ($v->guest->is_vip ?? false),
+                    'kategori'         => ($v->guest->is_vip ?? false) ? 'VIP' : 'Reguler',
+                    'waktu'            => $displayDate ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B') : '-',
+                    'tanggal'          => $displayDate ? \Carbon\Carbon::parse($displayDate)->format('Y-m-d') : null,
+                    'keperluan'        => $v->purpose->name ?? '-',
+                    'isCompleted'      => $isCompleted,
+                    'isCancelled'      => $isCancelled,
+                    'tahapPipeline'    => $lead ? ($leadBadges[$lead->status] ?? $lead->status) : 'Bukan Lead',
+                    'keteranganStatus' => $scheduleText,
+                    'estimasiValue'    => $lead->estimated_value ?? null,
+                    'catatanAwal'      => $v->notes ?? '-',
+                    'hasilMeeting'     => $v->meeting_result ?? '-',
+                    'riwayatPipeline'  => $lead?->followUps->map(function ($fu) use ($leadBadges) {
                         return [
-                            'tanggal' => optional($f->created_at)->format('Y-m-d'),
-                            'tahap'   => $f->stage,
-                            'catatan' => $f->notes,
+                            'tanggal'       => optional($fu->created_at)->format('Y-m-d H:i'),
+                            'tahap'         => $leadBadges[$fu->status] ?? $fu->status,
+                            'catatan'       => $fu->result,
+                            'estimasiValue' => $fu->estimated_value,
+                            'dueDate'       => $fu->due_at ? \Carbon\Carbon::parse($fu->due_at)->format('Y-m-d') : null,
                         ];
                     })->values() ?? [],
-                    'statusAkhir'       => $visit->status,
+                    'statusAkhir'      => $statusAkhir,
+                    'statusAkhirKey'   => $statusAkhirKey, // dipakai Flutter untuk pilih warna badge
                 ];
             })->values(),
             'meta' => [
@@ -258,18 +317,12 @@ public function riwayat(Request $request)
         ]);
     }
  
-    // ==== Fallback: request biasa dari browser tetap dapat view Blade ====
     return view('pic.riwayat', [
         'visits'    => $visits,
         'vipFilter' => $vipFilter,
     ]);
 }
  
-    /**
-     * PUT/POST /api/v1/pic/visits/{id}/status
-     *
-     * Update status kehadiran/kunjungan (konfirmasi / batalkan).
-     */
     public function updateStatus(Request $request, $id)
     {
         $visit = visits::where('id', $id)
