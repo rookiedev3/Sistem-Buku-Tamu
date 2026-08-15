@@ -79,11 +79,12 @@
                     </td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            {{-- Tombol Edit --}}
-                            <a href="{{ route('branches.edit', $b->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
-                            </a>
+                           {{-- Tombol Edit (Tanpa Ikon) --}}
+<a href="{{ route('branches.edit', $b->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center;">
+    Edit
+</a>
 
+<<<<<<< HEAD
                             {{-- Tombol Hapus memicu Modal --}}
                             <button type="button" onclick="confirmDelete('{{ $b->id }}', '{{ addslashes($b->name) }}')" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
                                 <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
@@ -93,6 +94,21 @@
                             <form id="delete-form-{{ $b->id }}" action="{{ route('branches.destroy', $b->id) }}" method="POST" style="display: none;">
                                 @csrf
                                 @method('DELETE')
+=======
+{{-- Tombol Hapus (Tanpa Ikon) --}}
+<form action="{{ route('branches.destroy', $b->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Branch ini?')" style="margin: 0; display: inline;">
+    @csrf
+    @method('DELETE')
+    <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center;">
+        Hapus
+    </button>
+</form>
+                                @csrf
+                                @method('DELETE')
+                                {{-- <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
+                                </button> --}}
+>>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
                             </form>
                         </div>
                     </td>

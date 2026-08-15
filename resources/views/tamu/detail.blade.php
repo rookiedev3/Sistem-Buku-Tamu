@@ -2,9 +2,10 @@
 
 @section('content')
 
-{{-- Tombol Kembali --}}
+{{-- Tombol Kembali (Diubah menjadi Button warna #0284c7) --}}
 <div style="margin-bottom: 20px;">
-    <a href="{{ route('owner.databaseTamu') }}" style="color: #778195; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+    <a href="{{ route('owner.databaseTamu') }}" 
+       style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">
         ← Kembali ke Database Tamu
     </a>
 </div>
@@ -12,7 +13,7 @@
 {{-- Header Profile Tamu --}}
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; padding: 24px; box-shadow: 0 18px 50px rgba(31,53,97,.12); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
             <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0;">
                 {{ $guest->name }}
             </h1>
@@ -22,9 +23,9 @@
                 Minat: {{ $guest->category->name ?? $guest->product_interest ?? '-' }}
             </span>
 
-            {{-- Status VIP (Opsional jika is_vip true) --}}
+            {{-- Status VIP (Disamakan menjadi lencana kuning profesional) --}}
             @if($guest->is_vip)
-                <span style="background: #fff0f0; color: #e03131; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800;">
+                <span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">
                     VIP
                 </span>
             @endif
@@ -71,12 +72,12 @@
                             </span>
                         </td>
 
-                        {{-- Bertemu Dengan (PIC) -> Mengambil dari relasi assignedUser --}}
+                        {{-- Bertemu Dengan (PIC) --}}
                         <td style="padding: 16px 20px;">
                             {{ $visit->assignedUser->name ?? '-' }}
                         </td>
 
-                        {{-- Keperluan / Catatan Pertemuan -> Mengambil dari kolom notes --}}
+                        {{-- Keperluan / Catatan Pertemuan --}}
                         <td style="padding: 16px 20px;">
                             {{ $visit->notes ?? '-' }}
                         </td>

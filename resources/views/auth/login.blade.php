@@ -268,7 +268,7 @@
         <!-- Sisi Kanan -->
         <div class="login-form-side">
             
-            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Selamat Datang! 👋</h3>
+            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Selamat Datang! </h3>
             <p class="text-secondary mb-4" style="font-size: 14px;">Silakan masukkan akun Anda untuk melanjutkan ke sistem.</p>
 
             @if (session('success'))

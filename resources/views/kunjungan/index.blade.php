@@ -6,7 +6,7 @@
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 14px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div>
-                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Daftar Kunjungan Tamu 📋</h2>
+                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Daftar Kunjungan Tamu</h2>
                 <p style="font-size: 11px; color: #778195; margin: 0;">Rekapitulasi seluruh riwayat kunjungan tamu dari berbagai PIC.</p>
             </div>
         </div>
@@ -32,7 +32,7 @@
         <div style="position: relative; width: 100%;">
             <select name="vip_status" style="width: 100%; height: 38px; padding: 8px 30px 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; font-weight: 700; color: #172033; background-color: #fff; outline: none; cursor: pointer; box-sizing: border-box; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
                 @php
-                    $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                    $vipOptions = ['all' => 'Semua Status', 'vip' => 'VIP', 'reguler' => 'Reguler'];
                     $activeVipFilter = $vipFilter ?? 'all';
                 @endphp
                 @foreach($vipOptions as $key => $label)
@@ -78,8 +78,8 @@
             $leadBadges = [
                 'new'         => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
                 'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
-                'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
-                'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
+                'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi'],
+                'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal'],
                 'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
             ];
         @endphp
@@ -117,13 +117,15 @@
                         </td>
 
                         <td style="padding: 8px 10px;">
-                            <strong style="display: block; color: #172033; font-weight: 800;">
-                                {{ $v->guest->name ?? '-' }}
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <strong style="color: #172033; font-weight: 800;">
+                                    {{ $v->guest->name ?? '-' }}
+                                </strong>
                                 @if(isset($v->guest) && $v->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                                    <span style="background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: 800;">VIP</span>
                                 @endif
-                            </strong>
-                            <span style="font-size: 10px; color: #778195;">
+                            </div>
+                            <span style="font-size: 10px; color: #778195; display: block; margin-top: 2px;">
                                 {{ $v->guest->company_name ?? '-' }} ({{ $v->guest->position ?? '-' }})
                             </span>
                         </td>
@@ -151,7 +153,7 @@
 
                         <td style="padding: 8px 10px; text-align: center;">
                             <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">
-                                📝 Lihat Catatan
+                                Lihat Catatan
                             </button>
                         </td>
 
@@ -181,7 +183,7 @@
             @php
                 $leadModal = $v->lead;
                 $scheduleTextMap = [
-                    'deal' => 'Sudah Deal 🎉',
+                    'deal' => 'Sudah Deal',
                     'lost' => 'Lead Hilang / Lost',
                 ];
                 $scheduleText = $leadModal
@@ -226,17 +228,15 @@
                                 </div>
                             </div>
 
-{{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
-     dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Catatan Awal Kunjungan:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->notes ?? 'Tidak ada catatan awal.' }}
     </div>
 </div>
 
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Hasil Meeting Pertama:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->meeting_result ?? 'Tidak ada hasil meeting.' }}
     </div>
@@ -244,13 +244,13 @@
 
                             <div>
                                 <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">
-                                    🔄 Riwayat Update Pipeline:
+                                    Riwayat Update Pipeline:
                                 </label>
 
                                 @forelse(optional($leadModal)->followUps ?? [] as $fu)
                                     <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                         <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
-                                            <span>📅 Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
+                                            <span>Tanggal Update: <strong>{{ \Carbon\Carbon::parse($fu->created_at)->translatedFormat('d F Y, H:i') }}</strong></span>
                                             <span>Tahap: <strong style="text-transform: uppercase; color: #006B3F;">{{ $leadBadges[$fu->status]['label'] ?? $fu->status }}</strong></span>
                                         </div>
 <div style="color: #334155; font-size: 13px; white-space: pre-line;">
@@ -258,7 +258,7 @@
 </div>
 <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px;">
     <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
-        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+        Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
     </div>
     @if($fu->due_at)
         <div style="font-size: 11px; color: #475569;">
@@ -293,7 +293,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
-    /* Kalender diperkecil - disamakan dengan manager/kunjungan supaya rapi & tidak kebesaran */
     .flatpickr-calendar {
         width: 230px !important;
         padding: 6px !important;
@@ -401,40 +400,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const startPicker = flatpickr("#start_date", {
-        locale: "id",
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "d F Y",
-        altInputClass: "flatpickr-custom-input",
-        disableMobile: "true",
-        onChange: function(selectedDates) {
-            if (selectedDates[0]) {
-                endPicker.set('minDate', selectedDates[0]);
-            }
-        }
-    });
-
-    const endPicker = flatpickr("#end_date", {
-        locale: "id",
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "d F Y",
-        altInputClass: "flatpickr-custom-input",
-        disableMobile: "true",
-        onChange: function(selectedDates) {
-            if (selectedDates[0]) {
-                startPicker.set('maxDate', selectedDates[0]);
-            }
-        }
-    });
-
-    const startVal = document.getElementById('start_date').value;
-    const endVal = document.getElementById('end_date').value;
-    if (startVal) endPicker.set('minDate', startVal);
-    if (endVal) startPicker.set('maxDate', endVal);
-});
 document.addEventListener('DOMContentLoaded', function() {
     const startPicker = flatpickr("#start_date", {
         locale: "id",

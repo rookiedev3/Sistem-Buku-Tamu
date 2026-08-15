@@ -7,7 +7,7 @@
         <button type="button" onclick="document.getElementById('welcomeBanner').style.display='none';" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close"></button>
         <div class="d-flex justify-content-between align-items-center pe-4">
             <div>
-                <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} 👋</h4>
+                <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} </h4>
                 <p class="mb-0 text-white-50 fs-6">Berikut adalah ringkasan aktivitas buku tamu dan kunjungan kantor hari ini.</p>
             </div>
         </div>
@@ -39,7 +39,7 @@
     </div>
 </a>
 
-<a href="{{ route('owner.dashboard', ['status' => 'Selesai']) }}#kunjungan-hari-ini" class="stat-box" ...>
+<a href="{{ route('owner.dashboard', ['status' => 'Selesai']) }}#kunjungan-hari-ini" class="stat-box" style="text-decoration:none; color:inherit;">
     <div class="stat-icon-wrap green">
         <i class="bi bi-check-circle-fill"></i>
     </div>
@@ -131,7 +131,7 @@
             <div class="card border-0 rounded-4 p-4 shadow-sm h-100" style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 10px 30px rgba(31,53,97,0.05); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru ⚡</h3>
+    <h3 class="fw-bold m-0" style="color: #172033; font-size: 16px;">Aktivitas Terbaru</h3>
     <a href="{{ route('owner.activity-log') }}" style="font-size: 12px; color: #013220; font-weight: 700; text-decoration: none;">Lihat Semua</a>
 </div>
 
@@ -163,7 +163,7 @@
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div>
-                <h2 style="font-size:18px; font-weight:800; color:#172033; margin-bottom:4px;">Kunjungan Hari Ini 📋</h2>
+                <h2 style="font-size:18px; font-weight:800; color:#172033; margin-bottom:4px;">Kunjungan Hari Ini</h2>
                 <p style="font-size:13px; color:#778195; margin:0;">Daftar tamu yang dijadwalkan atau check-in pada hari ini.</p>
             </div>
         </div>
@@ -351,7 +351,6 @@
             if (controller.signal.aborted) return;
             wrapper.innerHTML = html;
 
-            // --- FIX: sembunyikan notif kalau tidak ada filter aktif ---
             const infoBar = document.getElementById('kunjunganInfoBar');
             const keyword = fetchUrl.searchParams.get('keyword') || '';
             const status  = fetchUrl.searchParams.get('status') || '';
@@ -362,7 +361,6 @@
             if (!hasFilter && infoBar) {
                 infoBar.innerHTML = '';
             }
-            // -------------------------------------------------------------
 
             const displayUrl = new URL(url, window.location.href);
             displayUrl.searchParams.delete('partial');
