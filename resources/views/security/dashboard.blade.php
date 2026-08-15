@@ -13,7 +13,7 @@
 
     <div class="d-flex justify-content-between align-items-center pe-4">
         <div>
-            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Petugas Security' }} 👋</h4>
+            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Petugas Security' }} </h4>
             <p class="mb-0 text-white-50 fs-6">Berikut adalah daftar tamu yang masuk dan keluar berdasarkan tanggal penjagaan.</p>
         </div>
     </div>
@@ -22,7 +22,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">
-            Daftar Tamu 📋
+            Daftar Tamu 
         </h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">
             Pantau seluruh log aktivitas check-in dan check-out tamu secara real-time.
@@ -60,8 +60,7 @@
                         <strong style="display: block; color: #172033; font-weight: 800;">
                             {{ $v->guest->name ?? '-' }}
                             @if(isset($v->guest) && $v->guest->is_vip)
-                                <span title="VIP" style="color: #d97706;">⭐</span>
-                            @endif
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>                            @endif
                         </strong>
                         <span style="font-size: 11px; color: #778195;">{{ $v->guest->company_name ?? '-' }}</span>
                     </td>
