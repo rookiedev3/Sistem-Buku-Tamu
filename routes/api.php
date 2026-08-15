@@ -124,5 +124,6 @@ Route::middleware('auth:sanctum')->prefix('owner')->group(function () {
     Route::get('/produk-diminati', [OwnerApiController::class, 'produkDiminati']);
     Route::get('/kategori-tamu', [OwnerApiController::class, 'kategoriTamu']);
     Route::get('/activity-log', [OwnerApiController::class, 'activityLog']);
+    Route::get('/leads', [OwnerApiController::class, 'leads']);
     // Route::get('/owner/activities', [OwnerController::class, 'activities']);
 });

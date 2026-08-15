@@ -367,28 +367,28 @@ class OwnerApiController extends Controller
 
         $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
             ->paginate($perPage)
-            ->appends($request->query());
 
-        return response()->json([
-            'success' => true,
-            'data'    => $leads->items(),
-            'meta'    => $this->paginationMeta($leads),
-            'counts'  => [
-                'all'      => leads::count(),
-                'active'   => leads::whereNotIn('status', ['deal', 'lost'])->count(),
-                'overdue'  => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
-                'today'    => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
-                'upcoming' => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
-                'deal'     => leads::where('status', 'deal')->count(),
-                'lost'     => leads::where('status', 'lost')->count(),
-            ],
-            'filters' => [
-                'filter'     => $filter,
-                'vip_status' => $vipFilter,
-                'keyword'    => $request->input('keyword'),
-                'per_page'   => $perPage,
-            ],
-        ]);
+            ->appends($request->query());
+return response()->json([
+    'success' => true,
+    'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
+    'meta'    => $this->paginationMeta($leads),
+    'counts'  => [
+        'all'      => leads::count(),
+        'active'   => leads::whereNotIn('status', ['deal', 'lost'])->count(),
+        'overdue'  => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
+        'today'    => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
+        'upcoming' => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
+        'deal'     => leads::where('status', 'deal')->count(),
+        'lost'     => leads::where('status', 'lost')->count(),
+    ],
+    'filters' => [
+        'filter'     => $filter,
+        'vip_status' => $vipFilter,
+        'keyword'    => $request->input('keyword'),
+        'per_page'   => $perPage,
+    ],
+]);
     }
 
     /**
@@ -837,32 +837,33 @@ public function kategoriTamu(Request $request)
     ]);
 }
 
-// OwnerController.php
-
-// public function activities(Request $request)
-// {
-//     $perPage = $request->get('per_page', 20);
-
-//     $logs = activity_logs::with('user') // sesuaikan relasi kalau ada
-//         ->latest('created_at')
-//         ->paginate($perPage);
-
-//     $data = $logs->map(function ($log) {
-//         $payload = is_array($log->payload) ? $log->payload : json_decode($log->payload, true);
-
-//         return [
-//             'guest_name'   => $payload['guest_name'] ?? null,
-//             'company_name' => $payload['company_name'] ?? null,
-//             'new_status'   => $payload['new_status'] ?? $log->action,
-//             'changed_at'   => $log->created_at->toIso8601String(),
-//         ];
-//     });
-
-//     return response()->json([
-//         'data' => $data,
-//         'current_page' => $logs->currentPage(),
-//         'last_page' => $logs->lastPage(),
-//     ]);
-// }
+private function mapLead($l): array
+{
+    return [
+        'id'              => $l->id,
+        'visit_code'      => optional($l->visit)->visit_code
+            ?? ('VST-' . str_pad(optional($l->visit)->id ?? $l->id, 4, '0', STR_PAD_LEFT)),
+        'guest_name'      => optional($l->guest)->name,
+        'guest_position'  => optional($l->guest)->position,
+        'company_name'    => optional($l->guest)->company_name,
+        'is_vip'          => (bool) optional($l->guest)->is_vip,
+        'owner_id'        => optional($l->owner)->id,
+        'owner_name'      => optional($l->owner)->name,
+        'status'          => $l->status,
+        'potential_level' => $l->potential_level ?? null,
+        'estimated_value' => $l->estimated_value ?? null,
+        'follow_up_at'    => $l->follow_up_at,
+        'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
+        'meeting_result'  => optional($l->visit)->meeting_result,
+        'follow_ups'      => $l->followUps->map(fn ($f) => [
+            'id'              => $f->id,
+            'result'          => $f->result ?? null,
+            'status'          => $f->status ?? null,
+            'due_at'          => $f->due_at ?? null,
+            'estimated_value' => $f->estimated_value ?? null,   // ⬅️ BARU: nilai estimasi per update
+            'created_at'      => $f->created_at,
+        ]),
+    ];
+}
 
 }
