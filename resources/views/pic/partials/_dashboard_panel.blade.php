@@ -209,12 +209,12 @@
                                     Mulai Pertemuan
                                 </button>
                             </form>
-                            @elseif(in_array($statusLower, ['meeting', 'sedang bertemu', 'meeting selesai']))
-                            <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan-{{ $visit->id }}" style="background: {{ $visit->meeting_result ? '#0d9488' : '#d97706' }}; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                                {{ $visit->meeting_result ? '📝 Edit Catatan' : '📝 Catat Hasil' }}
-                            </button>
-                            @elseif(in_array($statusLower, ['completed', 'selesai']))
-                            <span style="color: #006B3F; font-size: 11px; font-weight: 700;">✔ Selesai</span>
+@elseif(in_array($statusLower, ['meeting', 'sedang bertemu']))
+<button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan-{{ $visit->id }}" style="background: #d97706; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+    📝 Catat Hasil
+</button>
+@elseif($statusLower === 'meeting selesai')
+<span style="color: #0d9488; font-size: 11px; font-weight: 700;">✔ Hasil Tercatat</span>
                             @else
                             <button type="button" disabled style="background: #cbd5e1; color: #64748b; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">
                                 Mulai Pertemuan
@@ -268,27 +268,58 @@
     <input type="hidden" name="_visit_id" value="{{ $visit->id }}">
 
     <div style="margin-bottom: 16px;">
-        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi</label>
+        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Catatan / Ringkasan Diskusi<span class="js-followup-required-mark" style="color: #dc2626;">*</span></label>
         <textarea name="meeting_result" rows="3" required placeholder="Tuliskan hasil obrolan atau permintaan khusus klien di sini..." style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none;">{{ old('_visit_id') == $visit->id ? old('meeting_result') : $visit->meeting_result }}</textarea>
     </div>
 
     <div style="margin-bottom: 16px;">
-        <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Potensi Klien</label>
-        @php
-            $selectedPotential = old('_visit_id') == $visit->id ? old('potential_level') : $visit->potential_level;
-        @endphp
-        <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
-            <option value="hot" {{ $selectedPotential == 'hot' ? 'selected' : '' }}>Hot Lead</option>
-            <option value="warm" {{ $selectedPotential == 'warm' ? 'selected' : '' }}>Warm Lead</option>
-            <option value="cold" {{ $selectedPotential == 'cold' ? 'selected' : '' }}>Cold</option>
-            <option value="non_lead" {{ $selectedPotential == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
-        </select>
-    </div>
+    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">Potensi Klien <span class="js-followup-required-mark" style="color: #dc2626;">*</span></label>
+    @php
+        $selectedPotential = old('_visit_id') == $visit->id ? old('potential_level') : $visit->potential_level;
+    @endphp
+    <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+        <option value="hot" {{ $selectedPotential == 'hot' ? 'selected' : '' }}>Hot Lead</option>
+        <option value="warm" {{ $selectedPotential == 'warm' ? 'selected' : '' }}>Warm Lead</option>
+        <option value="cold" {{ $selectedPotential == 'cold' ? 'selected' : '' }}>Cold</option>
+        <option value="non_lead" {{ $selectedPotential == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
+        <option value="deal" {{ $selectedPotential == 'deal' ? 'selected' : '' }}>🎉 Deal</option>
+    </select>
+</div>
 
-    <div style="margin-bottom: 20px;">
+{{-- Estimasi Nilai: cuma muncul untuk Hot/Warm/Deal, wajib khusus Deal --}}
+<div id="estimatedValueGroup-{{ $visit->id }}" style="margin-bottom: 16px; display: none;">
+    <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
+        Estimasi Nilai (Rp)
+        <span class="js-followup-required-mark" style="color: #dc2626;">*</span>
+    </label>
+    @php
+        $existingEstValue = $visit->lead->estimated_value ?? null;
+    @endphp
+    <div style="position: relative; display: flex; align-items: center; width: 100%;">
+        <div style="position: absolute; left: 14px; color: #006B3F; font-weight: 700; font-size: 13px; pointer-events: none;">Rp</div>
+        <input type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            class="rupiah-input"
+            data-hidden-target="estimatedValueRaw{{ $visit->id }}"
+            data-has-existing="{{ ($existingEstValue && (float) $existingEstValue > 0) ? '1' : '0' }}"
+            id="estimatedValueDisplay{{ $visit->id }}"
+            value=""
+            required
+            placeholder="Contoh: 5.000.000"
+            style="width: 100%; padding: 10px 14px 10px 34px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; box-sizing: border-box;">
+    </div>
+    <input type="hidden" name="estimated_value" id="estimatedValueRaw{{ $visit->id }}" value="">
+    <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 0 0;">
+        Nilai saat ini: <strong style="color: #475569;">{{ $existingEstValue ? rupiah($existingEstValue, true) : 'Belum diisi' }}</strong>.
+        Kosongkan kalau belum ada perubahan dari estimasi sebelumnya.
+    </p>
+</div>
+
+<div style="margin-bottom: 20px;">
         <label style="font-size: 12px; font-weight: 700; color: #5c6678; display: block; margin-bottom: 6px;">
             Jadwal Follow-Up Berikutnya
-            <span class="js-followup-required-mark" style="color: #dc2626;">*</span>
+            {{-- <span class="js-followup-required-mark" id="followUpRequiredMark-{{ $visit->id }}" style="color: #dc2626;">*</span> --}}
         </label>
 
         <div style="position: relative; display: flex; align-items: center; width: 100%;">
@@ -357,14 +388,30 @@ function validateFollowUpDate(form) {
     const potentialSelect = form.querySelector('select[name="potential_level"]');
     const errorEl = form.querySelector('.js-followup-date-error');
 
-    // Hanya Hot Lead yang wajib isi tanggal follow-up
-    const isDateOptional = potentialSelect && ['warm', 'cold', 'non_lead'].includes(potentialSelect.value);
+    const rupiahInput = form.querySelector('.rupiah-input');
+    const hiddenInput = form.querySelector("input[name='estimated_value']");
+
+    const isDeal = potentialSelect && potentialSelect.value === 'deal';
+    const isDateOptional = potentialSelect && ['cold', 'non_lead'].includes(potentialSelect.value);
 
     if (!isDateOptional && !dateInput.value) {
         if (errorEl) errorEl.style.display = 'block';
         dateInput.style.borderColor = '#dc2626';
         dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return false;
+    }
+
+    if (isDeal && rupiahInput && hiddenInput) {
+        const hasExisting = rupiahInput.dataset.hasExisting === '1';
+        const hasNewValue = !!hiddenInput.value;
+
+        if (!hasNewValue && !hasExisting) {
+            rupiahInput.classList.add('is-invalid');
+            rupiahInput.focus();
+            rupiahInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            alert('Estimasi Nilai Deal wajib diisi sebelum bisa ditandai Deal.');
+            return false;
+        }
     }
 
     if (errorEl) errorEl.style.display = 'none';

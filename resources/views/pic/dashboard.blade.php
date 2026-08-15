@@ -92,6 +92,9 @@
         color: #778195 !important;
         font-weight: 600 !important;
     }
+
+   input.rupiah-input:focus { border-color: #006B3F !important; box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.1) !important; }
+    input.rupiah-input.is-invalid { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important; }
 </style>
 
 <script>
@@ -100,25 +103,78 @@
     const dashboardUrl = new URL('{{ route('pic.dashboard') }}', window.location.origin);
 
 function toggleFollowUpRequirement(selectEl) {
-    const visitId = selectEl.id.replace('potential_level-', '');
-    const dateInput = document.getElementById('follow_up_at-' + visitId);
-    if (!dateInput) return;
+    const id = selectEl.id.replace('potential_level-', '');
+    const dateInput = document.getElementById('follow_up_at-' + id);
+    const estGroup = document.getElementById('estimatedValueGroup-' + id);
+    const estInput = document.getElementById('estimatedValueDisplay' + id); // <-- ambil input-nya juga
 
-    const isOptional = ['warm', 'cold', 'non_lead'].includes(selectEl.value);
+    const isDeal = selectEl.value === 'deal';
+    const isDateOptional = ['cold', 'non_lead', 'deal'].includes(selectEl.value);
+    const showEstValue = ['hot', 'warm', 'deal'].includes(selectEl.value);
+
     const form = selectEl.closest('form');
     const mark = form ? form.querySelector('.js-followup-required-mark') : null;
     const errorEl = form ? form.querySelector('.js-followup-date-error') : null;
+    const dealMark = form ? form.querySelector('.js-deal-required-mark') : null;
 
-    dateInput.placeholder = isOptional ? 'Pilih tanggal follow-up... (opsional)' : 'Pilih tanggal follow-up...';
-    if (mark) mark.style.display = isOptional ? 'none' : 'inline';
+    if (dateInput) {
+        dateInput.disabled = isDateOptional;
+        dateInput.placeholder = isDateOptional
+            ? 'Tidak memerlukan follow up'
+            : 'Pilih tanggal follow-up...';
+        dateInput.style.background = isDateOptional ? '#f1f5f9' : '#fbfcfe';
+        dateInput.style.cursor = isDateOptional ? 'not-allowed' : 'pointer';
 
-    if (isOptional && errorEl) {
+        if (isDateOptional) {
+            if (dateInput._flatpickr) {
+                dateInput._flatpickr.clear();
+            } else {
+                dateInput.value = '';
+            }
+        }
+    }
+
+    if (mark) mark.style.display = isDateOptional ? 'none' : 'inline';
+
+    if (isDateOptional && errorEl) {
         errorEl.style.display = 'none';
-        dateInput.style.borderColor = '#e8edf5';
+        if (dateInput) dateInput.style.borderColor = '#e8edf5';
+    }
+
+    if (estGroup) estGroup.style.display = showEstValue ? 'block' : 'none';
+    if (dealMark) dealMark.style.display = isDeal ? 'inline' : 'none';
+
+    // Field ini cuma bener-bener wajib pas Deal — dan yang penting,
+    // JANGAN biarin "required" nempel pas field-nya disembunyikan (hot/warm/cold/non_lead),
+    // soalnya required + hidden bikin form gagal submit tanpa pesan error yang keliatan.
+    if (estInput) {
+        estInput.required = isDeal;
+        if (!showEstValue) {
+            estInput.value = '';
+            estInput.classList.remove('is-invalid');
+            const hidden = document.getElementById(estInput.dataset.hiddenTarget);
+            if (hidden) hidden.value = '';
+        }
     }
 }
 
-    // Nyalain ulang flatpickr utk input follow_up_at di baris-baris yang baru di-load
+// Formatter Rupiah, sama logic-nya kayak di pic.leads, tapi bisa dipanggil ulang
+// tiap kali panel di-swap via AJAX (pakai flag data-rupiah-init biar gak double-bind)
+function initRupiahInputs(scope) {
+    scope.querySelectorAll('.rupiah-input:not([data-rupiah-init])').forEach(function (input) {
+        input.dataset.rupiahInit = '1';
+        const hidden = document.getElementById(input.dataset.hiddenTarget);
+
+        input.addEventListener('input', function () {
+            const raw = this.value.replace(/\D/g, '');
+            this.value = raw ? new Intl.NumberFormat('id-ID').format(raw) : '';
+            if (hidden) hidden.value = raw;
+            this.classList.remove('is-invalid');
+        });
+    });
+}
+
+// Nyalain ulang flatpickr utk input follow_up_at di baris-baris yang baru di-load
 function initRowWidgets() {
     panel.querySelectorAll('[id^="follow_up_at-"]').forEach(function (inputEl) {
         if (inputEl._flatpickr) return;
@@ -130,23 +186,32 @@ function initRowWidgets() {
         });
     });
 
-    // Set wajib/opsional sesuai Potensi Klien yang sedang terpilih (termasuk saat edit catatan lama)
-    panel.querySelectorAll('select[id^="potential_level-"]').forEach(toggleFollowUpRequirement);
+    // Nyalain formatter Rupiah utk input Estimasi Nilai di baris-baris yang baru di-load
+    initRupiahInputs(panel);
+
+    // Set kondisi awal tanda (*) & visibilitas Estimasi Nilai tiap kali panel
+    // di-render/di-swap ulang, biar sinkron sama nilai potential_level yang
+    // udah ke-set (misal dari old())
+    panel.querySelectorAll('select[id^="potential_level-"]').forEach(function (select) {
+        toggleFollowUpRequirement(select);
+    });
 }
-    function loadDashboard(params, pushState = true) {
-        const url = dashboardUrl.pathname + '?' + params.toString();
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function (res) { return res.text(); })
-            .then(function (html) {
-                panel.innerHTML = html;
-                initRowWidgets();
-                if (pushState) {
-                    window.history.pushState({}, '', url);
-                }
-            });
-    }
+function loadDashboard(params, pushState = true) {
+    const url = dashboardUrl.pathname + '?' + params.toString();
 
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+            panel.innerHTML = html;
+            initRowWidgets();
+            if (pushState) {
+                window.history.pushState({}, '', url);
+            }
+        });
+}
+
+// Satu listener aja buat semua perubahan di dalam panel
 panel.addEventListener('change', function (e) {
     if (e.target.matches('select[id^="potential_level-"]')) {
         toggleFollowUpRequirement(e.target);
@@ -159,15 +224,7 @@ panel.addEventListener('change', function (e) {
     loadDashboard(new URLSearchParams(url.search));
 });
 
-    // Ganti dropdown Status VIP/Reguler -> AJAX, bukan reload
-    panel.addEventListener('change', function (e) {
-        if (!e.target.matches('select[data-role="vip-status"]')) return;
-
-        const url = new URL(e.target.value, window.location.origin);
-        loadDashboard(new URLSearchParams(url.search));
-    });
-
-    initRowWidgets();
+initRowWidgets();
 })();
 </script>
 @endsection

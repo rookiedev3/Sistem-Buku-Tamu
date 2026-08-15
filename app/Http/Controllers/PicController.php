@@ -260,90 +260,78 @@ class PicController extends Controller
     /**
      * Selesaikan Pertemuan & Catat Hasil Diskusi.
      */
+       /**
+     * Selesaikan Pertemuan & Catat Hasil Diskusi.
+     */
     public function completeMeeting(Request $request, $id)
-    {
-$request->validate([
-    'meeting_result' => 'required|string',
-    'potential_level' => 'required|in:hot,warm,cold,non_lead',
-    'follow_up_at' => 'nullable|date|required_unless:potential_level,warm,cold,non_lead',
-    'estimated_value' => 'nullable|numeric',
-], [
-    'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
-]);
+{
+    $visit = visits::with(['guest', 'lead'])
+        ->where('id', $id)
+        ->where('assigned_to', auth()->id())
+        ->firstOrFail();
 
-        $visit = visits::with('guest')
-            ->where('id', $id)
-            ->where('assigned_to', auth()->id())
-            ->firstOrFail();
-
-        $oldStatus = trim($visit->status ?? '');
-        $newStatus = 'Meeting Selesai';
-
-        if (strtolower($oldStatus) !== strtolower($newStatus)) {
-            visit_status_logs::create([
-                'visit_id'   => $visit->id,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
-                'changed_by' => auth()->check() ? auth()->id() : null,
-                'changed_at' => now(),
-            ]);
-        }
-
-        $visit->update([
-            'status' => $newStatus,
-            'meeting_result' => $request->meeting_result,
-            'potential_level' => $request->potential_level,
-            'follow_up_at' => $request->follow_up_at,
-            'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot']),
-            'updated_by' => auth()->id(),
-        ]);
-
-        // 🟢 PROSES LEAD DAN PENGIRIMAN NOTIFIKASI
-        if (in_array($request->potential_level, ['warm', 'hot'])) {
-            $estValue = $request->estimated_value ?? 0;
-
-            $lead = leads::updateOrCreate(
-                ['visit_id' => $visit->id],
-                [
-                    'guest_id' => $visit->guest_id,
-                    'owner_id' => auth()->id(),
-                    'status' => 'new',
-                    'estimated_value' => $estValue,
-                    'follow_up_at' => $request->follow_up_at,
-                ]
-            );
-
-            // 🔔 KIRIM NOTIFIKASI LEAD BARU KE MANAGER / OWNER
-            $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
-
-            $guestName = $visit->guest->name ?? 'Tamu';
-            $companyName = $visit->guest->company_name ?? 'Instansi';
-            $formattedValue = 'Rp ' . number_format($estValue, 0, ',', '.');
-            $picName = auth()->user()->name ?? 'PIC';
-            $potensiText = strtoupper($request->potential_level);
-
-            $title = "🚀 Lead Baru Masuk: {$guestName}";
-
-            $message = implode("\n", [
-                "Terdapat Lead baru dari {$guestName} ({$companyName})",
-                "• Potensi: {$potensiText}",
-                "• Est. Nilai: {$formattedValue}",
-                "• PIC: {$picName}",
-            ]);
-
-            foreach ($managers as $manager) {
-                notifications::send(
-                    $manager->id,
-                    'new_lead',
-                    $title,
-                    $message
-                );
-            }
-        }
-
-        return redirect()->back()->with('success', 'Catatan hasil pertemuan dan data lead berhasil disimpan!');
+    // 🔒 Sekali dicatat, hasil pertemuan tidak bisa diubah lagi —
+    // mencegah PIC ganti potential_level (misal deal → non_lead) setelah lead sudah terbentuk.
+    if (strtolower(trim($visit->status ?? '')) === 'meeting selesai') {
+        return back()->with('error', 'Hasil pertemuan sudah pernah dicatat dan tidak bisa diubah lagi.');
     }
 
+    $request->validate([
+        'meeting_result' => 'required|string',
+        'potential_level' => 'required|in:hot,warm,cold,non_lead,deal',
+        'follow_up_at' => 'nullable|date|required_unless:potential_level,warm,cold,non_lead,deal',
+        'estimated_value' => 'nullable|numeric|min:0',
+], [
+        'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
+    ]);
+
+    // Nilai final = input baru (kalau diisi) atau nilai lama dari lead yang sudah ada
+    $existingEstValue = $visit->lead->estimated_value ?? 0;
+    $finalEstValue = $request->filled('estimated_value') ? $request->estimated_value : $existingEstValue;
+
+    if ($request->potential_level === 'deal' && (float) $finalEstValue <= 0) {
+        return back()->withInput()->with('error', 'Estimasi Nilai Deal wajib diisi (lebih dari Rp 0) sebelum bisa ditandai Deal.');
+    }
+
+    $oldStatus = trim($visit->status ?? '');
+    $newStatus = 'Meeting Selesai';
+
+    visit_status_logs::create([
+        'visit_id'   => $visit->id,
+        'old_status' => $oldStatus,
+        'new_status' => $newStatus,
+        'changed_by' => auth()->check() ? auth()->id() : null,
+        'changed_at' => now(),
+    ]);
+
+    $visit->update([
+        'status' => $newStatus,
+        'meeting_result' => $request->meeting_result,
+        'potential_level' => $request->potential_level,
+        'follow_up_at' => $request->follow_up_at,
+        'is_converted_to_lead' => in_array($request->potential_level, ['warm', 'hot', 'deal']),
+        'updated_by' => auth()->id(),
+    ]);
+
+    if (in_array($request->potential_level, ['warm', 'hot', 'deal'])) {
+        $isDeal = $request->potential_level === 'deal';
+
+        leads::updateOrCreate(
+            ['visit_id' => $visit->id],
+            [
+                'guest_id' => $visit->guest_id,
+                'owner_id' => auth()->id(),
+                'status' => $isDeal ? 'deal' : 'new',
+                'estimated_value' => $finalEstValue,
+                'follow_up_at' => $isDeal ? null : $request->follow_up_at,
+            ]
+        );
+    }
+
+    // 🔕 Notifikasi ke manager tetap ditunda sampai checkOut() di FrontOfficeController.
+
+    return redirect()->back()->with('success', 'Catatan hasil pertemuan dan data lead berhasil disimpan!');
+}
     /**
      * Update Tahap Pipeline Lead dari Modal (Daftar Follow-Up)
      */
