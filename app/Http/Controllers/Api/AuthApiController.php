@@ -15,6 +15,7 @@ public function login(Request $request)
     $validator = Validator::make($request->all(), [
         'email'    => 'required|email',
         'password' => 'required',
+        'remember' => 'nullable|boolean',
     ]);
 
     if ($validator->fails()) {
@@ -27,17 +28,21 @@ public function login(Request $request)
         return $this->responseHasil(401, false, "Email atau password salah");
     }
 
-    // Belum pernah di-approve sama sekali (role kosong)
     if (is_null($user->role)) {
         return $this->responseHasil(403, false, "Akun masih menunggu persetujuan admin");
     }
 
-    // Sudah punya role, tapi dinonaktifkan
     if (!$user->is_active) {
         return $this->responseHasil(403, false, "Akun Anda telah dinonaktifkan. Hubungi admin.");
     }
 
-    $token = $user->createToken('mobile-app')->plainTextToken;
+    $remember = $request->boolean('remember');
+
+    // Kalau "Ingat Saya" dicentang → token berlaku 30 hari
+    // Kalau tidak → token berlaku 1 hari saja
+    $expiresAt = $remember ? now()->addDays(30) : now()->addDay();
+
+    $token = $user->createToken('mobile-app', ['*'], $expiresAt)->plainTextToken;
 
     return $this->responseHasil(200, true, [
         'token' => $token,
@@ -49,7 +54,6 @@ public function login(Request $request)
         ],
     ]);
 }
-
 public function register(Request $request)
 {
     $validator = Validator::make($request->all(), [
