@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use URL;
 
 class OwnerApiController extends Controller
 {
@@ -469,7 +470,7 @@ return response()->json([
 
         return response()->json([
             'success' => true,
-            'data'    => $visits->items(),
+            'data' => collect($visits->items())->map(fn ($v) => $this->mapVisitLaporan($v)),
             'meta'    => $this->paginationMeta($visits),
             'summary' => [
                 'total_kunjungan' => $totalKunjungan,
@@ -534,11 +535,18 @@ return response()->json([
             'public'
         );
 
-        return response()->json([
-            'success'  => true,
-            'file_url' => Storage::disk('public')->url($path),
-            'file_name'=> $fileName,
-        ]);
+// di dalam exportExcel(), ganti bagian return-nya jadi:
+$downloadUrl = URL::temporarySignedRoute(
+    'laporan.download',
+    now()->addMinutes(10),
+    ['filename' => $fileName]
+);
+
+return response()->json([
+    'success'   => true,
+    'file_url'  => $downloadUrl,
+    'file_name' => $fileName,
+]);
     }
 
     /**
@@ -649,12 +657,34 @@ return response()->json([
 
         Storage::disk('public')->put($path, $pdf->output());
 
-        return response()->json([
-            'success'  => true,
-            'file_url' => Storage::disk('public')->url($path),
-            'file_name'=> $fileName,
-        ]);
+// di dalam exportExcel(), ganti bagian return-nya jadi:
+$downloadUrl = URL::temporarySignedRoute(
+    'laporan.download',
+    now()->addMinutes(10),
+    ['filename' => $fileName]
+);
+
+return response()->json([
+    'success'   => true,
+    'file_url'  => $downloadUrl,
+    'file_name' => $fileName,
+]);
     }
+
+    public function downloadLaporan(Request $request, string $filename)
+{
+    if (!$request->hasValidSignature()) {
+        abort(403, 'Link download tidak valid atau sudah kadaluarsa.');
+    }
+
+    $path = 'exports/' . $filename;
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404, 'File tidak ditemukan.');
+    }
+
+    return Storage::disk('public')->download($path, $filename);
+}
 
     /**
      * GET /api/v1/owner/guests
@@ -743,7 +773,43 @@ return response()->json([
             ?? $v->meeting_result
             ?? optional(optional($v->lead)->followUps->sortByDesc('created_at')->first())->result,
         'status_kunjungan' => $v->status,
-        'status_lead'      => optional($v->lead)->status ?? $v->potential_level,
+        'potential_level'  => $v->potensi_level,
+    ];
+}
+
+private function mapVisitLaporan($v): array
+{
+    $checkIn  = $v->check_in_at;
+    $checkOut = $v->check_out_at;
+    $durasiMenit = ($checkIn && $checkOut)
+        ? Carbon::parse($checkIn)->diffInMinutes(Carbon::parse($checkOut))
+        : null;
+
+    // Samain persis logika $isCompleted di blade (riwayat.blade.php)
+    $statusLower = strtolower(trim((string) $v->status));
+    $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+
+    return [
+        'id'               => $v->id,
+        'visit_code'       => $v->visit_code ?? ('TRX-' . str_pad($v->id, 3, '0', STR_PAD_LEFT)),
+        'check_in_at'      => $checkIn,
+        'check_out_at'     => $checkOut,
+        'durasi_menit'     => $durasiMenit,
+        'guest_name'       => optional($v->guest)->name,
+        'guest_phone'      => optional($v->guest)->phone,
+        'is_vip'           => (bool) optional($v->guest)->is_vip,
+        'branch_name'      => optional($v->branch)->name,
+        'pic_name'         => optional($v->assignedUser)->name,
+        'purpose_name'     => optional($v->purpose)->name,
+        'product_names'    => $v->products->pluck('name')->implode(', '),
+        'source_name'      => optional($v->source)->name,
+        'potential_level'  => $v->potential_level,              // FIX: langsung dari visits.potensi_level
+        'meeting_result'   => $v->meeting_result,
+        'notes'            => $v->notes,                      // FIX: field baru untuk "Catatan Hasil"
+        'status'           => $v->status,
+        'lead_status'      => optional($v->lead)->status,      // FIX: leads.status terpisah
+        'is_completed'     => $isCompleted,                    // FIX: flag buat logic badge
+        'company_name'     => optional($v->guest)->company_name,
     ];
 }
 

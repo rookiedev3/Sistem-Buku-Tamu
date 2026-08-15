@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\GuestCategoriesApiController;
 use App\Http\Controllers\Api\LeadSourcesApiController;
 use App\Http\Controllers\Api\ProductsApiController;
 use App\Http\Controllers\Api\CheckInApiController;
+use App\Http\Controllers\api\LaporanController;
 use App\Http\Controllers\Api\ManagerApiController;
 use App\Http\Controllers\Api\OwnerApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
@@ -125,5 +126,14 @@ Route::middleware('auth:sanctum')->prefix('owner')->group(function () {
     Route::get('/kategori-tamu', [OwnerApiController::class, 'kategoriTamu']);
     Route::get('/activity-log', [OwnerApiController::class, 'activityLog']);
     Route::get('/leads', [OwnerApiController::class, 'leads']);
-    // Route::get('/owner/activities', [OwnerController::class, 'activities']);
+    Route::get('/laporan', [OwnerApiController::class, 'laporan']);
+Route::get('/laporan/export-excel', [OwnerApiController::class, 'exportExcel']);
+Route::get('/laporan/export-pdf', [OwnerApiController::class, 'exportPdf']);
+// routes/api.php
+Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'downloadFile']);
+
 });
+
+Route::get('/owner/laporan/download/{filename}', [OwnerApiController::class, 'downloadLaporan'])
+    ->name('laporan.download')   // 👈 INI namanya "laporan.download"
+    ->middleware('signed');
