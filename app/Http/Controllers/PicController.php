@@ -322,7 +322,7 @@ class PicController extends Controller
 
             // NOTIFIKASI WA & DB HANYA DIKIRIM JIKA LEAD BARU DIBUAT (Mencegah Notif Ganda Saat Edit)
             if ($lead->wasRecentlyCreated) {
-                $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
+                $managers = User::whereIn('role', ['manager', 'owner'])->get();
 
                 $guestName      = $visit->guest->name ?? 'Tamu';
                 $companyName    = $visit->guest->company_name ?? 'Instansi';
@@ -334,30 +334,35 @@ class PicController extends Controller
                 $message = implode("\n", [
                     "Terdapat Lead baru dari {$guestName} ({$companyName})",
                     "• Potensi: {$potensiText}",
-                    "• Est. Nilai: {$formattedValue}",
                     "• PIC: {$picName}",
                 ]);
 
-                // Notifikasi Database
+                // 1. Notifikasi Database Internal
                 foreach ($managers as $manager) {
                     notifications::send($manager->id, 'new_lead', $title, $message);
                 }
 
-                // Notifikasi WhatsApp Fonnte (Mengirim ke nomor HP unik milik Manager/Owner/Admin)
-                $token        = config('services.fonnte.token', env('FONNTE_TOKEN'));
-                $waMessage    = "*{$title}*\n\n" . $message;
+                // 2. Notifikasi WhatsApp (Mengirim ke nomor HP unik milik Manager, Owner, dan Admin)
+                $targetPhones = $managers->pluck('phone')->filter()->unique();
 
-                //try {
-                //    Http::withoutVerifying()
-                //        ->withHeaders([
-                //            'Authorization' => $token,
-                //        ])->post('https://api.fonnte.com/send', [
-                //            'target'  => '085926276649',
-                //            'message' => $waMessage,
-                //        ]);
-                //} catch (\Exception $e) {
-                //    \Log::error("Gagal kirim WA ke 085926276649: " . $e->getMessage());
-                //}
+                if (! $targetPhones->isEmpty()) {
+                    $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                    $waMessage = "*{$title}*\n\n" . $message;
+
+                    foreach ($targetPhones as $phone) {
+                        try {
+                            Http::withoutVerifying()
+                                ->withHeaders([
+                                    'Authorization' => $token,
+                                ])->post('https://api.fonnte.com/send', [
+                                    'target'  => $phone,
+                                    'message' => $waMessage,
+                                ]);
+                        } catch (\Exception $e) {
+                            \Log::error("Gagal kirim WA ke {$phone}: " . $e->getMessage());
+                        }
+                    }
+                }
             }
         }
 

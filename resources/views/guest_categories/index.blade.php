@@ -76,7 +76,7 @@
             <tbody style="color: #172033;">
                 @forelse ($guest_category as $index => $guest)
                 <tr style="border-bottom: 1px solid #f1f4f9;">
-                    <td style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
+                    <td class="row-number" style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px; font-weight: 800;">{{ $guest->name }}</td>
                     <td style="padding: 16px 20px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -88,16 +88,22 @@
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
                             {{-- Tombol Edit --}}
                             <a href="{{ route('guest-categories.edit', $guest->id) }}" style="background: #e8f8f1; color: #013220; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                                Edit
+                                <i class="bi bi-pencil-fill" style="font-size: 11px;"></i> Edit
                             </a>
 
-                            {{-- Tombol Hapus --}}
-                            <form action="{{ route('guest-categories.destroy', $guest->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Guest Category ini?')" style="margin: 0; display: inline;">
+                            {{-- Tombol Hapus memicu Modal --}}
+                            <button type="button" 
+                                    class="btn-delete-trigger"
+                                    data-id="{{ $guest->id }}" 
+                                    data-name="{{ $guest->name }}"
+                                    style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-trash-fill" style="font-size: 11px;"></i> Hapus
+                            </button>
+
+                            {{-- Form Tersembunyi Hapus --}}
+                            <form id="delete-form-{{ $guest->id }}" action="{{ route('guest-categories.destroy', $guest->id) }}" method="POST" style="display: none;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" style="background: #fef2f2; border: none; color: #e5484d; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 12px; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;">
-                                    Hapus
-                                </button>
                             </form>
                         </div>
                     </td>
@@ -119,20 +125,83 @@
 
 </div>
 
-{{-- Script JavaScript untuk Pencarian Real-Time Guest Categories --}}
+{{-- MODAL KONFIRMASI HAPUS --}}
+<div id="deleteConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 9999; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
+
+        <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Hapus Guest Category?</h3>
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
+            Apakah Anda yakin ingin menghapus kategori <strong id="deleteTargetName" style="color: #172033;">-</strong>? Tindakan ini tidak dapat dibatalkan.
+        </p>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="button" onclick="closeDeleteModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                Batal
+            </button>
+            <button type="button" id="confirmDeleteSubmitBtn" style="flex: 1; background: #dc2626; color: #ffffff; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Script JavaScript untuk Modal dan Pencarian Real-Time --}}
 <script>
+    let activeDeleteId = null;
+
+    // Membuka Modal Hapus Menggunakan Event Listener (Aman dari String Escaping Issue)
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-delete-trigger');
+        if (btn) {
+            activeDeleteId = btn.getAttribute('data-id');
+            const targetName = btn.getAttribute('data-name');
+            
+            document.getElementById('deleteTargetName').textContent = targetName;
+            
+            const modal = document.getElementById('deleteConfirmModal');
+            modal.style.setProperty('display', 'flex', 'important');
+        }
+    });
+
+    function closeDeleteModal() {
+        activeDeleteId = null;
+        const modal = document.getElementById('deleteConfirmModal');
+        modal.style.setProperty('display', 'none', 'important');
+    }
+
+    // Eksekusi Submit Form Hapus
+    document.getElementById('confirmDeleteSubmitBtn').addEventListener('click', function() {
+        if (activeDeleteId) {
+            const form = document.getElementById('delete-form-' + activeDeleteId);
+            if (form) {
+                form.submit();
+            }
+        }
+    });
+
+    // Filtering Pencarian Real-Time
     function filterGuestCategoryTable() {
         const input = document.getElementById('searchGuestCategory');
-        const filter = input.value.toLowerCase();
+        const filter = input.value.toLowerCase().trim();
         const table = document.getElementById('guestCategoryTable');
         const tr = table.getElementsByTagName('tr');
+        let visibleIndex = 1;
 
         for (let i = 1; i < tr.length; i++) {
+            if (tr[i].getElementsByTagName('td').length <= 1) continue;
+
             let tdName = tr[i].getElementsByTagName('td')[1];
+            let tdNum = tr[i].querySelector('.row-number');
+
             if (tdName) {
                 let txtName = tdName.textContent || tdName.innerText;
+
                 if (txtName.toLowerCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
+                    if (tdNum) {
+                        tdNum.textContent = visibleIndex;
+                        visibleIndex++;
+                    }
                 } else {
                     tr[i].style.display = "none";
                 }

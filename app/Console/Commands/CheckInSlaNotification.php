@@ -7,6 +7,7 @@ use App\Models\visits;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class CheckInSlaNotification extends Command
 {
@@ -65,39 +66,47 @@ class CheckInSlaNotification extends Command
 
             $purposeName = $visit->purpose->name ?? '-';
             $branchName  = $visit->branch->name ?? '-';
+            $guestName   = $guest->name ?? '-';
+            $companyName = $guest->company_name ?? '-';
+            $visitCode   = $visit->visit_code ?? '-';
+            $checkInTime = Carbon::parse($visit->check_in_at)->format('H:i');
 
-            // Kirim Notifikasi HANYA ke PIC Terpilih (assigned_to)
+            $title   = 'Peringatan SLA Pelayanan!';
+            $message = "Tamu telah menunggu Anda selama {$formattedDuration}.\n"
+                . "• Kode: {$visitCode}\n"
+                . "• Nama: {$guestName}\n"
+                . "• Instansi: {$companyName}\n"
+                . "• Tujuan: {$purposeName}\n"
+                . "• Cabang: {$branchName}\n"
+                . "• Waktu Check-in: {$checkInTime} WIB";
+
+            // 1. Kirim Notifikasi Sistem (Database) ke PIC (assigned_to)
             notifications::send(
                 $visit->assigned_to,
                 'sla_warning',
-                'Peringatan SLA Pelayanan!',
-                'Tamu telah menunggu Anda selama ' . $formattedDuration . '.' .
-                    "\n" . 'Kode: ' . ($visit->visit_code ?? '-') .
-                    "\n" . 'Nama: ' . ($guest->name ?? '-') .
-                    "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                    "\n" . 'Tujuan: ' . $purposeName .
-                    "\n" . 'Cabang: ' . $branchName .
-                    "\n" . 'Waktu Check-in: ' . Carbon::parse($visit->check_in_at)->format('H:i') . ' WIB'
+                $title,
+                $message
             );
 
-            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+            // 2. Kirim Notifikasi WhatsApp Fonnte ke Nomor HP PIC
+            $assignedPicPhone = $visit->assignedUser->phone ?? null;
 
-            $message = "*Peringatan SLA Pelayanan!*\n\n"
-            . "Tamu telah menunggu Anda selama *" . $formattedDuration . "*.\n\n"
-            . "Kode: " . ($visit->visit_code ?? '-') . "\n"
-            . "Nama: " . ($guest->name ?? '-') . "\n"
-            . "Instansi: " . ($guest->company_name ?? '-') . "\n"
-            . "Tujuan: " . $purposeName . "\n"
-            . "Cabang: " . $branchName . "\n"
-            . "Waktu Check-in: " . Carbon::parse($visit->check_in_at)->format('H:i') . " WIB";
+            if (! empty($assignedPicPhone)) {
+                $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage = "*{$title}*\n\n" . $message;
 
-            Http::withoutVerifying()
-                ->withHeaders([
-                    'Authorization' => $token,
-                ])->post('https://api.fonnte.com/send', [
-                    'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-                    'message' => $message,
-               ]);
+                try {
+                    Http::withoutVerifying()
+                        ->withHeaders([
+                            'Authorization' => $token,
+                        ])->post('https://api.fonnte.com/send', [
+                            'target'  => $assignedPicPhone,
+                            'message' => $waMessage,
+                        ]);
+                } catch (\Exception $e) {
+                    Log::error("Gagal mengirim WA SLA ke PIC ({$assignedPicPhone}): " . $e->getMessage());
+                }
+            }
 
             $processedCount++;
         }
@@ -111,7 +120,7 @@ class CheckInSlaNotification extends Command
      */
     private function formatDuration(int $totalMinutes): string
     {
-        $hours = floor($totalMinutes / 60);
+        $hours   = floor($totalMinutes / 60);
         $minutes = $totalMinutes % 60;
 
         if ($hours > 0 && $minutes > 0) {

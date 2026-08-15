@@ -127,30 +127,38 @@ class FrontOfficeController extends Controller
         $guestName   = $visit->guest->name ?? 'Tamu';
         $assignedPic = $visit->assignedUser;
 
-        // 4. Kirim Notifikasi (Hanya berjalan 1 kali)
+        // 4. Kirim Notifikasi Internal & WhatsApp (Hanya berjalan jika ada PIC yang ditugaskan)
         if ($assignedPic) {
+            $title   = 'Tamu Anda Sudah Datang';
+            $message = "Tamu {$guestName} telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
+
             // A. Notifikasi Sistem (Database)
             notifications::send(
                 $assignedPic->id,
                 'guest_arrived',
-                'Tamu Anda Sudah Datang',
-                'Tamu ' . $guestName . ' telah check-in dan sedang menunggu untuk bertemu dengan Anda.'
+                $title,
+                $message
             );
 
-            // B. Notifikasi WhatsApp Fonnte
-            $token = config('services.fonnte.token', env('FONNTE_TOKEN'));
-            
-            // PERBAIKAN: Menggunakan $guestName (sebelumnya $guest->name yang menyebabkan error)
-            $message = "*Tamu Anda Sudah Datang*\n\n"
-                . "Tamu *" . $guestName . "* telah check-in dan sedang menunggu untuk bertemu dengan Anda.";
+            // B. Notifikasi WhatsApp Fonnte (Mengirim ke nomor HP PIC)
+            $targetPhone = $assignedPic->phone ?? null;
 
-            //Http::withoutVerifying()
-            //    ->withHeaders([
-            //        'Authorization' => $token,
-            //    ])->post('https://api.fonnte.com/send', [
-            //        'target'  => '085926276649',
-            //        'message' => $message,
-            //    ]);
+            if (! empty($targetPhone)) {
+                $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage = "*{$title}*\n\n" . $message;
+
+                try {
+                    Http::withoutVerifying()
+                        ->withHeaders([
+                            'Authorization' => $token,
+                        ])->post('https://api.fonnte.com/send', [
+                            'target'  => $targetPhone,
+                            'message' => $waMessage,
+                        ]);
+                } catch (\Exception $e) {
+                    \Log::error("Gagal mengirim WA ke PIC {$assignedPic->name} ({$targetPhone}): " . $e->getMessage());
+                }
+            }
         }
 
         return redirect()->back()->with('success', 'Tamu berhasil Check-in!');

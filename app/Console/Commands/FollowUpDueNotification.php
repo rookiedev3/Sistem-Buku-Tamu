@@ -2,11 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Models\follow_ups; // Sesuaikan dengan model follow_ups Anda
+use App\Models\follow_ups;
 use App\Models\notifications;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class FollowUpDueNotification extends Command
 {
@@ -43,9 +44,9 @@ class FollowUpDueNotification extends Command
             $lead = $fu->lead;
             if (!$lead) continue;
 
-            $guest    = $lead->visit->guest ?? null;
-            $purpose  = $lead->visit->purpose ?? null;
-            $picId    = $lead->assigned_to ?? $fu->created_by; // ID PIC yang bertanggung jawab
+            $guest     = $lead->visit->guest ?? null;
+            $purpose   = $lead->visit->purpose ?? null;
+            $picId     = $lead->assigned_to ?? $fu->created_by; // ID PIC yang bertanggung jawab
 
             if (!$picId) continue;
 
@@ -54,8 +55,6 @@ class FollowUpDueNotification extends Command
             $tindakan    = $fu->action_plan ?? $fu->notes ?? $fu->result ?? 'Melakukan kontak/follow-up lanjutan';
 
             // Identifier unik untuk cegah spaming notifikasi ganda dalam 5 menit terakhir
-            $notifIdentifier = "Follow-up Tamu: {$guestName}";
-
             $recentlyNotified = notifications::where('user_id', $picId)
                 ->where('type', 'followup_reminder')
                 ->where('body', 'like', '%' . $guestName . '%')
@@ -69,32 +68,39 @@ class FollowUpDueNotification extends Command
             // Format tanggal tenggat
             $dueDateFormatted = Carbon::parse($fu->due_at)->translatedFormat('d F Y');
 
-            // 2. Kirim Notifikasi ke PIC Terkait
+            $title   = 'Pengingat Follow-Up Jatuh Tempo!';
+            $message = "Jadwal follow-up telah jatuh tempo ({$dueDateFormatted}).\n" .
+                "• Nama Tamu: {$guestName}\n" .
+                "• Kebutuhan: {$kebutuhan}\n" .
+                "• Tindakan Berikutnya: {$tindakan}";
+
+            // 2. Kirim Notifikasi Sistem (Database) ke PIC Terkait
             notifications::send(
                 $picId,
                 'followup_reminder',
-                'Pengingat Follow-Up Jatuh Tempo!',
-                "Jadwal follow-up telah jatuh tempo ({$dueDateFormatted}).\n" .
-                "Nama Tamu: {$guestName}\n" .
-                "Kebutuhan: {$kebutuhan}\n" .
-                "Tindakan Berikutnya: {$tindakan}"
+                $title,
+                $message
             );
 
-            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+            // 3. Kirim Notifikasi WhatsApp Fonnte ke Nomor HP PIC Terkait
+            $assignedPicPhone = $lead->assignedUser->phone ?? null;
 
-            $message = "*Pengingat Follow-Up Jatuh Tempo!*\n\n"
-            . "Jadwal follow-up telah jatuh tempo (*{$dueDateFormatted}*).\n\n"
-            . "Nama Tamu: *{$guestName}*\n"
-            . "Kebutuhan: {$kebutuhan}\n"
-            . "Tindakan Berikutnya: {$tindakan}";
+            if (! empty($assignedPicPhone)) {
+                $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage = "*{$title}*\n\n" . $message;
 
-            //Http::withoutVerifying()
-            //    ->withHeaders([
-            //        'Authorization' => $token,
-            //    ])->post('https://api.fonnte.com/send', [
-            //        'target'  => '085926276649', // 💡 Ganti dengan variabel nomor HP penerima (contoh: $admin->phone atau $admin->nohp)
-            //        'message' => $message,
-            //    ]);
+                try {
+                    Http::withoutVerifying()
+                        ->withHeaders([
+                            'Authorization' => $token,
+                        ])->post('https://api.fonnte.com/send', [
+                            'target'  => $assignedPicPhone, // 🟢 Mengirim ke nomor telepon PIC terkait
+                            'message' => $waMessage,
+                        ]);
+                } catch (\Exception $e) {
+                    Log::error("Gagal mengirim WA Follow-Up ke PIC ({$assignedPicPhone}): " . $e->getMessage());
+                }
+            }
 
             $processedCount++;
         }

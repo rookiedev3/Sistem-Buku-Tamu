@@ -2,6 +2,7 @@
 
 @section('content')
 
+<!-- CDN CSS Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
@@ -26,6 +27,8 @@
     /* ==========================================================
        STYLING FLATPICKR - COMPACT, SOFT BORDER & MINIMALIS
        ========================================================== */
+
+    /* Input Field Datepicker */
     .flatpickr-custom-input {
         font-size: 12px !important;
         padding: 8px 12px !important;
@@ -46,6 +49,7 @@
         box-shadow: 0 0 0 2px rgba(0, 107, 63, 0.08) !important;
     }
 
+    /* Popup Kalender Ringkas & Border Soft */
     .flatpickr-calendar {
         z-index: 99999 !important;
         width: 215px !important;
@@ -68,6 +72,7 @@
         max-width: 196px !important;
     }
 
+    /* Header Bulan & Navigasi */
     .flatpickr-months .flatpickr-month {
         height: 26px !important;
     }
@@ -85,12 +90,14 @@
         width: 22px !important;
     }
 
+    /* Header Nama Hari */
     span.flatpickr-weekday {
         color: #006B3F !important;
         font-weight: 700 !important;
         font-size: 9.5px !important;
     }
 
+    /* Grid Angka Tanggal */
     .flatpickr-day {
         border-radius: 6px !important;
         color: #172033 !important;
@@ -110,12 +117,14 @@
         border: none !important;
     }
 
+    /* Indikator Hari Ini (Today) */
     .flatpickr-day.today {
         border: 1px solid #86efac !important;
         color: #006B3F !important;
         font-weight: 700 !important;
     }
 
+    /* Tanggal Terpilih */
     .flatpickr-day.selected,
     .flatpickr-day.selected:hover,
     .flatpickr-day.selected:focus {
@@ -126,6 +135,7 @@
         box-shadow: none !important;
     }
 
+    /* Pembatas Time Picker (Jam & Menit) */
     .flatpickr-time {
         border-top: 1px solid #f8fafc !important;
         margin-top: 4px !important;
@@ -140,6 +150,7 @@
         font-size: 11px !important;
     }
 
+    /* Style Tombol Filter Tab */
     .btn-filter-tab {
         padding: 6px 14px;
         border-radius: 20px;
@@ -160,27 +171,6 @@
         background: #013220;
         color: #ffffff;
         border-color: #006B3F;
-    }
-
-    /* Konsistensi Kotak Statistik Ala Owner */
-    .stat-box-fo {
-        background: #ffffff;
-        border: 1px solid #e8edf5;
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: 0 10px 30px rgba(31, 53, 97, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 100%;
-    }
-    .stat-icon-fo {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
     }
 </style>
 
@@ -203,29 +193,22 @@
 
     <div class="d-flex justify-content-between align-items-center pe-4">
         <div>
-<<<<<<< HEAD
             <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Pimpinan / Owner' }} </h4>
             <p class="mb-0 text-white-50 fs-6">Berikut adalah ringkasan aktivitas buku tamu dan kunjungan kantor hari ini.</p>
-=======
-            <h4 class="fw-bold mb-1 text-white">Selamat datang, {{ Auth::user()->name ?? 'Frontoffice' }}</h4>
-            <p class="mb-0 text-white-50 fs-6">Kelola data reservasi dan buat janji temu tamu secara cepat dan terstruktur.</p>
->>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
 </div>
 
-{{-- Kartu Statistik Rangkuman (Diselaraskan dengan Gaya Owner) --}}
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px;">
-    
-    <div class="stat-box-fo">
+{{-- Kartu Statistik Rangkuman --}}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div style="background: #ffffff; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <span style="font-size: 11px; font-weight: 700; color: #778195; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Total Terjadwal</span>
-            <h3 style="font-size: 26px; font-weight: 900; color: #172033; margin: 0;">
+            <span style="font-size: 11px; color: #778195; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">Total Terjadwal</span>
+            <span style="font-size: 22px; font-weight: 800; color: #006B3F;">
                 {{ method_exists($visits, 'total') ? $visits->total() : count($visits) }} 
-                <span style="font-size: 12px; font-weight: 700; color: #778195;">Agenda</span>
-            </h3>
+                <span style="font-size: 13px; font-weight: 600; color: #778195;">Agenda</span>
+            </span>
         </div>
-<<<<<<< HEAD
         <div style="width: 42px; height: 42px; background: #e6f4ed; color: #006B3F; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -233,22 +216,17 @@
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-=======
-        <div class="stat-icon-fo" style="background: #e8f8f1; color: #21a86b;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
->>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
 
-    <div class="stat-box-fo">
+    <div style="background: #ffffff; padding: 18px 20px; border-radius: 16px; border: 1px solid #e8edf5; box-shadow: 0 4px 12px rgba(31,53,97,0.03); display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <span style="font-size: 11px; font-weight: 700; color: #778195; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Belum Selesai Hari Ini</span>
-            <h3 style="font-size: 26px; font-weight: 900; color: #172033; margin: 0;">
+            <span style="font-size: 11px; color: #778195; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">Belum Selesai Hari Ini</span>
+            <span style="font-size: 22px; font-weight: 800; color: #0284c7;">
                 {{ $unfinishedTodayCount }} 
-                <span style="font-size: 12px; font-weight: 700; color: #778195;">Tamu</span>
-            </h3>
+                <span style="font-size: 13px; font-weight: 600; color: #778195;">Tamu</span>
+            </span>
         </div>
-<<<<<<< HEAD
         <div style="width: 42px; height: 42px; background: #e0f2fe; color: #0284c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 22h14" />
@@ -256,13 +234,8 @@
                 <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
                 <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
             </svg>
-=======
-        <div class="stat-icon-fo" style="background: #e0f2fe; color: #0284c7;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
->>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         </div>
     </div>
-
 </div>
 
 {{-- Container Utama Tabel --}}
@@ -327,10 +300,10 @@
                     </td>
 
                     <td style="padding: 16px 20px;">
-                        <div style="font-weight: 700; color: #172033; display: flex; align-items: center; gap: 6px;">
-                            <span>{{ $visit->guest->name ?? '-' }}</span>
+                        <div style="font-weight: 700; color: #172033;">
+                            {{ $visit->guest->name ?? '-' }}
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                            <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-0.5 rounded-pill" style="font-size: 10px; font-weight: 700; border: 1px solid rgba(217,119,6,0.3);">VIP</span>
+                            <span title="VIP" style="color: #d97706; margin-left: 2px;">⭐</span>
                             @endif
                         </div>
                         <div style="font-size: 11px; color: #778195;">{{ $visit->guest->company_name ?? '-' }} ({{ $visit->guest->position ?? '-' }})</div>
@@ -541,6 +514,7 @@
                         2. Tujuan & Keperluan Kunjungan
                     </h4>
 
+                    {{-- 1. PILIH CABANG TERLEBIH DAHULU --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Cabang *</label>
                         <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="loadPicsForModal(this.value); updateSummary();">
@@ -551,6 +525,7 @@
                         </select>
                     </div>
 
+                    {{-- 2. PILIH PIC TUJUAN (DINAMIS DIBUAT BERDASARKAN CABANG) --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
                         <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
@@ -568,6 +543,7 @@
                         </select>
                     </div>
 
+                    {{-- PILIH PRODUK / LAYANAN (dikirim sebagai product_id) --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Produk / Layanan yang Diminati</label>
                         <select name="product_id" id="select_product" style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
@@ -679,15 +655,15 @@
             </button>
 
             <button type="button" id="btnPrevStep" onclick="changeStep(-1)" style="flex: 1; min-width: 90px; display: none; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
-                Kembali
+                ← Kembali
             </button>
 
             <button type="button" id="btnNextStep" onclick="changeStep(1)" style="flex: 2; min-width: 120px; background: #013220; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
-                Lanjut
+                Lanjut →
             </button>
 
             <button type="button" id="btnSubmitForm" onclick="submitMultiStepForm()" style="flex: 2; min-width: 120px; display: none; background: #013220; color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,107,63,0.2);">
-                Simpan & Buat Antrian
+                Simpan & Buat Antrian ✓
             </button>
         </div>
 
@@ -698,8 +674,8 @@
 <div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
-        <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
+            ⚠️
         </div>
 
         <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Batalkan Kunjungan?</h3>
@@ -762,6 +738,7 @@
         });
     });
 
+    // 🟢 DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
     function loadPicsForModal(branchId, selectedPicId = null) {
         const picSelect = document.getElementById('select_pic');
         if (!branchId) return;

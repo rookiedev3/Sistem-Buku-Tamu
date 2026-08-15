@@ -278,36 +278,49 @@ class VisitsController extends Controller
 
             $adminUsers = users::where('role', 'admin')->get();
 
+            $guestName   = $guest->name ?? '-';
+            $companyName = $guest->company_name ?? '-';
+            $purposeName = $purposeType->name ?? '-';
+            $branchName  = $branch->name ?? '-';
+
+            $title   = 'Notifikasi Admin';
+            $message = "Tamu baru membuat jadwal pertemuan.\n"
+                . "• Nama: {$guestName}\n"
+                . "• Instansi: {$companyName}\n"
+                . "• Tujuan: {$purposeName}\n"
+                . "• Cabang: {$branchName}";
+
+            // Notifikasi Database Internal
             foreach ($adminUsers as $admin) {
                 notifications::send(
                     $admin->id,
                     'guest_arrived',
-                    'Notifikasi Admin',
-                    'Tamu baru membuat jadwal pertemuan.' .
-                        "\n" . 'Nama: ' . ($guest->name ?? '-') .
-                        "\n" . 'Instansi: ' . ($guest->company_name ?? '-') .
-                        "\n" . 'Tujuan: ' . ($purposeType->name ?? '-') .
-                        "\n" . 'Cabang: ' . ($branch->name ?? '-')
+                    $title,
+                    $message
                 );
             }
 
-            $token = env('FONNTE_TOKEN'); // Mengambil value token dari env
+            // Notifikasi WhatsApp Fonnte (Mengirim ke nomor telepon Admin yang valid & unik)
+            $targetPhones = $adminUsers->pluck('phone')->filter()->unique();
 
-            // Isi pesan notifikasi ke WhatsApp
-            $message = "*Notifikasi Admin*\n\n"
-                . "Tamu baru membuat jadwal pertemuan.\n"
-                . "Nama: " . ($guest->name ?? '-') . "\n"
-                . "Instansi: " . ($guest->company_name ?? '-') . "\n"
-                . "Tujuan: " . ($purposeType->name ?? '-') . "\n"
-                . "Cabang: " . ($branch->name ?? '-');
+            if (! $targetPhones->isEmpty()) {
+                $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage = "*{$title}*\n\n{$message}";
 
-            //Http::withoutVerifying()
-            //   ->withHeaders([
-            //        'Authorization' => $token,
-            //    ])->post('https://api.fonnte.com/send', [
-            //        'target'  => '085926276649',
-            //        'message' => $message,
-            //    ]);
+                foreach ($targetPhones as $phone) {
+                    try {
+                        Http::withoutVerifying()
+                            ->withHeaders([
+                                'Authorization' => $token,
+                            ])->post('https://api.fonnte.com/send', [
+                                'target'  => $phone,
+                                'message' => $waMessage,
+                            ]);
+                    } catch (\Exception $e) {
+                        \Log::error("Gagal kirim WA ke Admin ({$phone}): " . $e->getMessage());
+                    }
+                }
+            }
 
             return $newVisit;
         });

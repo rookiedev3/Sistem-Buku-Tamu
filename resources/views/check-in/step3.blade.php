@@ -237,7 +237,7 @@
                 <!-- Navigasi Tombol (Kembali & Konfirmasi) -->
                 <div style="display: flex; gap: 12px; margin-top: 10px;">
                     <a href="{{ route('check-in.step2') }}" style="flex: 1; background: #006B3F; color: #ffffff; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span style="font-size: 15px; line-height: 1; color: #ffffff;">&#8592;</span> Kembali
+                        Kembali
                     </a>
                     <button type="submit"
                         style="flex: 2; background: #C7AB6B; color: #013220; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,107,63,0.15);">
