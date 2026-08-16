@@ -46,9 +46,9 @@ class PicApiController extends BaseApiController
         $today     = Carbon::today();
         $ownerId   = auth()->id();
 
-        $query = visits::with(['guest.category', 'purpose', 'branch'])
-            ->where('assigned_to', $ownerId)
-            ->whereNotIn('status', self::ACTIVE_EXCLUDED_STATUSES);
+$query = visits::with(['guest.category', 'purpose', 'branch'])
+    ->where('assigned_to', $ownerId)
+    ->whereNotIn('status', self::ACTIVE_EXCLUDED_STATUSES);
 
         if ($filter === 'today') {
             $query->where(function (Builder $q) use ($today) {
@@ -743,6 +743,7 @@ return $this->responseHasil(200, true, [
      */
     private function mapVisit(visits $v): array
     {
+            $displayDate = $v->check_in_at ?? $v->scheduled_at;
         return [
             'id'              => $v->id,
             'visit_code'      => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
@@ -756,8 +757,15 @@ return $this->responseHasil(200, true, [
             'branch_id'       => $v->branch_id,
             'branch_name'     => optional($v->branch)->name,
             'status'          => $v->status,
-            'scheduled_at'    => $v->scheduled_at,
-            'check_in_at'     => $v->check_in_at,
+
+             'waktu'           => $displayDate
+            ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B')
+            : '-',
+        'scheduled_at'    => $v->scheduled_at,
+        'check_in_at'     => $v->check_in_at,
+
+            // 'scheduled_at'    => $v->scheduled_at,
+            // 'check_in_at'     => $v->check_in_at,
             'check_out_at'    => $v->check_out_at,
             'meeting_start_at' => $v->meeting_start_at,
             'notes'           => $v->notes,
@@ -790,6 +798,7 @@ return $this->responseHasil(200, true, [
             'visit_code'      => optional($l->visit)->visit_code
                 ?? ('VST-' . str_pad(optional($l->visit)->id ?? $l->id, 4, '0', STR_PAD_LEFT)),
             'guest_name'      => optional($l->guest)->name,
+            'phone'      => optional($l->guest)->phone,
             'guest_position'  => optional($l->guest)->position,
             'company_name'    => optional($l->guest)->company_name,
             'is_vip'          => (bool) optional($l->guest)->is_vip,

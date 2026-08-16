@@ -84,12 +84,12 @@ Route::middleware('auth:sanctum')->prefix('pic')->group(function () {
     Route::get('/followup', [PicApiController::class, 'followupIndex']);
     Route::get('/riwayat', [PicApiController::class, 'riwayat']);
     Route::get('/leads', [PicApiController::class, 'leadsIndex']);
-    Route::post('/leads/{id}/follow-up', [PicApiController::class, 'storeLeadFollowUp']);
- 
+    // Route::post('/leads/{id}/follow-up', [PicApiController::class, 'storeLeadFollowUp']);
+
     Route::post('/visits/{id}/status', [PicApiController::class, 'updateStatus']);
     Route::post('/visits/{id}/start-meeting', [PicApiController::class, 'startMeeting']);
     Route::post('/visits/{id}/complete-meeting', [PicApiController::class, 'completeMeeting']);
-    // Route::post('/leads/{leadId}/follow-up', [PicApiController::class, 'updateFollowUp']);
+    Route::post('/leads/{id}/follow-up', [PicApiController::class, 'updateFollowUp']);
     // Route::get('/pic/riwayat', [\App\Http\Controllers\PicController::class, 'riwayat'])
     //    ->name('pic.riwayat')
     //    ->middleware('auth');
