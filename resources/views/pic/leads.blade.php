@@ -43,17 +43,13 @@
                         $isActive = $activeFilter === $key;
                         $bg = $isActive ? '#013220' : '#f1f5f9';
                         $color = $isActive ? '#ffffff' : '#475569';
+                        // Hanya tab 'overdue' (Terlambat) yang diberi warna latar khusus saat tidak aktif
                         if (!$isActive && $key === 'overdue' && $countOverdue > 0) {
                             $bg = '#fef2f2'; $color = '#dc2626';
-                        } elseif (!$isActive && $key === 'deal' && $countDeal > 0) {
-                            $bg = '#dcfce7'; $color = '#15803d';
                         }
                     @endphp
-                    {{-- 'page' dibuang dulu sebelum di-merge, sama seperti dashboard, supaya tiap ganti tab
-                         filter selalu mulai dari halaman 1 (kalau tidak, page lama misal page=2 ikut kebawa
-                         dan bisa kosong karena tab baru datanya lebih sedikit). --}}
                     <a href="{{ route('pic.leads', array_merge(request()->except('page'), ['filter' => $key])) }}"
-                       style="background: {{ $bg }}; color: {{ $color }}; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
+                        style="background: {{ $bg }}; color: {{ $color }}; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-decoration: none; border: 1px solid {{ $isActive ? '#006B3F' : '#e2e8f0' }};">
                         {{ $label }}
                     </a>
                 @endforeach
@@ -63,12 +59,10 @@
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678;">Status:</label>
                 <select onchange="window.location.href=this.value" style="height: 32px; padding: 4px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
                     @php
-                        $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => 'VIP', 'reguler' => 'Reguler'];
                         $activeVipFilter = $vipFilter ?? 'all';
                     @endphp
                     @foreach($vipOptions as $key => $label)
-                        {{-- Sama seperti tab filter di atas: 'page' dibuang dulu supaya ganti Status VIP/Reguler
-                             juga selalu balik ke halaman 1. --}}
                         <option
                             value="{{ route('pic.leads', array_merge(request()->except('page'), ['vip_status' => $key])) }}"
                             {{ $activeVipFilter === $key ? 'selected' : '' }}>
@@ -99,7 +93,6 @@
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 8px 10px; font-weight: 700;">{{ $leads->firstItem() + $index }}</td>
 
-                        {{-- TOKEN: diambil dari relasi visit milik lead ini (bukan $visit dari dashboard) --}}
                         <td style="padding: 8px 10px;">
                             <strong style="color: #006B3F; font-weight: 800;">
                                 {{ optional($lead->visit)->visit_code ?? ('VST-' . str_pad(optional($lead->visit)->id ?? $lead->id, 4, '0', STR_PAD_LEFT)) }}
@@ -109,11 +102,10 @@
                         <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $lead->guest->name ?? '-' }}
-                               @if(isset($visit->guest) && $visit->guest->is_vip)
-    <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
-@endif
+                                @if(isset($lead->guest) && $lead->guest->is_vip)
+                                    <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+                                @endif
                             </strong>
-                            {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
                             <span style="font-size: 10px; color: #778195;">
                                 {{ $lead->guest->company_name ?? '-' }} ({{ $lead->guest->position ?? '-' }})
                             </span>
@@ -134,7 +126,7 @@
                                 @elseif($fuDate->lt($today))
                                     <span style="background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
                                 @elseif($fuDate->eq($today))
-                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;"> Hari Ini</span>
+                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">Hari Ini</span>
                                 @else
                                     @php $diff = abs($fuDate->diffInDays($today)); @endphp
                                     <span style="background: #e6f4ed; color: #006B3F; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 700;">
@@ -150,8 +142,8 @@
                                 $badges = [
                                     'new'       => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
                                     'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
-                                    'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi '],
-                                    'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal '],
+                                    'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi'],
+                                    'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal'],
                                     'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
                                 ];
                                 $b = $badges[$lead->status] ?? $badges['new'];
@@ -190,7 +182,7 @@
 @foreach($leads as $lead)
     @php
         $latestFollowUp = $lead->followUps->first();
-        $scheduleTextMap = ['deal' => 'Sudah Deal ', 'lost' => 'Lead Hilang / Lost'];
+        $scheduleTextMap = ['deal' => 'Sudah Deal', 'lost' => 'Lead Hilang / Lost'];
         $scheduleText = $scheduleTextMap[$lead->status]
             ?? ($lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan');
     @endphp
@@ -219,24 +211,22 @@
                         </div>
                     </div>
 
-                    {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
-                         dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Catatan Awal Kunjungan:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Catatan Awal Kunjungan:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                             {{ optional($lead->visit)->notes ?? 'Tidak ada catatan awal.' }}
                         </div>
                     </div>
 
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Hasil Meeting Pertama:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Hasil Meeting Pertama:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                             {{ optional($lead->visit)->meeting_result ?? 'Tidak ada hasil meeting.' }}
                         </div>
                     </div>
 
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;"> Riwayat Update Pipeline:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">Riwayat Update Pipeline:</label>
                         @forelse($lead->followUps as $fu)
                             <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
@@ -413,7 +403,6 @@
             });
         });
 
-        // 🚫 Cegah submit "Deal" tanpa Estimasi Nilai (baru maupun lama)
         document.querySelectorAll(".js-followup-form").forEach(function (form) {
             const statusSelect = form.querySelector(".status-dropdown");
             const rupiahInput = form.querySelector(".rupiah-input");

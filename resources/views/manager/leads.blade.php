@@ -60,7 +60,7 @@
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678;">Status:</label>
                 <select onchange="window.location.href=this.value" style="height: 32px; padding: 4px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
                     @php
-                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
                         $activeVipFilter = $vipFilter ?? 'all';
                     @endphp
                     @foreach($vipOptions as $key => $label)
