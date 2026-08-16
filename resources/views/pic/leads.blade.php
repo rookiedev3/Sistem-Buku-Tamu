@@ -5,7 +5,7 @@
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 4px;">Lead & Follow-Up Penjualan 📈</h2>
+            <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 4px;">Lead & Follow-Up Penjualan </h2>
             <p style="font-size: 11px; color: #778195; margin: 0; line-height: 1.5;">Kelola pipeline prospek klien hasil kunjungan, update tahapan, dan pantau konversi Deal. Lead yang Lost otomatis disembunyikan dari halaman ini dan hanya bisa dilihat di Riwayat Kunjungan.</p>
         </div>
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -31,7 +31,7 @@
                     $filterOptions = [
                         'all'      => 'Semua' . ($countAll > 0 ? " ({$countAll})" : ''),
                         'active'   => 'Aktif' . ($countActive > 0 ? " ({$countActive})" : ''),
-                        'deal'     => 'Deal 🎉' . ($countDeal > 0 ? " ({$countDeal})" : ''),
+                        'deal'     => 'Deal ' . ($countDeal > 0 ? " ({$countDeal})" : ''),
                         'overdue'  => 'Terlambat' . ($countOverdue > 0 ? " ({$countOverdue})" : ''),
                         'today'    => 'Hari Ini' . ($countToday > 0 ? " ({$countToday})" : ''),
                         'upcoming' => 'Mendatang' . ($countUpcoming > 0 ? " ({$countUpcoming})" : ''),
@@ -63,7 +63,7 @@
                 <label style="font-size: 11px; font-weight: 700; color: #5c6678;">Status:</label>
                 <select onchange="window.location.href=this.value" style="height: 32px; padding: 4px 10px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 11px; font-weight: 700; color: #172033; background: #fff; outline: none; cursor: pointer;">
                     @php
-                        $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                        $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
                         $activeVipFilter = $vipFilter ?? 'all';
                     @endphp
                     @foreach($vipOptions as $key => $label)
@@ -109,9 +109,9 @@
                         <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $lead->guest->name ?? '-' }}
-                                @if(isset($lead->guest) && $lead->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
-                                @endif
+                               @if(isset($visit->guest) && $visit->guest->is_vip)
+    <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+@endif
                             </strong>
                             {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
                             <span style="font-size: 10px; color: #778195;">
@@ -132,9 +132,9 @@
                                 @if($lead->status === 'deal')
                                     {{-- selesai --}}
                                 @elseif($fuDate->lt($today))
-                                    <span style="background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">⚠ Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
+                                    <span style="background: #fef2f2; color: #dc2626; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">Terlambat {{ $fuDate->diffInDays($today) }} hari</span>
                                 @elseif($fuDate->eq($today))
-                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;">🔥 Hari Ini</span>
+                                    <span style="background: #fef3c7; color: #d97706; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800;"> Hari Ini</span>
                                 @else
                                     @php $diff = abs($fuDate->diffInDays($today)); @endphp
                                     <span style="background: #e6f4ed; color: #006B3F; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 700;">
@@ -150,8 +150,8 @@
                                 $badges = [
                                     'new'       => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
                                     'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
-                                    'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
-                                    'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
+                                    'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi '],
+                                    'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal '],
                                     'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
                                 ];
                                 $b = $badges[$lead->status] ?? $badges['new'];
@@ -160,7 +160,7 @@
                         </td>
                         <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
                             <div style="display: flex; gap: 5px; justify-content: center;">
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 5px 9px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">📝 Riwayat</button>
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $lead->id }}" style="background: #ffffff; color: #006B3F; border: 1px solid #006B3F; padding: 5px 9px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">Riwayat</button>
 
                                 @if($lead->status === 'deal')
                                     <button type="button" disabled title="Lead sudah Deal, tidak bisa diubah lagi" style="background: #f1f5f9; color: #94a3b8; border: none; padding: 5px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: not-allowed;">
@@ -190,7 +190,7 @@
 @foreach($leads as $lead)
     @php
         $latestFollowUp = $lead->followUps->first();
-        $scheduleTextMap = ['deal' => 'Sudah Deal 🎉', 'lost' => 'Lead Hilang / Lost'];
+        $scheduleTextMap = ['deal' => 'Sudah Deal ', 'lost' => 'Lead Hilang / Lost'];
         $scheduleText = $scheduleTextMap[$lead->status]
             ?? ($lead->follow_up_at ? \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y') : 'Tidak ada jadwal lanjutan');
     @endphp
@@ -201,7 +201,9 @@
                 <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
                     <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
                         Riwayat & Hasil Pertemuan - {{ $lead->guest->name ?? 'Klien' }}
-                        @if(isset($lead->guest) && $lead->guest->is_vip)⭐@endif
+                        @if(isset($lead->guest) && $lead->guest->is_vip)
+                            <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+                        @endif
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -220,21 +222,21 @@
                     {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
                          dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Catatan Awal Kunjungan:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                             {{ optional($lead->visit)->notes ?? 'Tidak ada catatan awal.' }}
                         </div>
                     </div>
 
                     <div style="margin-bottom: 20px;">
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Hasil Meeting Pertama:</label>
                         <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
                             {{ optional($lead->visit)->meeting_result ?? 'Tidak ada hasil meeting.' }}
                         </div>
                     </div>
 
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">🔄 Riwayat Update Pipeline:</label>
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;"> Riwayat Update Pipeline:</label>
                         @forelse($lead->followUps as $fu)
                             <div style="background: #fdfdfd; border: 1px solid #e2e8f0; border-left: 4px solid #006B3F; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #64748b; flex-wrap: wrap; gap: 4px;">
@@ -244,7 +246,7 @@
                                 <div style="color: #334155; font-size: 13px; white-space: pre-line;">{{ $fu->result ?? '-' }}</div>
                                 <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
                                     <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
-                                        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+                                         Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
                                     </div>
                                     @if($fu->due_at)
                                         <div style="font-size: 11px; color: #475569;">Tanggal Follow Up: {{ \Carbon\Carbon::parse($fu->due_at)->translatedFormat('d F Y') }}</div>
@@ -277,7 +279,9 @@
                         <span style="color: #778195; display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;">Klien Prospek:</span>
                         <strong style="color: #172033; font-size: 14px;">
                             {{ $lead->guest->name ?? '-' }}
-                            @if(isset($lead->guest) && $lead->guest->is_vip)⭐@endif
+                            @if(isset($lead->guest) && $lead->guest->is_vip)
+                                <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+                            @endif
                             ({{ $lead->guest->company_name ?? '-' }})
                         </strong>
                         <div style="color: #475569; font-size: 12px; margin-top: 2px;">WhatsApp: {{ $lead->guest->phone ?? '-' }}</div>

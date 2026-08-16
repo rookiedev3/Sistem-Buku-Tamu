@@ -57,7 +57,7 @@
                 @php
                     $vipOptions = [
                         'all'     => 'Semua Status',
-                        'vip'     => '⭐ VIP',
+                        'vip'     => ' VIP',
                         'reguler' => 'Reguler',
                     ];
                 @endphp
@@ -106,8 +106,8 @@
                         <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $visit->guest->name ?? '-' }}
-                                @if(isset($visit->guest) && $visit->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
+                               @if(isset($visit->guest) && $visit->guest->is_vip)
+                                <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
                                 @endif
                             </strong>
                             {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
@@ -129,9 +129,9 @@
                             @if($visit->scheduled_at)
                                 @php $schedDate = \Carbon\Carbon::parse($visit->scheduled_at); @endphp
                                 @if($schedDate->isToday())
-                                    <div style="font-size: 9px; color: #d97706; margin-top: 2px; font-weight: 700;">🔥 Hari Ini</div>
+                                    <div style="font-size: 9px; color: #d97706; margin-top: 2px; font-weight: 700;"> Hari Ini</div>
                                 @else
-                                    <div style="font-size: 9px; color: #1d4ed8; margin-top: 2px; font-weight: 700;">📅 {{ $schedDate->translatedFormat('d M Y') }}</div>
+                                    <div style="font-size: 9px; color: #1d4ed8; margin-top: 2px; font-weight: 700;"> {{ $schedDate->translatedFormat('d M Y') }}</div>
                                 @endif
                             @endif
                         </td>
@@ -151,7 +151,7 @@
                         <td style="padding: 8px 10px; text-align: center;">
                             @if(!empty($visit->notes))
                             <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatanTamu-{{ $visit->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer;">
-                                📝 Lihat
+                                 Lihat
                             </button>
                             @else
                             <span style="font-style: italic; color: #94a3b8; font-size: 11px;">-</span>
@@ -229,7 +229,7 @@
                             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                                 <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
                                     <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
-                                        📝 Catatan dari {{ $visit->guest->name ?? 'Tamu' }}
+                                         Catatan dari {{ $visit->guest->name ?? 'Tamu' }}
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>

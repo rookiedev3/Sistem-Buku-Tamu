@@ -7,7 +7,7 @@
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 14px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div>
-                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Riwayat Kunjungan Tamu 📋</h2>
+                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Riwayat Kunjungan Tamu </h2>
             </div>
         </div>
 
@@ -33,7 +33,7 @@
         <div style="position: relative; width: 100%;">
             <select name="vip_status" style="width: 100%; height: 38px; padding: 8px 30px 8px 12px; border: 1px solid #e8edf5; border-radius: 8px; font-size: 12px; font-weight: 700; color: #172033; background-color: #fff; outline: none; cursor: pointer; box-sizing: border-box; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
                 @php
-                    $vipOptions = ['all' => 'Semua Status', 'vip' => '⭐ VIP', 'reguler' => 'Reguler'];
+                    $vipOptions = ['all' => 'Semua Status', 'vip' => ' VIP', 'reguler' => 'Reguler'];
                     $activeVipFilter = $vipFilter ?? 'all';
                 @endphp
                 @foreach($vipOptions as $key => $label)
@@ -80,8 +80,8 @@
             $leadBadges = [
                 'new'         => ['bg' => '#f1f5f9', 'color' => '#475569', 'label' => 'Baru'],
                 'contacted'   => ['bg' => '#dbeafe', 'color' => '#1d4ed8', 'label' => 'Dihubungi'],
-                'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi 🔥'],
-                'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal 🎉'],
+                'negotiation' => ['bg' => '#fef3c7', 'color' => '#d97706', 'label' => 'Negosiasi '],
+                'deal'        => ['bg' => '#dcfce7', 'color' => '#15803d', 'label' => 'Deal '],
                 'lost'        => ['bg' => '#fee2e2', 'color' => '#b91c1c', 'label' => 'Lost'],
             ];
         @endphp
@@ -122,9 +122,9 @@
                         <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $v->guest->name ?? '-' }}
-                                @if(isset($v->guest) && $v->guest->is_vip)
-                                    <span title="VIP" style="color: #d97706;">⭐</span>
-                                @endif
+                                @if(isset($visit->guest) && $visit->guest->is_vip)
+    <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+@endif
                             </strong>
                             {{-- Ditambah perusahaan, meniru frontoffice/dashboard: "Instansi (Jabatan)" --}}
                             <span style="font-size: 10px; color: #778195;">
@@ -150,7 +150,7 @@
                         <td style="padding: 8px 10px; text-align: center;">
                             @if($isCompleted)
                                 <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">
-                                    📝 Lihat Catatan
+                                     Lihat Catatan
                                 </button>
                             @else
                                 <span style="font-style: italic; color: #94a3b8; font-size: 11px;">Dibatalkan / Belum Selesai</span>
@@ -201,7 +201,7 @@
 
         $leadModal = $v->lead; // bisa null kalau visit tidak dikonversi jadi lead
         $scheduleTextMap = [
-            'deal' => 'Sudah Deal 🎉',
+            'deal' => 'Sudah Deal ',
             'lost' => 'Lead Hilang / Lost',
         ];
         $scheduleText = $leadModal
@@ -216,7 +216,9 @@
                     <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 16px 24px;">
                         <h5 class="modal-title" style="font-size: 15px; font-weight: 800; color: #172033;">
                             Riwayat & Hasil Pertemuan - {{ $v->guest->name ?? 'Tamu' }}
-                            @if(isset($v->guest) && $v->guest->is_vip)⭐@endif
+                            @if(isset($v->guest) && $v->guest->is_vip)
+                                <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
+                            @endif
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -247,14 +249,14 @@
 {{-- REVISI: dipecah jadi dua blok terpisah, notes (catatan awal kunjungan)
      dan meeting_result (hasil meeting pertama), supaya dua-duanya tampil. --}}
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📝 Catatan Awal Kunjungan:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Catatan Awal Kunjungan:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->notes ?? 'Tidak ada catatan awal.' }}
     </div>
 </div>
 
 <div style="margin-bottom: 20px;">
-    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">📌 Hasil Meeting Pertama:</label>
+    <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;"> Hasil Meeting Pertama:</label>
     <div style="white-space: pre-line; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; color: #1e293b;">
         {{ $v->meeting_result ?? 'Tidak ada hasil meeting.' }}
     </div>
@@ -264,7 +266,7 @@
                         <!-- Riwayat Update Pipeline (hanya ada kalau visit ini jadi lead) -->
                         <div>
                             <label style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 8px;">
-                                🔄 Riwayat Update Pipeline:
+                                Riwayat Update Pipeline:
                             </label>
 
                             @forelse(optional($leadModal)->followUps ?? [] as $fu)
@@ -278,7 +280,7 @@
 </div>
 <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px;">
     <div style="font-size: 11px; color: #006B3F; font-weight: 700;">
-        💰 Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
+         Estimasi Value: {{ $fu->estimated_value ? rupiah($fu->estimated_value, true) : '-' }}
     </div>
     @if($fu->due_at)
         <div style="font-size: 11px; color: #475569;">

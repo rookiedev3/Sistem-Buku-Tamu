@@ -37,7 +37,7 @@
 
         <div class="d-flex justify-content-between align-items-center pe-4">
             <div>
-                <h4 class="fw-bold mb-1 text-white" style="font-size: 16px;">Selamat datang, {{ Auth::user()->name ?? 'PIC / Sales' }} 👋</h4>
+                <h4 class="fw-bold mb-1 text-white" style="font-size: 16px;">Selamat datang, {{ Auth::user()->name ?? 'PIC / Sales' }} </h4>
                 <p class="mb-0 text-white-50" style="font-size: 12px;">Kelola daftar tamu berdasarkan kategori VIP & Reguler, konfirmasi kehadiran, catat hasil pertemuan, dan pantau konversi lead.</p>
             </div>
         </div>
