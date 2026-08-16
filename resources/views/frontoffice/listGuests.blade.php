@@ -321,7 +321,7 @@ use App\Helpers\DateHelper;
 
         const vipBadge = document.getElementById('modalVipBadge');
         if (isVip === '1') {
-            vipBadge.innerText = '⭐ VIP Member';
+            vipBadge.innerText = ' VIP Member';
             vipBadge.style.cssText = 'background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;';
         } else {
             vipBadge.innerText = 'Reguler';
