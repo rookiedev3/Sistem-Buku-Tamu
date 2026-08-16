@@ -47,7 +47,10 @@ public function login(Request $request)
         }
 
         $request->session()->regenerate();
-        return redirect()->intended('/dashboard');
+        // WAJIB: buang intended URL, biar tidak "membajak" tujuan redirect
+        $request->session()->forget('url.intended');
+
+        return redirect()->intended('dashboard');
     }
 
     return back()->withErrors([

@@ -14,13 +14,18 @@ class CheckUserLogin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, ...$role): Response
-    {
-        $user = Auth::user();
-        if (in_array($user->role, $role)) {
-            return $next($request);
-        }
+public function handle(Request $request, Closure $next, ...$role): Response
+{
+    $user = Auth::user();
 
-        return redirect()->route('login')->with('error', 'You do not have permission to access this page.');
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
     }
+
+    if (in_array($user->role, $role, true)) {
+        return $next($request);
+    }
+
+    return redirect()->route('login')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+}
 }
