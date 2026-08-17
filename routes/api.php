@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\OwnerApiController;
 use App\Http\Controllers\Api\PicApiController;
 use App\Http\Controllers\Api\VisitPurposesApiController;
 use App\Http\Controllers\Api\SecurityApiController;
+use App\Http\Controllers\Api\AdminApiController;
 
 // ================= AUTH (tidak butuh token) =================
 Route::post('/login', [AuthApiController::class, 'login']);
@@ -79,25 +80,24 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
-Route::middleware('auth:sanctum')->prefix('pic')->group(function () {
-    Route::get('/dashboard', [PicApiController::class, 'dashboard']);
-    Route::get('/followup', [PicApiController::class, 'followupIndex']);
-    Route::get('/riwayat', [PicApiController::class, 'riwayat']);
-    Route::get('/leads', [PicApiController::class, 'leadsIndex']);
-    // Route::post('/leads/{id}/follow-up', [PicApiController::class, 'storeLeadFollowUp']);
+    Route::middleware('auth:sanctum')->prefix('pic')->group(function () {
+        Route::get('/dashboard', [PicApiController::class, 'dashboard']);
+        Route::get('/followup', [PicApiController::class, 'followupIndex']);
+        Route::get('/riwayat', [PicApiController::class, 'riwayat']);
+        Route::get('/leads', [PicApiController::class, 'leadsIndex']);
+        // Route::post('/leads/{id}/follow-up', [PicApiController::class, 'storeLeadFollowUp']);
 
-    Route::post('/visits/{id}/status', [PicApiController::class, 'updateStatus']);
-    Route::post('/visits/{id}/start-meeting', [PicApiController::class, 'startMeeting']);
-    Route::post('/visits/{id}/complete-meeting', [PicApiController::class, 'completeMeeting']);
-    Route::post('/leads/{id}/follow-up', [PicApiController::class, 'updateFollowUp']);
-    // Route::get('/pic/riwayat', [\App\Http\Controllers\PicController::class, 'riwayat'])
-    //    ->name('pic.riwayat')
-    //    ->middleware('auth');
-});
- 
+        Route::post('/visits/{id}/status', [PicApiController::class, 'updateStatus']);
+        Route::post('/visits/{id}/start-meeting', [PicApiController::class, 'startMeeting']);
+        Route::post('/visits/{id}/complete-meeting', [PicApiController::class, 'completeMeeting']);
+        Route::post('/leads/{id}/follow-up', [PicApiController::class, 'updateFollowUp']);
+        // Route::get('/pic/riwayat', [\App\Http\Controllers\PicController::class, 'riwayat'])
+        //    ->name('pic.riwayat')
+        //    ->middleware('auth');
+    });
 });
 
-    Route::middleware('auth:sanctum')->prefix('manager')->group(function () {
+Route::middleware('auth:sanctum')->prefix('manager')->group(function () {
     Route::get('/dashboard', [ManagerApiController::class, 'dashboard']);
     Route::get('/kunjungan', [ManagerApiController::class, 'kunjungan']);
     Route::get('/leads', [ManagerApiController::class, 'leadsPipeline']);
@@ -118,13 +118,13 @@ Route::prefix('check-in')->group(function () {
     Route::get('/{id}', [CheckInApiController::class, 'show']);
 });
 
-    // ---------- Security ----------
 // ---------- Security ----------
-    Route::get('/security/dashboard', [SecurityApiController::class, 'dashboard']);
-    Route::post('/security/check-in/{id}', [SecurityApiController::class, 'checkIn']);
-    Route::post('/security/check-out/{id}', [SecurityApiController::class, 'checkOut']);
+// ---------- Security ----------
+Route::get('/security/dashboard', [SecurityApiController::class, 'dashboard']);
+Route::post('/security/check-in/{id}', [SecurityApiController::class, 'checkIn']);
+Route::post('/security/check-out/{id}', [SecurityApiController::class, 'checkOut']);
 
-    Route::prefix('check-in')->group(function () {
+Route::prefix('check-in')->group(function () {
     // 1. Ambil data dropdown/master data untuk frontend
     Route::get('/form-data', [CheckInApiController::class, 'getFormData']);
 
@@ -145,11 +145,10 @@ Route::middleware('auth:sanctum')->prefix('owner')->group(function () {
     Route::get('/activity-log', [OwnerApiController::class, 'activityLog']);
     Route::get('/leads', [OwnerApiController::class, 'leads']);
     Route::get('/laporan', [OwnerApiController::class, 'laporan']);
-Route::get('/laporan/export-excel', [OwnerApiController::class, 'exportExcel']);
-Route::get('/laporan/export-pdf', [OwnerApiController::class, 'exportPdf']);
-// routes/api.php
-Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'downloadFile']);
-
+    Route::get('/laporan/export-excel', [OwnerApiController::class, 'exportExcel']);
+    Route::get('/laporan/export-pdf', [OwnerApiController::class, 'exportPdf']);
+    // routes/api.php
+    Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'downloadFile']);
 });
 
 
@@ -158,4 +157,31 @@ Route::get('/owner/laporan/download/{filename}', [OwnerApiController::class, 'do
     ->name('laporan.download')   // 👈 INI namanya "laporan.download"
     ->middleware('signed');
 
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    // Master data untuk dropdown Flutter (CheckInBloc.getFormData())
+    Route::get('/master-data', [AdminApiController::class, 'masterData']);
 
+    // Dashboard & Visitas
+    Route::get('/dashboard', [AdminApiController::class, 'dashboard']);
+    Route::post('/check-in/{id}', [AdminApiController::class, 'checkIn']);
+    Route::post('/check-out/{id}', [AdminApiController::class, 'checkOut']);
+    Route::post('/cancel/{id}', [AdminApiController::class, 'cancel']);
+    Route::post('/store-manual', [AdminApiController::class, 'storeManual']);
+
+    // History & Appointment
+    Route::get('/history', [AdminApiController::class, 'history']);
+    Route::get('/appointments', [AdminApiController::class, 'appointment']);
+    Route::post('/appointments', [AdminApiController::class, 'storeAppointment']);
+    Route::patch('/appointments/{id}/status', [AdminApiController::class, 'updateAppointmentStatus']);
+
+    // Guest Management
+    Route::get('/guest', [AdminApiController::class, 'guest']);
+    Route::post('/guest', [AdminApiController::class, 'storeGuest']);
+    Route::patch('/guest/{id}/vip', [AdminApiController::class, 'toggleVip']);
+
+    // Notifications
+    Route::get('/notifications', [AdminApiController::class, 'notifications']);
+    Route::post('/notifications/read-all', [AdminApiController::class, 'markAllNotificationsRead']);
+    Route::post('/notifications/{id}/read', [AdminApiController::class, 'markNotificationRead']);
+});
+Route::put('/admin/guest/{id}/vip', [AdminApiController::class, 'toggleVip']);

@@ -158,6 +158,28 @@
                         <option value="" disabled selected>-- Pilih Cabang Terlebih Dahulu --</option>
                     </select>
                 </div>
+                
+                {{-- Tanggal & Jam Kunjungan --}}
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">
+                        Tanggal & Jam Kunjungan <span style="color: #e5484d;">*</span> <span style="font-weight: 400; color: #778195; font-size: 11px;">(08:00 - 17:00)</span>
+                    </label>
+
+                    <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input type="text" id="scheduled_at" name="scheduled_at"
+                            value="{{ old('scheduled_at', $step2Data['scheduled_at'] ?? date('Y-m-d 08:00')) }}"
+                            placeholder="Pilih tanggal & jam kunjungan..." required readonly
+                            style="width: 100%; padding: 11px 16px 11px 44px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
+                    </div>
+                </div>
 
                 {{-- Jenis Kunjungan --}}
                 <div>
@@ -193,28 +215,6 @@
                         @endforeach
                         @endif
                     </select>
-                </div>
-
-                {{-- Tanggal & Jam Kunjungan --}}
-                <div>
-                    <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 5px;">
-                        Tanggal & Jam Kunjungan <span style="color: #e5484d;">*</span> <span style="font-weight: 400; color: #778195; font-size: 11px;">(08:00 - 17:00)</span>
-                    </label>
-
-                    <div style="position: relative; display: flex; align-items: center; width: 100%;">
-                        <div style="position: absolute; left: 14px; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #006B3F;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                            </svg>
-                        </div>
-                        <input type="text" id="scheduled_at" name="scheduled_at"
-                            value="{{ old('scheduled_at', $step2Data['scheduled_at'] ?? date('Y-m-d 08:00')) }}"
-                            placeholder="Pilih tanggal & jam kunjungan..." required readonly
-                            style="width: 100%; padding: 11px 16px 11px 44px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 14px; outline: none; background: #fbfcfe; color: #172033; cursor: pointer; box-sizing: border-box; font-family: inherit; transition: all 0.2s ease;">
-                    </div>
                 </div>
 
                 {{-- Sumber Info --}}
