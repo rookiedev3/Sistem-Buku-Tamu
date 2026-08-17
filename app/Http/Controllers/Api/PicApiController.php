@@ -562,7 +562,7 @@ public function riwayat(Request $request)
      */
    public function leadsIndex(Request $request)
 {
-    $perPage   = (int) $request->input('per_page', 10);
+    $perPage   = (int) $request->input('per_page', 1);
     $today     = Carbon::today();
     $filter    = $request->input('filter', 'active');
     $vipFilter = $request->input('vip_status', 'all');
