@@ -301,53 +301,88 @@ class OwnerApiController extends Controller
      * GET /api/v1/owner/leads
      * Query params: filter, vip_status, keyword, per_page
      */
-    public function leads(Request $request)
-    {
-        $today  = Carbon::today();
-        $filter = $request->input('filter', 'active');
-        $vipFilter = $request->input('vip_status', 'all');
+   /**
+ * GET /api/v1/owner/leads
+ * Query params: filter, vip_status, keyword, per_page
+ */
+public function leads(Request $request)
+{
+    $today  = Carbon::today();
+    $filter = $request->input('filter', 'active');
+    $vipFilter = $request->input('vip_status', 'all');
+    $keyword = trim((string) $request->input('keyword', ''));
 
-        $allowedPerPage = [10, 25, 50, 100];
-        $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
-            $perPage = 10;
+    $allowedPerPage = [2, 10, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 10);
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 10;
+    }
+
+    $query = leads::with([
+        'guest',
+        'visit',
+        'owner',
+        'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
+    ]);
+
+    switch ($filter) {
+        case 'active':
+            $query->whereNotIn('status', ['deal', 'lost']);
+            break;
+        case 'overdue':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', '<', $today);
+            break;
+        case 'today':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', $today);
+            break;
+        case 'upcoming':
+            $query->whereNotIn('status', ['deal', 'lost'])
+                ->whereDate('follow_up_at', '>', $today);
+            break;
+        case 'deal':
+            $query->where('status', 'deal');
+            break;
+        case 'lost':
+            $query->where('status', 'lost');
+            break;
+    }
+
+    if ($keyword !== '') {
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('owner', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
+            });
         }
+    }
 
-        $query = leads::with([
-            'guest',
-            'visit',
-            'owner',
-            'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
-        ]);
+    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+        ->paginate($perPage)
+        ->appends($request->query());
 
-        switch ($filter) {
-            case 'active':
-                $query->whereNotIn('status', ['deal', 'lost']);
-                break;
-            case 'overdue':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', '<', $today);
-                break;
-            case 'today':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', $today);
-                break;
-            case 'upcoming':
-                $query->whereNotIn('status', ['deal', 'lost'])
-                    ->whereDate('follow_up_at', '>', $today);
-                break;
-            case 'deal':
-                $query->where('status', 'deal');
-                break;
-            case 'lost':
-                $query->where('status', 'lost');
-                break;
-        }
+    // Base count yang ikut menghormati filter vip_status & keyword yang sedang aktif,
+    // supaya badge jumlah di tiap chip kategori selalu sesuai dengan data yang
+    // benar-benar sedang ditampilkan — bukan total keseluruhan tanpa filter.
+    $baseCount = function () use ($vipFilter, $keyword) {
+        $q = leads::query();
 
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->whereHas('guest', function ($q2) use ($keyword) {
+        if ($keyword !== '') {
+            $q->where(function ($qq) use ($keyword) {
+                $qq->whereHas('guest', function ($q2) use ($keyword) {
                     $q2->where('name', 'like', "%{$keyword}%")
                         ->orWhere('company_name', 'like', "%{$keyword}%");
                 })->orWhereHas('owner', function ($q3) use ($keyword) {
@@ -358,40 +393,38 @@ class OwnerApiController extends Controller
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+                $q->whereHas('guest', fn($gq) => $gq->where('is_vip', true));
             } elseif ($vipFilter === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
+                $q->whereHas('guest', function ($gq) {
+                    $gq->where('is_vip', false)->orWhereNull('is_vip');
                 });
             }
         }
 
-        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-            ->paginate($perPage)
+        return $q;
+    };
 
-            ->appends($request->query());
-return response()->json([
-    'success' => true,
-    'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
-    'meta'    => $this->paginationMeta($leads),
-    'counts'  => [
-        'all'      => leads::count(),
-        'active'   => leads::whereNotIn('status', ['deal', 'lost'])->count(),
-        'overdue'  => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
-        'today'    => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
-        'upcoming' => leads::whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
-        'deal'     => leads::where('status', 'deal')->count(),
-        'lost'     => leads::where('status', 'lost')->count(),
-    ],
-    'filters' => [
-        'filter'     => $filter,
-        'vip_status' => $vipFilter,
-        'keyword'    => $request->input('keyword'),
-        'per_page'   => $perPage,
-    ],
-]);
-    }
-
+    return response()->json([
+        'success' => true,
+        'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
+        'meta'    => $this->paginationMeta($leads),
+        'counts'  => [
+            'all'      => $baseCount()->count(),
+            'active'   => $baseCount()->whereNotIn('status', ['deal', 'lost'])->count(),
+            'overdue'  => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
+            'today'    => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
+            'upcoming' => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
+            'deal'     => $baseCount()->where('status', 'deal')->count(),
+            'lost'     => $baseCount()->where('status', 'lost')->count(),
+        ],
+        'filters' => [
+            'filter'     => $filter,
+            'vip_status' => $vipFilter,
+            'keyword'    => $request->input('keyword'),
+            'per_page'   => $perPage,
+        ],
+    ]);
+}
     /**
      * GET /api/v1/owner/laporan
      * Query params: month, year, category, branch_id, pic_id, per_page
