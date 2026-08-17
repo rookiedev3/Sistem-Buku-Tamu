@@ -813,9 +813,7 @@ private function mapVisitLaporan($v): array
     ];
 }
 
-/**
- * GET /api/owner/produk-diminati?month=8&year=2026
- */
+
 public function produkDiminati(Request $request)
 {
     $month = (int) $request->input('month', now()->month);
@@ -824,6 +822,8 @@ public function produkDiminati(Request $request)
     $products = DB::table('visit_products')
         ->join('products', 'products.id', '=', 'visit_products.product_id')
         ->join('visits', 'visits.id', '=', 'visit_products.visit_id')
+        ->join('leads', 'leads.visit_id', '=', 'visits.id')
+        ->where('leads.status', 'deal')
         ->where(function ($q) use ($month, $year) {
             $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
               ->orWhere(function ($q2) use ($month, $year) {
@@ -869,6 +869,8 @@ public function kategoriTamu(Request $request)
     $categories = DB::table('visits')
         ->join('guests', 'guests.id', '=', 'visits.guest_id')
         ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
+        ->join('leads', 'leads.visit_id', '=', 'visits.id')
+        ->where('leads.status', 'deal')
         ->where(function ($q) use ($month, $year) {
             $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
               ->orWhere(function ($q2) use ($month, $year) {

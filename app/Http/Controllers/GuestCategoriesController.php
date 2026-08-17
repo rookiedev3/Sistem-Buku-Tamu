@@ -82,10 +82,13 @@ public function laporan(Request $request)
 
     $baseQuery = DB::table('guests')
         ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
-        ->whereMonth('guests.created_at', $month)
-        ->whereYear('guests.created_at', $year);
+        ->join('leads', 'leads.guest_id', '=', 'guests.id')
+        ->join('visits', 'visits.id', '=', 'leads.visit_id')
+        ->where('leads.status', 'deal')
+        ->whereMonth('visits.check_in_at', $month)
+        ->whereYear('visits.check_in_at', $year);
 
-    // Total keseluruhan tamu pada bulan terpilih (untuk basis persentase)
+    // Total keseluruhan tamu (deal) pada bulan terpilih (untuk basis persentase)
     $totalGuests = (clone $baseQuery)->count();
 
     // Data statistik kategori, tanpa pagination

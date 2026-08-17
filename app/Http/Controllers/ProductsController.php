@@ -89,6 +89,8 @@ public function laporan(Request $request)
     $baseQuery = DB::table('visit_products')
         ->join('products', 'products.id', '=', 'visit_products.product_id')
         ->join('visits', 'visits.id', '=', 'visit_products.visit_id')
+        ->join('leads', 'leads.visit_id', '=', 'visits.id')
+        ->where('leads.status', 'deal')
         ->whereMonth('visits.check_in_at', $month)
         ->whereYear('visits.check_in_at', $year);
 
