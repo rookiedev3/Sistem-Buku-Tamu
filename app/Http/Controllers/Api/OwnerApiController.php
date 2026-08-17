@@ -312,7 +312,7 @@ public function leads(Request $request)
     $vipFilter = $request->input('vip_status', 'all');
     $keyword = trim((string) $request->input('keyword', ''));
 
-    $allowedPerPage = [2, 10, 25, 50, 100];
+    $allowedPerPage = [10, 25, 50, 100];
     $perPage = (int) $request->input('per_page', 10);
     if (!in_array($perPage, $allowedPerPage)) {
         $perPage = 10;
