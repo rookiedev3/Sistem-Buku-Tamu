@@ -285,7 +285,7 @@ class ManagerController extends Controller
         ->avg(fn($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at)));
     $avgDuration = $avgDuration ?? 0;
 
-    $perPage = (int) $request->input('per_page', 15);
+    $perPage = (int) $request->input('per_page', 10);
 
     $visits = $baseQuery->orderBy('check_in_at', 'desc')
         ->paginate($perPage)

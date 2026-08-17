@@ -386,10 +386,10 @@ private function mapVisit($v): array
         $branchId = (string) $request->input('branch_id', '');
         $picId    = (string) $request->input('pic_id', '');
 
-        $allowedPerPage = [10, 15, 25, 50, 100];
-        $perPage = (int) $request->input('per_page', 15);
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', default: 10);
         if (!in_array($perPage, $allowedPerPage)) {
-            $perPage = 15;
+            $perPage = 10;
         }
 
         $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
