@@ -13,15 +13,15 @@ class BranchSeeder extends Seeder
             [
                 'code' => 'SLM',
                 'name' => 'Cabang Sleman',
-                'address' => null,
-                'phone' => null,
+                'address' => 'Jl. Sleman No. 123, Sleman, Yogyakarta',
+                'phone' => '0274-123456',
                 'is_active' => true,
             ],
             [
                 'code' => 'MGL',
                 'name' => 'Cabang Magelang',
-                'address' => null,
-                'phone' => null,
+                'address' => 'Jl. Magelang No. 456, Magelang, Jawa Tengah',
+                'phone' => '0293-654321',
                 'is_active' => true,
             ],
         ];

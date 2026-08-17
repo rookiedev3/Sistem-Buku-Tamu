@@ -69,7 +69,6 @@
                 <tr style="background: #f8fafc; color: #778195; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 800; width: 60px;">No</th>
                     <th style="padding: 14px 20px; font-weight: 800;">Nama Kategori</th>
-                    <th style="padding: 14px 20px; font-weight: 800;">Warna (Color)</th>
                     <th style="padding: 14px 20px; font-weight: 800; text-align: center;">Aksi</th>
                 </tr>
             </thead>
@@ -78,12 +77,6 @@
                 <tr style="border-bottom: 1px solid #f1f4f9;">
                     <td class="row-number" style="padding: 16px 20px; font-weight: 700;">{{ $index + 1 }}</td>
                     <td style="padding: 16px 20px; font-weight: 800;">{{ $guest->name }}</td>
-                    <td style="padding: 16px 20px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background-color: {{ $guest->color }}; border: 1px solid rgba(0,0,0,0.1);"></span>
-                            <span style="font-family: monospace; color: #778195; font-weight: 600;">{{ $guest->color }}</span>
-                        </div>
-                    </td>
                     <td style="padding: 16px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
                             {{-- Tombol Edit --}}
@@ -110,7 +103,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" style="padding: 32px 20px; text-align: center; color: #778195; font-size: 13px;">
+                    <td colspan="3" style="padding: 32px 20px; text-align: center; color: #778195; font-size: 13px;">
                         Belum ada data Guest Categories.
                     </td>
                 </tr>

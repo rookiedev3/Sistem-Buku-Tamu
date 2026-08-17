@@ -23,7 +23,7 @@ class GuestCategoriesController extends Controller
     {
         $request->validate([
             'name'    => 'required',
-            'color'  => 'required'
+            // 'color'  => 'required'
         ]);
 
         try {
@@ -50,7 +50,7 @@ class GuestCategoriesController extends Controller
 
         $request->validate([
             'name'    => 'required',
-            'color'  => 'required'
+            // 'color'  => 'required'
         ]);
 
         try {

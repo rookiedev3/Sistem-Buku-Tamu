@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             VisitPurposesSeeder::class,
             LeadSourcesSeeder::class,
             GuestCategoriesSeeder::class,
-            GuestVisitsSeeder::class,
+            // GuestVisitsSeeder::class,
         ]);
     }
 }

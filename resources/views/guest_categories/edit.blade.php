@@ -32,29 +32,13 @@
         @method('PUT')
 
         {{-- Nama Guest Categories --}}
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 28px;">
             <label for="name" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
                 Nama Kategori <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="name" id="name" value="{{ old('name', $guest_category->name) }}"
                 placeholder="Contoh: VIP / Klien Utama"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
-        </div>
-
-        {{-- Color Guest Categories --}}
-        <div style="margin-bottom: 28px;">
-            <label for="color" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Warna Label (Color) <span style="color: #e5484d;">*</span>
-            </label>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <input type="color" name="color" id="color_picker" value="{{ old('color', $guest_category->color) }}"
-                    style="width: 45px; height: 42px; border: 1px solid #e8edf5; border-radius: 10px; background: #fff; cursor: pointer; padding: 2px;"
-                    oninput="document.getElementById('color_text').value = this.value">
-                <input type="text" name="color" id="color_text" value="{{ old('color', $guest_category->color) }}"
-                    placeholder="Contoh: #006B3F"
-                    style="flex: 1; min-width: 200px; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;"
-                    oninput="document.getElementById('color_picker').value = this.value">
-            </div>
         </div>
 
         {{-- Tombol Aksi (Responsif & Fleksibel) --}}
