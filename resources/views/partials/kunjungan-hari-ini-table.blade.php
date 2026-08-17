@@ -61,7 +61,7 @@
                         <strong style="display:block; color:#172033; font-weight:800;">
                             {{ $visit->guest->name ?? '-' }}
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                                <span title="VIP" style="color:#d97706;"></span>
+                                <span title="VIP" style="color:#d97706;">VIP</span>
                             @endif
                         </strong>
                         <span style="font-size:11px; color:#778195;">

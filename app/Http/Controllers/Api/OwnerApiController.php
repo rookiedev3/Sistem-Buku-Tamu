@@ -301,88 +301,53 @@ class OwnerApiController extends Controller
      * GET /api/v1/owner/leads
      * Query params: filter, vip_status, keyword, per_page
      */
-   /**
- * GET /api/v1/owner/leads
- * Query params: filter, vip_status, keyword, per_page
- */
-public function leads(Request $request)
-{
-    $today  = Carbon::today();
-    $filter = $request->input('filter', 'active');
-    $vipFilter = $request->input('vip_status', 'all');
-    $keyword = trim((string) $request->input('keyword', ''));
+    public function leads(Request $request)
+    {
+        $today  = Carbon::today();
+        $filter = $request->input('filter', 'active');
+        $vipFilter = $request->input('vip_status', 'all');
+        $keyword = trim((string) $request->input('keyword', ''));
 
-    $allowedPerPage = [10, 25, 50, 100];
-    $perPage = (int) $request->input('per_page', 10);
-    if (!in_array($perPage, $allowedPerPage)) {
-        $perPage = 10;
-    }
-
-    $query = leads::with([
-        'guest',
-        'visit',
-        'owner',
-        'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
-    ]);
-
-    switch ($filter) {
-        case 'active':
-            $query->whereNotIn('status', ['deal', 'lost']);
-            break;
-        case 'overdue':
-            $query->whereNotIn('status', ['deal', 'lost'])
-                ->whereDate('follow_up_at', '<', $today);
-            break;
-        case 'today':
-            $query->whereNotIn('status', ['deal', 'lost'])
-                ->whereDate('follow_up_at', $today);
-            break;
-        case 'upcoming':
-            $query->whereNotIn('status', ['deal', 'lost'])
-                ->whereDate('follow_up_at', '>', $today);
-            break;
-        case 'deal':
-            $query->where('status', 'deal');
-            break;
-        case 'lost':
-            $query->where('status', 'lost');
-            break;
-    }
-
-    if ($keyword !== '') {
-        $query->where(function ($q) use ($keyword) {
-            $q->whereHas('guest', function ($q2) use ($keyword) {
-                $q2->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('company_name', 'like', "%{$keyword}%");
-            })->orWhereHas('owner', function ($q3) use ($keyword) {
-                $q3->where('name', 'like', "%{$keyword}%");
-            });
-        });
-    }
-
-    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
-        if ($vipFilter === 'vip') {
-            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-        } elseif ($vipFilter === 'reguler') {
-            $query->whereHas('guest', function ($q) {
-                $q->where('is_vip', false)->orWhereNull('is_vip');
-            });
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
         }
-    }
 
-    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-        ->paginate($perPage)
-        ->appends($request->query());
+        $query = leads::with([
+            'guest',
+            'visit',
+            'owner',
+            'followUps' => fn($q) => $q->orderBy('created_at', 'desc'),
+        ]);
 
-    // Base count yang ikut menghormati filter vip_status & keyword yang sedang aktif,
-    // supaya badge jumlah di tiap chip kategori selalu sesuai dengan data yang
-    // benar-benar sedang ditampilkan — bukan total keseluruhan tanpa filter.
-    $baseCount = function () use ($vipFilter, $keyword) {
-        $q = leads::query();
+        switch ($filter) {
+            case 'active':
+                $query->whereNotIn('status', ['deal', 'lost']);
+                break;
+            case 'overdue':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                    ->whereDate('follow_up_at', '<', $today);
+                break;
+            case 'today':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                    ->whereDate('follow_up_at', $today);
+                break;
+            case 'upcoming':
+                $query->whereNotIn('status', ['deal', 'lost'])
+                    ->whereDate('follow_up_at', '>', $today);
+                break;
+            case 'deal':
+                $query->where('status', 'deal');
+                break;
+            case 'lost':
+                $query->where('status', 'lost');
+                break;
+        }
 
         if ($keyword !== '') {
-            $q->where(function ($qq) use ($keyword) {
-                $qq->whereHas('guest', function ($q2) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->whereHas('guest', function ($q2) use ($keyword) {
                     $q2->where('name', 'like', "%{$keyword}%")
                         ->orWhere('company_name', 'like', "%{$keyword}%");
                 })->orWhereHas('owner', function ($q3) use ($keyword) {
@@ -393,38 +358,70 @@ public function leads(Request $request)
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
-                $q->whereHas('guest', fn($gq) => $gq->where('is_vip', true));
+                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
             } elseif ($vipFilter === 'reguler') {
-                $q->whereHas('guest', function ($gq) {
-                    $gq->where('is_vip', false)->orWhereNull('is_vip');
+                $query->whereHas('guest', function ($q) {
+                    $q->where('is_vip', false)->orWhereNull('is_vip');
                 });
             }
         }
 
-        return $q;
-    };
+        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+            ->paginate($perPage)
+            ->appends($request->query());
 
-    return response()->json([
-        'success' => true,
-        'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
-        'meta'    => $this->paginationMeta($leads),
-        'counts'  => [
-            'all'      => $baseCount()->count(),
-            'active'   => $baseCount()->whereNotIn('status', ['deal', 'lost'])->count(),
-            'overdue'  => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
-            'today'    => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
-            'upcoming' => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
-            'deal'     => $baseCount()->where('status', 'deal')->count(),
-            'lost'     => $baseCount()->where('status', 'lost')->count(),
-        ],
-        'filters' => [
-            'filter'     => $filter,
-            'vip_status' => $vipFilter,
-            'keyword'    => $request->input('keyword'),
-            'per_page'   => $perPage,
-        ],
-    ]);
-}
+        // Base count yang ikut menghormati filter vip_status & keyword yang sedang aktif,
+        // supaya badge jumlah di tiap chip kategori selalu sesuai dengan data yang
+        // benar-benar sedang ditampilkan — bukan total keseluruhan tanpa filter.
+        $baseCount = function () use ($vipFilter, $keyword) {
+            $q = leads::query();
+
+            if ($keyword !== '') {
+                $q->where(function ($qq) use ($keyword) {
+                    $qq->whereHas('guest', function ($q2) use ($keyword) {
+                        $q2->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('company_name', 'like', "%{$keyword}%");
+                    })->orWhereHas('owner', function ($q3) use ($keyword) {
+                        $q3->where('name', 'like', "%{$keyword}%");
+                    });
+                });
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+                if ($vipFilter === 'vip') {
+                    $q->whereHas('guest', fn($gq) => $gq->where('is_vip', true));
+                } elseif ($vipFilter === 'reguler') {
+                    $q->whereHas('guest', function ($gq) {
+                        $gq->where('is_vip', false)->orWhereNull('is_vip');
+                    });
+                }
+            }
+
+            return $q;
+        };
+
+        return response()->json([
+            'success' => true,
+            'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
+            'meta'    => $this->paginationMeta($leads),
+            'counts'  => [
+                'all'      => $baseCount()->count(),
+                'active'   => $baseCount()->whereNotIn('status', ['deal', 'lost'])->count(),
+                'overdue'  => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
+                'today'    => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
+                'upcoming' => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
+                'deal'     => $baseCount()->where('status', 'deal')->count(),
+                'lost'     => $baseCount()->where('status', 'lost')->count(),
+            ],
+            'filters' => [
+                'filter'     => $filter,
+                'vip_status' => $vipFilter,
+                'keyword'    => $request->input('keyword'),
+                'per_page'   => $perPage,
+            ],
+        ]);
+    }
+
     /**
      * GET /api/v1/owner/laporan
      * Query params: month, year, category, branch_id, pic_id, per_page
@@ -568,18 +565,17 @@ public function leads(Request $request)
             'public'
         );
 
-// di dalam exportExcel(), ganti bagian return-nya jadi:
-$downloadUrl = URL::temporarySignedRoute(
-    'laporan.download',
-    now()->addMinutes(10),
-    ['filename' => $fileName]
-);
+        $downloadUrl = URL::temporarySignedRoute(
+            'laporan.download',
+            now()->addMinutes(10),
+            ['filename' => $fileName]
+        );
 
-return response()->json([
-    'success'   => true,
-    'file_url'  => $downloadUrl,
-    'file_name' => $fileName,
-]);
+        return response()->json([
+            'success'   => true,
+            'file_url'  => $downloadUrl,
+            'file_name' => $fileName,
+        ]);
     }
 
     /**
@@ -690,34 +686,33 @@ return response()->json([
 
         Storage::disk('public')->put($path, $pdf->output());
 
-// di dalam exportExcel(), ganti bagian return-nya jadi:
-$downloadUrl = URL::temporarySignedRoute(
-    'laporan.download',
-    now()->addMinutes(10),
-    ['filename' => $fileName]
-);
+        $downloadUrl = URL::temporarySignedRoute(
+            'laporan.download',
+            now()->addMinutes(10),
+            ['filename' => $fileName]
+        );
 
-return response()->json([
-    'success'   => true,
-    'file_url'  => $downloadUrl,
-    'file_name' => $fileName,
-]);
+        return response()->json([
+            'success'   => true,
+            'file_url'  => $downloadUrl,
+            'file_name' => $fileName,
+        ]);
     }
 
     public function downloadLaporan(Request $request, string $filename)
-{
-    if (!$request->hasValidSignature()) {
-        abort(403, 'Link download tidak valid atau sudah kadaluarsa.');
+    {
+        if (!$request->hasValidSignature()) {
+            abort(403, 'Link download tidak valid atau sudah kadaluarsa.');
+        }
+
+        $path = 'exports/' . $filename;
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->download($path, $filename);
     }
-
-    $path = 'exports/' . $filename;
-
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    return Storage::disk('public')->download($path, $filename);
-}
 
     /**
      * GET /api/v1/owner/guests
@@ -790,7 +785,7 @@ return response()->json([
         ];
     }
 
-    private function mapVisitForOwnerDashboard($v): array
+private function mapVisitForOwnerDashboard($v): array
 {
     return [
         'id'               => $v->id,
@@ -802,169 +797,167 @@ return response()->json([
         'jenis'            => optional(optional($v->guest)->category)->name,
         'keperluan'        => optional($v->purpose)->name,
         'pic'              => optional($v->assignedUser)->name,
-        'catatan'          => $v->notes
-            ?? $v->meeting_result
-            ?? optional(optional($v->lead)->followUps->sortByDesc('created_at')->first())->result,
+        'catatan'          => $v->notes ?? $v->meeting_result ?? optional(optional($v->lead)->followUps->sortByDesc('created_at')->first())->result,
         'status_kunjungan' => $v->status,
+        'status_lead'      => optional($v->lead)->status, // ← TAMBAHAN: ini yang kelewat
         'potential_level'  => $v->potensi_level,
-    ];
-}
-
-private function mapVisitLaporan($v): array
-{
-    $checkIn  = $v->check_in_at;
-    $checkOut = $v->check_out_at;
-    $durasiMenit = ($checkIn && $checkOut)
-        ? Carbon::parse($checkIn)->diffInMinutes(Carbon::parse($checkOut))
-        : null;
-
-    // Samain persis logika $isCompleted di blade (riwayat.blade.php)
-    $statusLower = strtolower(trim((string) $v->status));
-    $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
-
-    return [
-        'id'               => $v->id,
-        'visit_code'       => $v->visit_code ?? ('TRX-' . str_pad($v->id, 3, '0', STR_PAD_LEFT)),
-        'check_in_at'      => $checkIn,
-        'check_out_at'     => $checkOut,
-        'durasi_menit'     => $durasiMenit,
-        'guest_name'       => optional($v->guest)->name,
-        'guest_phone'      => optional($v->guest)->phone,
         'is_vip'           => (bool) optional($v->guest)->is_vip,
-        'branch_name'      => optional($v->branch)->name,
-        'pic_name'         => optional($v->assignedUser)->name,
-        'purpose_name'     => optional($v->purpose)->name,
-        'product_names'    => $v->products->pluck('name')->implode(', '),
-        'source_name'      => optional($v->source)->name,
-        'potential_level'  => $v->potential_level,              // FIX: langsung dari visits.potensi_level
-        'meeting_result'   => $v->meeting_result,
-        'notes'            => $v->notes,                      // FIX: field baru untuk "Catatan Hasil"
-        'status'           => $v->status,
-        'lead_status'      => optional($v->lead)->status,      // FIX: leads.status terpisah
-        'is_completed'     => $isCompleted,                    // FIX: flag buat logic badge
-        'company_name'     => optional($v->guest)->company_name,
     ];
 }
 
+    private function mapVisitLaporan($v): array
+    {
+        $checkIn  = $v->check_in_at;
+        $checkOut = $v->check_out_at;
+        $durasiMenit = ($checkIn && $checkOut)
+            ? Carbon::parse($checkIn)->diffInMinutes(Carbon::parse($checkOut))
+            : null;
 
-public function produkDiminati(Request $request)
-{
-    $month = (int) $request->input('month', now()->month);
-    $year  = (int) $request->input('year', now()->year);
+        // Samain persis logika $isCompleted di blade (riwayat.blade.php)
+        $statusLower = strtolower(trim((string) $v->status));
+        $isCompleted = in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
 
-    $products = DB::table('visit_products')
-        ->join('products', 'products.id', '=', 'visit_products.product_id')
-        ->join('visits', 'visits.id', '=', 'visit_products.visit_id')
-        ->join('leads', 'leads.visit_id', '=', 'visits.id')
-        ->where('leads.status', 'deal')
-        ->where(function ($q) use ($month, $year) {
-            $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
-              ->orWhere(function ($q2) use ($month, $year) {
-                  $q2->whereNull('visits.check_in_at')
-                     ->whereMonth('visits.scheduled_at', $month)
-                     ->whereYear('visits.scheduled_at', $year);
-              });
-        })
-        ->select('products.id', 'products.name', DB::raw('count(*) as total'))
-        ->groupBy('products.id', 'products.name')
-        ->orderByDesc('total')
-        ->get();
-
-    $totalPeminatan = $products->sum('total');
-
-    $data = $products->map(function ($p) use ($totalPeminatan) {
         return [
-            'nama'       => $p->name,
-            'jumlah'     => $p->total,
-            'persentase' => $totalPeminatan > 0 ? round(($p->total / $totalPeminatan) * 100, 1) : 0,
+            'id'               => $v->id,
+            'visit_code'       => $v->visit_code ?? ('TRX-' . str_pad($v->id, 3, '0', STR_PAD_LEFT)),
+            'check_in_at'      => $checkIn,
+            'check_out_at'     => $checkOut,
+            'durasi_menit'     => $durasiMenit,
+            'guest_name'       => optional($v->guest)->name,
+            'guest_phone'      => optional($v->guest)->phone,
+            'is_vip'           => (bool) optional($v->guest)->is_vip,
+            'branch_name'      => optional($v->branch)->name,
+            'pic_name'         => optional($v->assignedUser)->name,
+            'purpose_name'     => optional($v->purpose)->name,
+            'product_names'    => $v->products->pluck('name')->implode(', '),
+            'source_name'      => optional($v->source)->name,
+            'potential_level'  => $v->potential_level,              // FIX: langsung dari visits.potensi_level
+            'meeting_result'   => $v->meeting_result,
+            'notes'            => $v->notes,                      // FIX: field baru untuk "Catatan Hasil"
+            'status'           => $v->status,
+            'lead_status'      => optional($v->lead)->status,      // FIX: leads.status terpisah
+            'is_completed'     => $isCompleted,                    // FIX: flag buat logic badge
+            'company_name'     => optional($v->guest)->company_name,
         ];
-    });
+    }
 
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'products'         => $data,
-            'total_peminatan'  => $totalPeminatan,
-            'month'            => $month,
-            'year'             => $year,
-        ],
-    ]);
-}
+    public function produkDiminati(Request $request)
+    {
+        $month = (int) $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
 
-/**
- * GET /api/owner/kategori-tamu?month=8&year=2026
- */
-public function kategoriTamu(Request $request)
-{
-    $month = (int) $request->input('month', now()->month);
-    $year  = (int) $request->input('year', now()->year);
+        $products = DB::table('visit_products')
+            ->join('products', 'products.id', '=', 'visit_products.product_id')
+            ->join('visits', 'visits.id', '=', 'visit_products.visit_id')
+            ->join('leads', 'leads.visit_id', '=', 'visits.id')
+            ->where('leads.status', 'deal')
+            ->where(function ($q) use ($month, $year) {
+                $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
+                  ->orWhere(function ($q2) use ($month, $year) {
+                      $q2->whereNull('visits.check_in_at')
+                         ->whereMonth('visits.scheduled_at', $month)
+                         ->whereYear('visits.scheduled_at', $year);
+                  });
+            })
+            ->select('products.id', 'products.name', DB::raw('count(*) as total'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('total')
+            ->get();
 
-    $categories = DB::table('visits')
-        ->join('guests', 'guests.id', '=', 'visits.guest_id')
-        ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
-        ->join('leads', 'leads.visit_id', '=', 'visits.id')
-        ->where('leads.status', 'deal')
-        ->where(function ($q) use ($month, $year) {
-            $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
-              ->orWhere(function ($q2) use ($month, $year) {
-                  $q2->whereNull('visits.check_in_at')
-                     ->whereMonth('visits.scheduled_at', $month)
-                     ->whereYear('visits.scheduled_at', $year);
-              });
-        })
-        ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
-        ->groupBy('guest_categories.id', 'guest_categories.name')
-        ->orderByDesc('total')
-        ->get();
+        $totalPeminatan = $products->sum('total');
 
-    $totalTamu = $categories->sum('total');
+        $data = $products->map(function ($p) use ($totalPeminatan) {
+            return [
+                'nama'       => $p->name,
+                'jumlah'     => $p->total,
+                'persentase' => $totalPeminatan > 0 ? round(($p->total / $totalPeminatan) * 100, 1) : 0,
+            ];
+        });
 
-    $data = $categories->map(function ($c) use ($totalTamu) {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products'         => $data,
+                'total_peminatan'  => $totalPeminatan,
+                'month'            => $month,
+                'year'             => $year,
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/owner/kategori-tamu?month=8&year=2026
+     */
+    public function kategoriTamu(Request $request)
+    {
+        $month = (int) $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
+
+        $categories = DB::table('visits')
+            ->join('guests', 'guests.id', '=', 'visits.guest_id')
+            ->join('guest_categories', 'guest_categories.id', '=', 'guests.guest_category_id')
+            ->join('leads', 'leads.visit_id', '=', 'visits.id')
+            ->where('leads.status', 'deal')
+            ->where(function ($q) use ($month, $year) {
+                $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
+                  ->orWhere(function ($q2) use ($month, $year) {
+                      $q2->whereNull('visits.check_in_at')
+                         ->whereMonth('visits.scheduled_at', $month)
+                         ->whereYear('visits.scheduled_at', $year);
+                  });
+            })
+            ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
+            ->groupBy('guest_categories.id', 'guest_categories.name')
+            ->orderByDesc('total')
+            ->get();
+
+        $totalTamu = $categories->sum('total');
+
+        $data = $categories->map(function ($c) use ($totalTamu) {
+            return [
+                'kategori'   => $c->name,
+                'jumlah'     => $c->total,
+                'persentase' => $totalTamu > 0 ? round(($c->total / $totalTamu) * 100, 1) : 0,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'categories'  => $data,
+                'total_tamu'  => $totalTamu,
+                'month'       => $month,
+                'year'        => $year,
+            ],
+        ]);
+    }
+
+    private function mapLead($l): array
+    {
         return [
-            'kategori'   => $c->name,
-            'jumlah'     => $c->total,
-            'persentase' => $totalTamu > 0 ? round(($c->total / $totalTamu) * 100, 1) : 0,
+            'id'              => $l->id,
+            'visit_code'      => optional($l->visit)->visit_code
+                ?? ('VST-' . str_pad(optional($l->visit)->id ?? $l->id, 4, '0', STR_PAD_LEFT)),
+            'guest_name'      => optional($l->guest)->name,
+            'guest_position'  => optional($l->guest)->position,
+            'company_name'    => optional($l->guest)->company_name,
+            'is_vip'          => (bool) optional($l->guest)->is_vip,
+            'owner_id'        => optional($l->owner)->id,
+            'owner_name'      => optional($l->owner)->name,
+            'status'          => $l->status,
+            'potential_level' => $l->potential_level ?? null,
+            'estimated_value' => $l->estimated_value ?? null,
+            'follow_up_at'    => $l->follow_up_at,
+            'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
+            'meeting_result'  => optional($l->visit)->meeting_result,
+            'follow_ups'      => $l->followUps->map(fn ($f) => [
+                'id'              => $f->id,
+                'result'          => $f->result ?? null,
+                'status'          => $f->status ?? null,
+                'due_at'          => $f->due_at ?? null,
+                'estimated_value' => $f->estimated_value ?? null,   // ⬅️ BARU: nilai estimasi per update
+                'created_at'      => $f->created_at,
+            ]),
         ];
-    });
-
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'categories'  => $data,
-            'total_tamu'  => $totalTamu,
-            'month'       => $month,
-            'year'        => $year,
-        ],
-    ]);
-}
-
-private function mapLead($l): array
-{
-    return [
-        'id'              => $l->id,
-        'visit_code'      => optional($l->visit)->visit_code
-            ?? ('VST-' . str_pad(optional($l->visit)->id ?? $l->id, 4, '0', STR_PAD_LEFT)),
-        'guest_name'      => optional($l->guest)->name,
-        'guest_position'  => optional($l->guest)->position,
-        'company_name'    => optional($l->guest)->company_name,
-        'is_vip'          => (bool) optional($l->guest)->is_vip,
-        'owner_id'        => optional($l->owner)->id,
-        'owner_name'      => optional($l->owner)->name,
-        'status'          => $l->status,
-        'potential_level' => $l->potential_level ?? null,
-        'estimated_value' => $l->estimated_value ?? null,
-        'follow_up_at'    => $l->follow_up_at,
-        'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
-        'meeting_result'  => optional($l->visit)->meeting_result,
-        'follow_ups'      => $l->followUps->map(fn ($f) => [
-            'id'              => $f->id,
-            'result'          => $f->result ?? null,
-            'status'          => $f->status ?? null,
-            'due_at'          => $f->due_at ?? null,
-            'estimated_value' => $f->estimated_value ?? null,   // ⬅️ BARU: nilai estimasi per update
-            'created_at'      => $f->created_at,
-        ]),
-    ];
-}
-
+    }
 }
