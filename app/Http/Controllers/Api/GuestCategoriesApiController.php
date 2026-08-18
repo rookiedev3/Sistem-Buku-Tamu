@@ -31,7 +31,7 @@ class GuestCategoriesApiController extends BaseApiController
         try {
             $validated = $request->validate([
                 'name'    => 'required',
-                'color'   => 'required',
+                // 'color'   => 'required',
             ]);
         } catch (ValidationException $e) {
             return $this->responseHasil(400, false, $e->errors());
@@ -39,7 +39,7 @@ class GuestCategoriesApiController extends BaseApiController
 
         $guest_category = guest_categories::create([
             'name'      => $validated['name'],
-            'color'     => $validated['color'],
+            'color'     => $validated['color'] ?? null,
         ]);
 
         return $this->responseHasil(200, true, $guest_category);
@@ -56,7 +56,7 @@ class GuestCategoriesApiController extends BaseApiController
         try {
             $validated = $request->validate([
                 'name'    => 'required',
-                'color'   => 'required',
+                // 'color'   => 'required',
             ]);
         } catch (ValidationException $e) {
             return $this->responseHasil(400, false, $e->errors());
@@ -64,7 +64,7 @@ class GuestCategoriesApiController extends BaseApiController
 
         $guest_category->update([
             'name'      => $validated['name'],
-            'color'     => $validated['color'],
+            'color'     => $validated['color'] ?? null,
         ]);
 
         return $this->responseHasil(200, true, $guest_category);
