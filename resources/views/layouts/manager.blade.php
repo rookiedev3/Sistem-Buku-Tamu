@@ -286,7 +286,7 @@
 
                 <a href="{{ url('/manager/leads') }}" class="menu-item {{ request()->is('manager/leads*') ? 'active' : '' }}" title="Pipeline Lead Tim" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('manager/leads*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('manager/leads*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('manager/leads*') ? '#C7AB6B' : 'transparent' }};">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span>Pipeline Lead Tim</span>
+                    <span>Pipeline Lead & Follow up</span>
                 </a>
 
                 <a href="{{ url('/manager/kunjungan') }}" class="menu-item {{ request()->is('manager/kunjungan*') ? 'active' : '' }}" title="Semua Kunjungan" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('manager/kunjungan*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('manager/kunjungan*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('manager/kunjungan*') ? '#C7AB6B' : 'transparent' }};">

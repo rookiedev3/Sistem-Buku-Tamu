@@ -293,7 +293,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                     </svg>
-                    <span>Lead</span>
+                    <span>Lead & Follow up</span>
                 </a>
 
                 <a href="{{ route('pic.riwayat') }}" class="menu-item {{ request()->is('pic/riwayat*') ? 'active' : '' }}" title="Riwayat Kunjungan" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: {{ request()->is('pic/riwayat*') ? '#013220' : '#d1d5db' }}; text-decoration: none; font-size: 13px; font-weight: {{ request()->is('pic/riwayat*') ? '700' : '600' }}; border-radius: 10px; background: {{ request()->is('pic/riwayat*') ? '#C7AB6B' : 'transparent' }};">
