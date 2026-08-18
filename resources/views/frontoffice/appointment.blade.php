@@ -349,7 +349,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Alamat Instansi / Perusahaan
                         </label>
-                        <input type="text" name="address" value="{{ old('address') }}" placeholder="Contoh: Jl. Sudirman No. 123, Jakarta"
+                        <input type="text" id="input_address" name="address" value="{{ old('address') }}" placeholder="Contoh: Jl. Sudirman No. 123, Jakarta"
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
@@ -358,7 +358,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Jabatan di Perusahaan <span style="color: #dc2626;">*</span>
                         </label>
-                        <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Staff, Manager, Direktur" required
+                        <input type="text" id="input_position" name="position" value="{{ old('position') }}" placeholder="Contoh: Staff, Manager, Direktur" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
@@ -367,7 +367,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nomor WhatsApp (Aktif) <span style="color: #dc2626;">*</span>
                         </label>
-                        <input type="tel" name="phone" value="{{ old('phone') }}" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" placeholder="Contoh: 081234567890" required
+                        <input type="tel" id="input_phone" name="phone" value="{{ old('phone') }}" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" placeholder="Contoh: 081234567890" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
@@ -376,7 +376,7 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Email <span style="color: #dc2626;">*</span>
                         </label>
-                        <input type="email" name="email" value="{{ old('email') }}" placeholder="Contoh: nama@email.com" required
+                        <input type="email" id="input_email" name="email" value="{{ old('email') }}" placeholder="Contoh: nama@email.com" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
                             onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
                     </div>
@@ -385,9 +385,9 @@
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Kategori Pengunjung <span style="color: #dc2626;">*</span>
                         </label>
-                        <select name="guest_category_id" required
+                        <select id="select_category" name="guest_category_id" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'" onchange="updateSummary()">
                             <option value="">-- Pilih Kategori --</option>
                             @if(isset($guestCategories))
                             @foreach($guestCategories as $categories)
@@ -507,6 +507,26 @@
                                 <strong id="sum_company" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Alamat:</span>
+                                <strong id="sum_address" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Jabatan:</span>
+                                <strong id="sum_position" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">No. WhatsApp:</span>
+                                <strong id="sum_phone" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Email:</span>
+                                <strong id="sum_email" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #64748b; font-weight: 600;">Kategori Pengunjung:</span>
+                                <strong id="sum_category" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
                                 <span style="color: #64748b; font-weight: 600;">Cabang:</span>
                                 <strong id="sum_branch" style="color: #172033; text-align: right; max-width: 60%;"> -</strong>
                             </div>
@@ -577,13 +597,10 @@
 <div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
-<<<<<<< HEAD
-=======
         <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
             
         </div>
 
->>>>>>> 1ed6a31a7e4487d2a7d33ad9e5469ba233afc462
         <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Batalkan Kunjungan?</h3>
         <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
             Apakah Anda yakin ingin membatalkan jadwal kunjungan untuk <strong id="cancelGuestName" style="color: #172033;">-</strong>? Tindakan ini tidak dapat dibatalkan.
@@ -808,6 +825,15 @@
     function updateSummary() {
         document.getElementById('sum_name').innerText = document.getElementById('input_name').value.trim() || '-';
         document.getElementById('sum_company').innerText = document.getElementById('input_company').value.trim() || '-';
+
+        // 🆕 Field yang sebelumnya belum ditampilkan di ringkasan Step 3
+        document.getElementById('sum_address').innerText = document.getElementById('input_address').value.trim() || '-';
+        document.getElementById('sum_position').innerText = document.getElementById('input_position').value.trim() || '-';
+        document.getElementById('sum_phone').innerText = document.getElementById('input_phone').value.trim() || '-';
+        document.getElementById('sum_email').innerText = document.getElementById('input_email').value.trim() || '-';
+
+        const categorySelect = document.getElementById('select_category');
+        document.getElementById('sum_category').innerText = (categorySelect.selectedIndex >= 0 && categorySelect.options[categorySelect.selectedIndex] && categorySelect.value) ? categorySelect.options[categorySelect.selectedIndex].text : '-';
 
         const branchSelect = document.getElementById('select_branch');
         document.getElementById('sum_branch').innerText = (branchSelect.selectedIndex >= 0 && branchSelect.options[branchSelect.selectedIndex] && branchSelect.value) ? branchSelect.options[branchSelect.selectedIndex].text : '-';
