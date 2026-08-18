@@ -19,8 +19,12 @@ use URL;
 class OwnerApiController extends Controller
 {
     private const FINAL_STATUSES = [
-        'completed', 'Selesai', 'Meeting Selesai',
-        'cancelled', 'Dibatalkan', 'Ditolak',
+        'completed',
+        'Selesai',
+        'Meeting Selesai',
+        'cancelled',
+        'Dibatalkan',
+        'Ditolak',
     ];
 
     private const COMPLETED_STATUSES = ['completed', 'Selesai', 'Meeting Selesai'];
@@ -159,7 +163,7 @@ class OwnerApiController extends Controller
                     'sedang_bertemu'       => $sedangBertemu,
                     'pertemuan_selesai'    => $pertemuanSelesai,
                     'terjadwal_hari_ini'   => $terjadwalHariIni,
-                    'menjadi_lead_hari_ini'=> $menjadiLeadHariIni,
+                    'menjadi_lead_hari_ini' => $menjadiLeadHariIni,
                     'avg_wait_minutes'     => $avgWaitMinutes,
                     'service_rate'         => $serviceRate,
                     'conversion_rate'      => $conversionRate,
@@ -170,7 +174,7 @@ class OwnerApiController extends Controller
                     'percentage' => $topCategoryPercentage,
                 ],
                 'recent_activities' => $recentActivities,
-                'visits' => $visits->map(fn ($v) => $this->mapVisitForOwnerDashboard($v)),
+                'visits' => $visits->map(fn($v) => $this->mapVisitForOwnerDashboard($v)),
                 'filters' => [
                     'status_options' => $statusOptions,
                     'pic_options'    => $picOptions,
@@ -402,7 +406,7 @@ class OwnerApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => collect($leads->items())->map(fn ($l) => $this->mapLead($l)),
+            'data'    => collect($leads->items())->map(fn($l) => $this->mapLead($l)),
             'meta'    => $this->paginationMeta($leads),
             'counts'  => [
                 'all'      => $baseCount()->count(),
@@ -451,8 +455,12 @@ class OwnerApiController extends Controller
                 });
             })
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
-                'completed', 'selesai', 'meeting selesai',
-                'cancelled', 'dibatalkan', 'ditolak',
+                'completed',
+                'selesai',
+                'meeting selesai',
+                'cancelled',
+                'dibatalkan',
+                'ditolak',
             ]);
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
@@ -500,7 +508,7 @@ class OwnerApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => collect($visits->items())->map(fn ($v) => $this->mapVisitLaporan($v)),
+            'data' => collect($visits->items())->map(fn($v) => $this->mapVisitLaporan($v)),
             'meta'    => $this->paginationMeta($visits),
             'summary' => [
                 'total_kunjungan' => $totalKunjungan,
@@ -539,9 +547,18 @@ class OwnerApiController extends Controller
         $picId    = (string) $request->input('pic_id', '');
 
         $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
         ];
 
         $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
@@ -591,9 +608,18 @@ class OwnerApiController extends Controller
         $picId    = (string) $request->input('pic_id', '');
 
         $months = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
         ];
 
         $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead', 'purpose', 'source', 'products', 'branch'])
@@ -607,8 +633,12 @@ class OwnerApiController extends Controller
                 });
             })
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
-                'completed', 'selesai', 'meeting selesai',
-                'cancelled', 'dibatalkan', 'ditolak',
+                'completed',
+                'selesai',
+                'meeting selesai',
+                'cancelled',
+                'dibatalkan',
+                'ditolak',
             ]);
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
@@ -714,7 +744,7 @@ class OwnerApiController extends Controller
         return Storage::disk('public')->download($path, $filename);
     }
 
-    /**
+   /**
      * GET /api/v1/owner/guests
      * Query params: search, per_page
      */
@@ -728,9 +758,15 @@ class OwnerApiController extends Controller
             $perPage = 10;
         }
 
-        $search = $request->input('search');
+        $search = $request->input('search') ?? $request->input('keyword');
 
-        $guests = guests::with(['category'])
+        // 🟢 Eager load 'purpose' bersama assignedUser & products
+        $guests = guests::with([
+            'category',
+            'visits' => function ($query) {
+                $query->with(['assignedUser', 'products', 'purpose'])->latest();
+            }
+        ])
             ->withCount('visits')
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -743,12 +779,55 @@ class OwnerApiController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $formattedData = $guests->getCollection()->map(function ($guest) {
+            $latestVisit = $guest->visits->first();
+
+            $minatProduk = '-';
+            if ($latestVisit) {
+                if ($latestVisit->relationLoaded('products') && $latestVisit->products && $latestVisit->products->isNotEmpty()) {
+                    $minatProduk = $latestVisit->products->pluck('name')->join(', ');
+                } else {
+                    $minatProduk = $latestVisit->product_interest ?? 'Umum';
+                }
+            }
+
+            $categoryName = optional($guest->category)->name ?? 'Regular';
+
+            return [
+                'id'                 => $guest->id,
+                'nama'               => $guest->name,
+                'kontak'             => $guest->phone,
+                'instansi'           => $guest->company_name ?? '-',
+                'jabatan'            => $guest->position ?? '-',
+                'kategoriTamu'       => $guest->is_vip ? 'VIP' : $categoryName,
+                'minatProduk'        => $minatProduk,
+                'totalKunjungan'     => $guest->visits_count ?? 0,
+                'terakhirBerkunjung' => $latestVisit
+                    ? Carbon::parse($latestVisit->created_at)->locale('id')->isoFormat('dddd, D MMMM YYYY')
+                    : '-',
+                'timelineRiwayat'    => $guest->visits->map(function ($visit) {
+                    return [
+                        'id'        => $visit->id,
+                        'waktu'     => Carbon::parse($visit->created_at)->locale('id')->isoFormat('D MMM YYYY, HH:mm') . ' WIB',
+                        'pic'       => optional($visit->assignedUser)->name ?? 'Admin',
+                        'keperluan' => optional($visit->purpose)->name ?? $visit->notes ?? '-', // 🟢 Ambil nama dari relasi purpose
+                        'status'    => $visit->status ?? 'Terjadwal',
+                    ];
+                })->values(),
+            ];
+        });
+
         return response()->json([
-            'success' => true,
-            'data'    => $guests->items(),
-            'meta'    => $this->paginationMeta($guests),
-            'filters' => ['search' => $search, 'per_page' => $perPage],
-        ]);
+            'status'  => true,
+            'message' => 'Data database tamu berhasil dimuat.',
+            'data'    => $formattedData,
+            'meta'    => [
+                'current_page' => $guests->currentPage(),
+                'last_page'    => $guests->lastPage(),
+                'per_page'     => $guests->perPage(),
+                'total'        => $guests->total(),
+            ],
+        ], 200);
     }
 
     /**
@@ -758,17 +837,66 @@ class OwnerApiController extends Controller
     {
         Carbon::setLocale('id');
 
-        $guest = guests::with(['category', 'visits' => function ($query) {
-            $query->with('assignedUser')->latest();
-        }])
+        $guest = guests::with([
+                'category',
+                'visits' => function ($query) {
+                    $query->with(['assignedUser', 'products', 'purpose'])->latest();
+                }
+            ])
             ->withCount('visits')
-            ->findOrFail($id);
+            ->find($id);
+
+        if (!$guest) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Data tamu tidak ditemukan.',
+            ], 404);
+        }
+
+        $latestVisit = $guest->visits->first();
+        $minatProduk = '-';
+        if ($latestVisit) {
+            if ($latestVisit->relationLoaded('products') && $latestVisit->products && $latestVisit->products->isNotEmpty()) {
+                $minatProduk = $latestVisit->products->pluck('name')->join(', ');
+            } else {
+                $minatProduk = $latestVisit->product_interest ?? 'Umum';
+            }
+        }
+
+        $categoryName = optional($guest->category)->name ?? 'Regular';
+
+        $detailData = [
+            'id'                 => $guest->id,
+            'nama'               => $guest->name,
+            'kontak'             => $guest->phone,
+            'email'              => $guest->email ?? '-',
+            'instansi'           => $guest->company_name ?? '-',
+            'jabatan'            => $guest->position ?? '-',
+            'alamat'             => $guest->address ?? '-',
+            'kategoriTamu'       => $guest->is_vip ? 'VIP' : $categoryName,
+            'minatProduk'        => $minatProduk,
+            'totalKunjungan'     => $guest->visits_count ?? 0,
+            'terakhirBerkunjung' => $latestVisit
+                ? Carbon::parse($latestVisit->created_at)->locale('id')->isoFormat('dddd, D MMMM YYYY')
+                : '-',
+            'timelineRiwayat'    => $guest->visits->map(function ($visit) {
+                return [
+                    'id'        => $visit->id,
+                    'waktu'     => Carbon::parse($visit->created_at)->locale('id')->isoFormat('D MMM YYYY, HH:mm') . ' WIB',
+                    'pic'       => optional($visit->assignedUser)->name ?? 'Admin',
+                    'keperluan' => optional($visit->purpose)->name ?? $visit->notes ?? '-',
+                    'status'    => $visit->status ?? 'Terjadwal',
+                ];
+            })->values(),
+        ];
 
         return response()->json([
-            'success' => true,
-            'data'    => $guest,
-        ]);
+            'status'  => true,
+            'message' => 'Detail data tamu berhasil dimuat.',
+            'data'    => $detailData,
+        ], 200);
     }
+
 
     /**
      * Helper: bentuk meta pagination yang konsisten buat semua endpoint.
@@ -785,25 +913,25 @@ class OwnerApiController extends Controller
         ];
     }
 
-private function mapVisitForOwnerDashboard($v): array
-{
-    return [
-        'id'               => $v->id,
-        'token'            => $v->visit_code ?? ('TRX-' . str_pad($v->id, 3, '0', STR_PAD_LEFT)),
-        'nama'             => optional($v->guest)->name,
-        'jabatan'          => optional($v->guest)->position,
-        'instansi'         => optional($v->guest)->company_name,
-        'waktu'            => $v->scheduled_at ?? $v->check_in_at,
-        'jenis'            => optional(optional($v->guest)->category)->name,
-        'keperluan'        => optional($v->purpose)->name,
-        'pic'              => optional($v->assignedUser)->name,
-        'catatan'          => $v->notes ?? $v->meeting_result ?? optional(optional($v->lead)->followUps->sortByDesc('created_at')->first())->result,
-        'status_kunjungan' => $v->status,
-        'status_lead'      => optional($v->lead)->status, // ← TAMBAHAN: ini yang kelewat
-        'potential_level'  => $v->potensi_level,
-        'is_vip'           => (bool) optional($v->guest)->is_vip,
-    ];
-}
+    private function mapVisitForOwnerDashboard($v): array
+    {
+        return [
+            'id'               => $v->id,
+            'token'            => $v->visit_code ?? ('TRX-' . str_pad($v->id, 3, '0', STR_PAD_LEFT)),
+            'nama'             => optional($v->guest)->name,
+            'jabatan'          => optional($v->guest)->position,
+            'instansi'         => optional($v->guest)->company_name,
+            'waktu'            => $v->scheduled_at ?? $v->check_in_at,
+            'jenis'            => optional(optional($v->guest)->category)->name,
+            'keperluan'        => optional($v->purpose)->name,
+            'pic'              => optional($v->assignedUser)->name,
+            'catatan'          => $v->notes ?? $v->meeting_result ?? optional(optional($v->lead)->followUps->sortByDesc('created_at')->first())->result,
+            'status_kunjungan' => $v->status,
+            'status_lead'      => optional($v->lead)->status, // ← TAMBAHAN: ini yang kelewat
+            'potential_level'  => $v->potensi_level,
+            'is_vip'           => (bool) optional($v->guest)->is_vip,
+        ];
+    }
 
     private function mapVisitLaporan($v): array
     {
@@ -853,11 +981,11 @@ private function mapVisitForOwnerDashboard($v): array
             ->where('leads.status', 'deal')
             ->where(function ($q) use ($month, $year) {
                 $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
-                  ->orWhere(function ($q2) use ($month, $year) {
-                      $q2->whereNull('visits.check_in_at')
-                         ->whereMonth('visits.scheduled_at', $month)
-                         ->whereYear('visits.scheduled_at', $year);
-                  });
+                    ->orWhere(function ($q2) use ($month, $year) {
+                        $q2->whereNull('visits.check_in_at')
+                            ->whereMonth('visits.scheduled_at', $month)
+                            ->whereYear('visits.scheduled_at', $year);
+                    });
             })
             ->select('products.id', 'products.name', DB::raw('count(*) as total'))
             ->groupBy('products.id', 'products.name')
@@ -900,11 +1028,11 @@ private function mapVisitForOwnerDashboard($v): array
             ->where('leads.status', 'deal')
             ->where(function ($q) use ($month, $year) {
                 $q->whereMonth('visits.check_in_at', $month)->whereYear('visits.check_in_at', $year)
-                  ->orWhere(function ($q2) use ($month, $year) {
-                      $q2->whereNull('visits.check_in_at')
-                         ->whereMonth('visits.scheduled_at', $month)
-                         ->whereYear('visits.scheduled_at', $year);
-                  });
+                    ->orWhere(function ($q2) use ($month, $year) {
+                        $q2->whereNull('visits.check_in_at')
+                            ->whereMonth('visits.scheduled_at', $month)
+                            ->whereYear('visits.scheduled_at', $year);
+                    });
             })
             ->select('guest_categories.id', 'guest_categories.name', DB::raw('count(*) as total'))
             ->groupBy('guest_categories.id', 'guest_categories.name')
@@ -950,7 +1078,7 @@ private function mapVisitForOwnerDashboard($v): array
             'follow_up_at'    => $l->follow_up_at,
             'notes'           => optional($l->visit)->notes,        // ⬅️ BARU: catatan awal kunjungan
             'meeting_result'  => optional($l->visit)->meeting_result,
-            'follow_ups'      => $l->followUps->map(fn ($f) => [
+            'follow_ups'      => $l->followUps->map(fn($f) => [
                 'id'              => $f->id,
                 'result'          => $f->result ?? null,
                 'status'          => $f->status ?? null,

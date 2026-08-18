@@ -95,6 +95,16 @@ $query = visits::with(['guest.category', 'purpose', 'branch'])
             ->whereDate('scheduled_at', '>', $today)
             ->count();
 
+        $myNotifications = notifications::where('user_id', $ownerId)
+            ->whereNull('read_at')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $unreadCount = notifications::where('user_id', $ownerId)
+            ->whereNull('read_at')
+            ->count();
+
         return $this->responseHasil(200, true, [
             'data'         => collect($paginated->items())->map(fn ($v) => $this->mapVisit($v)),
             'current_page' => $paginated->currentPage(),
@@ -106,6 +116,8 @@ $query = visits::with(['guest.category', 'purpose', 'branch'])
             'count_upcoming' => $countUpcoming,
             'filter'         => $filter,
             'vip_status'     => $vipFilter,
+            'notifications'  => $myNotifications,
+            'unread_notifications' => $unreadCount,
         ]);
     }
 

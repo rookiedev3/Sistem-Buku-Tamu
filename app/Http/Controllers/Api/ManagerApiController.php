@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\leads;
 use App\Models\visits;
-// use App\Models\notifications;
+use App\Models\notifications;
 use App\Models\branches;
 use App\Models\users;
 use Illuminate\Http\Request;
@@ -68,14 +68,22 @@ class ManagerApiController extends BaseApiController
                 ->whereYear('scheduled_at', now()->year))
             ->count();
 
-        // $notifications = notifications::where('user_id', auth()->id())
-        //     ->latest()->limit(10)->get(['id', 'title', 'message', 'is_read', 'created_at']);
+        $myNotifications = notifications::where('user_id', auth()->id())
+            ->whereNull('read_at')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $unreadCount = notifications::where('user_id', auth()->id())
+            ->whereNull('read_at')
+            ->count();
 
         return $this->responseHasil(200, true, [
             'visits'           => $visits,
             'total_today'      => $visits->count(),
             'lead_deals_count' => $leadDealsCount,
-            // 'notifications'    => $notifications,
+            'notifications'    => $myNotifications,
+            'unread_notifications' => $unreadCount,
             'selected_date'    => $selectedDate,
             'vip_status'       => $vipFilter,
         ]);

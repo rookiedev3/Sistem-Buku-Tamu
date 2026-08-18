@@ -35,19 +35,13 @@ class visits extends Model
     ];
 
     protected $casts = [
-        'scheduled_at' => 'datetime',
-        'check_in_at' => 'datetime',
-        'meeting_start_at' => 'datetime',
-        'check_out_at' => 'datetime',
-        'follow_up_at' => 'datetime',
+        'scheduled_at'         => 'datetime',
+        'check_in_at'          => 'datetime',
+        'meeting_start_at'     => 'datetime',
+        'check_out_at'         => 'datetime',
+        'follow_up_at'         => 'datetime',
         'is_converted_to_lead' => 'boolean',
     ];
-
-    // Relasi ke User yang menjadi PIC
-    public function pic()
-    {
-        return $this->belongsTo(User::class, 'pic_id');
-    }
 
     public function guest(): BelongsTo
     {
@@ -79,6 +73,11 @@ class visits extends Model
         return $this->belongsTo(users::class, 'created_by');
     }
 
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(users::class, 'updated_by');
+    }
+
     public function followUps()
     {
         return $this->hasMany(follow_ups::class, 'visit_id')->latest();
@@ -88,9 +87,9 @@ class visits extends Model
     {
         return $this->hasOne(leads::class, 'visit_id');
     }
+
     public function latestFollowUp()
     {
-        // Beritahu Laravel bahwa primary key-nya adalah 'follow_up_id'
         return $this->hasOne(follow_ups::class, 'visit_id', 'id')->latestOfMany('follow_up_id');
     }
 
@@ -107,16 +106,4 @@ class visits extends Model
             }
         });
     }
-
-    public function updatedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function visits()
-    {
-        // 🟢 PERBAIKAN: Menggunakan visits::class (huruf kecil sesuai nama class)
-        return $this->hasMany(visits::class, 'guest_id'); 
-    }
-    
 }

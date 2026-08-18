@@ -149,6 +149,9 @@ Route::middleware('auth:sanctum')->prefix('owner')->group(function () {
     Route::get('/laporan/export-pdf', [OwnerApiController::class, 'exportPdf']);
     // routes/api.php
     Route::get('/owner/laporan/download/{filename}', [LaporanController::class, 'downloadFile']);
+
+    Route::get('/database-tamu', [OwnerApiController::class, 'databaseOwner']);
+    Route::get('/database-tamu/{id}', [OwnerApiController::class, 'databaseOwnerDetail']);
 });
 
 
