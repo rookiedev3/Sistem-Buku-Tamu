@@ -277,7 +277,7 @@
         <!-- Sisi Kanan: Form Register -->
         <div class="login-form-side">
             
-            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Buat Akun Baru 🚀</h3>
+            <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Buat Akun Baru </h3>
             <p class="text-secondary mb-4" style="font-size: 14px;">Silakan lengkapi data untuk mendaftar ke sistem.</p>
 
             <form method="POST" action="{{ route('register.proses') }}" id="formRegister" novalidate>
