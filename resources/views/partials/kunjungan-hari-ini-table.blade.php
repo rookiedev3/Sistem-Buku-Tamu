@@ -61,7 +61,7 @@
                         <strong style="display:block; color:#172033; font-weight:800;">
                             {{ $visit->guest->name ?? '-' }}
                             @if(isset($visit->guest) && $visit->guest->is_vip)
-                                <span title="VIP" style="color:#d97706;">VIP</span>
+                                <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>
                             @endif
                         </strong>
                         <span style="font-size:11px; color:#778195;">
@@ -98,7 +98,7 @@
                             @php $lb = $leadBadges[$leadStatus] ?? $leadBadges['new']; @endphp
                             <span style="background:{{ $lb['bg'] }}; color:{{ $lb['color'] }}; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800;">{{ $lb['label'] }}</span>
                         @else
-                            <span style="background:#f8fafc; color:#94a3b8; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800;">Bukan Lead</span>
+                            <span style="background:#f8fafc; color:#94a3b8; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:800;">Non Lead</span>
                         @endif
                     </td>
                 </tr>
@@ -150,7 +150,7 @@
                         <div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Tahap Pipeline Terakhir:</div>
                             <div style="font-weight: 800; color: #172033;">
-                                {{ $leadModal ? ($leadBadges[$leadModal->status]['label'] ?? $leadModal->status) : 'Bukan Lead' }}
+                                {{ $leadModal ? ($leadBadges[$leadModal->status]['label'] ?? $leadModal->status) : 'Non Lead' }}
                             </div>
                         </div>
                         <div>
