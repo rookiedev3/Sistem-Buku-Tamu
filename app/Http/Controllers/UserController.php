@@ -57,7 +57,7 @@ class UserController extends Controller
         $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
-            'phone'     => 'nullable|string|max:20',
+            'phone'     => 'nullable|string|max:25',
             'password'  => 'required|min:6',
             'role'      => 'required|in:owner,manager,admin,pic,security,tamu',
             'branch_id' => 'nullable|exists:branches,id',

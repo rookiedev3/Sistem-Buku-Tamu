@@ -30,62 +30,62 @@ class ManagerController extends Controller
      */
     private const COMPLETED_STATUSES = ['completed', 'Selesai', 'Meeting Selesai'];
 
-    public function dashboard(Request $request)
-    {
-        $selectedDate = $request->query('date', Carbon::today()->format('Y-m-d'));
-        $selectedDateCarbon = Carbon::parse($selectedDate);
-        $vipFilter = $request->input('vip_status', 'all');
+        public function dashboard(Request $request)
+        {
+            $selectedDate = $request->query('date', Carbon::today()->format('Y-m-d'));
+            $selectedDateCarbon = Carbon::parse($selectedDate);
+            $vipFilter = $request->input('vip_status', 'all');
 
-        // PENTING (perbaikan bug "kunjungan 2 hari lagi ikut muncul hari ini"):
-        // Front Office kadang mengisi check_in_at otomatis meski scheduled_at
-        // sebenarnya masih di masa depan. Karena query lama memakai
-        // whereDate('check_in_at', ...) OR whereDate('scheduled_at', ...),
-        // kunjungan yang scheduled_at-nya masih 2 hari lagi bisa ikut nyangkut
-        // di tanggal hari ini gara-gara check_in_at-nya kebetulan/otomatis
-        // terisi tanggal hari ini.
-        //
-        // Aturan baru:
-        //  - Kalau kunjungan itu punya jadwal (scheduled_at terisi), tanggal
-        //    acuannya WAJIB scheduled_at, titik. check_in_at diabaikan.
-        //  - Kalau tidak ada jadwal sama sekali (tamu walk-in tanpa scheduled_at),
-        //    baru dipakai check_in_at sebagai acuan tanggal.
-        $query = visits::with(['guest.category', 'assignedUser', 'purpose'])
-            ->where(function ($q) use ($selectedDateCarbon) {
-                $q->where(function ($q2) use ($selectedDateCarbon) {
-                    $q2->whereNotNull('scheduled_at')
-                        ->whereDate('scheduled_at', $selectedDateCarbon);
-                })->orWhere(function ($q3) use ($selectedDateCarbon) {
-                    $q3->whereNull('scheduled_at')
-                        ->whereDate('check_in_at', $selectedDateCarbon);
+            // PENTING (perbaikan bug "kunjungan 2 hari lagi ikut muncul hari ini"):
+            // Front Office kadang mengisi check_in_at otomatis meski scheduled_at
+            // sebenarnya masih di masa depan. Karena query lama memakai
+            // whereDate('check_in_at', ...) OR whereDate('scheduled_at', ...),
+            // kunjungan yang scheduled_at-nya masih 2 hari lagi bisa ikut nyangkut
+            // di tanggal hari ini gara-gara check_in_at-nya kebetulan/otomatis
+            // terisi tanggal hari ini.
+            //
+            // Aturan baru:
+            //  - Kalau kunjungan itu punya jadwal (scheduled_at terisi), tanggal
+            //    acuannya WAJIB scheduled_at, titik. check_in_at diabaikan.
+            //  - Kalau tidak ada jadwal sama sekali (tamu walk-in tanpa scheduled_at),
+            //    baru dipakai check_in_at sebagai acuan tanggal.
+            $query = visits::with(['guest.category', 'assignedUser', 'purpose'])
+                ->where(function ($q) use ($selectedDateCarbon) {
+                    $q->where(function ($q2) use ($selectedDateCarbon) {
+                        $q2->whereNotNull('scheduled_at')
+                            ->whereDate('scheduled_at', $selectedDateCarbon);
+                    })->orWhere(function ($q3) use ($selectedDateCarbon) {
+                        $q3->whereNull('scheduled_at')
+                            ->whereDate('check_in_at', $selectedDateCarbon);
+                    });
                 });
-            });
 
-        if (Schema::hasColumn('guests', 'is_vip')) {
-            if ($vipFilter === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($vipFilter === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
+            if (Schema::hasColumn('guests', 'is_vip')) {
+                if ($vipFilter === 'vip') {
+                    $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+                } elseif ($vipFilter === 'reguler') {
+                    $query->whereHas('guest', function ($q) {
+                        $q->where('is_vip', false)->orWhereNull('is_vip');
+                    });
+                }
             }
+
+            $visits = $query->orderBy('scheduled_at')->get();
+
+            $totalToday = $visits->count();
+            $leadDealsCount = leads::where('status', 'deal')
+                ->whereHas('visit', function ($q) {
+                    $q->whereMonth('scheduled_at', Carbon::now()->month)
+                    ->whereYear('scheduled_at', Carbon::now()->year);
+                })
+                ->count();
+
+            $notifications = notifications::where('user_id', auth()->id())
+                ->latest()
+                ->paginate(10);
+
+            return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate', 'notifications', 'vipFilter'));
         }
-
-        $visits = $query->orderBy('scheduled_at')->get();
-
-        $totalToday = $visits->count();
-        $leadDealsCount = leads::where('status', 'deal')
-            ->whereHas('visit', function ($q) {
-                $q->whereMonth('scheduled_at', Carbon::now()->month)
-                ->whereYear('scheduled_at', Carbon::now()->year);
-            })
-            ->count();
-
-        $notifications = notifications::where('user_id', auth()->id())
-            ->latest()
-            ->paginate(10);
-
-        return view('manager.dashboard', compact('visits', 'totalToday', 'leadDealsCount', 'selectedDate', 'notifications', 'vipFilter'));
-    }
 
     public function kunjungan(Request $request)
     {

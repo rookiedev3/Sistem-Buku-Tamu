@@ -229,6 +229,14 @@
             color: #1e293b;
         }
 
+        .invalid-feedback-custom {
+            display: none;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
         @media (max-width: 991px) {
             .login-wrapper {
                 grid-template-columns: 1fr !important;
@@ -272,7 +280,7 @@
             <h3 class="fw-bold mb-1" style="color: #172033; font-size: 26px; letter-spacing: -0.5px;">Buat Akun Baru 🚀</h3>
             <p class="text-secondary mb-4" style="font-size: 14px;">Silakan lengkapi data untuk mendaftar ke sistem.</p>
 
-            <form method="POST" action="{{ route('register.proses') }}">
+            <form method="POST" action="{{ route('register.proses') }}" id="formRegister" novalidate>
                 @csrf
 
                 <div class="row g-3">
@@ -281,11 +289,12 @@
                         <div class="input-group-custom">
                             <i class="bi bi-person input-icon"></i>
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
+                                value="{{ old('name') }}" placeholder="Masukkan nama lengkap" minlength="3" maxlength="150" required>
                         </div>
                         @error('name')
                             <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
+                        <div class="invalid-feedback-custom">Nama minimal 3 karakter.</div>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -293,11 +302,13 @@
                         <div class="input-group-custom">
                             <i class="bi bi-envelope input-icon"></i>
                             <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                                value="{{ old('email') }}" placeholder="Masukkan alamat email" required>
+                                value="{{ old('email') }}" placeholder="Masukkan alamat email"
+                                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" required>
                         </div>
                         @error('email')
                             <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
+                        <div class="invalid-feedback-custom">Format email tidak valid. Contoh: nama@domain.com</div>
                     </div>
                 </div>
 
@@ -306,12 +317,14 @@
                         <label class="form-label">No. WhatsApp <span class="text-danger">*</span></label>
                         <div class="input-group-custom">
                             <i class="bi bi-whatsapp input-icon"></i>
-                            <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror"
-                                value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" required>
+                            <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror"
+                                value="{{ old('phone') }}" placeholder="08xxxxxxxxxx"
+                                inputmode="numeric" pattern="^[0-9]{9,15}$" minlength="9" maxlength="15" required>
                         </div>
                         @error('phone')
                             <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
+                        <div class="invalid-feedback-custom">Nomor WhatsApp hanya boleh angka, 9–15 digit (tanpa spasi/simbol).</div>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -330,6 +343,7 @@
                         @error('branch_id')
                             <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
+                        <div class="invalid-feedback-custom">Cabang wajib dipilih.</div>
                     </div>
                 </div>
 
@@ -339,7 +353,7 @@
                         <div class="password-container">
                             <i class="bi bi-lock input-icon"></i>
                             <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror"
-                                placeholder="Min. 6 karakter" required>
+                                placeholder="Min. 6 karakter" minlength="6" required>
                             <button type="button" class="password-toggle-btn" id="togglePassword">
                                 <i class="bi bi-eye-slash" id="eyeIcon"></i>
                             </button>
@@ -347,6 +361,7 @@
                         @error('password')
                             <div class="invalid-feedback d-block" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
+                        <div class="invalid-feedback-custom">Password minimal 6 karakter.</div>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -359,6 +374,7 @@
                                 <i class="bi bi-eye-slash" id="eyeIconConfirm"></i>
                             </button>
                         </div>
+                        <div class="invalid-feedback-custom">Konfirmasi password tidak cocok.</div>
                     </div>
                 </div>
 
@@ -402,6 +418,80 @@
             passwordConfirm.setAttribute('type', type);
             eyeIconConfirm.className = type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
         });
+
+        (function () {
+            const form = document.getElementById('formRegister');
+            const phoneInput = document.getElementById('phone');
+
+            // 1) Blokir dari level keydown -> keyboard fisik
+            phoneInput.addEventListener('keydown', function (e) {
+                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+                    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+                const isCtrlCombo = e.ctrlKey || e.metaKey;
+
+                if (allowedKeys.includes(e.key) || isCtrlCombo) return;
+
+                if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            // 1b) Blokir juga lewat beforeinput -> paling reliable di HP/keyboard virtual
+            phoneInput.addEventListener('beforeinput', function (e) {
+                if (e.data && /[^0-9]/.test(e.data)) {
+                    e.preventDefault();
+                }
+            });
+
+            // 2) Fallback: bersihin kalau ada karakter non-digit lolos
+            phoneInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // 3) Bersihin juga saat paste
+            phoneInput.addEventListener('paste', function (e) {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                const digitsOnly = pasted.replace(/[^0-9]/g, '');
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.slice(0, start) + digitsOnly + this.value.slice(end);
+                this.dispatchEvent(new Event('input'));
+            });
+
+            // Validasi saat submit + pesan error custom per field
+            form.addEventListener('submit', function (e) {
+                let valid = true;
+
+                form.querySelectorAll('input[required], select[required]').forEach(function (field) {
+                    let isValid = field.checkValidity();
+
+                    // Cek khusus konfirmasi password harus sama dengan password
+                    if (field.id === 'password_confirmation' && field.value !== password.value) {
+                        isValid = false;
+                    }
+
+                    const wrapper = field.closest('.col-md-6, .col-12');
+                    const feedback = wrapper ? wrapper.querySelector('.invalid-feedback-custom') : null;
+
+                    field.style.borderColor = isValid ? '#d1d9e2' : '#dc2626';
+                    if (feedback) {
+                        if (field.id === 'password_confirmation' && field.value !== password.value && field.value !== '') {
+                            feedback.textContent = 'Konfirmasi password tidak cocok.';
+                            feedback.style.display = 'block';
+                        } else {
+                            feedback.style.display = isValid ? 'none' : 'block';
+                        }
+                    }
+
+                    if (!isValid) valid = false;
+                });
+
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
+        })();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
