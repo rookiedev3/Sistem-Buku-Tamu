@@ -211,7 +211,7 @@
                             </form>
 @elseif(in_array($statusLower, ['meeting', 'sedang bertemu']))
 <button type="button" data-bs-toggle="modal" data-bs-target="#modalCatatPertemuan-{{ $visit->id }}" style="background: #d97706; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
-    📝 Catat Hasil
+    Catat Hasil
 </button>
 @elseif($statusLower === 'meeting selesai')
 <span style="color: #0d9488; font-size: 11px; font-weight: 700;">✔ Hasil Tercatat</span>
@@ -252,7 +252,7 @@
 
                                 <div class="modal-header" style="border-bottom: 1px solid #e8edf5; padding: 20px 24px;">
                                     <h5 class="modal-title" style="font-size: 16px; font-weight: 800; color: #172033;">
-                                        📝 Catat Hasil Pertemuan & Lead
+                                         Catat Hasil Pertemuan & Lead
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
@@ -282,7 +282,7 @@
         <option value="warm" {{ $selectedPotential == 'warm' ? 'selected' : '' }}>Warm Lead</option>
         <option value="cold" {{ $selectedPotential == 'cold' ? 'selected' : '' }}>Cold</option>
         <option value="non_lead" {{ $selectedPotential == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
-        <option value="deal" {{ $selectedPotential == 'deal' ? 'selected' : '' }}>🎉 Deal</option>
+        <option value="deal" {{ $selectedPotential == 'deal' ? 'selected' : '' }}> Deal</option>
     </select>
 </div>
 

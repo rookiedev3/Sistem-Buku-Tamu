@@ -6,7 +6,7 @@
     <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 14px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div>
-                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Arsip Kunjungan Tamu (Selesai) 📋</h2>
+                <h2 style="font-size: 15px; font-weight: 800; color: #172033; margin-bottom: 2px;">Arsip Kunjungan Tamu (Selesai) </h2>
                 <p style="font-size: 11px; color: #778195; margin: 0;">Rekapitulasi seluruh riwayat tamu yang kunjungannya sudah final (selesai / dibatalkan) dari berbagai PIC.</p>
             </div>
         </div>
@@ -150,7 +150,7 @@
 
                         <td style="padding: 8px 10px; text-align: center;">
                             <button type="button" data-bs-toggle="modal" data-bs-target="#noteModal{{ $v->id }}" style="background: transparent; color: #006B3F; border: 1px solid #006B3F; padding: 4px 10px; border-radius: 7px; font-size: 10px; font-weight: 700; cursor: pointer;">
-                                📝 Lihat Catatan
+                                 Lihat Catatan
                             </button>
                         </td>
 
