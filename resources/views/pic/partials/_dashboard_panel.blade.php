@@ -102,7 +102,7 @@
                                 {{ $visit->visit_code ?? ('VST-' . str_pad($visit->id, 4, '0', STR_PAD_LEFT)) }}
                             </strong>
                         </td>
-                        
+
                         <td style="padding: 8px 10px;">
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $visit->guest->name ?? '-' }}
@@ -277,13 +277,17 @@
     @php
         $selectedPotential = old('_visit_id') == $visit->id ? old('potential_level') : $visit->potential_level;
     @endphp
-    <select name="potential_level" id="potential_level-{{ $visit->id }}" style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+    <select name="potential_level" id="potential_level-{{ $visit->id }}" required style="width: 100%; padding: 10px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; color: #172033; outline: none; background: #fff;">
+        <option value="" disabled {{ !$selectedPotential ? 'selected' : '' }}>-- Pilih Potensi Klien --</option>
         <option value="hot" {{ $selectedPotential == 'hot' ? 'selected' : '' }}>Hot Lead</option>
         <option value="warm" {{ $selectedPotential == 'warm' ? 'selected' : '' }}>Warm Lead</option>
         <option value="cold" {{ $selectedPotential == 'cold' ? 'selected' : '' }}>Cold</option>
         <option value="non_lead" {{ $selectedPotential == 'non_lead' ? 'selected' : '' }}>Non-Lead</option>
         <option value="deal" {{ $selectedPotential == 'deal' ? 'selected' : '' }}> Deal</option>
     </select>
+    <small class="js-potential-error" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;">
+        Potensi klien wajib dipilih.
+    </small>
 </div>
 
 {{-- Estimasi Nilai: cuma muncul untuk Hot/Warm/Deal, wajib khusus Deal --}}
@@ -380,16 +384,28 @@
 </div>
 
 <script>
-    // Cegah submit "Catat Hasil Pertemuan & Lead" tanpa tanggal follow-up.
+    // Cegah submit "Catat Hasil Pertemuan & Lead" tanpa potensi klien / tanggal follow-up.
     // Dipasang lewat window supaya tetap ada walau panel ini di-swap ulang via AJAX
     // (lihat script initRowWidgets di dashboard.blade.php).
 function validateFollowUpDate(form) {
     const dateInput = form.querySelector('input[name="follow_up_at"]');
     const potentialSelect = form.querySelector('select[name="potential_level"]');
     const errorEl = form.querySelector('.js-followup-date-error');
+    const potentialErrorEl = form.querySelector('.js-potential-error');
 
     const rupiahInput = form.querySelector('.rupiah-input');
     const hiddenInput = form.querySelector("input[name='estimated_value']");
+
+    // Potensi klien wajib dipilih dulu sebelum validasi lain jalan
+    if (!potentialSelect.value) {
+        if (potentialErrorEl) potentialErrorEl.style.display = 'block';
+        potentialSelect.style.borderColor = '#dc2626';
+        potentialSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    } else if (potentialErrorEl) {
+        potentialErrorEl.style.display = 'none';
+        potentialSelect.style.borderColor = '#e8edf5';
+    }
 
     const isDeal = potentialSelect && potentialSelect.value === 'deal';
     const isDateOptional = potentialSelect && ['cold', 'non_lead'].includes(potentialSelect.value);

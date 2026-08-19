@@ -80,16 +80,6 @@ class UserTableSeeder extends Seeder
                 'is_active' => true,
                 'last_login' => null,
             ],
-            [
-                'branch_id' => 1,
-                'name' => 'Hesti Lestari',
-                'email' => 'tamu@gmail.com',
-                'phone' => '+6281234567897',
-                'password' => bcrypt('tamu123'),
-                'role' => 'tamu',
-                'is_active' => true,
-                'last_login' => null,
-            ],
         ];
 
         foreach ($users as $user) {

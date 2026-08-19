@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branches;
+use App\Models\branches;
 use Illuminate\Http\Request;
 
 class BranchesController extends Controller
 {
     public function index()
     {
-        $branches = Branches::all();
+        $branches = branches::all();
         return view('branches.index', compact('branches'));
     }
 
@@ -28,7 +28,7 @@ class BranchesController extends Controller
         ]);
 
         try {
-            $branch = new Branches();
+            $branch = new branches();
             $branch->code       = $request->code;
             $branch->name       = $request->name;
             $branch->address    = $request->address;
@@ -44,13 +44,13 @@ class BranchesController extends Controller
 
     public function edit($id)
     {
-        $branch = Branches::findOrFail($id);
+        $branch = branches::findOrFail($id);
         return view('branches.edit', compact('branch'));
     }
 
     public function update(Request $request, $id)
     {
-        $branch = Branches::findOrFail($id);
+        $branch = branches::findOrFail($id);
 
         $request->validate([
             'code'    => 'required|unique:branches,code,' . $id,
@@ -76,7 +76,7 @@ class BranchesController extends Controller
     public function destroy($id)
     {
         try {
-            $branch = Branches::findOrFail($id);
+            $branch = branches::findOrFail($id);
             $branch->delete();
             return redirect()->route('branches.index')->with('success', 'Branch berhasil dihapus.');
         } catch (\Exception $e) {
