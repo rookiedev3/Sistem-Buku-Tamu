@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Branches;
+use App\Models\branches;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -10,13 +10,13 @@ class BranchesApiController extends BaseApiController
 {
     public function index()
     {
-        $branches = Branches::all();
+        $branches = branches::all();
         return $this->responseHasil(200, true, $branches);
     }
 
     public function show($id)
     {
-        $branch = Branches::find($id);
+        $branch = branches::find($id);
 
         if (!$branch) {
             return $this->responseHasil(404, false, "Branch tidak ditemukan");
@@ -38,7 +38,7 @@ class BranchesApiController extends BaseApiController
             return $this->responseHasil(400, false, $e->errors());
         }
 
-        $branch = Branches::create([
+        $branch = branches::create([
             'code'      => $validated['code'],
             'name'      => $validated['name'],
             'address'   => $validated['address'],
@@ -51,7 +51,7 @@ class BranchesApiController extends BaseApiController
 
     public function update(Request $request, $id)
     {
-        $branch = Branches::find($id);
+        $branch = branches::find($id);
 
         if (!$branch) {
             return $this->responseHasil(404, false, "Branch tidak ditemukan");
@@ -81,7 +81,7 @@ class BranchesApiController extends BaseApiController
 
     public function destroy($id)
     {
-        $branch = Branches::find($id);
+        $branch = branches::find($id);
 
         if (!$branch) {
             return $this->responseHasil(404, false, "Branch tidak ditemukan");

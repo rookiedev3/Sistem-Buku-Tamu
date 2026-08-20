@@ -25,25 +25,11 @@ class ManagerApiController extends BaseApiController
         'cancelled', 'Dibatalkan', 'Ditolak',
     ];
 
-    /**
-     * Versi lowercase dari FINAL_STATUSES, dipakai untuk perbandingan
-     * case-insensitive (mis. di laporan()).
-     */
     private const FINAL_STATUSES_LOWER = [
         'completed', 'selesai', 'meeting selesai',
         'cancelled', 'dibatalkan', 'ditolak',
     ];
 
-    /**
-     * GET /manager/dashboard
-     *
-     * Menampilkan kunjungan pada tanggal tertentu (default: hari ini),
-     * beserta jumlah lead yang deal bulan berjalan.
-     *
-     * Catatan: sengaja TIDAK memakai mapVisit() di sini — data dikembalikan
-     * sebagai Eloquent collection dengan relasi nested (guest.category,
-     * assignedUser, purpose) agar frontend bisa mengakses relasi apa adanya.
-     */
     public function dashboard(Request $request)
     {
         $selectedDate       = $request->query('date', Carbon::today()->format('Y-m-d'));
@@ -52,11 +38,8 @@ class ManagerApiController extends BaseApiController
 
         $query = visits::with(['guest.category', 'assignedUser', 'purpose'])
             ->where(function (Builder $q) use ($selectedDateCarbon) {
-                $q->where(function (Builder $q2) use ($selectedDateCarbon) {
-                    $q2->whereNotNull('scheduled_at')->whereDate('scheduled_at', $selectedDateCarbon);
-                })->orWhere(function (Builder $q3) use ($selectedDateCarbon) {
-                    $q3->whereNull('scheduled_at')->whereDate('check_in_at', $selectedDateCarbon);
-                });
+                $q->whereDate('scheduled_at', $selectedDateCarbon)
+                    ->orWhereDate('check_in_at', $selectedDateCarbon);
             });
 
         $this->applyVipFilter($query, $vipFilter);
@@ -64,7 +47,7 @@ class ManagerApiController extends BaseApiController
         $visits = $query->orderBy('scheduled_at')->get();
 
         $leadDealsCount = leads::where('status', 'deal')
-            ->whereHas('visit', fn ( $q) => $q->whereMonth('scheduled_at', now()->month)
+            ->whereHas('visit', fn ($q) => $q->whereMonth('scheduled_at', now()->month)
                 ->whereYear('scheduled_at', now()->year))
             ->count();
 
@@ -452,7 +435,7 @@ private function mapVisit($v): array
             ->paginate($perPage)
             ->appends($request->query());
 
-        $branches = \App\Models\branches::orderBy('name')->get();
+        $branches = branches::orderBy('name')->get();
         $picUsers = users::whereIn(
             'id',
             visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')

@@ -408,7 +408,7 @@ function validateFollowUpDate(form) {
     }
 
     const isDeal = potentialSelect && potentialSelect.value === 'deal';
-    const isDateOptional = potentialSelect && ['cold', 'non_lead'].includes(potentialSelect.value);
+    const isDateOptional = potentialSelect && ['cold', 'non_lead', 'deal'].includes(potentialSelect.value);
 
     if (!isDateOptional && !dateInput.value) {
         if (errorEl) errorEl.style.display = 'block';

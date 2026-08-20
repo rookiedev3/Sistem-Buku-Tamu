@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class PicApiController extends BaseApiController
@@ -28,7 +29,7 @@ class PicApiController extends BaseApiController
      * Status yang masih dianggap "berjalan" (dipakai untuk dashboard).
      */
     private const ACTIVE_EXCLUDED_STATUSES = [
-        'completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan',
+        'completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai', 'Dibatalkan', 'dibatalkan',
     ];
 
     /**
@@ -174,28 +175,6 @@ $query = visits::with(['guest.category', 'purpose', 'branch'])
         ]);
     }
 
-    /**
-     * GET /api/v1/pic/riwayat
-     *
-     * Riwayat kunjungan PIC yang sudah final.
-     */
-
-    /**
-     * GET /pic/riwayat  (route name: pic.riwayat)
-     *
-     * Halaman web (Blade) — beda dari PicApiController::riwayat() yang
-     * dipakai app Flutter. Blade ini mengharapkan $visits berisi model
-     * Eloquent asli (relasi langsung: guest, purpose, branch, lead,
-     * lead.followUps), BUKAN hasil mapVisit() yang sudah diserialisasi.
-
- 
-     * PUT/POST /api/v1/pic/visits/{id}/status
-     *
-     * 
-     * 
-     * Update status kehadiran/kunjungan (konfirmasi / batalkan).
-     */
-
     
 public function riwayat(Request $request)
 {
@@ -205,14 +184,14 @@ public function riwayat(Request $request)
     ], [
         'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
     ]);
- 
+
     $perPage   = (int) $request->input('per_page', 10);
     $vipFilter = $request->input('vip_status', 'all');
     $keyword   = $request->input('keyword');
- 
+
     $query = Visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
         ->where('assigned_to', auth()->id())
-        ->whereIn('status', self::FINAL_STATUSES);
+        ->whereIn(DB::raw('LOWER(TRIM(status))'), self::FINAL_STATUSES); 
  
     if ($keyword) {
         $query->whereHas('guest', function (Builder $q) use ($keyword) {
