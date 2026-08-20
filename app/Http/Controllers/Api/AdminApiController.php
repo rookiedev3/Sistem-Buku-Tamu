@@ -563,14 +563,15 @@ class AdminApiController extends BaseApiController
     {
         try {
             $validated = $request->validate([
-                'name'         => 'required|string|max:150',
-                'phone'        => 'required|string|max:25',
-                'email'        => 'nullable|email|max:150',
-                'company_name' => 'nullable|string|max:180',
-                'position'     => 'nullable|string|max:100',
-                'address'      => 'nullable|string',
-                'is_vip'       => 'required|boolean',
-                'photo'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'name'              => 'required|string|max:150',
+                'phone'             => 'required|string|max:25',
+                'email'             => 'nullable|email|max:150',
+                'company_name'      => 'nullable|string|max:180',
+                'position'          => 'nullable|string|max:100',
+                'address'           => 'nullable|string',
+                'guest_category_id' => 'nullable|integer|exists:guest_categories,id', // <-- Tambahkan validasi ini
+                'is_vip'            => 'required|boolean',
+                'photo'             => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             ]);
         } catch (ValidationException $e) {
             return $this->responseHasil(400, false, $e->errors());
@@ -583,16 +584,17 @@ class AdminApiController extends BaseApiController
         }
 
         $guest = guests::create([
-            'guest_code'   => $guestCode,
-            'name'         => $validated['name'],
-            'phone'        => $validated['phone'],
-            'email'        => $validated['email'] ?? null,
-            'company_name' => $validated['company_name'] ?? null,
-            'position'     => $validated['position'] ?? null,
-            'address'      => $validated['address'] ?? null,
-            'is_vip'       => $validated['is_vip'],
-            'photo_path'   => $photoPath,
-            'created_by'   => auth()->id(),
+            'guest_code'        => $guestCode,
+            'name'              => $validated['name'],
+            'phone'             => $validated['phone'],
+            'email'             => $validated['email'] ?? null,
+            'company_name'      => $validated['company_name'] ?? null,
+            'position'          => $validated['position'] ?? null,
+            'address'           => $validated['address'] ?? null,
+            'guest_category_id' => $validated['guest_category_id'] ?? null, // <-- Tambahkan simpan ke DB
+            'is_vip'            => $validated['is_vip'],
+            'photo_path'        => $photoPath,
+            'created_by'        => auth()->id(),
         ]);
 
         return $this->responseHasil(200, true, $guest);
