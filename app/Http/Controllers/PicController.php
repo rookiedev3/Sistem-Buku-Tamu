@@ -287,7 +287,7 @@ class PicController extends Controller
         $request->validate([
             'meeting_result'  => 'required|string',
             'potential_level' => 'required|in:hot,warm,cold,non_lead,deal',
-            'follow_up_at'    => 'nullable|date|required_unless:potential_level,warm,cold,non_lead,deal',
+            'follow_up_at' => 'nullable|date|required_unless:potential_level,cold,non_lead,deal',
             'estimated_value' => 'nullable|numeric|min:0',
         ], [
             'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',

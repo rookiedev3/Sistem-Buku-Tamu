@@ -24,7 +24,10 @@ class SecurityApiController extends Controller
 
         $visits = visits::with(['guest:id,name,company_name,is_vip', 'assignedUser:id,name'])
             ->select('id', 'visit_code', 'guest_id', 'assigned_to', 'scheduled_at', 'check_in_at', 'check_out_at', 'status')
-            ->whereDate('scheduled_at', $selectedDate)
+            ->where(function ($q) use ($selectedDate) {
+                $q->whereDate('scheduled_at', $selectedDate)
+                    ->orWhereDate('check_in_at', $selectedDate);
+            })
             ->orderBy('scheduled_at', 'asc')
             ->paginate($perPage)
             ->appends($request->query());
@@ -42,6 +45,7 @@ class SecurityApiController extends Controller
             ],
         ]);
     }
+
 
     public function checkIn($id): JsonResponse
     {

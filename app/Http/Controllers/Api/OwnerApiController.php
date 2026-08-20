@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\activity_logs;
+use App\Models\branches;
 use App\Models\guests;
 use App\Models\leads;
 use App\Models\products;
@@ -500,7 +501,7 @@ class OwnerApiController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
 
-        $branches = \App\Models\branches::orderBy('name')->get();
+        $branches = branches::orderBy('name')->get();
         $picUsers = users::whereIn(
             'id',
             visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
