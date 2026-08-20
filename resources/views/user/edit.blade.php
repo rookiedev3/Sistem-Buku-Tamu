@@ -40,8 +40,12 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Nomor Telepon/HP</label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" inputmode="numeric" pattern="^[0-9]{9,15}$" minlength="9" maxlength="15" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
-                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">Nomor HP hanya boleh angka, 9–15 digit (tanpa spasi/simbol).</div>
+                    {{-- DIUBAH: pattern sekarang mengizinkan satu '+' opsional di depan, karena
+                         backend (UserController::normalizePhone()) selalu menyimpan nomor dalam
+                         format "+62xxxxxxxxxx". minlength/maxlength dihapus (rawan salah hitung
+                         begitu ada '+'), validasi panjang sepenuhnya diserahkan ke pattern. --}}
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" inputmode="tel" pattern="^\+?[0-9]{9,15}$" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
+                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">Nomor HP hanya boleh angka (boleh diawali +), 9–15 digit.</div>
                 </div>
 
                 <div class="mb-3">
@@ -98,7 +102,19 @@
     const form = document.getElementById('formEditUser');
     const phoneInput = form.querySelector('input[name="phone"]');
 
-    // 1) Blokir dari level keydown -> huruf/simbol nggak akan pernah muncul di kolom (keyboard fisik)
+    // DIUBAH: helper untuk menyaring nilai jadi "opsional satu '+' di depan + digit saja".
+    // Dipakai bareng di input & paste supaya '+' yang datang dari data existing
+    // (format "+62..." dari normalizePhone() backend) tidak ikut kebuang, tapi '+'
+    // yang diketik di tengah/lebih dari sekali tetap dibuang.
+    function sanitizePhoneValue(value) {
+        const hasLeadingPlus = value.startsWith('+');
+        const digitsOnly = value.replace(/[^0-9]/g, '');
+        return hasLeadingPlus ? '+' + digitsOnly : digitsOnly;
+    }
+
+    // 1) Blokir dari level keydown -> huruf/simbol nggak akan pernah muncul di kolom
+    //    (keyboard fisik). DIUBAH: '+' sekarang diizinkan HANYA kalau kursor ada
+    //    di posisi paling depan (index 0) DAN field belum punya '+' sama sekali.
     phoneInput.addEventListener('keydown', function (e) {
         const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
             'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
@@ -106,31 +122,48 @@
 
         if (allowedKeys.includes(e.key) || isCtrlCombo) return;
 
+        if (e.key === '+') {
+            const atStart = this.selectionStart === 0;
+            const alreadyHasPlus = this.value.startsWith('+');
+            if (atStart && !alreadyHasPlus) return; // izinkan
+            e.preventDefault();
+            return;
+        }
+
         if (!/^[0-9]$/.test(e.key)) {
             e.preventDefault();
         }
     });
 
-    // 1b) Blokir juga lewat beforeinput -> paling reliable di HP/keyboard virtual
+    // 1b) Blokir juga lewat beforeinput -> paling reliable di HP/keyboard virtual.
+    //     DIUBAH: '+' diizinkan lewat, biar konsisten sama keydown; sisanya
+    //     tetap dibersihkan di listener 'input' lewat sanitizePhoneValue().
     phoneInput.addEventListener('beforeinput', function (e) {
-        if (e.data && /[^0-9]/.test(e.data)) {
+        if (e.data && /[^0-9+]/.test(e.data)) {
             e.preventDefault();
         }
     });
 
-    // 2) Fallback: bersihin kalau ada karakter non-digit lolos (misal dari autofill)
+    // 2) Fallback: bersihin karakter non-digit/'+' yang lolos (misal dari autofill),
+    //    dan pastikan '+' cuma boleh satu, di posisi paling depan.
     phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/[^0-9]/g, '');
+        const cleaned = sanitizePhoneValue(this.value);
+        if (cleaned !== this.value) {
+            const cursorFromEnd = this.value.length - this.selectionStart;
+            this.value = cleaned;
+            const newPos = Math.max(0, this.value.length - cursorFromEnd);
+            this.setSelectionRange(newPos, newPos);
+        }
     });
 
-    // 3) Bersihin juga saat paste
+    // 3) Bersihin juga saat paste, termasuk '+' kalau ada di paling depan hasil paste
     phoneInput.addEventListener('paste', function (e) {
         e.preventDefault();
         const pasted = (e.clipboardData || window.clipboardData).getData('text');
-        const digitsOnly = pasted.replace(/[^0-9]/g, '');
         const start = this.selectionStart;
         const end = this.selectionEnd;
-        this.value = this.value.slice(0, start) + digitsOnly + this.value.slice(end);
+        const merged = this.value.slice(0, start) + pasted + this.value.slice(end);
+        this.value = sanitizePhoneValue(merged);
         this.dispatchEvent(new Event('input'));
     });
 

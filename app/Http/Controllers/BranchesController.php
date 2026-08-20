@@ -24,7 +24,9 @@ class BranchesController extends Controller
             'code'    => 'required|unique:branches,code',
             'name'    => 'required',
             'address' => 'required',
-            'phone'   => 'required',
+            'phone'   => 'required|regex:/^[0-9]+$/',
+        ], [
+            'phone.regex' => 'Nomor telepon hanya boleh berupa angka.',
         ]);
 
         try {
@@ -56,7 +58,9 @@ class BranchesController extends Controller
             'code'    => 'required|unique:branches,code,' . $id,
             'name'    => 'required',
             'address' => 'required',
-            'phone'   => 'required',
+            'phone'   => 'required|regex:/^[0-9]+$/',
+        ], [
+            'phone.regex' => 'Nomor telepon hanya boleh berupa angka.',
         ]);
 
         try {

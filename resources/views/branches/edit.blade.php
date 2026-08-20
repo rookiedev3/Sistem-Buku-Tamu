@@ -37,8 +37,8 @@
                 Kode Branch <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="code" id="code" value="{{ old('code', $branch->code) }}"
-                placeholder="Contoh: BR-001"
-                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
+                placeholder="Contoh: SLM" required maxlength="10"
+                style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit; text-transform: uppercase;">
         </div>
 
         {{-- Nama Branch --}}
@@ -47,7 +47,7 @@
                 Nama Branch <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="name" id="name" value="{{ old('name', $branch->name) }}"
-                placeholder="Contoh: Branch Yogyakarta"
+                placeholder="Contoh: Branch Yogyakarta" required
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
@@ -64,10 +64,11 @@
         {{-- Nomor Telepon --}}
         <div style="margin-bottom: 20px;">
             <label for="phone" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
-                Nomor Telepon
+                Nomor Telepon <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="phone" id="phone" value="{{ old('phone', $branch->phone) }}"
-                placeholder="Contoh: 0274-123456"
+                placeholder="Contoh: 0274123456" required inputmode="numeric" pattern="[0-9]+"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
