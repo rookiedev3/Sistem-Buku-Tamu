@@ -27,9 +27,15 @@ class PicApiController extends BaseApiController
 
     /**
      * Status yang masih dianggap "berjalan" (dipakai untuk dashboard).
+     *
+     * FIX: 'Meeting Selesai' DIHAPUS dari sini supaya konsisten dengan
+     * dashboard versi web (PicController::dashboardPic). Meeting Selesai
+     * artinya PIC sudah mencatat hasil pertemuan, tapi kunjungan itu masih
+     * perlu ditutup/di-finalisasi jadi 'Selesai' — jadi masih harus tetap
+     * kelihatan di dashboard sampai benar-benar Selesai/Ditolak/Dibatalkan.
      */
     private const ACTIVE_EXCLUDED_STATUSES = [
-        'completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai', 'Dibatalkan', 'dibatalkan',
+        'completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan',
     ];
 
     /**
@@ -47,9 +53,9 @@ class PicApiController extends BaseApiController
         $today     = Carbon::today();
         $ownerId   = auth()->id();
 
-$query = visits::with(['guest.category', 'purpose', 'branch'])
-    ->where('assigned_to', $ownerId)
-    ->whereNotIn('status', self::ACTIVE_EXCLUDED_STATUSES);
+        $query = visits::with(['guest.category', 'purpose', 'branch'])
+            ->where('assigned_to', $ownerId)
+            ->whereNotIn('status', self::ACTIVE_EXCLUDED_STATUSES);
 
         if ($filter === 'today') {
             $query->where(function (Builder $q) use ($today) {
@@ -175,145 +181,150 @@ $query = visits::with(['guest.category', 'purpose', 'branch'])
         ]);
     }
 
-    
-public function riwayat(Request $request)
-{
-    $request->validate([
-        'start_date' => 'nullable|date',
-        'end_date'   => 'nullable|date|after_or_equal:start_date',
-    ], [
-        'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
-    ]);
 
-    $perPage   = (int) $request->input('per_page', 10);
-    $vipFilter = $request->input('vip_status', 'all');
-    $keyword   = $request->input('keyword');
+    public function riwayat(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date'   => 'nullable|date|after_or_equal:start_date',
+        ], [
+            'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+        ]);
 
-    $query = Visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
-        ->where('assigned_to', auth()->id())
-        ->whereIn(DB::raw('LOWER(TRIM(status))'), self::FINAL_STATUSES); 
- 
-    if ($keyword) {
-        $query->whereHas('guest', function (Builder $q) use ($keyword) {
-            $q->where('name', 'like', "%{$keyword}%")
-                ->orWhere('company_name', 'like', "%{$keyword}%");
-        });
-    }
- 
-    if ($request->filled('start_date')) {
-        $query->whereDate('check_in_at', '>=', $request->start_date);
-    }
-    if ($request->filled('end_date')) {
-        $query->whereDate('check_in_at', '<=', $request->end_date);
-    }
- 
-    if (Schema::hasColumn('guests', 'is_vip')) {
-        if ($vipFilter === 'vip') {
-            $query->whereHas('guest', fn ($q) => $q->where('is_vip', true));
-        } elseif ($vipFilter === 'reguler') {
-            $query->whereHas('guest', fn ($q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
+        $perPage   = (int) $request->input('per_page', 10);
+        $vipFilter = $request->input('vip_status', 'all');
+        $keyword   = $request->input('keyword');
+
+        // FIX: LOWER(TRIM(status)) di kolom SQL selalu menghasilkan string
+        // lowercase, tapi sebelumnya dibandingkan langsung ke FINAL_STATUSES
+        // yang casing-nya campur ('Selesai', 'Meeting Selesai', dst) —
+        // akibatnya baris dengan status itu tidak pernah match. Samakan
+        // casing dengan strtolower() di kedua sisi.
+        $query = Visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
+            ->where('assigned_to', auth()->id())
+            ->whereIn(DB::raw('LOWER(TRIM(status))'), array_map('strtolower', self::FINAL_STATUSES));
+
+        if ($keyword) {
+            $query->whereHas('guest', function (Builder $q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            });
         }
-    }
- 
-    $visits = $query->orderBy('check_in_at', 'desc')
-        ->paginate($perPage)
-        ->appends($request->query());
- 
-    if ($request->wantsJson() || $request->expectsJson()) {
-        // Sama persis dengan $leadBadges di Blade, supaya label konsisten web <-> mobile
-        $leadBadges = [
-            'new'         => 'Baru',
-            'contacted'   => 'Dihubungi',
-            'negotiation' => 'Negosiasi',
-            'deal'        => 'Deal',
-            'lost'        => 'Lost',
-        ];
- 
-        return response()->json([
-            'success' => true,
-            'data'    => $visits->getCollection()->map(function ($v) use ($leadBadges) {
-                $statusLower  = strtolower(trim($v->status ?? ''));
-                $isCancelled  = in_array($statusLower, ['cancelled', 'ditolak', 'dibatalkan']);
-                $isCompleted  = !$isCancelled && in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
-                $lead         = $v->lead;
-                $displayDate  = $v->check_in_at ?? $v->scheduled_at;
- 
-                // Sama seperti $scheduleText di Blade
-                if ($lead) {
-                    if ($lead->status === 'deal') {
-                        $scheduleText = 'Sudah Deal';
-                    } elseif ($lead->status === 'lost') {
-                        $scheduleText = 'Lead Hilang / Lost';
-                    } elseif ($lead->follow_up_at) {
-                        $scheduleText = \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y');
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('check_in_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('check_in_at', '<=', $request->end_date);
+        }
+
+        if (Schema::hasColumn('guests', 'is_vip')) {
+            if ($vipFilter === 'vip') {
+                $query->whereHas('guest', fn ($q) => $q->where('is_vip', true));
+            } elseif ($vipFilter === 'reguler') {
+                $query->whereHas('guest', fn ($q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
+            }
+        }
+
+        $visits = $query->orderBy('check_in_at', 'desc')
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        if ($request->wantsJson() || $request->expectsJson()) {
+            // Sama persis dengan $leadBadges di Blade, supaya label konsisten web <-> mobile
+            $leadBadges = [
+                'new'         => 'Baru',
+                'contacted'   => 'Dihubungi',
+                'negotiation' => 'Negosiasi',
+                'deal'        => 'Deal',
+                'lost'        => 'Lost',
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data'    => $visits->getCollection()->map(function ($v) use ($leadBadges) {
+                    $statusLower  = strtolower(trim($v->status ?? ''));
+                    $isCancelled  = in_array($statusLower, ['cancelled', 'ditolak', 'dibatalkan']);
+                    $isCompleted  = !$isCancelled && in_array($statusLower, ['completed', 'selesai', 'meeting selesai']);
+                    $lead         = $v->lead;
+                    $displayDate  = $v->check_in_at ?? $v->scheduled_at;
+
+                    // Sama seperti $scheduleText di Blade
+                    if ($lead) {
+                        if ($lead->status === 'deal') {
+                            $scheduleText = 'Sudah Deal';
+                        } elseif ($lead->status === 'lost') {
+                            $scheduleText = 'Lead Hilang / Lost';
+                        } elseif ($lead->follow_up_at) {
+                            $scheduleText = \Carbon\Carbon::parse($lead->follow_up_at)->translatedFormat('d F Y');
+                        } else {
+                            $scheduleText = 'Tidak ada jadwal lanjutan';
+                        }
                     } else {
-                        $scheduleText = 'Tidak ada jadwal lanjutan';
+                        $scheduleText = 'Kunjungan biasa, tidak dikonversi jadi lead';
                     }
-                } else {
-                    $scheduleText = 'Kunjungan biasa, tidak dikonversi jadi lead';
-                }
- 
-                // Status akhir badge, samakan logika dengan kolom "Status Akhir" di Blade
-                if ($isCancelled) {
-                    $statusAkhir = 'Dibatalkan';
-                    $statusAkhirKey = 'cancelled';
-                } elseif ($isCompleted && $lead) {
-                    $statusAkhir = $leadBadges[$lead->status] ?? $lead->status;
-                    $statusAkhirKey = $lead->status;
-                } elseif ($isCompleted) {
-                    $statusAkhir = '(Non-Lead)';
-                    $statusAkhirKey = 'non_lead';
-                } else {
-                    $statusAkhir = $v->status;
-                    $statusAkhirKey = $statusLower;
-                }
- 
-                return [
-                    'id'               => $v->id,
-                    'token'            => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
-                    'nama'             => $v->guest->name ?? '-',
-                    'jabatan'          => $v->guest->position ?? '-',
-                    'instansi'         => $v->guest->company_name ?? '-',
-                    'isVip'            => (bool) ($v->guest->is_vip ?? false),
-                    'kategori'         => ($v->guest->is_vip ?? false) ? 'VIP' : 'Reguler',
-                    'waktu'            => $displayDate ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B') : '-',
-                    'tanggal'          => $displayDate ? \Carbon\Carbon::parse($displayDate)->format('Y-m-d') : null,
-                    'keperluan'        => $v->purpose->name ?? '-',
-                    'isCompleted'      => $isCompleted,
-                    'isCancelled'      => $isCancelled,
-                    'tahapPipeline'    => $lead ? ($leadBadges[$lead->status] ?? $lead->status) : 'Bukan Lead',
-                    'keteranganStatus' => $scheduleText,
-                    'estimasiValue'    => $lead->estimated_value ?? null,
-                    'catatanAwal'      => $v->notes ?? '-',
-                    'hasilMeeting'     => $v->meeting_result ?? '-',
-                    'riwayatPipeline'  => $lead?->followUps->map(function ($fu) use ($leadBadges) {
-                        return [
-                            'tanggal'       => optional($fu->created_at)->format('Y-m-d H:i'),
-                            'tahap'         => $leadBadges[$fu->status] ?? $fu->status,
-                            'catatan'       => $fu->result,
-                            'estimasiValue' => $fu->estimated_value,
-                            'dueDate'       => $fu->due_at ? \Carbon\Carbon::parse($fu->due_at)->format('Y-m-d') : null,
-                        ];
-                    })->values() ?? [],
-                    'statusAkhir'      => $statusAkhir,
-                    'statusAkhirKey'   => $statusAkhirKey, // dipakai Flutter untuk pilih warna badge
-                ];
-            })->values(),
-            'meta' => [
-                'current_page' => $visits->currentPage(),
-                'last_page'    => $visits->lastPage(),
-                'per_page'     => $visits->perPage(),
-                'total'        => $visits->total(),
-            ],
+
+                    // Status akhir badge, samakan logika dengan kolom "Status Akhir" di Blade
+                    if ($isCancelled) {
+                        $statusAkhir = 'Dibatalkan';
+                        $statusAkhirKey = 'cancelled';
+                    } elseif ($isCompleted && $lead) {
+                        $statusAkhir = $leadBadges[$lead->status] ?? $lead->status;
+                        $statusAkhirKey = $lead->status;
+                    } elseif ($isCompleted) {
+                        $statusAkhir = '(Non-Lead)';
+                        $statusAkhirKey = 'non_lead';
+                    } else {
+                        $statusAkhir = $v->status;
+                        $statusAkhirKey = $statusLower;
+                    }
+
+                    return [
+                        'id'               => $v->id,
+                        'token'            => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
+                        'nama'             => $v->guest->name ?? '-',
+                        'jabatan'          => $v->guest->position ?? '-',
+                        'instansi'         => $v->guest->company_name ?? '-',
+                        'isVip'            => (bool) ($v->guest->is_vip ?? false),
+                        'kategori'         => ($v->guest->is_vip ?? false) ? 'VIP' : 'Reguler',
+                        'waktu'            => $displayDate ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B') : '-',
+                        'tanggal'          => $displayDate ? \Carbon\Carbon::parse($displayDate)->format('Y-m-d') : null,
+                        'keperluan'        => $v->purpose->name ?? '-',
+                        'isCompleted'      => $isCompleted,
+                        'isCancelled'      => $isCancelled,
+                        'tahapPipeline'    => $lead ? ($leadBadges[$lead->status] ?? $lead->status) : 'Bukan Lead',
+                        'keteranganStatus' => $scheduleText,
+                        'estimasiValue'    => $lead->estimated_value ?? null,
+                        'catatanAwal'      => $v->notes ?? '-',
+                        'hasilMeeting'     => $v->meeting_result ?? '-',
+                        'riwayatPipeline'  => $lead?->followUps->map(function ($fu) use ($leadBadges) {
+                            return [
+                                'tanggal'       => optional($fu->created_at)->format('Y-m-d H:i'),
+                                'tahap'         => $leadBadges[$fu->status] ?? $fu->status,
+                                'catatan'       => $fu->result,
+                                'estimasiValue' => $fu->estimated_value,
+                                'dueDate'       => $fu->due_at ? \Carbon\Carbon::parse($fu->due_at)->format('Y-m-d') : null,
+                            ];
+                        })->values() ?? [],
+                        'statusAkhir'      => $statusAkhir,
+                        'statusAkhirKey'   => $statusAkhirKey, // dipakai Flutter untuk pilih warna badge
+                    ];
+                })->values(),
+                'meta' => [
+                    'current_page' => $visits->currentPage(),
+                    'last_page'    => $visits->lastPage(),
+                    'per_page'     => $visits->perPage(),
+                    'total'        => $visits->total(),
+                ],
+            ]);
+        }
+
+        return view('pic.riwayat', [
+            'visits'    => $visits,
+            'vipFilter' => $vipFilter,
         ]);
     }
- 
-    return view('pic.riwayat', [
-        'visits'    => $visits,
-        'vipFilter' => $vipFilter,
-    ]);
-}
- 
+
     public function updateStatus(Request $request, $id)
     {
         $visit = visits::where('id', $id)
@@ -551,122 +562,130 @@ public function riwayat(Request $request)
      *
      * Daftar klien yang sudah Deal (dan lead lain milik PIC).
      */
-   public function leadsIndex(Request $request)
-{
-    $perPage   = (int) $request->input('per_page', 1);
-    $today     = Carbon::today();
-    $filter    = $request->input('filter', 'active');
-    $vipFilter = $request->input('vip_status', 'all');
-    $ownerId   = auth()->id();
+    public function leadsIndex(Request $request)
+    {
+        $perPage   = (int) $request->input('per_page', 1);
+        $today     = Carbon::today();
+        $filter    = $request->input('filter', 'active');
+        $vipFilter = $request->input('vip_status', 'all');
+        $ownerId   = auth()->id();
 
-    $query = leads::with(['guest', 'visit', 'followUps'])
-        ->where('owner_id', $ownerId)
-        ->where('status', '!=', 'lost');
+        $query = leads::with(['guest', 'visit', 'followUps'])
+            ->where('owner_id', $ownerId)
+            ->where('status', '!=', 'lost');
 
-    switch ($filter) {
-        case 'active':
-            $query->whereNotIn('status', ['deal', 'lost']);
-            break;
-        case 'overdue':
-            $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today);
-            break;
-        case 'today':
-            $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today);
-            break;
-        case 'upcoming':
-            $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today);
-            break;
-        case 'deal':
-            $query->where('status', 'deal');
-            break;
-        // 'all' -> tanpa filter tambahan
-    }
-
-    if (Schema::hasColumn('guests', 'is_vip')) {
-        if ($vipFilter === 'vip') {
-            $query->whereHas('guest', fn ($q) => $q->where('is_vip', true));
-        } elseif ($vipFilter === 'reguler') {
-            $query->whereHas('guest', fn ($q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
+        switch ($filter) {
+            case 'active':
+                $query->whereNotIn('status', ['deal', 'lost']);
+                break;
+            case 'overdue':
+                $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today);
+                break;
+            case 'today':
+                $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today);
+                break;
+            case 'upcoming':
+                $query->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today);
+                break;
+            case 'deal':
+                $query->where('status', 'deal');
+                break;
+            // 'all' -> tanpa filter tambahan
         }
-    }
 
-    $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
-        ->paginate($perPage)
-        ->appends($request->query());
-
-    $baseCount = function () use ($ownerId, $vipFilter) {
-        $q = leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
         if (Schema::hasColumn('guests', 'is_vip')) {
             if ($vipFilter === 'vip') {
-                $q->whereHas('guest', fn ($gq) => $gq->where('is_vip', true));
+                $query->whereHas('guest', fn ($q) => $q->where('is_vip', true));
             } elseif ($vipFilter === 'reguler') {
-                $q->whereHas('guest', fn ($gq) => $gq->where('is_vip', false)->orWhereNull('is_vip'));
+                $query->whereHas('guest', fn ($q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
             }
         }
-        return $q;
-    };
 
-    $counts = [
-        'all'      => $baseCount()->count(),
-        'active'   => $baseCount()->whereNotIn('status', ['deal', 'lost'])->count(),
-        'overdue'  => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
-        'today'    => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
-        'upcoming' => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
-        'deal'     => $baseCount()->where('status', 'deal')->count(),
-    ];
+        $leads = $query->orderByRaw('follow_up_at IS NULL, follow_up_at ASC')
+            ->paginate($perPage)
+            ->appends($request->query());
 
-return $this->responseHasil(200, true, [
-    'data'         => $leads->getCollection()->map(fn ($lead) => $this->mapLead($lead))->values(),
-    'current_page' => $leads->currentPage(),
-    'last_page'    => $leads->lastPage(),
-    'total'        => $leads->total(),
-    'filter'       => $filter,
-    'vip_status'   => $vipFilter,
-    'counts'       => $counts,
-]);
-}
+        $baseCount = function () use ($ownerId, $vipFilter) {
+            $q = leads::where('owner_id', $ownerId)->where('status', '!=', 'lost');
+            if (Schema::hasColumn('guests', 'is_vip')) {
+                if ($vipFilter === 'vip') {
+                    $q->whereHas('guest', fn ($gq) => $gq->where('is_vip', true));
+                } elseif ($vipFilter === 'reguler') {
+                    $q->whereHas('guest', fn ($gq) => $gq->where('is_vip', false)->orWhereNull('is_vip'));
+                }
+            }
+            return $q;
+        };
 
-// POST /api/pic/leads/{id}/follow-up
-public function storeLeadFollowUp(Request $request, $id)
-{
-    $ownerId = auth()->id();
-    $lead = leads::where('owner_id', $ownerId)->findOrFail($id);
+        $counts = [
+            'all'      => $baseCount()->count(),
+            'active'   => $baseCount()->whereNotIn('status', ['deal', 'lost'])->count(),
+            'overdue'  => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '<', $today)->count(),
+            'today'    => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', $today)->count(),
+            'upcoming' => $baseCount()->whereNotIn('status', ['deal', 'lost'])->whereDate('follow_up_at', '>', $today)->count(),
+            'deal'     => $baseCount()->where('status', 'deal')->count(),
+        ];
 
-    $validated = $request->validate([
-        'status'          => 'required|in:baru,dihubungi,negosiasi,deal,lost',
-        'result'          => 'nullable|string',
-        'estimated_value' => 'nullable|numeric',
-        'due_at'          => 'nullable|date',
-    ]);
-
-    $lead->status = $validated['status'];
-    if (array_key_exists('estimated_value', $validated) && $validated['estimated_value'] !== null) {
-        $lead->estimated_value = $validated['estimated_value'];
-    }
-    if (array_key_exists('due_at', $validated) && $validated['due_at'] !== null) {
-        $lead->follow_up_at = $validated['due_at'];
-    }
-    $lead->save();
-
-    if (!empty($validated['result'])) {
-        $lead->followUps()->create([
-            'result'          => $validated['result'],
-            'status'          => $validated['status'],
-            'due_at'          => $validated['due_at'] ?? null,
-            'estimated_value' => $validated['estimated_value'] ?? null,
+        return $this->responseHasil(200, true, [
+            'data'         => $leads->getCollection()->map(fn ($lead) => $this->mapLead($lead))->values(),
+            'current_page' => $leads->currentPage(),
+            'last_page'    => $leads->lastPage(),
+            'total'        => $leads->total(),
+            'filter'       => $filter,
+            'vip_status'   => $vipFilter,
+            'counts'       => $counts,
         ]);
     }
 
-return $this->responseHasil(200, true, [
-    'lead' => $this->mapLead($lead->fresh(['guest', 'visit', 'followUps'])),
-], 'Tahap pipeline berhasil diperbarui');
-}
+    // POST /api/pic/leads/{id}/follow-up
+    public function storeLeadFollowUp(Request $request, $id)
+    {
+        $ownerId = auth()->id();
+        $lead = leads::where('owner_id', $ownerId)->findOrFail($id);
+
+        $validated = $request->validate([
+            'status'          => 'required|in:baru,dihubungi,negosiasi,deal,lost',
+            'result'          => 'nullable|string',
+            'estimated_value' => 'nullable|numeric',
+            'due_at'          => 'nullable|date',
+        ]);
+
+        $lead->status = $validated['status'];
+        if (array_key_exists('estimated_value', $validated) && $validated['estimated_value'] !== null) {
+            $lead->estimated_value = $validated['estimated_value'];
+        }
+        if (array_key_exists('due_at', $validated) && $validated['due_at'] !== null) {
+            $lead->follow_up_at = $validated['due_at'];
+        }
+        $lead->save();
+
+        if (!empty($validated['result'])) {
+            $lead->followUps()->create([
+                'result'          => $validated['result'],
+                'status'          => $validated['status'],
+                'due_at'          => $validated['due_at'] ?? null,
+                'estimated_value' => $validated['estimated_value'] ?? null,
+            ]);
+        }
+
+        return $this->responseHasil(200, true, [
+            'lead' => $this->mapLead($lead->fresh(['guest', 'visit', 'followUps'])),
+        ], 'Tahap pipeline berhasil diperbarui');
+    }
+
     /**
      * POST /api/v1/pic/visits/{id}/start-meeting
+     *
+     * FIX: sebelumnya pakai visits::find($id) tanpa filter kepemilikan,
+     * jadi PIC lain bisa start-meeting visit milik PIC lain kalau tau ID-nya
+     * (IDOR). Disamakan dengan method lain di controller ini yang selalu
+     * scoping ke ->where('assigned_to', auth()->id()).
      */
     public function startMeeting($id)
     {
-        $visit = visits::find($id);
+        $visit = visits::where('id', $id)
+            ->where('assigned_to', auth()->id())
+            ->first();
 
         if (! $visit) {
             return $this->responseHasil(404, false, [], 'Kunjungan tidak ditemukan.');
@@ -734,7 +753,7 @@ return $this->responseHasil(200, true, [
      */
     private function mapVisit(visits $v): array
     {
-            $displayDate = $v->check_in_at ?? $v->scheduled_at;
+        $displayDate = $v->check_in_at ?? $v->scheduled_at;
         return [
             'id'              => $v->id,
             'visit_code'      => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
@@ -749,14 +768,12 @@ return $this->responseHasil(200, true, [
             'branch_name'     => optional($v->branch)->name,
             'status'          => $v->status,
 
-             'waktu'           => $displayDate
-            ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B')
-            : '-',
-        'scheduled_at'    => $v->scheduled_at,
-        'check_in_at'     => $v->check_in_at,
+            'waktu'           => $displayDate
+                ? \Carbon\Carbon::parse($displayDate)->translatedFormat('d M Y, H:i \W\I\B')
+                : '-',
+            'scheduled_at'    => $v->scheduled_at,
+            'check_in_at'     => $v->check_in_at,
 
-            // 'scheduled_at'    => $v->scheduled_at,
-            // 'check_in_at'     => $v->check_in_at,
             'check_out_at'    => $v->check_out_at,
             'meeting_start_at' => $v->meeting_start_at,
             'notes'           => $v->notes,
