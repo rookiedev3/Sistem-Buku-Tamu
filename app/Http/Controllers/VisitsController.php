@@ -90,8 +90,8 @@ class VisitsController extends Controller
 
         $pic = users::select('id', 'name')->where('role', 'pic')->get();
         $branches = branches::where('is_active', 1)->select('id', 'name')->get();
-        $visitPurposes = visit_purposes::select('id', 'name')->get();
-        $products = products::select('id', 'name')->get();
+        $visitPurposes = visit_purposes::where('is_active', 1)->select('id', 'name')->get();
+        $products = products::where('is_active', 1)->select('id', 'name')->get();
         $leadSources = lead_sources::select('id', 'name')->get();
 
         return view('check-in.step2', compact('step1Data', 'step2Data', 'pic', 'branches', 'visitPurposes', 'products', 'leadSources'));
@@ -276,7 +276,10 @@ class VisitsController extends Controller
             $purposeType = visit_purposes::find($step2['purpose_id']);
             $branch = branches::find($step2['branch_id']);
 
-            $adminUsers = users::where('role', 'admin')->get();
+            // Filter Admin berdasarkan branch_id yang dipilih tamu di Step 2
+            $adminUsers = users::where('role', 'admin')
+                ->where('branch_id', $step2['branch_id'])
+                ->get();
 
             $guestName   = $guest->name ?? '-';
             $companyName = $guest->company_name ?? '-';
@@ -290,7 +293,7 @@ class VisitsController extends Controller
                 . "• Tujuan: {$purposeName}\n"
                 . "• Cabang: {$branchName}";
 
-            // Notifikasi Database Internal
+            // Notifikasi Database Internal (Khusus Admin Cabang Terkait)
             foreach ($adminUsers as $admin) {
                 notifications::send(
                     $admin->id,
@@ -300,7 +303,7 @@ class VisitsController extends Controller
                 );
             }
 
-            // Notifikasi WhatsApp Fonnte (Mengirim ke nomor telepon Admin yang valid & unik)
+            // Notifikasi WhatsApp Fonnte (Ke nomor telepon Admin Cabang yang valid & unik)
             $targetPhones = $adminUsers->pluck('phone')->filter()->unique();
 
             if (! $targetPhones->isEmpty()) {

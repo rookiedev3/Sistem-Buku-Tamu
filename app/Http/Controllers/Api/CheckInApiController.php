@@ -32,7 +32,7 @@ class CheckInApiController extends Controller
             'data'    => [
                 'guest_categories' => guest_categories::select('id', 'name')->get(),
                 'pics' => users::select('id', 'name', 'branch_id') // 🟢 Tambahkan 'branch_id'
-                    ->whereIn(DB::raw('LOWER(role)'), ['pic', 'admin', 'staff'])
+                    ->whereIn(DB::raw('LOWER(role)'), ['pic'])
                     ->orderBy('name', 'asc')
                     ->get(),
                 'branches'         => branches::select('id', 'name', 'code')->get(),

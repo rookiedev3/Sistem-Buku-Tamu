@@ -284,6 +284,14 @@ class PicController extends Controller
             return back()->with('error', 'Hasil pertemuan sudah pernah dicatat dan tidak bisa diubah lagi.');
         }
 
+        // 🛠️ Sanitasi Input Rupiah: Bersihkan karakter selain angka jika yang terkirim berformat Rupiah
+        if ($request->has('estimated_value') && !empty($request->estimated_value)) {
+            $cleanedValue = preg_replace('/[^0-9]/', '', $request->estimated_value);
+            $request->merge([
+                'estimated_value' => $cleanedValue !== '' ? (float) $cleanedValue : null,
+            ]);
+        }
+
         $request->validate([
             'meeting_result'  => 'required|string',
             'potential_level' => 'required|in:hot,warm,cold,non_lead,deal',
@@ -291,20 +299,21 @@ class PicController extends Controller
             'estimated_value' => 'nullable|numeric|min:0',
         ], [
             'follow_up_at.required_unless' => 'Tanggal follow-up wajib dipilih sebelum menyimpan.',
+            'estimated_value.numeric'      => 'Estimasi nilai harus berupa angka yang valid.',
         ]);
 
         // Nilai final = input baru (kalau diisi) atau nilai lama dari lead yang sudah ada
         $existingEstValue = $visit->lead->estimated_value ?? 0;
-        $finalEstValue = $request->filled('estimated_value') ? $request->estimated_value : $existingEstValue;
+        $finalEstValue = $request->filled('estimated_value') ? (float) $request->estimated_value : (float) $existingEstValue;
 
         // 🚫 Cegah Deal tanpa estimasi nilai yang valid (> 0).
-        if ($request->potential_level === 'deal' && (float) $finalEstValue <= 0) {
+        if ($request->potential_level === 'deal' && $finalEstValue <= 0) {
             return back()->withInput()->with('error', 'Estimasi Nilai Deal wajib diisi (lebih dari Rp 0) sebelum bisa ditandai Deal.');
         }
 
         $newStatus = 'Meeting Selesai';
 
-        // 1. Catat log perubahan status (hanya sekali, karena pengeditan ulang sudah diblok di atas)
+        // 1. Catat log perubahan status
         visit_status_logs::create([
             'visit_id'   => $visit->id,
             'old_status' => $oldStatus,
@@ -339,48 +348,48 @@ class PicController extends Controller
                 ]
             );
 
-            // NOTIFIKASI WA & DB HANYA DIKIRIM JIKA LEAD BARU DIBUAT (Mencegah Notif Ganda)
-            if ($lead->wasRecentlyCreated) {
-                $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
+            // Kirim Notifikasi WA & DB
+            // Catatan: Jika ingin notifikasi terkirim baik saat baru dibuat maupun saat di-update, 
+            // biarkan kondisi ini atau sesuaikan bila hanya untuk lead baru ($lead->wasRecentlyCreated)
+            $managers = User::whereIn('role', ['manager', 'owner', 'admin'])->get();
 
-                $guestName      = $visit->guest->name ?? 'Tamu';
-                $companyName    = $visit->guest->company_name ?? 'Instansi';
-                $formattedValue = 'Rp ' . number_format($finalEstValue, 0, ',', '.');
-                $picName        = auth()->user()->name ?? 'PIC';
-                $potensiText    = strtoupper($request->potential_level);
+            $guestName      = $visit->guest->name ?? 'Tamu';
+            $companyName    = $visit->guest->company_name ?? 'Instansi';
+            $formattedValue = 'Rp ' . number_format($finalEstValue, 0, ',', '.');
+            $picName        = auth()->user()->name ?? 'PIC';
+            $potensiText    = strtoupper($request->potential_level);
 
-                $title   = "Lead Baru Masuk: {$guestName}";
-                $message = implode("\n", [
-                    "Terdapat Lead baru dari {$guestName} ({$companyName})",
-                    "• Potensi: {$potensiText}",
-                    "• Est. Nilai: {$formattedValue}",
-                    "• PIC: {$picName}",
-                ]);
+            $title   = "Lead Baru Masuk: {$guestName}";
+            $message = implode("\n", [
+                "Terdapat Lead baru dari {$guestName} ({$companyName})",
+                "• Potensi: {$potensiText}",
+                "• Est. Nilai: {$formattedValue}",
+                "• PIC: {$picName}",
+            ]);
 
-                // 1. Notifikasi Database Internal
-                foreach ($managers as $manager) {
-                    notifications::send($manager->id, 'new_lead', $title, $message);
-                }
+            // 1. Notifikasi Database Internal
+            foreach ($managers as $manager) {
+                notifications::send($manager->id, 'new_lead', $title, $message);
+            }
 
-                // 2. Notifikasi WhatsApp Fonnte (Mengirim ke nomor HP unik milik Manager/Owner/Admin)
-                $targetPhones = $managers->pluck('phone')->filter()->unique();
+            // 2. Notifikasi WhatsApp Fonnte (Mengirim ke nomor HP unik milik Manager/Owner/Admin)
+            $targetPhones = $managers->pluck('phone')->filter()->unique();
 
-                if (! $targetPhones->isEmpty()) {
-                    $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
-                    $waMessage = "*{$title}*\n\n" . $message;
+            if (!$targetPhones->isEmpty()) {
+                $token     = config('services.fonnte.token', env('FONNTE_TOKEN'));
+                $waMessage = "*{$title}*\n\n" . $message;
 
-                    foreach ($targetPhones as $phone) {
-                        try {
-                            Http::withoutVerifying()
-                                ->withHeaders([
-                                    'Authorization' => $token,
-                                ])->post('https://api.fonnte.com/send', [
-                                    'target'  => $phone,
-                                    'message' => $waMessage,
-                                ]);
-                        } catch (\Exception $e) {
-                            \Log::error("Gagal kirim WA ke {$phone}: " . $e->getMessage());
-                        }
+                foreach ($targetPhones as $phone) {
+                    try {
+                        Http::withoutVerifying()
+                            ->withHeaders([
+                                'Authorization' => $token,
+                            ])->post('https://api.fonnte.com/send', [
+                                'target'  => $phone,
+                                'message' => $waMessage,
+                            ]);
+                    } catch (\Exception $e) {
+                        
                     }
                 }
             }

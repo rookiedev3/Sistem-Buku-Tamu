@@ -7,6 +7,26 @@ use App\Helpers\DateHelper;
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+<style>
+    /* Validasi Error */
+    .field-error {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.08) !important;
+    }
+
+    .error-message {
+        display: none;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+</style>
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
     <div>
         <h1 style="font-size: 24px; font-weight: 800; color: #172033; margin: 10px 0 4px 0;">
@@ -148,7 +168,7 @@ use App\Helpers\DateHelper;
     <div style="background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box;">
 
         <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Profil Tamu 👤</h3>
+            <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Profil Tamu</h3>
             <button onclick="closeGuestModal()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
         </div>
 
@@ -192,43 +212,71 @@ use App\Helpers\DateHelper;
     <div style="background: #ffffff; width: 100%; max-width: 500px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; max-height: 90vh; display: flex; flex-direction: column;">
 
         <div style="padding: 20px 24px; background: #f8fafc; border-bottom: 1px solid #e8edf5; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-            <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Tambah Tamu Baru 👤</h3>
+            <h3 style="font-size: 16px; font-weight: 800; color: #172033; margin: 0;">Tambah Tamu Baru </h3>
             <button onclick="closeCreateGuestModal()" style="background: none; border: none; font-size: 20px; font-weight: bold; color: #778195; cursor: pointer;">&times;</button>
         </div>
 
-        <form action="{{ route('frontoffice.store') }}" method="POST" enctype="multipart/form-data" style="padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
+        <form id="createGuestForm" action="{{ route('frontoffice.store') }}" method="POST" enctype="multipart/form-data" style="padding: 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;" novalidate onsubmit="return validateCreateGuestForm(event)">
             @csrf
 
             <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Nama Lengkap <span style="color:red;">*</span></label>
-                <input type="text" name="name" required placeholder="Masukkan nama tamu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                <input type="text" id="cg_name" name="name" required placeholder="Masukkan nama tamu"
+                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;"
+                    oninput="validateField(this, false)" onblur="validateField(this, true)" data-error-msg="Nama lengkap wajib diisi.">
+                <small class="error-message" id="err_cg_name"></small>
             </div>
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">No. WhatsApp / Telepon <span style="color:red;">*</span></label>
-                    <input type="text" name="phone" required placeholder="08xxxxxxxxxx" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                    <input type="tel" id="cg_phone" name="phone" required pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" maxlength="16" placeholder="08xxxxxxxxxx"
+                        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;"
+                        oninput="validateField(this, false)" onblur="validateField(this, true)"
+                        data-error-msg="Nomor WhatsApp wajib diisi."
+                        data-error-pattern="Format nomor tidak valid. Contoh: 081234567890"
+                        data-error-toolong="Nomor WhatsApp melebihi batas maksimal (16 digit).">
+                    <small class="error-message" id="err_cg_phone"></small>
                 </div>
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Email (Opsional)</label>
-                    <input type="email" name="email" placeholder="email@contoh.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                    <input type="email" id="cg_email" name="email" placeholder="email@contoh.com"
+                        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;"
+                        oninput="validateField(this, false)" onblur="validateField(this, true)"
+                        data-error-pattern="Format email tidak valid.">
+                    <small class="error-message" id="err_cg_email"></small>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Instansi / Perusahaan</label>
-                    <input type="text" name="company_name" placeholder="Nama instansi" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                    <input type="text" id="cg_company" name="company_name" placeholder="Nama instansi" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                 </div>
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Jabatan</label>
-                    <input type="text" name="position" placeholder="Jabatan tamu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                    <input type="text" id="cg_position" name="position" placeholder="Jabatan tamu" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                 </div>
             </div>
 
             <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Kategori Pengunjung <span style="color:red;">*</span></label>
+                <select id="cg_guest_category_id" name="guest_category_id" required
+                    style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff; box-sizing: border-box;"
+                    onchange="validateField(this, true)" onblur="validateField(this, true)" data-error-msg="Kategori pengunjung wajib dipilih.">
+                    <option value="">-- Pilih Kategori --</option>
+                    @if(isset($guestCategories))
+                    @foreach($guestCategories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                    @endif
+                </select>
+                <small class="error-message" id="err_cg_guest_category_id"></small>
+            </div>
+
+            <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Alamat (Opsional)</label>
-                <textarea name="address" rows="2" placeholder="Alamat lengkap" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; resize: vertical;"></textarea>
+                <textarea id="cg_address" name="address" rows="2" placeholder="Alamat lengkap" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
 
             <div>
@@ -241,7 +289,9 @@ use App\Helpers\DateHelper;
 
             <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Foto Profil (Opsional)</label>
-                <input type="file" name="photo" accept="image/*" style="font-size: 12px; width: 100%;">
+                <input type="file" id="cg_photo" name="photo" accept="image/*" onchange="validatePhotoFile(this)" style="font-size: 12px; width: 100%;">
+                <span style="font-size: 11px; color: #778195; display: block; margin-top: 6px;">Format: JPG, JPEG, PNG (Maks. 2MB)</span>
+                <small class="error-message" id="err_cg_photo"></small>
             </div>
 
             <div style="padding-top: 10px; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
@@ -274,6 +324,116 @@ use App\Helpers\DateHelper;
         searchTimeout = setTimeout(() => {
             inputElem.form.submit();
         }, 600);
+    }
+
+    // ================== VALIDASI REAL-TIME (Modal Tambah Tamu) ==================
+    // Menampilkan pesan error langsung ketika field kosong (required)
+    // atau formatnya salah (pattern/type email & phone tidak sesuai).
+    // Parameter isBlurEvent: true = validasi penuh (dipanggil saat blur/submit),
+    // false = dipanggil saat mengetik (oninput) -> pesan "format salah" DITUNDA sampai
+    // user selesai mengetik (blur), supaya tidak muncul berulang kali saat input
+    // belum selesai diketik. Error "kosong" & "kepanjangan" tetap muncul langsung.
+    function validateField(field, isBlurEvent) {
+        isBlurEvent = (isBlurEvent === undefined) ? true : isBlurEvent;
+        const errorBox = document.getElementById('err_' + field.id);
+        if (!errorBox) return true;
+
+        const alreadyShowingError = field.classList.contains('field-error');
+
+        let isValid = true;
+        let message = '';
+
+        // Cek kosong (required)
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            isValid = false;
+            message = field.dataset.errorMsg || 'Kolom ini wajib diisi.';
+        }
+        // Cek kepanjangan (melebihi maxlength)
+        else if (field.hasAttribute('maxlength') && field.value.trim().length > parseInt(field.getAttribute('maxlength'), 10)) {
+            isValid = false;
+            message = field.dataset.errorToolong || 'Input melebihi batas maksimal karakter.';
+        }
+        // Cek format (pattern / type email) jika sudah ada isinya
+        else if (field.value.trim() && !field.checkValidity()) {
+            // Hanya munculkan pesan "format salah" saat blur, atau jika error ini memang
+            // sedang tampil (supaya bisa langsung hilang begitu user memperbaikinya).
+            if (isBlurEvent || alreadyShowingError) {
+                isValid = false;
+                message = field.dataset.errorPattern || field.dataset.errorMsg || 'Format tidak valid.';
+            }
+        }
+
+        if (!isValid) {
+            field.classList.add('field-error');
+            field.style.borderColor = '#dc2626';
+            errorBox.textContent = message;
+            errorBox.classList.add('show');
+        } else {
+            field.classList.remove('field-error');
+            field.style.borderColor = '#cbd5e1';
+            errorBox.textContent = '';
+            errorBox.classList.remove('show');
+        }
+
+        return isValid;
+    }
+
+    function validatePhotoFile(input) {
+        const file = input.files[0];
+        const errorBox = document.getElementById('err_cg_photo');
+        const maxSizeBytes = 2 * 1024 * 1024; // 2 MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+        if (!file) {
+            errorBox.textContent = '';
+            errorBox.classList.remove('show');
+            return true;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            errorBox.textContent = 'Format file tidak didukung. Gunakan JPG, JPEG, atau PNG.';
+            errorBox.classList.add('show');
+            input.value = '';
+            return false;
+        }
+
+        if (file.size > maxSizeBytes) {
+            errorBox.textContent = 'Ukuran file terlalu besar! Maksimal 2 MB.';
+            errorBox.classList.add('show');
+            input.value = '';
+            return false;
+        }
+
+        errorBox.textContent = '';
+        errorBox.classList.remove('show');
+        return true;
+    }
+
+    function validateCreateGuestForm(event) {
+        const form = document.getElementById('createGuestForm');
+        const fields = form.querySelectorAll('input, select, textarea');
+
+        let firstInvalid = null;
+        let allValid = true;
+
+        fields.forEach(field => {
+            // Hanya field yang memiliki elemen pesan error (id err_<id>) yang divalidasi di sini
+            if (document.getElementById('err_' + field.id)) {
+                const valid = validateField(field, true);
+                if (!valid) {
+                    allValid = false;
+                    if (!firstInvalid) firstInvalid = field;
+                }
+            }
+        });
+
+        if (!allValid) {
+            event.preventDefault();
+            if (firstInvalid) firstInvalid.focus();
+            return false;
+        }
+
+        return true;
     }
 
     function updateVipStatus(guestId, selectElem) {

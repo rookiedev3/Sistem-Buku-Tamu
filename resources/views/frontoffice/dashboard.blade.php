@@ -172,6 +172,24 @@
         color: #ffffff;
         border-color: #006B3F;
     }
+
+    /* Validasi Error */
+    .field-error {
+        border-color: #dc2626 !important;
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.08) !important;
+    }
+
+    .error-message {
+        display: none;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .error-message.show {
+        display: block;
+    }
 </style>
 
 {{-- Flash Messages --}}
@@ -276,7 +294,7 @@
             <thead>
                 <tr style="background: #f8fafc; color: #64748b; border-bottom: 1px solid #e8edf5;">
                     <th style="padding: 14px 20px; font-weight: 700;">No</th>
-                    <th style="padding: 14px 20px; font-weight: 700;">Token / Waktu</th>
+                    <th style="padding: 14px 20px; font-weight: 700;">Tanggal & Waktu</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Tamu & Jabatan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Jenis Kunjungan</th>
                     <th style="padding: 14px 20px; font-weight: 700;">Tujuan PIC</th>
@@ -418,7 +436,7 @@
         </div>
 
         <div id="modalFormContainer" class="custom-scroll" style="padding: 28px 32px; overflow-y: auto; max-height: 70vh; box-sizing: border-box;">
-            <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;">
+            <form id="multiStepForm" action="{{ route('frontoffice.storeManual') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 14px;" novalidate>
                 @csrf
 
                 {{-- STEP 1: PROFIL TAMU --}}
@@ -429,7 +447,8 @@
                         </label>
                         <input type="text" id="input_name" name="name" value="{{ old('name') }}" placeholder="Masukkan nama lengkap Anda" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this)" oninput="validateField(this)" data-error-msg="Nama lengkap wajib diisi.">
+                        <small class="error-message" id="err_input_name"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
@@ -438,7 +457,8 @@
                         </label>
                         <input type="text" id="input_company" name="company_name" value="{{ old('company_name') }}" placeholder="Contoh: PT / Universitas / Pribadi" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this)" oninput="validateField(this)" data-error-msg="Asal instansi / perusahaan wajib diisi.">
+                        <small class="error-message" id="err_input_company"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
@@ -456,16 +476,18 @@
                         </label>
                         <input type="text" id="input_position" name="position" value="{{ old('position') }}" placeholder="Contoh: Staff, Manager, Direktur" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this)" oninput="validateField(this)" data-error-msg="Jabatan wajib diisi.">
+                        <small class="error-message" id="err_input_position"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #172033; margin-bottom: 6px;">
                             Nomor WhatsApp (Aktif) <span style="color: #dc2626;">*</span>
                         </label>
-                        <input type="tel" id="input_phone" name="phone" value="{{ old('phone') }}" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" placeholder="Contoh: 081234567890" required
+                        <input type="tel" id="input_phone" name="phone" value="{{ old('phone') }}" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" maxlength="16" placeholder="Contoh: 081234567890" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this, true)" oninput="validateField(this, false)" data-error-msg="Nomor WhatsApp wajib diisi." data-error-pattern="Format nomor tidak valid. Contoh: 081234567890" data-error-toolong="Nomor WhatsApp melebihi batas maksimal (16 digit). Periksa kembali nomor Anda.">
+                        <small class="error-message" id="err_input_phone"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
@@ -474,7 +496,8 @@
                         </label>
                         <input type="email" id="input_email" name="email" value="{{ old('email') }}" placeholder="Contoh: nama@email.com" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this, true)" oninput="validateField(this, false)" data-error-msg="Email wajib diisi." data-error-pattern="Format email tidak valid.">
+                        <small class="error-message" id="err_input_email"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
@@ -483,7 +506,7 @@
                         </label>
                         <select id="select_category" name="guest_category_id" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; cursor: pointer; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="this.style.borderColor='#e8edf5'" onchange="updateSummary()">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this)" onchange="validateField(this); updateSummary()" data-error-msg="Kategori pengunjung wajib dipilih.">
                             <option value="">-- Pilih Kategori --</option>
                             @if(isset($guestCategories))
                             @foreach($guestCategories as $categories)
@@ -493,6 +516,7 @@
                             @endforeach
                             @endif
                         </select>
+                        <small class="error-message" id="err_select_category"></small>
                     </div>
 
                     <div style="margin-bottom: 14px;">
@@ -517,30 +541,33 @@
                     {{-- 1. PILIH CABANG TERLEBIH DAHULU --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Cabang *</label>
-                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="loadPicsForModal(this.value); updateSummary();">
+                        <select name="branch_id" id="select_branch" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="loadPicsForModal(this.value); validateField(this); updateSummary();" onblur="validateField(this)" data-error-msg="Cabang wajib dipilih.">
                             <option value="" disabled selected>-- Pilih Cabang --</option>
                             @foreach($branches as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                             @endforeach
                         </select>
+                        <small class="error-message" id="err_select_branch"></small>
                     </div>
 
                     {{-- 2. PILIH PIC TUJUAN (DINAMIS DIBUAT BERDASARKAN CABANG) --}}
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih PIC Tujuan *</label>
-                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select id="select_pic" name="assigned_to" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="validateField(this); updateSummary()" onblur="validateField(this)" data-error-msg="PIC tujuan wajib dipilih.">
                             <option value="" disabled selected>-- Pilih Cabang Terlebih Dahulu --</option>
                         </select>
+                        <small class="error-message" id="err_select_pic"></small>
                     </div>
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Pilih Keperluan Kunjungan *</label>
-                        <select name="purpose_id" id="select_purpose" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="updateSummary()">
+                        <select name="purpose_id" id="select_purpose" required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none;" onchange="validateField(this); updateSummary()" onblur="validateField(this)" data-error-msg="Keperluan kunjungan wajib dipilih.">
                             <option value="" disabled selected>-- Pilih Keperluan --</option>
                             @foreach($purposes as $purpose)
                             <option value="{{ $purpose->id }}">{{ $purpose->name }}</option>
                             @endforeach
                         </select>
+                        <small class="error-message" id="err_select_purpose"></small>
                     </div>
 
                     {{-- PILIH PRODUK / LAYANAN (dikirim sebagai product_id) --}}
@@ -558,7 +585,8 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Tanggal & Jam Kunjungan *</label>
-                        <input type="text" id="input_scheduled_at" name="scheduled_at" class="flatpickr-custom-input" readonly required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; outline: none;" onchange="updateSummary()">
+                        <input type="text" id="input_scheduled_at" name="scheduled_at" class="flatpickr-custom-input" readonly required style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; outline: none;" onchange="validateField(this); updateSummary()" data-error-msg="Tanggal & jam kunjungan wajib dipilih.">
+                        <small class="error-message" id="err_input_scheduled_at"></small>
                     </div>
 
                     <div style="margin-bottom: 12px;">
@@ -575,7 +603,8 @@
 
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 12px; font-weight: 700; color: #172033; display: block; margin-bottom: 6px;">Detail Keperluan Kunjungan *</label>
-                        <textarea name="notes" id="input_notes" rows="2" placeholder="Tuliskan ringkasan keperluan..." required style="width: 100%; padding: 10px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none; resize: vertical;" onkeyup="updateSummary()"></textarea>
+                        <textarea name="notes" id="input_notes" rows="2" placeholder="Tuliskan ringkasan keperluan..." required style="width: 100%; padding: 10px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13px; box-sizing: border-box; background: #fff; outline: none; resize: vertical;" onkeyup="updateSummary(); validateField(this)" onblur="validateField(this)" data-error-msg="Detail keperluan kunjungan wajib diisi."></textarea>
+                        <small class="error-message" id="err_input_notes"></small>
                     </div>
                 </div>
 
@@ -694,10 +723,6 @@
 <div id="cancelConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;">
     <div style="background: #ffffff; width: 100%; max-width: 400px; padding: 28px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box;">
 
-        <div style="width: 52px; height: 52px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #dc2626; font-size: 22px;">
-            
-        </div>
-
         <h3 style="font-size: 17px; font-weight: 800; color: #172033; margin: 0 0 8px 0;">Batalkan Kunjungan?</h3>
         <p style="font-size: 13px; color: #64748b; margin: 0 0 24px 0; line-height: 1.5;">
             Apakah Anda yakin ingin membatalkan jadwal kunjungan untuk <strong id="cancelGuestName" style="color: #172033;">-</strong>? Tindakan ini tidak dapat dibatalkan.
@@ -753,10 +778,64 @@
                 }
             ],
             onChange: function() {
+                validateField(document.getElementById('input_scheduled_at'));
                 updateSummary();
             }
         });
     });
+
+    // ================== VALIDASI REAL-TIME ==================
+    // Menampilkan pesan error langsung ketika field kosong (required)
+    // atau formatnya salah (pattern/type email & phone tidak sesuai).
+    // Parameter isBlurEvent: true = validasi penuh (dipanggil saat blur/pindah field/submit),
+    // false = dipanggil saat mengetik (oninput) -> pesan "format salah" DITUNDA sampai
+    // user selesai mengetik (blur), supaya tidak muncul berulang kali saat nomor/email
+    // belum selesai diketik. Error "kosong" & "kepanjangan" tetap muncul langsung.
+    function validateField(field, isBlurEvent) {
+        isBlurEvent = (isBlurEvent === undefined) ? true : isBlurEvent;
+        const errorBox = document.getElementById('err_' + field.id);
+        if (!errorBox) return true;
+
+        const alreadyShowingError = field.classList.contains('field-error');
+
+        let isValid = true;
+        let message = '';
+
+        // Cek kosong (required)
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            isValid = false;
+            message = field.dataset.errorMsg || 'Kolom ini wajib diisi.';
+        }
+        // Cek kepanjangan (melebihi maxlength) - dicek lebih dulu supaya pesannya spesifik
+        else if (field.hasAttribute('maxlength') && field.value.trim().length > parseInt(field.getAttribute('maxlength'), 10)) {
+            isValid = false;
+            message = field.dataset.errorToolong || 'Input melebihi batas maksimal karakter.';
+        }
+        // Cek format (pattern / type email) jika sudah ada isinya
+        else if (field.value.trim() && !field.checkValidity()) {
+            // Hanya munculkan pesan "format salah" saat blur, atau jika error ini memang
+            // sedang tampil (supaya bisa langsung hilang begitu user memperbaikinya).
+            // Saat masih mengetik dan belum ada error tampil, jangan munculkan dulu.
+            if (isBlurEvent || alreadyShowingError) {
+                isValid = false;
+                message = field.dataset.errorPattern || field.dataset.errorMsg || 'Format tidak valid.';
+            }
+        }
+
+        if (!isValid) {
+            field.classList.add('field-error');
+            field.style.borderColor = '#dc2626';
+            errorBox.textContent = message;
+            errorBox.classList.add('show');
+        } else {
+            field.classList.remove('field-error');
+            field.style.borderColor = '#e8edf5';
+            errorBox.textContent = '';
+            errorBox.classList.remove('show');
+        }
+
+        return isValid;
+    }
 
     // 🟢 DYNAMIC FETCH PIC BERDASARKAN CABANG TERPILIH
     function loadPicsForModal(branchId, selectedPicId = null) {
@@ -882,20 +961,29 @@
         updateStepUI();
     }
 
+    // Validasi seluruh field wajib & format pada step aktif.
+    // Semua error langsung ditampilkan (tidak berhenti di field pertama),
+    // lalu fokus diarahkan ke field pertama yang tidak valid.
     function validateCurrentStep(step) {
         const currentContainer = document.getElementById(`step-${step}-content`);
-        const inputs = currentContainer.querySelectorAll('input[required], select[required], textarea[required]');
+        const fields = currentContainer.querySelectorAll('input, select, textarea');
 
-        for (let input of inputs) {
-            if (!input.value.trim()) {
-                input.focus();
-                input.style.borderColor = '#ef4444';
-                return false;
-            } else {
-                input.style.borderColor = '#e8edf5';
+        let firstInvalid = null;
+        let allValid = true;
+
+        fields.forEach(field => {
+            const valid = validateField(field);
+            if (!valid) {
+                allValid = false;
+                if (!firstInvalid) firstInvalid = field;
             }
+        });
+
+        if (firstInvalid) {
+            firstInvalid.focus();
         }
-        return true;
+
+        return allValid;
     }
 
     function updateStepUI() {
@@ -959,6 +1047,25 @@
     }
 
     function submitMultiStepForm() {
+        // Validasi ulang seluruh step sebelum submit, memastikan tidak ada
+        // field wajib yang kosong atau formatnya salah walau tidak melewati step tsb secara manual.
+        const step1Valid = validateCurrentStep(1);
+        const step2Valid = validateCurrentStep(2);
+
+        if (!step1Valid) {
+            currentStep = 1;
+            updateStepUI();
+            validateCurrentStep(1);
+            return;
+        }
+
+        if (!step2Valid) {
+            currentStep = 2;
+            updateStepUI();
+            validateCurrentStep(2);
+            return;
+        }
+
         const consent = document.getElementById('manual_privacy_consent');
         if (!consent.checked) {
             consent.focus();
