@@ -128,18 +128,20 @@ class OwnerApiController extends Controller
         $totalLeadsAll = leads::count();
         $conversionRate = $totalVisitsAll > 0 ? round(($totalLeadsAll / $totalVisitsAll) * 100) : 0;
 
-        $recentActivities = DB::table('visit_status_logs')
-            ->join('visits', 'visits.id', '=', 'visit_status_logs.visit_id')
-            ->join('guests', 'guests.id', '=', 'visits.guest_id')
-            ->select(
-                'guests.name as guest_name',
-                'guests.company_name',
-                'visit_status_logs.new_status',
-                'visit_status_logs.changed_at'
-            )
-            ->orderByDesc('visit_status_logs.changed_at')
-            ->take(5)
-            ->get();
+$recentActivities = DB::table('visit_status_logs')
+    ->join('visits', 'visits.id', '=', 'visit_status_logs.visit_id')
+    ->join('guests', 'guests.id', '=', 'visits.guest_id')
+    ->select(
+        'guests.name as guest_name',
+        'guests.company_name',
+        'guests.position as jabatan',      // ← TAMBAHAN
+        'visits.scheduled_at as waktu',    // ← TAMBAHAN (kalau kamu mau tampilin jadwalnya juga)
+        'visit_status_logs.new_status',
+        'visit_status_logs.changed_at'
+    )
+    ->orderByDesc('visit_status_logs.changed_at')
+    ->take(5)
+    ->get();
 
         $statusOptions = visits::whereNotNull('status')
             ->get()
@@ -235,72 +237,109 @@ class OwnerApiController extends Controller
      * GET /api/v1/owner/kunjungan
      * Query params: start_date, end_date, vip_status, keyword, per_page
      */
-    public function kunjungan(Request $request)
-    {
-        $validated = $request->validate([
-            'start_date' => 'nullable|date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
-        ], [
-            'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
-        ]);
+   public function kunjungan(Request $request)
+{
+    $validated = $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date'   => 'nullable|date|after_or_equal:start_date',
+    ], [
+        'end_date.after_or_equal' => 'Tanggal "Sampai" tidak boleh lebih awal dari tanggal "Dari".',
+    ]);
 
-        $vipFilter = $request->input('vip_status', 'all');
+    $vipFilter = $request->input('vip_status', 'all');
 
-        $allowedPerPage = [10, 25, 50, 100];
-        $perPage = (int) $request->input('per_page', 10);
-        if (!in_array($perPage, $allowedPerPage)) {
-            $perPage = 10;
-        }
+    $allowedPerPage = [10, 25, 50, 100];
+    $perPage = (int) $request->input('per_page', 10);
+    if (!in_array($perPage, $allowedPerPage)) {
+        $perPage = 10;
+    }
 
-        $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-            ->whereIn('status', self::FINAL_STATUSES);
+    $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
+        ->whereIn('status', self::FINAL_STATUSES);
 
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->whereHas('guest', function ($q2) use ($keyword) {
-                    $q2->where('name', 'like', "%{$keyword}%")
-                        ->orWhere('company_name', 'like', "%{$keyword}%");
-                })->orWhereHas('assignedUser', function ($q3) use ($keyword) {
-                    $q3->where('name', 'like', "%{$keyword}%");
-                });
+    if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function ($q) use ($keyword) {
+            $q->whereHas('guest', function ($q2) use ($keyword) {
+                $q2->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('company_name', 'like', "%{$keyword}%");
+            })->orWhereHas('assignedUser', function ($q3) use ($keyword) {
+                $q3->where('name', 'like', "%{$keyword}%");
+            });
+        });
+    }
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('check_in_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+        $query->whereDate('check_in_at', '<=', $request->end_date);
+    }
+
+    if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
+        if ($vipFilter === 'vip') {
+            $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
+        } elseif ($vipFilter === 'reguler') {
+            $query->whereHas('guest', function ($q) {
+                $q->where('is_vip', false)->orWhereNull('is_vip');
             });
         }
-
-        if ($request->filled('start_date')) {
-            $query->whereDate('check_in_at', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('check_in_at', '<=', $request->end_date);
-        }
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('guests', 'is_vip')) {
-            if ($vipFilter === 'vip') {
-                $query->whereHas('guest', fn($q) => $q->where('is_vip', true));
-            } elseif ($vipFilter === 'reguler') {
-                $query->whereHas('guest', function ($q) {
-                    $q->where('is_vip', false)->orWhereNull('is_vip');
-                });
-            }
-        }
-
-        $visits = $query->orderBy('check_in_at', 'desc')
-            ->paginate($perPage)
-            ->appends($request->query());
-
-        return response()->json([
-            'success' => true,
-            'data'    => $visits->items(),
-            'meta'    => $this->paginationMeta($visits),
-            'filters' => [
-                'vip_status' => $vipFilter,
-                'start_date' => $request->input('start_date'),
-                'end_date'   => $request->input('end_date'),
-                'keyword'    => $request->input('keyword'),
-                'per_page'   => $perPage,
-            ],
-        ]);
     }
+
+    $visits = $query->orderBy('check_in_at', 'desc')
+        ->paginate($perPage)
+        ->appends($request->query());
+
+    return response()->json([
+        'success' => true,
+        'data'    => collect($visits->items())->map(fn($v) => $this->mapVisitForKunjungan($v)),
+        'meta'    => $this->paginationMeta($visits),
+        'filters' => [
+            'vip_status' => $vipFilter,
+            'start_date' => $request->input('start_date'),
+            'end_date'   => $request->input('end_date'),
+            'keyword'    => $request->input('keyword'),
+            'per_page'   => $perPage,
+        ],
+    ]);
+}
+
+private function mapVisitForKunjungan($v): array
+{
+    return [
+        'id'               => $v->id,
+        'visit_code'       => $v->visit_code ?? ('VST-' . str_pad($v->id, 4, '0', STR_PAD_LEFT)),
+        'guest_name'       => optional($v->guest)->name,
+        'guest_position'   => optional($v->guest)->position,
+        'position'         => optional($v->guest)->position,
+        'company_name'     => optional($v->guest)->company_name,
+        'is_vip'           => (bool) optional($v->guest)->is_vip,
+        'category_name'    => optional(optional($v->guest)->category)->name,
+        'category_color'   => optional(optional($v->guest)->category)->color,
+        'assigned_user'    => optional($v->assignedUser)->name,
+        'purpose'          => optional($v->purpose)->name,
+        'branch_name'      => optional($v->branch)->name,
+        'scheduled_at'     => $v->scheduled_at,
+        'check_in_at'      => $v->check_in_at,
+        'check_out_at'     => $v->check_out_at,
+        'status'           => $v->status,
+        'notes'            => $v->notes,
+        'meeting_result'   => $v->meeting_result,
+        'lead_status'      => optional($v->lead)->status,
+        'estimated_value'  => optional($v->lead)->estimated_value,
+        'follow_up_at'     => optional($v->lead)->follow_up_at,
+        'follow_ups'       => optional($v->lead)->followUps
+            ? $v->lead->followUps->map(fn($f) => [
+                'id'              => $f->id,
+                'result'          => $f->result,
+                'status'          => $f->status,
+                'due_at'          => $f->due_at,
+                'estimated_value' => $f->estimated_value,
+                'created_at'      => $f->created_at,
+            ])
+            : [],
+    ];
+}
 
     /**
      * GET /api/v1/owner/leads
@@ -922,7 +961,7 @@ class OwnerApiController extends Controller
             'nama'             => optional($v->guest)->name,
             'jabatan'          => optional($v->guest)->position,
             'instansi'         => optional($v->guest)->company_name,
-            'waktu'            => $v->scheduled_at ?? $v->check_in_at,
+            'waktu'            => $v->scheduled_at,
             'jenis'            => optional(optional($v->guest)->category)->name,
             'keperluan'        => optional($v->purpose)->name,
             'pic'              => optional($v->assignedUser)->name,
