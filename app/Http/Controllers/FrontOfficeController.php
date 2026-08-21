@@ -286,7 +286,6 @@ class FrontOfficeController extends Controller
                 'notes' => $validated['notes'],
                 'status' => 'Terjadwal',
                 'queue_number' => $queueNumber,
-                'check_in_at' => now(),
                 'created_by' => $currentUserId,
             ]);
 
