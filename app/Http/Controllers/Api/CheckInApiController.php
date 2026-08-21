@@ -35,9 +35,9 @@ class CheckInApiController extends Controller
                     ->whereIn(DB::raw('LOWER(role)'), ['pic'])
                     ->orderBy('name', 'asc')
                     ->get(),
-                'branches'         => branches::select('id', 'name', 'code')->get(),
-                'visit_purposes'   => visit_purposes::select('id', 'name')->get(),
-                'products'         => products::select('id', 'name')->get(),
+                'branches'         => branches::where('is_active', 1)->select('id', 'name', 'code')->get(),
+                'visit_purposes'   => visit_purposes::where('is_active', 1)->select('id', 'name')->get(),
+                'products'         => products::where('is_active', 1)->select('id', 'name')->get(),
                 'lead_sources'     => lead_sources::select('id', 'name')->get(),
             ],
         ], 200);

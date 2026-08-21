@@ -88,9 +88,9 @@ class AdminApiController extends BaseApiController
         $data = [
             'pics'             => User::where('role', 'pic')->select('id', 'name', 'branch_id')->get(),
             'branches'         => branches::where('is_active', 1)->select('id', 'name')->get(),
-            'visit_purposes'   => visit_purposes::select('id', 'name')->get(),
+            'visit_purposes'   => visit_purposes::where('is_active', 1)->select('id', 'name')->get(),
             'guest_categories' => guest_categories::select('id', 'name')->get(),
-            'products'         => products::select('id', 'name')->get(),
+            'products'         => products::where('is_active', 1)->select('id', 'name')->get(),
             'lead_sources'     => lead_sources::select('id', 'name')->get(),
         ];
 

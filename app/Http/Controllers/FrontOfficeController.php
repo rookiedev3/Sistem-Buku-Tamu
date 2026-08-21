@@ -79,9 +79,9 @@ class FrontOfficeController extends Controller
         // 4. Data Pendukung Modal
         $pics = User::where('role', 'pic')->select('id', 'name')->get();
         $branches = branches::where('is_active', 1)->select('id', 'name')->get();
-        $purposes = visit_purposes::select('id', 'name')->get();
+        $purposes = visit_purposes::where('is_active', 1)->select('id', 'name')->get();
         $guestCategories = guest_categories::select('id', 'name')->get();
-        $products = products::select('id', 'name')->get();
+        $products = products::where('is_active', 1)->select('id', 'name')->get();
         $leadSources = lead_sources::select('id', 'name')->get();
 
         // 5. Data Notifikasi
