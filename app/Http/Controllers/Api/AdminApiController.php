@@ -670,4 +670,49 @@ class AdminApiController extends BaseApiController
 
         return $this->responseHasil(200, true, "Notifikasi ditandai sudah dibaca.");
     }
+
+    public function updateGuest(Request $request, $id)
+    {
+        $guest = guests::find($id);
+
+        if (!$guest) {
+            return $this->responseHasil(404, false, "Data tamu tidak ditemukan.");
+        }
+
+        try {
+            $validated = $request->validate([
+                'name'              => 'required|string|max:150',
+                'phone'             => 'required|string|max:25',
+                'email'             => 'nullable|email|max:150',
+                'company_name'      => 'nullable|string|max:180',
+                'position'          => 'nullable|string|max:100',
+                'address'           => 'nullable|string',
+                'guest_category_id' => 'nullable|integer|exists:guest_categories,id',
+                'is_vip'            => 'required|boolean',
+                'photo'             => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->responseHasil(400, false, $e->errors());
+        }
+
+        // Upload foto baru jika ada
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('photos', 'public');
+            $validated['photo_path'] = $photoPath;
+        }
+
+        $guest->update([
+            'name'              => $validated['name'],
+            'phone'             => $validated['phone'],
+            'email'             => $validated['email'] ?? null,
+            'company_name'      => $validated['company_name'] ?? null,
+            'position'          => $validated['position'] ?? null,
+            'address'           => $validated['address'] ?? null,
+            'guest_category_id' => $validated['guest_category_id'] ?? $guest->guest_category_id,
+            'is_vip'            => $validated['is_vip'],
+            'photo_path'        => $validated['photo_path'] ?? $guest->photo_path,
+        ]);
+
+        return $this->responseHasil(200, true, $guest);
+    }
 }

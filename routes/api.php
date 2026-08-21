@@ -181,6 +181,9 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/guest', [AdminApiController::class, 'guest']);
     Route::post('/guest', [AdminApiController::class, 'storeGuest']);
     Route::patch('/guest/{id}/vip', [AdminApiController::class, 'toggleVip']);
+    Route::post('/guest/{id}', [AdminApiController::class, 'updateGuest']);
+    Route::match(['post', 'put'], '/guest/{id}', [AdminApiController::class, 'updateGuest']);
+    Route::put('/guest/{id}', [AdminApiController::class, 'updateGuest']);
 
     // Notifications
     Route::get('/notifications', [AdminApiController::class, 'notifications']);
