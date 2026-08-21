@@ -80,7 +80,8 @@
                             <strong style="display: block; color: #172033; font-weight: 800;">
                                 {{ $v->guest->name ?? '-' }}
                                 @if(isset($v->guest) && $v->guest->is_vip)
-<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>                                @endif
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>          
+                      @endif
                             </strong>
                             <span style="font-size: 10px; color: #778195;">
                                 {{ $v->guest->company_name ?? '-' }} ({{ $v->guest->position ?? '-' }})

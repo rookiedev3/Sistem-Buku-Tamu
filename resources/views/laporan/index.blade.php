@@ -30,8 +30,7 @@
         <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 12px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
             <span style="font-size: 10px; font-weight: 700; color: #778195; text-transform: uppercase; letter-spacing: 0.5px;">Tamu VIP</span>
             <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                <span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; display: inline-block;">VIP</span>
-                <strong style="font-size: 18px; font-weight: 800; color: #d97706;">{{ $totalVip }} Tamu</strong>
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>                <strong style="font-size: 18px; font-weight: 800; color: #d97706;">{{ $totalVip }} Tamu</strong>
             </div>
         </div>
     </div>
@@ -194,7 +193,7 @@
                                     {{ $v->guest->name ?? '-' }}
                                 </strong>
                                 @if(isset($v->guest) && $v->guest->is_vip)
-                                    <span style="background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: 800;">VIP</span>
+<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>          
                                 @endif
                             </div>
                             <span style="font-size: 11px; color: #778195; display: block; margin-top: 2px;">{{ $v->guest->company_name ?? '-' }}</span>

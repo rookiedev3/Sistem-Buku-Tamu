@@ -25,9 +25,8 @@
 
             {{-- Status VIP (Disamakan menjadi lencana kuning profesional) --}}
             @if($guest->is_vip)
-                <span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800;">
-                    VIP
-                </span>
+               <span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700;">VIP</span>          
+
             @endif
         </div>
         <p style="font-size: 13px; color: #778195; margin: 0;">
