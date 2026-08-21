@@ -24,6 +24,9 @@ class PicApiController extends BaseApiController
         'completed', 'cancelled', 'Selesai', 'Ditolak',
         'Meeting Selesai', 'Dibatalkan', 'dibatalkan',
     ];
+    private const RIWAYAT_STATUSES = [
+        'completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan',
+    ];
 
     /**
      * Status yang masih dianggap "berjalan" (dipakai untuk dashboard).
@@ -200,9 +203,9 @@ class PicApiController extends BaseApiController
         // yang casing-nya campur ('Selesai', 'Meeting Selesai', dst) —
         // akibatnya baris dengan status itu tidak pernah match. Samakan
         // casing dengan strtolower() di kedua sisi.
-        $query = Visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
+        $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('assigned_to', auth()->id())
-            ->whereIn(DB::raw('LOWER(TRIM(status))'), array_map('strtolower', self::FINAL_STATUSES));
+            ->whereIn(DB::raw('LOWER(TRIM(status))'), array_map('strtolower', self::RIWAYAT_STATUSES));
 
         if ($keyword) {
             $query->whereHas('guest', function (Builder $q) use ($keyword) {

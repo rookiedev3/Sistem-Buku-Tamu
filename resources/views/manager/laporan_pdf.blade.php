@@ -120,7 +120,7 @@
             PIC dengan jumlah penanganan kunjungan terbanyak adalah <strong>{{ $topPicName }}</strong> ({{ $topPicCount }} kunjungan).
         @endif
         @if($avgDuration !== null)
-            Rata-rata durasi pertemuan (check-in sampai check-out) adalah <strong>{{ $avgDuration }} menit</strong>.
+            Rata-rata durasi pertemuan (check-in sampai check-out) adalah <strong>{{ round($avgDuration) }} menit</strong>.
         @endif
     </div>
 
@@ -143,7 +143,7 @@
         </div>
         <div class="stat-box">
             <div class="stat-label">Rata-rata Durasi</div>
-            <div class="stat-value">{{ $avgDuration !== null ? $avgDuration . ' mnt' : '-' }}</div>
+            <div class="stat-value">{{ $avgDuration !== null ? round($avgDuration) . ' mnt' : '-' }}</div>
         </div>
     </div>
 
@@ -190,9 +190,15 @@
                     $statusAkhir = 'Menunggu';
                 }
 
+                // FIX: Carbon 3.x mengembalikan float pada diffInMinutes(), bukan int
+                // seperti di Carbon 2.x. Dibulatkan supaya tidak menampilkan angka
+                // desimal panjang seperti "51.683333333333 mnt".
                 $durasi = '-';
                 if ($v->check_in_at && $v->check_out_at) {
-                    $durasi = \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at)) . ' mnt';
+                    $menit = (int) round(
+                        \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at))
+                    );
+                    $durasi = $menit . ' mnt';
                 }
             @endphp
             <tr>

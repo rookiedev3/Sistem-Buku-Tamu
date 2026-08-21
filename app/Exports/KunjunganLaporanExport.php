@@ -25,7 +25,9 @@ class KunjunganLaporanExport implements FromCollection, WithHeadings, WithMappin
      * ManagerController::COMPLETED_STATUSES supaya isi Excel konsisten dengan
      * preview di halaman Laporan & dengan Export PDF.
      */
-    private const COMPLETED_STATUSES = ['completed', 'Selesai', 'Meeting Selesai'];
+    private const COMPLETED_STATUSES = ['completed', 'Selesai', 
+    // 'Meeting Selesai'
+    ];
 
     protected int $month;
     protected int $year;
@@ -69,7 +71,8 @@ public function collection()
             });
         })
         ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
-            'completed', 'selesai', 'meeting selesai',
+            'completed', 'selesai', 
+            // 'meeting selesai',
             'cancelled', 'dibatalkan', 'ditolak',
         ]);
 
@@ -138,9 +141,14 @@ public function collection()
             $statusAkhir = 'Menunggu';
         }
 
+        // FIX: Carbon 3.x mengembalikan float pada diffInMinutes(), bukan int
+        // seperti di Carbon 2.x. Dibulatkan supaya kolom Excel tidak menampilkan
+        // angka desimal panjang seperti "51.683333333333".
         $durasi = '-';
         if ($visit->check_in_at && $visit->check_out_at) {
-            $durasi = Carbon::parse($visit->check_in_at)->diffInMinutes(Carbon::parse($visit->check_out_at));
+            $durasi = (int) round(
+                Carbon::parse($visit->check_in_at)->diffInMinutes(Carbon::parse($visit->check_out_at))
+            );
         }
 
         return [

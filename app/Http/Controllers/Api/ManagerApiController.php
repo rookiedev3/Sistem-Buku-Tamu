@@ -29,6 +29,11 @@ class ManagerApiController extends BaseApiController
         'completed', 'selesai', 'meeting selesai',
         'cancelled', 'dibatalkan', 'ditolak',
     ];
+    private const MANAGER_STATUESES_LOWER = [
+        'completed', 'selesai',
+        //  'meeting selesai',
+        'cancelled', 'dibatalkan', 'ditolak',
+    ];
 
     public function dashboard(Request $request)
     {
@@ -88,7 +93,7 @@ class ManagerApiController extends BaseApiController
         $vipFilter = $request->input('vip_status', 'all');
 
         $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-            ->whereIn('status', self::FINAL_STATUSES);
+            ->whereIn('status', self::MANAGER_STATUESES_LOWER);
 
         $this->applyKeywordFilter($query, $request->input('keyword'));
 
@@ -146,76 +151,6 @@ class ManagerApiController extends BaseApiController
             'counts'       => $this->leadStatusCounts($today),
         ]);
     }
-
-    /**
-     * GET /manager/laporan
-     *
-     * Laporan bulanan kunjungan final, dengan filter kategori (vip/reguler),
-     * cabang, dan PIC, plus statistik ringkas (total, deal, VIP, conversion,
-     * rata-rata durasi kunjungan).
-     */
-//     public function laporan(Request $request)
-//     {
-//         $month    = (int) $request->input('month', now()->month);
-//         $year     = (int) $request->input('year', now()->year);
-//         $category = (string) $request->input('category', '');
-//         $branchId = (string) $request->input('branch_id', '');
-//         $picId    = (string) $request->input('pic_id', '');
-
-// $baseQuery = visits::with(['guest.category', 'assignedUser', 'lead.followUps', 'purpose', 'source', 'products', 'branch'])
-//     ->where(function (Builder $q) use ($month, $year) {
-//         $q->where(fn (Builder $q2) => $q2->whereMonth('check_in_at', $month)->whereYear('check_in_at', $year))
-//           ->orWhere(fn (Builder $q2) => $q2->whereNull('check_in_at')
-//               ->whereMonth('scheduled_at', $month)->whereYear('scheduled_at', $year));
-//     })
-//     ->whereIn(DB::raw('LOWER(TRIM(status))'), self::FINAL_STATUSES_LOWER);
-
-//         if (Schema::hasColumn('guests', 'is_vip')) {
-//             if ($category === 'vip') {
-//                 $baseQuery->whereHas('guest', fn ( $q) => $q->where('is_vip', true));
-//             } elseif ($category === 'reguler') {
-//                 $baseQuery->whereHas('guest', fn ( $q) => $q->where('is_vip', false)->orWhereNull('is_vip'));
-//             }
-//         }
-//         if ($branchId !== '') {
-//             $baseQuery->where('branch_id', $branchId);
-//         }
-//         if ($picId !== '') {
-//             $baseQuery->where('assigned_to', $picId);
-//         }
-
-//         $totalKunjungan = (clone $baseQuery)->count();
-//         $totalDeal      = (clone $baseQuery)->whereHas('lead', fn ( $q) => $q->where('status', 'deal'))->count();
-//         $totalVip       = Schema::hasColumn('guests', 'is_vip')
-//             ? (clone $baseQuery)->whereHas('guest', fn ( $q) => $q->where('is_vip', true))->count()
-//             : 0;
-//         $conversionRate = $totalKunjungan > 0 ? round(($totalDeal / $totalKunjungan) * 100, 1) : 0;
-
-//         $avgDuration = (clone $baseQuery)
-//             ->whereNotNull('check_in_at')->whereNotNull('check_out_at')
-//             ->get(['check_in_at', 'check_out_at'])
-//             ->avg(fn ($v) => Carbon::parse($v->check_in_at)->diffInMinutes(Carbon::parse($v->check_out_at))) ?? 0;
-
-//         $paginated = $baseQuery->orderBy('check_in_at', 'desc')
-//             ->paginate((int) $request->input('per_page', 15));
-
-//         return $this->responseHasil(200, true, [
-//             'data'         => collect($paginated->items())->map(fn ($v) => $this->mapVisit($v)),
-//             'current_page' => $paginated->currentPage(),
-//             'last_page'    => $paginated->lastPage(),
-//             'total'        => $paginated->total(),
-//             'stats'        => [
-//                 'total_kunjungan' => $totalKunjungan,
-//                 'total_deal'      => $totalDeal,
-//                 'total_vip'       => $totalVip,
-//                 'conversion_rate' => $conversionRate,
-//                 'avg_duration'    => round($avgDuration),
-//             ],
-//             'branches'  => branches::orderBy('name')->get(['id', 'name']),
-//             'pic_users' => users::whereIn('id', visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to'))
-//                 ->orderBy('name')->get(['id', 'name']),
-//         ]);
-//     }
 
     /**
      * Terapkan filter status VIP ('vip' | 'reguler' | 'all') ke query guest.
@@ -394,7 +329,8 @@ private function mapVisit($v): array
                 });
             })
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
-                'completed', 'selesai', 'meeting selesai',
+                'completed', 'selesai',
+                //  'meeting selesai',
                 'cancelled', 'dibatalkan', 'ditolak',
             ]);
 
@@ -551,7 +487,8 @@ return response()->json([
                 });
             })
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
-                'completed', 'selesai', 'meeting selesai',
+                'completed', 'selesai',
+                //  'meeting selesai',
                 'cancelled', 'dibatalkan', 'ditolak',
             ]);
 
@@ -642,7 +579,7 @@ return response()->json([
     'file_url'  => $downloadUrl,
     'file_name' => $fileName,
 ]);
-    }
+}
 
     public function downloadLaporan(Request $request, string $filename)
 {

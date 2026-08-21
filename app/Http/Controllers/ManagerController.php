@@ -23,6 +23,11 @@ class ManagerController extends Controller
         'cancelled', 'Dibatalkan', 'Ditolak',
     ];
 
+    private const MANAGER_STATUSES = [
+        'completed', 'Selesai', 
+        'cancelled', 'Dibatalkan', 'Ditolak',
+    ];
+
     /**
      * Status yang dianggap "sudah ada hasil pertemuan" (dipakai khusus untuk Laporan,
      * BUKAN untuk arsip kunjungan). Kunjungan yang dibatalkan tidak ikut masuk laporan
@@ -85,7 +90,7 @@ class ManagerController extends Controller
         // menunggu, dikonfirmasi, sedang bertemu) sudah difasilitasi oleh
         // Dashboard Monitoring, jadi tidak perlu dobel tampil di sini.
         $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-            ->whereIn('status', self::FINAL_STATUSES);
+            ->whereIn('status', self::MANAGER_STATUSES);
 
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
@@ -229,7 +234,8 @@ class ManagerController extends Controller
             });
         })
         ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
-            'completed', 'selesai', 'meeting selesai',
+            'completed', 'selesai', 
+            // 'meeting selesai',
             'cancelled', 'dibatalkan', 'ditolak',
         ]);
 
@@ -341,7 +347,8 @@ class ManagerController extends Controller
             });
         })
         ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), [
-            'completed', 'selesai', 'meeting selesai',
+            'completed', 'selesai', 
+            // 'meeting selesai',
             'cancelled', 'dibatalkan', 'ditolak',
         ]);
 

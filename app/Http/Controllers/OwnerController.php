@@ -30,6 +30,14 @@ class OwnerController extends Controller
         'Ditolak',
     ];
 
+    private const KUNJUNGAN_OWNER = [
+        'completed',
+        'Selesai',
+        'cancelled',
+        'Dibatalkan',
+        'Ditolak',
+    ];
+
     public function dashboard(Request $request)
     {
         $today = Carbon::today();
@@ -237,7 +245,7 @@ class OwnerController extends Controller
         }
 
         $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-            ->whereIn('status', self::FINAL_STATUSES);
+            ->whereIn('status', self::KUNJUNGAN_OWNER);
 
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
@@ -397,7 +405,7 @@ class OwnerController extends Controller
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
                 'completed',
                 'selesai',
-                'meeting selesai',
+                // 'meeting selesai',
                 'cancelled',
                 'dibatalkan',
                 'ditolak',
@@ -542,7 +550,7 @@ class OwnerController extends Controller
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
                 'completed',
                 'selesai',
-                'meeting selesai',
+                // 'meeting selesai',
                 'cancelled',
                 'dibatalkan',
                 'ditolak',

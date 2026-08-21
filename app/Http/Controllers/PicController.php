@@ -181,7 +181,7 @@ class PicController extends Controller
 
         $query = visits::with(['guest', 'purpose', 'branch', 'lead.followUps'])
             ->where('assigned_to', auth()->id())
-            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Meeting Selesai', 'Dibatalkan', 'dibatalkan']);
+            ->whereIn('status', ['completed', 'cancelled', 'Selesai', 'Ditolak', 'Dibatalkan', 'dibatalkan']);
 
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;

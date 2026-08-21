@@ -27,6 +27,14 @@ class OwnerApiController extends Controller
         'Dibatalkan',
         'Ditolak',
     ];
+    private const OWNER_FINAL_STATUSES = [
+        'completed',
+        'Selesai',
+        'Meeting Selesai',
+        'cancelled',
+        'Dibatalkan',
+        'Ditolak',
+    ];
 
     private const COMPLETED_STATUSES = ['completed', 'Selesai', 'Meeting Selesai'];
 
@@ -255,7 +263,7 @@ $recentActivities = DB::table('visit_status_logs')
     }
 
     $query = visits::with(['guest.category', 'assignedUser', 'purpose', 'lead.followUps'])
-        ->whereIn('status', self::FINAL_STATUSES);
+        ->whereIn('status', self::OWNER_FINAL_STATUSES);
 
     if ($request->filled('keyword')) {
         $keyword = $request->keyword;
@@ -497,7 +505,7 @@ private function mapVisitForKunjungan($v): array
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
                 'completed',
                 'selesai',
-                'meeting selesai',
+                // 'meeting selesai',
                 'cancelled',
                 'dibatalkan',
                 'ditolak',
@@ -675,7 +683,7 @@ private function mapVisitForKunjungan($v): array
             ->whereIn(DB::raw('LOWER(TRIM(status))'), [
                 'completed',
                 'selesai',
-                'meeting selesai',
+                // 'meeting selesai',
                 'cancelled',
                 'dibatalkan',
                 'ditolak',
