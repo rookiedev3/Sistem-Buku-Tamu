@@ -7,7 +7,7 @@
         <h1 style="font-size: 20px; font-weight: 800; color: #172033; margin: 0 0 4px 0;">Tambah Branch Baru</h1>
         <p style="font-size: 13px; color: #778195; margin: 0;">Lengkapi formulir di bawah ini untuk menambahkan data cabang baru.</p>
     </div>
-    
+
     <a href="{{ route('branches.index') }}" style="background: #e5484d; color: #ffffff; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; border: 1px solid #e8edf5; transition: all 0.2s; white-space: nowrap;">
         &larr; Kembali
     </a>
@@ -15,18 +15,18 @@
 
 {{-- Alert Error Validation --}}
 @if ($errors->any())
-    <div style="background: #fde8e8; border: 1px solid #f8b4b4; color: #c81e1e; padding: 14px 18px; border-radius: 14px; font-size: 13px; margin-bottom: 24px;">
-        <div style="font-weight: 800; margin-bottom: 6px;">Terdapat beberapa kesalahan:</div>
-        <ul style="margin: 0; padding-left: 20px;">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+<div style="background: #fde8e8; border: 1px solid #f8b4b4; color: #c81e1e; padding: 14px 18px; border-radius: 14px; font-size: 13px; margin-bottom: 24px;">
+    <div style="font-weight: 800; margin-bottom: 6px;">Terdapat beberapa kesalahan:</div>
+    <ul style="margin: 0; padding-left: 20px;">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
 @endif
 
 <div style="background: #ffffff; border: 1px solid #e8edf5; border-radius: 20px; box-shadow: 0 18px 50px rgba(31,53,97,.12); padding: 24px; width: 100%; max-width: 680px; box-sizing: border-box; margin-bottom: 32px;">
-    
+
     <form action="{{ route('branches.store') }}" method="POST">
         @csrf
 
@@ -65,9 +65,12 @@
             <label for="phone" style="display: block; font-size: 13px; font-weight: 700; color: #172033; margin-bottom: 8px;">
                 Nomor Telepon <span style="color: #e5484d;">*</span>
             </label>
-            <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
-                placeholder="Contoh: 0274123456" required inputmode="numeric" pattern="[0-9]+"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            <input type="tel" name="phone" id="phone" value="{{ old('phone') }}"
+                placeholder="Contoh: ontoh: 0874123456" required inputmode="tel"
+                oninput="this.value = this.value.replace(/[^0-9\+\s\-]/g, '')"
+                pattern="^(?:\+62|62|0)[0-9\s\-]{8,15}$"
+                title="Nomor telepon harus diawali 0, 62, atau +62 dan hanya boleh berisi angka, spasi, atau tanda hubung (-) dengan panjang 9-16 karakter."
+                maxlength="18"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 

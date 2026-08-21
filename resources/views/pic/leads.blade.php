@@ -261,7 +261,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                 <div class="modal-header" style="border-bottom: 1px solid #e8edf5; padding: 20px 24px;">
-                    <h5 class="modal-title" style="font-size: 16px; font-weight: 800; color: #172033;">🔄 Update Tahap Pipeline</h5>
+                    <h5 class="modal-title" style="font-size: 16px; font-weight: 800; color: #172033;">Update Tahap Pipeline</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="padding: 24px;">

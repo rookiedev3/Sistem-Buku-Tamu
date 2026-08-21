@@ -67,8 +67,11 @@
                 Nomor Telepon <span style="color: #e5484d;">*</span>
             </label>
             <input type="text" name="phone" id="phone" value="{{ old('phone', $branch->phone) }}"
-                placeholder="Contoh: 0274123456" required inputmode="numeric" pattern="[0-9]+"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                placeholder="Contoh: 0274123456" required inputmode="numeric"
+                oninput="this.value = this.value.replace(/[^0-9\+\s\-]/g, '')"
+                pattern="^(?:\+62|62|0)[0-9\s\-]{8,15}$"
+                title="Nomor telepon harus diawali 0, 62, atau +62 dan hanya boleh berisi angka, spasi, atau tanda hubung (-) dengan panjang 9-16 karakter."
+                maxlength="18"
                 style="width: 100%; padding: 11px 14px; border: 1px solid #e8edf5; border-radius: 10px; font-size: 13px; outline: none; background: #fff; color: #172033; box-sizing: border-box; font-family: inherit;">
         </div>
 
