@@ -9,6 +9,8 @@ use App\Models\notifications;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 use App\Exports\KunjunganLaporanExport;
+use App\Models\branches;
+use App\Models\users;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -278,7 +280,7 @@ class ManagerController extends Controller
         ->paginate($perPage)
         ->appends($request->query());
 
-    $branches = \App\Models\branches::orderBy('name')->get();
+    $branches = branches::orderBy('name')->get();
     $picUsers = \App\Models\users::whereIn(
         'id',
         visits::whereNotNull('assigned_to')->distinct()->pluck('assigned_to')
@@ -304,8 +306,8 @@ class ManagerController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
         ];
 
-        $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
-        $picName    = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
+        $branchName = $branchId !== '' ? optional(branches::find($branchId))->name : null;
+        $picName    = $picId !== '' ? optional(users::find($picId))->name : null;
 
         $fileName = 'laporan-kunjungan-' . $month . '-' . $year . '.xlsx';
 
@@ -394,8 +396,8 @@ class ManagerController extends Controller
         ->map(fn($v) => \Carbon\Carbon::parse($v->check_in_at)->diffInMinutes(\Carbon\Carbon::parse($v->check_out_at)));
     $avgDuration = $durations->count() > 0 ? round($durations->avg()) : null;
 
-    $branchName = $branchId !== '' ? optional(\App\Models\branches::find($branchId))->name : null;
-    $picName = $picId !== '' ? optional(\App\Models\users::find($picId))->name : null;
+    $branchName = $branchId !== '' ? optional(branches::find($branchId))->name : null;
+    $picName = $picId !== '' ? optional(users::find($picId))->name : null;
 
     $pdf = Pdf::loadView('manager.laporan_pdf', [
         'visits'          => $visits,
