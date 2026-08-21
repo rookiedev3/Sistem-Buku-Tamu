@@ -390,7 +390,7 @@
                         </label>
                         <input type="tel" id="input_phone" name="phone" value="{{ old('phone') }}" pattern="^(\+62|62|0)8[1-9][0-9]{7,11}$" maxlength="16" placeholder="Contoh: 081234567890" required
                             style="width: 100%; padding: 11px 16px; border: 1px solid #e8edf5; border-radius: 12px; font-size: 13.5px; outline: none; background: #ffffff; color: #172033; box-sizing: border-box; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this, true)" oninput="validateField(this, false)" data-error-msg="Nomor WhatsApp wajib diisi." data-error-pattern="Format nomor tidak valid. Contoh: 081234567890" data-error-toolong="Nomor WhatsApp melebihi batas maksimal (16 digit). Periksa kembali nomor Anda.">
+                            onfocus="this.style.borderColor='#006B3F'" onblur="validateField(this, true)" oninput="validateField(this, false)" data-error-msg="Nomor WhatsApp wajib diisi." data-error-pattern="Format nomor tidak valid atau nomor melebihi batas maksimal (maks 16). Contoh: 081234567890" data-error-toolong="Nomor WhatsApp melebihi batas maksimal (16 digit). Periksa kembali nomor Anda.">
                         <small class="error-message" id="err_input_phone"></small>
                     </div>
 
