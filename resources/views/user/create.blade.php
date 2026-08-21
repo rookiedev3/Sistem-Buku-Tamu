@@ -39,8 +39,11 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Nomor Telepon/HP <span class="text-danger">*</span></label>
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" required inputmode="numeric" pattern="^[0-9]{9,15}$" minlength="9" maxlength="15" placeholder="Contoh: 08123456789" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
-                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">Nomor HP hanya boleh angka, 9–15 digit (tanpa spasi/simbol).</div>
+                    {{-- DIUBAH: nomor HP sekarang wajib diawali "+62" atau "08", disamakan
+                         dengan validasi di UserApiController & app Flutter. --}}
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" required inputmode="tel" pattern="^(\+62|08)[0-9]{7,13}$" placeholder="Contoh: 08123456789 atau +628123456789" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
+                    <small style="color: #778195; font-size: 11.5px; margin-top: 4px; display: block;">Harus diawali +62 atau 08.</small>
+                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">No. HP harus diawali +62 atau 08, diikuti 7–13 digit.</div>
                 </div>
 
                 <div class="mb-3">
@@ -96,13 +99,34 @@
     const form = document.getElementById('formTambahUser');
     const phoneInput = form.querySelector('input[name="phone"]');
 
-    // 1) Blokir dari level keydown -> huruf/simbol nggak akan pernah muncul di kolom (browser desktop)
+    // DIUBAH: dulu field ini menolak SEMUA karakter non-digit termasuk '+',
+    // padahal sekarang format yang wajib adalah "+62..." atau "08...".
+    // Helper ini menyaring nilai jadi "opsional satu '+' di depan + digit saja",
+    // sama seperti yang dipakai di form Edit, supaya '+' tidak lagi diblokir
+    // total tapi tetap tidak bisa muncul di tengah atau lebih dari sekali.
+    function sanitizePhoneValue(value) {
+        const hasLeadingPlus = value.startsWith('+');
+        const digitsOnly = value.replace(/[^0-9]/g, '');
+        return hasLeadingPlus ? '+' + digitsOnly : digitsOnly;
+    }
+
+    // 1) Blokir dari level keydown -> huruf/simbol nggak akan pernah muncul di kolom
+    //    (browser desktop). DIUBAH: '+' sekarang diizinkan HANYA kalau kursor ada
+    //    di posisi paling depan (index 0) DAN field belum punya '+' sama sekali.
     phoneInput.addEventListener('keydown', function (e) {
         const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
             'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
         const isCtrlCombo = e.ctrlKey || e.metaKey; // izinkan Ctrl+C / Ctrl+V / Ctrl+A dll
 
         if (allowedKeys.includes(e.key) || isCtrlCombo) return;
+
+        if (e.key === '+') {
+            const atStart = this.selectionStart === 0;
+            const alreadyHasPlus = this.value.startsWith('+');
+            if (atStart && !alreadyHasPlus) return; // izinkan
+            e.preventDefault();
+            return;
+        }
 
         // Cuma izinkan digit 0-9 (baik dari keyboard utama maupun numpad)
         if (!/^[0-9]$/.test(e.key)) {
@@ -111,27 +135,35 @@
     });
 
     // 1b) Blokir juga lewat beforeinput -> ini yang paling reliable di HP/keyboard virtual,
-    // karena keydown sering ngirim "Unidentified" di Android/Gboard sehingga filter di atas kebobolan
+    // karena keydown sering ngirim "Unidentified" di Android/Gboard sehingga filter di atas kebobolan.
+    // DIUBAH: '+' diizinkan lewat, sisanya tetap dibersihkan di listener 'input' di bawah.
     phoneInput.addEventListener('beforeinput', function (e) {
-        // Cuma cek untuk aksi ngetik karakter baru (insertText / insertCompositionText / insertFromPaste)
-        if (e.data && /[^0-9]/.test(e.data)) {
+        if (e.data && /[^0-9+]/.test(e.data)) {
             e.preventDefault();
         }
     });
 
-    // 2) Fallback: bersihin kalau ada karakter non-digit lolos (misal dari autofill)
+    // 2) Fallback: bersihin karakter non-digit/'+' yang lolos (misal dari autofill),
+    //    dan pastikan '+' cuma boleh satu, di posisi paling depan.
     phoneInput.addEventListener('input', function () {
-        this.value = this.value.replace(/[^0-9]/g, '');
+        const cleaned = sanitizePhoneValue(this.value);
+        if (cleaned !== this.value) {
+            const cursorFromEnd = this.value.length - this.selectionStart;
+            this.value = cleaned;
+            const newPos = Math.max(0, this.value.length - cursorFromEnd);
+            this.setSelectionRange(newPos, newPos);
+        }
     });
 
-    // 3) Bersihin juga saat paste (copy-paste teks yang ada hurufnya)
+    // 3) Bersihin juga saat paste (copy-paste teks yang ada hurufnya),
+    //    tetap mempertahankan '+' kalau ada di paling depan hasil paste.
     phoneInput.addEventListener('paste', function (e) {
         e.preventDefault();
         const pasted = (e.clipboardData || window.clipboardData).getData('text');
-        const digitsOnly = pasted.replace(/[^0-9]/g, '');
         const start = this.selectionStart;
         const end = this.selectionEnd;
-        this.value = this.value.slice(0, start) + digitsOnly + this.value.slice(end);
+        const merged = this.value.slice(0, start) + pasted + this.value.slice(end);
+        this.value = sanitizePhoneValue(merged);
         this.dispatchEvent(new Event('input'));
     });
 

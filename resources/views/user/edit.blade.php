@@ -40,12 +40,12 @@
 
                 <div class="mb-3">
                     <label class="form-label" style="font-size: 12.5px; font-weight: 800; color: #172033;">Nomor Telepon/HP</label>
-                    {{-- DIUBAH: pattern sekarang mengizinkan satu '+' opsional di depan, karena
-                         backend (UserController::normalizePhone()) selalu menyimpan nomor dalam
-                         format "+62xxxxxxxxxx". minlength/maxlength dihapus (rawan salah hitung
-                         begitu ada '+'), validasi panjang sepenuhnya diserahkan ke pattern. --}}
-                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" inputmode="tel" pattern="^\+?[0-9]{9,15}$" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
-                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">Nomor HP hanya boleh angka (boleh diawali +), 9–15 digit.</div>
+                    {{-- DIUBAH: pattern sekarang mewajibkan diawali "+62" atau "08" secara spesifik
+                         (sebelumnya cuma "boleh diawali satu + opsional"), disamakan dengan validasi
+                         di UserApiController & app Flutter. Panjang digit setelah prefix: 7–13. --}}
+                    <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" inputmode="tel" pattern="^(\+62|08)[0-9]{7,13}$" placeholder="Contoh: 08123456789 atau +628123456789" style="border-radius: 10px; padding: 11px 16px; font-size: 13px; border: 1px solid #e8edf5; width: 100%; box-sizing: border-box;">
+                    <small style="color: #778195; font-size: 11.5px; margin-top: 4px; display: block;">Harus diawali +62 atau 08.</small>
+                    <div class="invalid-feedback-custom" style="display:none; color:#dc2626; font-size:11.5px; font-weight:700; margin-top:4px;">No. HP harus diawali +62 atau 08, diikuti 7–13 digit.</div>
                 </div>
 
                 <div class="mb-3">
@@ -102,10 +102,12 @@
     const form = document.getElementById('formEditUser');
     const phoneInput = form.querySelector('input[name="phone"]');
 
-    // DIUBAH: helper untuk menyaring nilai jadi "opsional satu '+' di depan + digit saja".
+    // Helper untuk menyaring nilai jadi "opsional satu '+' di depan + digit saja".
     // Dipakai bareng di input & paste supaya '+' yang datang dari data existing
     // (format "+62..." dari normalizePhone() backend) tidak ikut kebuang, tapi '+'
-    // yang diketik di tengah/lebih dari sekali tetap dibuang.
+    // yang diketik di tengah/lebih dari sekali tetap dibuang. Aturan "wajib +62/08"
+    // sendiri divalidasi lewat atribut pattern & submit handler di bawah, bukan di sini,
+    // supaya user masih bisa mengetik bertahap (mis. baru mengetik "0" atau "+").
     function sanitizePhoneValue(value) {
         const hasLeadingPlus = value.startsWith('+');
         const digitsOnly = value.replace(/[^0-9]/g, '');
@@ -113,8 +115,8 @@
     }
 
     // 1) Blokir dari level keydown -> huruf/simbol nggak akan pernah muncul di kolom
-    //    (keyboard fisik). DIUBAH: '+' sekarang diizinkan HANYA kalau kursor ada
-    //    di posisi paling depan (index 0) DAN field belum punya '+' sama sekali.
+    //    (keyboard fisik). '+' diizinkan HANYA kalau kursor ada di posisi paling depan
+    //    (index 0) DAN field belum punya '+' sama sekali.
     phoneInput.addEventListener('keydown', function (e) {
         const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
             'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
@@ -136,7 +138,7 @@
     });
 
     // 1b) Blokir juga lewat beforeinput -> paling reliable di HP/keyboard virtual.
-    //     DIUBAH: '+' diizinkan lewat, biar konsisten sama keydown; sisanya
+    //     '+' diizinkan lewat, biar konsisten sama keydown; sisanya
     //     tetap dibersihkan di listener 'input' lewat sanitizePhoneValue().
     phoneInput.addEventListener('beforeinput', function (e) {
         if (e.data && /[^0-9+]/.test(e.data)) {

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Validator;
 
 class UserApiController extends BaseApiController
 {
+    // TAMBAHAN: pesan error khusus untuk aturan nomor HP, dipakai berulang
+    // di store() dan update() supaya konsisten.
+    private const PHONE_REGEX_RULE = 'regex:/^(\+62|08)[0-9]+$/';
+    private const PHONE_REGEX_MESSAGE = 'No. HP harus diawali +62 atau 08.';
+
     private function authorizeAdmin(Request $request)
     {
         if (!in_array($request->user()->role, ['owner', 'admin'])) {
@@ -40,10 +45,14 @@ class UserApiController extends BaseApiController
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
-            'phone'     => 'nullable|string|max:20',
+            // DIUBAH: nomor HP sekarang wajib diawali "+62" atau "08",
+            // disamakan dengan validasi di app Flutter (_validatePhone).
+            'phone'     => ['nullable', 'string', 'max:20', self::PHONE_REGEX_RULE],
             'password'  => 'required|min:6',
             'role'      => 'required|in:owner,manager,admin,pic,security,tamu',
             'branch_id' => 'nullable|exists:branches,id',
+        ], [
+            'phone.regex' => self::PHONE_REGEX_MESSAGE,
         ]);
 
         if ($validator->fails()) {
@@ -79,10 +88,13 @@ class UserApiController extends BaseApiController
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email,' . $id,
-            'phone'     => 'nullable|string|max:20',
+            // DIUBAH: sama seperti store(), nomor HP wajib diawali "+62" atau "08".
+            'phone'     => ['nullable', 'string', 'max:20', self::PHONE_REGEX_RULE],
             'role'      => 'required|in:owner,manager,admin,pic,security,tamu',
             'branch_id' => 'nullable|exists:branches,id',
             'password'  => 'nullable|min:6', // opsional: cuma diisi kalau mau ganti password
+        ], [
+            'phone.regex' => self::PHONE_REGEX_MESSAGE,
         ]);
 
         if ($validator->fails()) {
