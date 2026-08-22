@@ -29,10 +29,6 @@ class DashboardController extends Controller
             return $this->securityDashboard();
         }
 
-        if ($user->role === 'tamu') {
-            return $this->tamuDashboard($user);
-        }
-
         // fallback sementara untuk role lain (manager, admin, pic, security)
         return redirect()->route('dashboard');
     }
@@ -71,24 +67,5 @@ return redirect()->route('pic.dashboard');
     /**
      * Dashboard untuk role tamu: lihat status kunjungan sendiri
      * berdasarkan email akun yang cocok dengan data guest.
-     */
-    protected function tamuDashboard($user)
-    {
-        $guest = DB::table('guests')
-            ->where('email', $user->email)
-            ->first();
-
-        $visits = [];
-
-        if ($guest) {
-            $visits = DB::table('visits')
-                ->where('guest_id', $guest->id)
-                ->orderByDesc('check_in_at')
-                ->get();
-        }
-
-        return view('tamu.dashboard', compact('guest', 'visits'));
-    }
-
-    
+     */    
 }
